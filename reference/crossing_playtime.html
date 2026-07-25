@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chuga Chocho — Crossing!</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;background:#7ec0ee;font-family:'Trebuchet MS',sans-serif;user-select:none;touch-action:manipulation;}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+  canvas{display:block;background:#8fd0f0;max-width:100%;max-height:100%;}
+  #controls{position:absolute;bottom:3vh;left:0;right:0;display:flex;justify-content:center;gap:8vw;pointer-events:none;}
+  .big{pointer-events:auto;border:none;border-radius:50%;width:26vmin;height:26vmin;max-width:180px;max-height:180px;font-size:5vmin;font-weight:bold;color:#fff;cursor:pointer;box-shadow:0 10px 0 rgba(0,0,0,0.25),0 14px 22px rgba(0,0,0,0.3);transition:transform .08s,box-shadow .08s;display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1.1;text-shadow:0 2px 3px rgba(0,0,0,0.35);}
+  .big:active{transform:translateY(8px);box-shadow:0 2px 0 rgba(0,0,0,0.25);}
+  .big .ico{font-size:9vmin;margin-bottom:.3vh;}
+  #bClose{background:radial-gradient(circle at 35% 30%,#ff6b6b,#d62828);}
+  #bOpen{background:radial-gradient(circle at 35% 30%,#5dd959,#2a9d2a);}
+  #title{position:absolute;top:3vh;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.9);border-radius:999px;padding:1.2vh 6vw;font-size:4.5vmin;font-weight:bold;color:#d62828;box-shadow:0 4px 10px rgba(0,0,0,.2);white-space:nowrap;}
+  #gear{position:absolute;top:3vh;right:4vw;z-index:6;width:10vmin;height:10vmin;max-width:60px;max-height:60px;border-radius:50%;border:none;background:rgba(255,255,255,.9);font-size:5vmin;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.25);}
+  #settings{position:absolute;inset:0;background:rgba(20,33,61,.94);z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;padding:8vw;text-align:center;}
+  #settings.open{display:flex;}
+  #settings h2{color:#ffd166;font-size:6vmin;margin-bottom:4vh;}
+  #settings input{width:min(90vw,460px);background:rgba(0,0,0,.3);border:1px solid #3a5a8a;border-radius:10px;padding:2vh 3vw;color:#fff;font-size:4vmin;font-family:inherit;margin-bottom:2vh;text-align:center;}
+  #devTest{border:none;background:#3d7bd6;color:#fff;font-size:4.5vmin;font-weight:bold;padding:1.6vh 10vw;border-radius:999px;cursor:pointer;margin-bottom:2vh;}
+  #devStatus{color:#cfe3ff;font-size:4vmin;min-height:5vmin;margin-bottom:3vh;}
+  #devClose{border:none;background:#5dd959;color:#fff;font-size:5vmin;font-weight:bold;padding:2vh 12vw;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 #1a7a1a;}
+  #devClose:active{transform:translateY(4px);box-shadow:0 2px 0 #1a7a1a;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="title">🚂 Chuga Chocho! 🚗</div>
+  <button id="gear">⚙️</button>
+  <div id="settings">
+    <h2>🔌 Fizyczna brama</h2>
+    <input type="text" id="devAddr" placeholder="crossinggate.local" spellcheck="false" autocomplete="off">
+    <button id="devTest">Test</button>
+    <div id="devStatus">—</div>
+    <button id="devClose">Gotowe ✓</button>
+  </div>
+  <div id="controls">
+    <button class="big" id="bClose"><span class="ico">⬇️</span>ZAMKNIJ</button>
+    <button class="big" id="bOpen"><span class="ico">⬆️</span>OTWÓRZ</button>
+  </div>
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=1280,H=720;cv.width=W;cv.height=H;
+function fit(){const s=Math.min(wrap.clientWidth/W,wrap.clientHeight/H);cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';}
+const wrap=document.getElementById('wrap');addEventListener('resize',fit);fit();
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),now=()=>performance.now();
+
+// road runs vertically through the middle; track runs horizontally
+const ROAD_X=W/2, TRACK_Y=430;
+let gate='open';            // open | closing | closed | opening
+let gateAngle=0;            // 0 up, 90 down
+
+// ---- cars (drive up the vertical road, stop at gate when closed) ----
+const carColors=['#e84a4a','#3d7bd6','#f4b400','#7b3fb0','#2aa84a','#ff8c2a'];
+let cars=[];
+function spawnCar(){
+  const fromTop=Math.random()<0.5;
+  cars.push({
+    y: fromTop? -80 : H+80,
+    dir: fromTop? 1 : -1,
+    lane: fromTop? ROAD_X-38 : ROAD_X+38,
+    color: carColors[(Math.random()*carColors.length)|0],
+    stopped:false
+  });
+}
+let carTimer=0;
+
+// ---- train (rolls across the track when gate closed) ----
+let train=null; // {x, dir}
+function launchTrain(){ if(train)return; train={x:-560,dir:1}; whistle(); }
+
+// ================= AUDIO =================
+let actx=null;function A(){if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return actx;}
+function unlock(){const a=A();if(a&&a.state==='suspended')a.resume();}
+let bellTimer=null;
+function bells(){stopBells();const a=A();if(!a)return;const ding=()=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.28,a.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.4);o.start();o.stop(a.currentTime+.42);};ding();bellTimer=setInterval(ding,460);}
+function stopBells(){if(bellTimer){clearInterval(bellTimer);bellTimer=null;}}
+function whistle(){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(400,a.currentTime);o.frequency.exponentialRampToValueAtTime(560,a.currentTime+.2);o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.3,a.currentTime+.05);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+1);o.start();o.stop(a.currentTime+1.02);}
+let chugTimer=null;
+function startChug(){stopChug();chugTimer=setInterval(()=>{const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=95;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.14,a.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.18);o.start();o.stop(a.currentTime+.2);},300);}
+function stopChug(){if(chugTimer){clearInterval(chugTimer);chugTimer=null;}}
+function honk(){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=300;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.2,a.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.25);o.start();o.stop(a.currentTime+.27);}
+
+// ================= DRAW =================
+function drawBg(){
+  // grass
+  ctx.fillStyle='#7ac74f';ctx.fillRect(0,0,W,H);
+  // road (vertical)
+  ctx.fillStyle='#5a5a5a';ctx.fillRect(ROAD_X-70,0,140,H);
+  ctx.strokeStyle='#ffe066';ctx.lineWidth=5;ctx.setLineDash([26,22]);
+  ctx.beginPath();ctx.moveTo(ROAD_X,0);ctx.lineTo(ROAD_X,H);ctx.stroke();ctx.setLineDash([]);
+  // track (horizontal)
+  ctx.fillStyle='#9a8366';ctx.fillRect(0,TRACK_Y-30,W,60);
+  ctx.fillStyle='#6b4a2a';for(let x=0;x<W;x+=34){ctx.fillRect(x,TRACK_Y-30,12,60);}
+  ctx.fillStyle='#c9ccd1';ctx.fillRect(0,TRACK_Y-16,W,6);ctx.fillRect(0,TRACK_Y+12,W,6);
+}
+function drawCar(car){
+  ctx.save();ctx.translate(car.lane,car.y);
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(-20,26,40,10);
+  ctx.fillStyle=car.color;ctx.fillRect(-20,-34,40,68);
+  ctx.fillStyle='#bfe3f5';ctx.fillRect(-15,-26,30,20);ctx.fillRect(-15,10,30,18);
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(-24,-24,5,16);ctx.fillRect(19,-24,5,16);ctx.fillRect(-24,10,5,16);ctx.fillRect(19,10,5,16);
+  ctx.fillStyle='#ffe9a8';const fy=car.dir>0?34:-34;ctx.beginPath();ctx.arc(-11,fy,4,0,7);ctx.arc(11,fy,4,0,7);ctx.fill();
+  ctx.restore();
+}
+function drawTrain(){
+  if(!train)return;
+  ctx.save();ctx.translate(train.x,TRACK_Y);
+  const dir=train.dir;
+  // passenger car (behind)
+  ctx.fillStyle='#2a6fd6';ctx.fillRect(-260*dir,-46,220*dir,80);
+  ctx.fillStyle='#1f55a8';ctx.fillRect(-260*dir,-46,220*dir,16);
+  ctx.fillStyle='#bfe3f5';for(let i=1;i<=3;i++){ctx.fillRect((-250+ (i-1)*60)*dir - (dir<0?42:0),-20,42,26);}
+  // loco (front, black)
+  ctx.fillStyle='#1c1c1e';ctx.fillRect(-40*dir,-52,190*dir,86);
+  ctx.fillStyle='#0e0e10';ctx.fillRect(120*dir,-52,30*dir,86); // cab
+  ctx.fillStyle='#bfe3f5';ctx.fillRect(126*dir,-40,20*dir,26);
+  ctx.fillStyle='#2a2a2a';ctx.fillRect(30*dir,-72,20*dir,22); // chimney
+  ctx.fillStyle='#ffd166';ctx.fillRect(-40*dir,20,190*dir,6);
+  // wheels
+  ctx.fillStyle='#111';for(let i=0;i<7;i++){ctx.beginPath();ctx.arc((-230+i*44)*dir,40,13,0,7);ctx.fill();}
+  ctx.restore();
+}
+function drawGate(){
+  // two posts either side of the road, arms lower across the road
+  [[ROAD_X-90,1],[ROAD_X+90,-1]].forEach(([px,dir])=>{
+    ctx.save();ctx.translate(px,TRACK_Y+52);
+    ctx.fillStyle='#333';ctx.fillRect(-6,-6,12,70);
+    // lights
+    const flash=(gate!=='open')&&(Math.floor(now()/280)%2===0);
+    ctx.fillStyle=flash?'#ff2a2a':'#601a1a';ctx.beginPath();ctx.arc(-10,-14,6,0,7);ctx.fill();
+    ctx.fillStyle=flash?'#601a1a':'#ff2a2a';ctx.beginPath();ctx.arc(10,-14,6,0,7);ctx.fill();
+    // arm
+    const ang=(gateAngle/90)*Math.PI/2; // 0 up -> down
+    const len=88;
+    const tx=dir*Math.sin(ang)*len, ty=-Math.cos(ang)*len;
+    ctx.strokeStyle='#fff';ctx.lineWidth=9;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(tx,-6+ty);ctx.stroke();
+    ctx.strokeStyle='#d62828';ctx.lineWidth=9;
+    for(let i=0.12;i<1;i+=0.3){ctx.beginPath();ctx.moveTo(tx*i,-6+ty*i);ctx.lineTo(tx*(i+0.15),-6+ty*(i+0.15));ctx.stroke();}
+    ctx.restore();
+  });
+}
+
+// ================= UPDATE =================
+let last=now();
+function update(t){
+  const dt=Math.min(t-last,50);last=t;
+
+  if(gate==='closing'){gateAngle=clamp(gateAngle+dt*0.22,0,90);if(gateAngle>=90){gate='closed';launchTrain();}}
+  else if(gate==='opening'){gateAngle=clamp(gateAngle-dt*0.22,0,90);if(gateAngle<=0)gate='open';}
+
+  // spawn cars
+  carTimer+=dt;
+  if(carTimer>1100 && cars.length<7){carTimer=0;spawnCar();}
+
+  const gateBlocking = gate!=='open'; // block once it starts closing
+  const stopLineTop = TRACK_Y-95, stopLineBot = TRACK_Y+95;
+  cars.forEach(car=>{
+    const speed=0.32*dt;
+    // should this car stop at the gate?
+    if(gateBlocking){
+      if(car.dir>0 && car.y< stopLineTop && car.y+speed>=stopLineTop){ car.y=stopLineTop; car.stopped=true; }
+      else if(car.dir<0 && car.y> stopLineBot && car.y-speed<=stopLineBot){ car.y=stopLineBot; car.stopped=true; }
+      else if(!car.stopped){ car.y+=car.dir*speed; }
+    } else {
+      car.stopped=false; car.y+=car.dir*speed;
+    }
+  });
+  cars=cars.filter(c=>c.y>-120&&c.y<H+120);
+
+  // train motion
+  if(train){
+    train.x+=0.5*dt*train.dir;
+    if(train.x>W+560){ train=null; stopChug();
+      // after train passes, auto-open so cars can go (feels good)
+    } else if(train.x>-400){ startChug(); }
+  }
+}
+
+// ================= RENDER =================
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawBg();
+  cars.forEach(drawCar);
+  drawTrain();
+  drawGate();
+}
+function loop(t){update(t);render();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+// ================= PHYSICAL DEVICE =================
+let devAddr='';
+function devBase(){ if(!devAddr)return null; return (devAddr.startsWith('http')?devAddr:'http://'+devAddr).replace(/\/+$/,''); }
+function devSend(ep){ const b=devBase(); if(!b)return; fetch(b+ep).catch(()=>{}); }
+
+// Poll /status so the PHYSICAL button also drives the on-screen game.
+let devPrev='up', devPolling=false, gameInitiated=false;
+function startDevPolling(){
+  if(devPolling)return; if(!devBase())return; devPolling=true;
+  const poll=async()=>{
+    const b=devBase(); if(!b){devPolling=false;return;}
+    try{ const r=await fetch(b+'/status'); const j=await r.json(); onDevState(j.state); }catch(e){}
+    if(devPolling) setTimeout(poll,180);
+  };
+  poll();
+}
+function onDevState(state){
+  if(!state||state===devPrev){devPrev=state||devPrev;return;}
+  const prev=devPrev; devPrev=state;
+  // Only react to changes the DEVICE initiated (physical button), not ones the game just sent.
+  if(gameInitiated){ gameInitiated=false; return; }
+  const wentDown=(state==='down'||state==='lowering')&&(prev==='up'||prev==='raising');
+  const wentUp  =(state==='up'||state==='raising')&&(prev==='down'||prev==='lowering');
+  if(wentDown && (gate==='open'||gate==='opening')){ unlock(); gate='closing'; bells(); }   // physical → close game
+  if(wentUp   && (gate==='closed'||gate==='closing')){ unlock(); gate='opening'; stopBells(); } // physical → open game
+}
+
+// ================= CONTROLS =================
+function closeGate(){ if(gate==='open'||gate==='opening'){ unlock(); gate='closing'; bells(); gameInitiated=true; devSend('/close'); } }
+function openGate(){ if(gate==='closed'||gate==='closing'){ unlock(); gate='opening'; stopBells(); gameInitiated=true; devSend('/open'); } }
+document.getElementById('bClose').addEventListener('click',()=>{unlock();closeGate();});
+document.getElementById('bOpen').addEventListener('click',()=>{unlock();openGate();});
+addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault(); (gate==='open'||gate==='opening')?closeGate():openGate(); } });
+// honk when a stopped car is waiting a while
+setInterval(()=>{ if(gate==='closed' && cars.some(c=>c.stopped) && Math.random()<0.5) honk(); },1600);
+
+// ================= SETTINGS UI =================
+const settingsEl=document.getElementById('settings'),devStatus=document.getElementById('devStatus'),devAddrEl=document.getElementById('devAddr');
+document.getElementById('gear').addEventListener('click',()=>settingsEl.classList.add('open'));
+document.getElementById('devClose').addEventListener('click',()=>settingsEl.classList.remove('open'));
+devAddrEl.addEventListener('input',()=>{ devAddr=devAddrEl.value.trim(); devStatus.textContent=devAddr?'…':'—'; });
+document.getElementById('devTest').addEventListener('click',async()=>{
+  if(!devAddr){devStatus.textContent='wpisz adres';return;}
+  const b=devBase();devStatus.textContent='łączę…';
+  try{ const r=await fetch(b+'/status');const j=await r.json();devStatus.textContent='✓ połączono ('+(j.state||'ok')+')';devPrev=j.state||'up';devSend('/open');startDevPolling(); }
+  catch(e){ devStatus.textContent='✗ brak łączności'; }
+});
+</script>
+</body>
+</html>

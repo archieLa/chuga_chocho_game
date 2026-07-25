@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chuga Chocho — a train game for little kids</title>
+<meta name="description" content="A free, open-source train crossing game for young kids. Press the button, lower the gate, watch the train go. Teaches geography, counting, colors and letters. English &amp; Polish.">
+<style>
+  :root{
+    --sky1:#8fd0f0; --sky2:#cdeafd; --grass:#7ac74f; --ink:#173a5e;
+    --accent:#d62828; --go:#2a9d2a; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(var(--sky1),var(--sky2));min-height:100vh;}
+  .hero{max-width:820px;margin:0 auto;padding:8vh 6vw 4vh;text-align:center;}
+  .train{font-size:15vmin;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.15));}
+  h1{font-size:clamp(2.2rem,7vw,3.6rem);margin:.3em 0 .15em;color:var(--accent);}
+  .tag{font-size:clamp(1.05rem,3.4vw,1.4rem);opacity:.85;margin-bottom:1.4em;}
+  .play{display:inline-flex;align-items:center;gap:.5em;background:radial-gradient(circle at 35% 30%,#5dd959,#2a9d2a);
+    color:#fff;text-decoration:none;font-size:clamp(1.3rem,4.5vw,1.8rem);font-weight:bold;
+    padding:.7em 1.6em;border-radius:999px;box-shadow:0 8px 0 #1a7a1a,0 12px 22px rgba(0,0,0,.25);
+    transition:transform .08s,box-shadow .08s;}
+  .play:active{transform:translateY(6px);box-shadow:0 2px 0 #1a7a1a;}
+  .track{height:10px;background:repeating-linear-gradient(90deg,#9a8366 0 22px,#6b4a2a 22px 34px);
+    border-top:4px solid #c9ccd1;border-bottom:4px solid #c9ccd1;margin:6vh 0 0;}
+  main{background:var(--grass);padding:5vh 6vw 8vh;}
+  .wrap{max-width:820px;margin:0 auto;}
+  .card{background:var(--card);border-radius:20px;padding:1.6em 1.8em;margin:1.2em 0;
+    box-shadow:0 6px 16px rgba(0,0,0,.12);}
+  .card h2{color:var(--accent);font-size:1.4rem;margin-bottom:.5em;}
+  .card p{line-height:1.6;margin:.5em 0;}
+  .cards{display:grid;gap:1em;grid-template-columns:1fr;}
+  @media(min-width:640px){.cards{grid-template-columns:1fr 1fr;}}
+  code{background:#eef3f7;padding:.15em .4em;border-radius:5px;font-size:.92em;}
+  .steps{text-align:left;margin:.4em 0 .2em 1.1em;line-height:1.7;}
+  footer{max-width:820px;margin:0 auto;padding:3vh 6vw;text-align:center;color:var(--ink);opacity:.75;font-size:.95rem;}
+  footer a{color:var(--accent);}
+  .note{background:#fff6d6;border:1px dashed #e0b000;border-radius:12px;padding:.8em 1em;
+    display:inline-block;margin-top:1em;font-size:.95rem;}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="train">🚂</div>
+    <h1>Chuga Chocho!</h1>
+    <p class="tag">A gentle train game for little kids. Press the button, the crossing gate goes down, and the train chugs through. 🚗🚦</p>
+    <a class="play" href="play/">▶ Play Now</a>
+    <div class="note">🚧 Early build — the game is growing. Come back for new trains, places, and games!</div>
+  </section>
+
+  <div class="track"></div>
+
+  <main>
+    <div class="wrap">
+      <div class="card">
+        <h2>What is this?</h2>
+        <p>Chuga Chocho is a free, open-source game made for young children (about ages 3–5). It starts simple — a happy train and a crossing gate — and teaches along the way: <strong>geography</strong> (travel the USA on a map), <strong>trains</strong> (steam, diesel, electric), and soon <strong>counting, colors, and letters</strong>. Everything is spoken out loud in <strong>English and Polish</strong>. There's no way to lose and nothing scary.</p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h2>🖐️ Play in your browser</h2>
+          <p>Just tap the big green <strong>Play Now</strong> button above. Nothing to install, no account, works on a tablet.</p>
+        </div>
+        <div class="card">
+          <h2>🏠 Play offline at home</h2>
+          <p>Want it without internet? Download the project, unzip it, and open the <code>play/index.html</code> file. That's it.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🔧 For tinkerers: a real crossing gate</h2>
+        <p>The game can talk to a <strong>real physical crossing gate</strong> on your home network. Pressing the real button moves the on-screen gate, and the on-screen buttons move the real one. Wiring and firmware instructions are on the way — see the project page.</p>
+      </div>
+
+      <div class="card">
+        <h2>👩‍💻 For developers</h2>
+        <p>Plain HTML, CSS, JavaScript, and SVG — no framework, no build step. Contributions welcome, especially new places, translations, and art.</p>
+        <p class="steps">
+          Source code, roadmap, and how to contribute →
+          <a href="https://github.com/">the GitHub repository</a>
+          <em>(update this link once the repo is published)</em>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Made with love, open-source under the MIT license. 🚂 ·
+    <a href="play/">Play</a> ·
+    <a href="https://github.com/">Source</a>
+  </footer>
+</body>
+</html>

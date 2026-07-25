@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chuga Chocho — Play</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="wrap">
+    <!-- The SVG scene lives here. Phase 1.3 replaces the placeholder with storybook art. -->
+    <svg id="scene" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+
+    <div id="title">🚂 Chuga Chocho!</div>
+
+    <!-- Top-right utility icons (wired up during Phase 1) -->
+    <div id="topbar">
+      <button id="mapBtn"  class="icon" title="Choose a place">🗺️</button>
+      <button id="trainBtn" class="icon" title="Customize train">🚆</button>
+      <button id="gearBtn" class="icon" title="Settings">⚙️</button>
+    </div>
+
+    <!-- The two always-available gate controls -->
+    <div id="controls">
+      <button class="big" id="closeBtn"><span class="ico">⬇️</span><span class="lbl" data-i18n="close">CLOSE</span></button>
+      <button class="big" id="openBtn"><span class="ico">⬆️</span><span class="lbl" data-i18n="open">OPEN</span></button>
+    </div>
+
+    <!-- Settings / map / train panels get injected or toggled by their modules -->
+    <div id="panel" hidden></div>
+  </div>
+
+  <!-- Classic scripts (no ES modules) so the game runs by opening this file directly. -->
+  <!-- Load order matters: data & services first, then systems, then the orchestrator. -->
+  <script src="js/i18n.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/gate.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/map-data.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/trains.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/modes.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
