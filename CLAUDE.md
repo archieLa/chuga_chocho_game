@@ -23,6 +23,18 @@ A gentle, spoken, bilingual (English + Polish) train-crossing learning game for 
 - SVG art: group and name parts so they can be swapped/recolored (`fill`) at runtime (steam vs electric engine, loco color, wagon type).
 - Test by opening the game and clicking through; there is no automated test suite yet (adding a light one is welcome).
 
+## Scene art
+
+**Locations are authored art, not procedural.** `play/assets/scenes/colorado.svg` is the reference scene and style anchor; **`SCENE_GUIDE.md` is the spec** — shared geometry, layer order, the depth model, and the per-location recipe. Read it before touching scene rendering or adding a location.
+
+Structural rules the engine MUST honour (from the reference scene):
+
+- Scenes are 1280×720 with a **horizon at y=300**; the road is a **perspective ribbon** to a vanishing point on the horizon; the track band is **y=450–516**.
+- **Two crossing gates** — near (`y=480`, posts x=552/728, scale 1.2) and far (`y=388`, posts x=580/700, scale 0.82). Both lower together. **Cars travel in BOTH directions** (top and bottom).
+- The moving train renders **between `#gate-far` and `#scenery-front`** — behind the near gate, in front of the far gate.
+- Because the road is in perspective, **cars scale with distance** as they approach or recede.
+- Never place props in the track band; never disable either gate.
+
 ## Reference material
 
 - `reference/crossing_playtime.html` — the **original working game** (single-file canvas). It already implements: gate open/close animation with easing, flashing lights, warning bell, whistle, chug and honk sounds (Web Audio), cars that stop at the gate, and the **physical-device polling + two-way sync**. **Port this logic; don't reinvent it.** Its visuals are placeholder — the new version replaces canvas rectangles with SVG storybook art.

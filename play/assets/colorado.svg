@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chuga Chocho — Colorado reference scene v6 (art style anchor).
+     Signature Colorado: Georgetown Loop red trestle, golden aspens (incl. fall
+     color on the slopes), red-rock sandstone, columbines, Clear Creek, boulders.
+     CORRECT DEPTH ORDER: background -> ground -> creek -> road -> TRACK ->
+     foreground scenery (trees/rocks IN FRONT of the track, never sliced). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" id="scene-colorado">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ec8ec"/><stop offset="0.62" stop-color="#bbe2f1"/><stop offset="1" stop-color="#e2f1ea"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff8dc" stop-opacity="0.95"/><stop offset="0.55" stop-color="#fff0bd" stop-opacity="0.45"/><stop offset="1" stop-color="#fff0bd" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ec96a"/><stop offset="1" stop-color="#6faa4e"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6a6a6f"/><stop offset="1" stop-color="#54545a"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cdeafb"/><stop offset="1" stop-color="#8fc7ec"/>
+    </linearGradient>
+
+    <g id="pine">
+      <ellipse cx="-4" cy="50" rx="24" ry="6" fill="#000" opacity="0.12"/>
+      <rect x="-5" y="30" width="10" height="20" rx="3" fill="#6b4a2a"/>
+      <polygon points="0,-4 24,32 -24,32" fill="#2f6f47"/><polygon points="0,-4 18,20 -18,20" fill="#3c8556"/><polygon points="0,-4 12,8 -12,8" fill="#4aa168"/>
+    </g>
+    <g id="pineDark">
+      <ellipse cx="-4" cy="50" rx="24" ry="6" fill="#000" opacity="0.12"/>
+      <rect x="-5" y="30" width="10" height="20" rx="3" fill="#573b22"/>
+      <polygon points="0,-4 24,32 -24,32" fill="#255c3a"/><polygon points="0,-4 18,20 -18,20" fill="#2f6f47"/><polygon points="0,-4 12,8 -12,8" fill="#3c8556"/>
+    </g>
+    <g id="aspen">
+      <ellipse cx="-5" cy="52" rx="20" ry="6" fill="#000" opacity="0.12"/>
+      <rect x="-3.5" y="6" width="7" height="46" rx="2" fill="#eef1ee"/>
+      <g fill="#3a3a3a"><rect x="-3.5" y="18" width="4" height="3"/><rect x="0" y="30" width="4" height="3"/><rect x="-3" y="40" width="3.5" height="3"/></g>
+      <circle cx="0" cy="-2" r="20" fill="#e9b53e"/><circle cx="-13" cy="6" r="14" fill="#f2c556"/><circle cx="13" cy="5" r="14" fill="#edbe46"/><circle cx="0" cy="10" r="13" fill="#f4cf66"/>
+    </g>
+    <g id="rock">
+      <ellipse cx="0" cy="15" rx="26" ry="7" fill="#000" opacity="0.12"/>
+      <polygon points="-22,14 -10,-10 8,-14 24,-2 22,14" fill="#9a9aa2"/><polygon points="8,-14 24,-2 22,14 6,14 -2,6" fill="#82828b"/><polygon points="-22,14 -10,-10 -2,6 6,14" fill="#b2b2b9"/>
+    </g>
+    <g id="boulder">
+      <ellipse cx="2" cy="36" rx="56" ry="13" fill="#000" opacity="0.14"/>
+      <polygon points="-52,36 -46,-2 -22,-26 14,-32 44,-14 54,14 46,36" fill="#8f8f98"/>
+      <polygon points="14,-32 44,-14 54,14 24,8 4,-16" fill="#b4b4bc"/><polygon points="-22,-26 14,-32 4,-16 -18,-6" fill="#a3a3ac"/>
+      <polygon points="-52,36 -46,-2 -18,-6 -8,20 -22,36" fill="#78787f"/>
+      <g stroke="#6d6d73" stroke-width="2" opacity="0.7" fill="none" stroke-linecap="round"><path d="M4,-16 L2,10 L-10,30"/><path d="M24,8 L21,30"/></g>
+      <g fill="#93b06a" opacity="0.85"><circle cx="-30" cy="0" r="5"/><circle cx="-24" cy="-4" r="4"/><circle cx="30" cy="-8" r="4"/></g>
+    </g>
+    <g id="redrock">
+      <ellipse cx="0" cy="60" rx="74" ry="15" fill="#000" opacity="0.16"/>
+      <polygon points="-62,60 -42,-42 -24,-72 -8,-28 -10,60" fill="#b5563a"/>
+      <polygon points="-24,-72 -8,-28 6,-82 24,-18 22,60 -10,60" fill="#c86d4b"/>
+      <polygon points="6,-82 24,-18 46,-52 60,60 22,60" fill="#a8492f"/>
+      <g stroke="#8f3d27" stroke-width="2.5" opacity="0.55" fill="none" stroke-linecap="round"><path d="M-22,-40 L-16,42"/><path d="M8,-28 L15,46"/><path d="M34,-4 L42,50"/></g>
+      <g fill="#9aae63" opacity="0.7"><circle cx="-30" cy="30" r="5"/><circle cx="20" cy="36" r="4"/></g>
+    </g>
+    <g id="bush">
+      <ellipse cx="0" cy="15" rx="24" ry="6" fill="#000" opacity="0.10"/>
+      <circle cx="-10" cy="4" r="12" fill="#4f9a5f"/><circle cx="6" cy="2" r="14" fill="#59a86a"/><circle cx="-2" cy="-6" r="12" fill="#63b573"/>
+    </g>
+    <g id="columbine">
+      <g fill="#6f92cf"><circle cx="0" cy="-7" r="5"/><circle cx="7" cy="-2" r="5"/><circle cx="4" cy="6" r="5"/><circle cx="-4" cy="6" r="5"/><circle cx="-7" cy="-2" r="5"/></g>
+      <g fill="#ffffff"><circle cx="0" cy="-3" r="2.6"/><circle cx="3" cy="0" r="2.6"/><circle cx="2" cy="3" r="2.6"/><circle cx="-2" cy="3" r="2.6"/><circle cx="-3" cy="0" r="2.6"/></g>
+      <circle cx="0" cy="0" r="2" fill="#ffd24a"/>
+    </g>
+  </defs>
+
+  <!-- ===== SKY ===== -->
+  <g id="sky">
+    <rect x="0" y="0" width="1280" height="320" fill="url(#sky)"/>
+    <circle cx="1080" cy="100" r="150" fill="url(#sun)"/>
+    <g fill="#ffffff">
+      <g opacity="0.92"><ellipse cx="250" cy="90" rx="56" ry="23"/><ellipse cx="296" cy="84" rx="42" ry="21"/><ellipse cx="208" cy="97" rx="36" ry="18"/></g>
+      <g opacity="0.8"><ellipse cx="700" cy="66" rx="48" ry="19"/><ellipse cx="740" cy="60" rx="34" ry="17"/><ellipse cx="666" cy="74" rx="28" ry="14"/></g>
+    </g>
+    <g stroke="#5f7d92" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.45"><path d="M560,108 q10,-9 20,0 q10,-9 20,0"/><path d="M600,136 q9,-8 18,0 q9,-8 18,0"/></g>
+  </g>
+
+  <!-- ===== FAR SNOWY PEAKS (warm tan/ochre) ===== -->
+  <g id="far-peaks">
+    <polygon points="-20,320 120,110 270,300 440,90 610,300 770,150 940,300 1090,105 1240,300 1300,190 1300,320" fill="#c2a069"/>
+    <g stroke="#a5854e" stroke-width="3" opacity="0.5" fill="none" stroke-linecap="round"><path d="M440,120 l-26,44"/><path d="M452,140 l-24,40"/><path d="M120,150 l-18,34"/><path d="M1090,140 l-22,40"/></g>
+    <g fill="#f7fbfe">
+      <polygon points="120,110 170,190 146,180 120,202 95,181 70,190"/><polygon points="440,90 494,184 464,173 440,196 414,174 388,185"/><polygon points="1090,105 1142,190 1116,180 1090,202 1064,180 1040,190"/>
+    </g>
+    <g fill="#a5834b" opacity="0.55"><polygon points="120,110 270,300 170,190"/><polygon points="440,90 610,300 494,184"/><polygon points="1090,105 1240,300 1142,190"/></g>
+  </g>
+
+  <!-- ===== EVERGREEN SLOPES + fall-gold aspen stands + ravine ===== -->
+  <g id="slopes">
+    <polygon points="-20,320 -20,214 110,300 190,270 250,318 -20,320" fill="#3f7c53"/>
+    <polygon points="420,318 470,262 560,300 700,235 860,300 1010,250 1160,300 1300,235 1300,320 420,320" fill="#4a875b"/>
+    <polygon points="420,318 470,262 560,300 700,235 780,300" fill="#3f7c53" opacity="0.5"/>
+    <g>
+      <use href="#pineDark" transform="translate(50,286) scale(0.45)"/><use href="#pineDark" transform="translate(100,290) scale(0.48)"/><use href="#pineDark" transform="translate(160,294) scale(0.5)"/>
+      <use href="#pineDark" transform="translate(520,296) scale(0.5)"/><use href="#pineDark" transform="translate(680,296) scale(0.55)"/><use href="#pineDark" transform="translate(760,298) scale(0.5)"/>
+      <use href="#pineDark" transform="translate(840,300) scale(0.5)"/><use href="#pineDark" transform="translate(960,302) scale(0.5)"/><use href="#pineDark" transform="translate(1080,300) scale(0.52)"/><use href="#pineDark" transform="translate(1200,302) scale(0.5)"/>
+    </g>
+    <!-- fall-gold aspen stands on the slopes -->
+    <g>
+      <g fill="#e6b03a"><circle cx="736" cy="270" r="10"/><circle cx="754" cy="263" r="13"/><circle cx="772" cy="271" r="10"/><circle cx="758" cy="279" r="11"/><circle cx="788" cy="274" r="9"/></g>
+      <g fill="#f2c556"><circle cx="746" cy="267" r="7"/><circle cx="766" cy="269" r="7"/></g>
+      <g fill="#e6b03a"><circle cx="1004" cy="266" r="10"/><circle cx="1022" cy="259" r="13"/><circle cx="1040" cy="267" r="10"/><circle cx="1026" cy="275" r="11"/></g>
+      <g fill="#f2c556"><circle cx="1014" cy="263" r="7"/><circle cx="1032" cy="265" r="7"/></g>
+      <g fill="#e6b03a"><circle cx="150" cy="286" r="9"/><circle cx="166" cy="280" r="12"/><circle cx="182" cy="288" r="9"/></g>
+    </g>
+  </g>
+
+  <!-- ===== GEORGETOWN LOOP curved red trestle (HERO) ===== -->
+  <g id="bridge">
+    <polygon points="240,300 250,318 420,318 410,300" fill="#2f6144" opacity="0.5"/>
+    <g stroke="#5a2222" stroke-width="4">
+      <line x1="262" y1="268" x2="262" y2="330"/><line x1="300" y1="262" x2="300" y2="326"/><line x1="338" y1="262" x2="338" y2="326"/><line x1="376" y1="268" x2="376" y2="330"/>
+      <g stroke="#6e2b2b" stroke-width="2.5">
+        <line x1="262" y1="272" x2="300" y2="322"/><line x1="300" y1="272" x2="262" y2="322"/><line x1="300" y1="266" x2="338" y2="322"/><line x1="338" y1="266" x2="300" y2="322"/><line x1="338" y1="272" x2="376" y2="322"/><line x1="376" y1="272" x2="338" y2="322"/>
+      </g>
+    </g>
+    <path d="M244,272 Q 319,244 394,272 L394,284 Q 319,256 244,284 Z" fill="#7a2f2f"/>
+    <path d="M250,268 Q 319,242 388,268" fill="none" stroke="#3a2020" stroke-width="2"/>
+    <g transform="translate(300,252)">
+      <rect x="-40" y="-4" width="26" height="12" rx="2" fill="#2a6f4a"/><rect x="-12" y="-4" width="24" height="12" rx="2" fill="#7a2f2f"/>
+      <rect x="14" y="-8" width="18" height="16" rx="3" fill="#1c1e24"/><rect x="20" y="-16" width="6" height="9" fill="#1c1e24"/><circle cx="18" cy="-3" r="2.4" fill="#ffe9a8"/>
+      <g fill="#ffffff" opacity="0.85"><circle cx="24" cy="-22" r="6"/><circle cx="34" cy="-30" r="8" opacity="0.7"/><circle cx="48" cy="-36" r="10" opacity="0.5"/></g>
+    </g>
+  </g>
+
+  <!-- ===== GROUND ===== -->
+  <g id="ground">
+    <rect x="0" y="300" width="1280" height="420" fill="url(#grass)"/>
+    <path d="M0,392 Q 240,360 470,388 L470,470 L0,470 Z" fill="#7cb457" opacity="0.5"/>
+    <path d="M810,388 Q 1050,360 1280,392 L1280,470 L810,470 Z" fill="#7cb457" opacity="0.5"/>
+  </g>
+
+  <!-- ===== CLEAR CREEK (passes under the track) ===== -->
+  <g id="creek">
+    <path d="M300,320 C 306,350 336,362 326,392 C 316,422 262,430 250,462 C 239,494 214,518 196,540 C 184,555 179,557 175,560" fill="none" stroke="#6fa8c8" stroke-width="34" stroke-linecap="round" opacity="0.9"/>
+    <path d="M300,320 C 306,350 336,362 326,392 C 316,422 262,430 250,462 C 239,494 214,518 196,540 C 184,555 179,557 175,560" fill="none" stroke="url(#water)" stroke-width="26" stroke-linecap="round"/>
+    <ellipse cx="175" cy="566" rx="122" ry="31" fill="url(#water)"/><ellipse cx="150" cy="560" rx="44" ry="9" fill="#ffffff" opacity="0.5"/>
+  </g>
+
+  <!-- ===== TREES BEHIND THE RAILS (train passes in FRONT of these; trunks sit above the track) ===== -->
+  <g id="scenery-back">
+    <use href="#pineDark" transform="translate(40,392) scale(1.0)"/>
+    <use href="#aspen" transform="translate(110,393) scale(0.95)"/>
+    <use href="#aspen" transform="translate(175,387) scale(1.05)"/>
+    <use href="#pine" transform="translate(285,395) scale(0.95)"/>
+    <use href="#pine" transform="translate(380,392) scale(1.0)"/>
+    <use href="#pine" transform="translate(455,396) scale(0.9)"/>
+    <use href="#pineDark" transform="translate(860,390) scale(1.05)"/>
+    <use href="#aspen" transform="translate(955,387) scale(1.05)"/>
+    <use href="#pine" transform="translate(1035,395) scale(0.95)"/>
+    <use href="#aspen" transform="translate(1130,385) scale(1.1)"/>
+    <use href="#pine" transform="translate(1215,392) scale(1.0)"/>
+  </g>
+
+  <!-- ===== ROAD (perspective) ===== -->
+  <g id="road">
+    <polygon points="510,720 770,720 658,300 622,300" fill="url(#road)"/>
+    <polygon points="510,720 528,720 636,300 622,300" fill="#e8e2c9" opacity="0.45"/><polygon points="752,720 770,720 658,300 644,300" fill="#e8e2c9" opacity="0.45"/>
+    <g fill="#ffe066"><polygon points="634,704 646,704 645,660 635,660"/><polygon points="636,626 644,626 643,590 637,590"/><polygon points="637,560 643,560 642,532 638,532"/><polygon points="638,392 642,392 641,368 639,368"/><polygon points="639,352 641,352 641,336 639,336"/></g>
+  </g>
+
+  <!-- ===== TRACK (drawn BEFORE foreground scenery, so trees/rocks sit in front) ===== -->
+  <g id="track">
+    <rect x="0" y="450" width="1280" height="66" fill="#a98c68"/><rect x="0" y="450" width="1280" height="8" fill="#bb9d76"/>
+    <g fill="#6b4a2a">
+      <rect x="6" y="452" width="15" height="62"/><rect x="50" y="452" width="15" height="62"/><rect x="94" y="452" width="15" height="62"/><rect x="138" y="452" width="15" height="62"/><rect x="182" y="452" width="15" height="62"/><rect x="226" y="452" width="15" height="62"/>
+      <rect x="270" y="452" width="15" height="62"/><rect x="314" y="452" width="15" height="62"/><rect x="358" y="452" width="15" height="62"/><rect x="402" y="452" width="15" height="62"/><rect x="446" y="452" width="15" height="62"/><rect x="490" y="452" width="15" height="62"/>
+      <rect x="534" y="452" width="15" height="62"/><rect x="578" y="452" width="15" height="62"/><rect x="622" y="452" width="15" height="62"/><rect x="666" y="452" width="15" height="62"/><rect x="710" y="452" width="15" height="62"/><rect x="754" y="452" width="15" height="62"/>
+      <rect x="798" y="452" width="15" height="62"/><rect x="842" y="452" width="15" height="62"/><rect x="886" y="452" width="15" height="62"/><rect x="930" y="452" width="15" height="62"/><rect x="974" y="452" width="15" height="62"/><rect x="1018" y="452" width="15" height="62"/>
+      <rect x="1062" y="452" width="15" height="62"/><rect x="1106" y="452" width="15" height="62"/><rect x="1150" y="452" width="15" height="62"/><rect x="1194" y="452" width="15" height="62"/><rect x="1238" y="452" width="15" height="62"/>
+    </g>
+    <rect x="0" y="466" width="1280" height="6" fill="#d3d7dc"/><rect x="0" y="496" width="1280" height="6" fill="#d3d7dc"/>
+  </g>
+
+  <!-- ===== FAR GATE (above the tracks; smaller, behind the train) ===== -->
+  <g id="gate-far">
+    <g transform="translate(580,388) scale(0.82)">
+      <rect x="-8" y="0" width="16" height="70" rx="4" fill="#2f3136"/>
+      <g transform="translate(0,-4)" stroke="#ffffff" stroke-width="6" stroke-linecap="round"><line x1="-15" y1="-15" x2="15" y2="15"/><line x1="15" y1="-15" x2="-15" y2="15"/></g>
+      <circle cx="-13" cy="16" r="6.5" fill="#ff2a2a"/><circle cx="13" cy="16" r="6.5" fill="#7a1c1c"/>
+      <g transform="translate(0,40)"><rect x="0" y="-5" width="76" height="10" rx="5" fill="#ffffff"/><rect x="6" y="-5" width="15" height="10" fill="#d23b34"/><rect x="34" y="-5" width="15" height="10" fill="#d23b34"/><rect x="62" y="-5" width="14" height="10" fill="#d23b34"/></g>
+    </g>
+    <g transform="translate(700,388) scale(0.82)">
+      <rect x="-8" y="0" width="16" height="70" rx="4" fill="#2f3136"/>
+      <g transform="translate(0,-4)" stroke="#ffffff" stroke-width="6" stroke-linecap="round"><line x1="-15" y1="-15" x2="15" y2="15"/><line x1="15" y1="-15" x2="-15" y2="15"/></g>
+      <circle cx="-13" cy="16" r="6.5" fill="#7a1c1c"/><circle cx="13" cy="16" r="6.5" fill="#ff2a2a"/>
+      <g transform="translate(0,40)"><rect x="-76" y="-5" width="76" height="10" rx="5" fill="#ffffff"/><rect x="-21" y="-5" width="15" height="10" fill="#d23b34"/><rect x="-49" y="-5" width="15" height="10" fill="#d23b34"/><rect x="-76" y="-5" width="14" height="10" fill="#d23b34"/></g>
+    </g>
+  </g>
+
+  <!-- ===== FOREGROUND PROPS IN FRONT OF THE TRAIN (low; trunks/bases below the rails) ===== -->
+  <g id="scenery-front">
+    <!-- left: low foreground pine, boulders, bush, columbines -->
+    <use href="#pineDark" transform="translate(48,606) scale(1.7)"/>
+    <use href="#boulder" transform="translate(250,568) scale(1.05)"/>
+    <use href="#rock" transform="translate(345,560) scale(0.95)"/>
+    <use href="#boulder" transform="translate(110,700) scale(1.15)"/>
+    <use href="#bush" transform="translate(360,624) scale(1.55)"/>
+    <use href="#columbine" transform="translate(230,660) scale(2.2)"/>
+    <use href="#columbine" transform="translate(120,690) scale(2.0)"/>
+
+    <!-- right: bold red-rock landmark + boulders + low pine -->
+    <use href="#redrock" transform="translate(1050,632) scale(1.55)"/>
+    <use href="#redrock" transform="translate(1168,672) scale(1.05)"/>
+    <use href="#boulder" transform="translate(905,572) scale(0.95)"/>
+    <use href="#boulder" transform="translate(1245,662) scale(1.1)"/>
+    <use href="#pineDark" transform="translate(1238,606) scale(1.55)"/>
+    <use href="#bush" transform="translate(945,630) scale(1.6)"/>
+    <use href="#columbine" transform="translate(950,692) scale(2.3)"/>
+    <use href="#columbine" transform="translate(1200,708) scale(2.4)"/>
+  </g>
+
+  <!-- ===== NEAR GATE (below the tracks; bigger, in front of the train) ===== -->
+  <g id="gate-near">
+    <g transform="translate(552,480) scale(1.2)">
+      <rect x="-8" y="0" width="16" height="70" rx="4" fill="#2f3136"/>
+      <g transform="translate(0,-4)" stroke="#ffffff" stroke-width="6" stroke-linecap="round"><line x1="-15" y1="-15" x2="15" y2="15"/><line x1="15" y1="-15" x2="-15" y2="15"/></g>
+      <circle cx="-13" cy="16" r="6.5" fill="#ff2a2a"/><circle cx="13" cy="16" r="6.5" fill="#7a1c1c"/>
+      <g transform="translate(0,40)"><rect x="0" y="-5" width="76" height="10" rx="5" fill="#ffffff"/><rect x="6" y="-5" width="15" height="10" fill="#d23b34"/><rect x="34" y="-5" width="15" height="10" fill="#d23b34"/><rect x="62" y="-5" width="14" height="10" fill="#d23b34"/></g>
+    </g>
+    <g transform="translate(728,480) scale(1.2)">
+      <rect x="-8" y="0" width="16" height="70" rx="4" fill="#2f3136"/>
+      <g transform="translate(0,-4)" stroke="#ffffff" stroke-width="6" stroke-linecap="round"><line x1="-15" y1="-15" x2="15" y2="15"/><line x1="15" y1="-15" x2="-15" y2="15"/></g>
+      <circle cx="-13" cy="16" r="6.5" fill="#7a1c1c"/><circle cx="13" cy="16" r="6.5" fill="#ff2a2a"/>
+      <g transform="translate(0,40)"><rect x="-76" y="-5" width="76" height="10" rx="5" fill="#ffffff"/><rect x="-21" y="-5" width="15" height="10" fill="#d23b34"/><rect x="-49" y="-5" width="15" height="10" fill="#d23b34"/><rect x="-76" y="-5" width="14" height="10" fill="#d23b34"/></g>
+    </g>
+  </g>
+
+  <!-- ===== FOREGROUND grass + flowers ===== -->
+  <g id="foreground">
+    <g fill="#5f9e43"><path d="M40,712 q6,-20 12,0 q6,-18 12,0 z"/><path d="M1190,712 q6,-20 12,0 q6,-18 12,0 z"/><path d="M430,716 q5,-16 10,0 q5,-14 10,0 z"/><path d="M838,716 q5,-16 10,0 q5,-14 10,0 z"/></g>
+    <use href="#columbine" transform="translate(60,706) scale(2.6)"/>
+  </g>
+</svg>
