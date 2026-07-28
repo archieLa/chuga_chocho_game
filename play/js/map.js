@@ -54,14 +54,22 @@
       if (this.overlay) this.overlay.querySelector('.map-cities').hidden = true;
     },
 
+    /* The map only shows two-letter abbreviations. Tapping a state reveals its
+       FULL NAME (spoken aloud too — that's the geography lesson) along with the
+       places you can travel to. Statewide locations get a single button, so the
+       interaction is the same everywhere. */
     pickState(stateName) {
       const locs = CC.world.all().filter(l => l.state === stateName);
       if (!locs.length) return;
-      if (locs.length === 1) { this.selectLocation(locs[0]); return; }
 
-      // Multiple cities → show a chooser.
+      this.overlay.querySelectorAll('.state--picked').forEach(e => e.classList.remove('state--picked'));
+      const shape = this.overlay.querySelector('[data-name="' + stateName + '"]');
+      if (shape) shape.classList.add('state--picked');
+
+      CC.speech && CC.speech.say(stateName, { interrupt: true });
+
       const box = this.overlay.querySelector('.map-cities');
-      box.innerHTML = '<span class="map-title">' + stateName + '</span>';
+      box.innerHTML = '<span class="state-name">' + stateName + '</span>';
       locs.forEach(l => {
         const b = document.createElement('button');
         b.className = 'city-btn';

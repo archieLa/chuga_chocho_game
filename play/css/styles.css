@@ -45,6 +45,10 @@ html,body{height:100%;overflow:hidden;background:#7ec0ee;
   box-shadow:0 8px 24px rgba(0,0,0,.35);}
 .map-cities{display:flex;flex-wrap:wrap;gap:2vw;align-items:center;justify-content:center;color:#fff;}
 .map-cities[hidden]{display:none;}
+/* the full state name, revealed only after a state is tapped */
+.state-name{font-size:5vmin;font-weight:bold;color:#ffd166;letter-spacing:.02em;
+  text-shadow:0 2px 6px rgba(0,0,0,.5);}
+#us-map .state--picked{fill:#ffd166;}
 .city-btn{border:none;background:#5dd959;color:#fff;font-weight:bold;font-size:3.4vmin;
   padding:1.4vh 6vw;border-radius:999px;cursor:pointer;box-shadow:0 5px 0 #1a7a1a;}
 .city-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #1a7a1a;}
