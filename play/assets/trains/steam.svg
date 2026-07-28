@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chuga Chocho — STEAM locomotive (coal-fired narrow gauge, Georgetown Loop style).
+     Faces RIGHT. Local coords: y=0 is the RAIL LINE, +x is forward.
+     Place with transform="translate(X, railY)"; mirror with scale(-1,1) to face left.
+
+     RECOLOR HOOKS (change fill on these classes):
+       .cc-loco   locomotive + tender body   (default near-black)
+       .cc-trim   trim stripe + wheel centers (default red)
+       .cc-brass  domes, bell, headlight rim  (default brass)
+
+     ANIMATION — the side rods MUST move with the wheels.
+     The engine updates these each frame from wheel angle theta (radians,
+     theta = distanceTravelled / DRIVER_R, increasing = rolling right):
+       #driver-0/1/2   transform="rotate(deg cx -27)"   cx = 0, 54, 108
+       #coupling-rod   line between crank pins of driver-0 and driver-2
+       #main-rod       line from crank pin of driver-1 to the crosshead
+       #crosshead      slides horizontally on the guide at y=-40
+       #piston-rod     from cylinder rear (x=138) to the crosshead
+     Constants: DRIVER_R = 27, CRANK_R = 14, MAIN_ROD_L = 64, GUIDE_Y = -40.
+
+     SMOKE (engine-side, not in this file): emit a puff from the stack mouth at
+     local (134, -134) every quarter wheel revolution — four chuffs per turn, as a
+     two-cylinder engine does — so the chuffing stays in time with the rods. Puffs
+     rise, drift backwards, expand and fade in WORLD space (not parented to the
+     train), so the trail is left behind.
+     See play/js/trains.js for the reference implementation. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -140 430 150" id="train-steam">
+  <defs>
+    <linearGradient id="boilerShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ground shadow -->
+  <ellipse cx="10" cy="2" rx="190" ry="7" fill="#000" opacity="0.18"/>
+
+  <!-- ============ TENDER (coal) ============ -->
+  <g id="tender">
+    <rect class="cc-loco" x="-190" y="-96" width="114" height="54" rx="4" fill="#1c1f26"/>
+    <rect x="-190" y="-96" width="114" height="54" rx="4" fill="url(#boilerShade)"/>
+    <!-- coal load -->
+    <g fill="#0d0f13">
+      <rect x="-186" y="-104" width="106" height="9" rx="3"/>
+      <circle cx="-166" cy="-105" r="7"/><circle cx="-148" cy="-108" r="8"/><circle cx="-128" cy="-105" r="7"/>
+      <circle cx="-108" cy="-107" r="8"/><circle cx="-90" cy="-104" r="6"/>
+    </g>
+    <g fill="#2b3038" opacity="0.9">
+      <circle cx="-150" cy="-110" r="3"/><circle cx="-110" cy="-109" r="2.5"/>
+    </g>
+    <!-- tender frame + trim -->
+    <rect class="cc-trim" x="-190" y="-50" width="114" height="6" fill="#c0392b"/>
+    <rect x="-190" y="-44" width="114" height="7" rx="2" fill="#15181d"/>
+    <!-- underframe + truck bolsters so the wheels don't float -->
+    <rect x="-188" y="-37" width="110" height="5" rx="2" fill="#2a2e35"/>
+    <rect x="-176" y="-32" width="42" height="9" rx="3" fill="#22262d"/>
+    <rect x="-120" y="-32" width="42" height="9" rx="3" fill="#22262d"/>
+    <!-- tender wheels -->
+    <g fill="#101318">
+      <circle cx="-166" cy="-13" r="13"/><circle cx="-136" cy="-13" r="13"/>
+      <circle cx="-110" cy="-13" r="13"/><circle cx="-80" cy="-13" r="13"/>
+    </g>
+    <g fill="none" stroke="#3a4049" stroke-width="2">
+      <circle cx="-166" cy="-13" r="8.5"/><circle cx="-136" cy="-13" r="8.5"/>
+      <circle cx="-110" cy="-13" r="8.5"/><circle cx="-80" cy="-13" r="8.5"/>
+    </g>
+    <g class="cc-trim" fill="#c0392b">
+      <circle cx="-166" cy="-13" r="4.5"/><circle cx="-136" cy="-13" r="4.5"/>
+      <circle cx="-110" cy="-13" r="4.5"/><circle cx="-80" cy="-13" r="4.5"/>
+    </g>
+  </g>
+
+  <!-- coupling -->
+  <rect x="-78" y="-40" width="10" height="6" fill="#2a2e35"/>
+
+  <!-- ============ CAB ============ -->
+  <g id="cab">
+    <rect class="cc-loco" x="-72" y="-122" width="50" height="82" rx="3" fill="#1c1f26"/>
+    <rect x="-72" y="-122" width="50" height="82" rx="3" fill="url(#boilerShade)"/>
+    <rect class="cc-loco" x="-80" y="-130" width="68" height="9" rx="3" fill="#23272f"/>
+    <rect x="-66" y="-112" width="28" height="26" rx="2" fill="#bfe3f5"/>
+    <rect x="-66" y="-112" width="28" height="10" rx="2" fill="#d9f0fb"/>
+    <rect class="cc-trim" x="-72" y="-48" width="50" height="6" fill="#c0392b"/>
+  </g>
+
+  <!-- ============ BOILER ============ -->
+  <g id="boiler">
+    <rect class="cc-loco" x="-30" y="-94" width="172" height="50" rx="24" fill="#1c1f26"/>
+    <rect x="-30" y="-94" width="172" height="50" rx="24" fill="url(#boilerShade)"/>
+    <!-- boiler bands -->
+    <g stroke="#3a4049" stroke-width="2.5" opacity="0.9">
+      <line x1="6" y1="-92" x2="6" y2="-46"/><line x1="44" y1="-92" x2="44" y2="-46"/>
+      <line x1="82" y1="-92" x2="82" y2="-46"/>
+    </g>
+    <!-- smokebox (slightly larger, matte) -->
+    <rect x="118" y="-96" width="30" height="54" rx="10" fill="#15181d"/>
+    <circle cx="146" cy="-69" r="4" class="cc-brass" fill="#d4a943"/>
+    <!-- running board -->
+    <rect x="-30" y="-46" width="178" height="7" rx="2" fill="#15181d"/>
+    <rect class="cc-trim" x="-30" y="-44" width="178" height="3" fill="#c0392b"/>
+    <!-- sand dome + steam dome (dark, with brass caps — not gold blobs) -->
+    <g>
+      <rect class="cc-loco" x="9" y="-104" width="26" height="12" rx="4" fill="#23272f"/>
+      <ellipse class="cc-loco" cx="22" cy="-104" rx="13" ry="8" fill="#2a2f37"/>
+      <ellipse class="cc-brass" cx="22" cy="-107" rx="9" ry="4" fill="#d4a943"/>
+    </g>
+    <g>
+      <rect class="cc-loco" x="51" y="-108" width="30" height="14" rx="5" fill="#23272f"/>
+      <ellipse class="cc-loco" cx="66" cy="-108" rx="15" ry="9" fill="#2a2f37"/>
+      <ellipse class="cc-brass" cx="66" cy="-112" rx="10" ry="4.5" fill="#d4a943"/>
+    </g>
+    <!-- bell -->
+    <g class="cc-brass" fill="#d4a943"><rect x="98" y="-104" width="4" height="8"/><path d="M92,-96 q8,-12 16,0 z"/></g>
+    <!-- whistle -->
+    <rect class="cc-brass" x="82" y="-108" width="4" height="12" rx="2" fill="#d4a943"/>
+  </g>
+
+  <!-- ============ STACK + HEADLIGHT + PILOT ============ -->
+  <g id="front">
+    <!-- straight stack with flared cap -->
+    <rect x="124" y="-124" width="16" height="30" fill="#15181d"/>
+    <path d="M118,-124 L146,-124 L142,-134 L122,-134 Z" fill="#15181d"/>
+    <!-- headlight (the engine's "face" — kids look straight at it) -->
+    <rect class="cc-loco" x="138" y="-120" width="24" height="24" rx="4" fill="#262b33"/>
+    <circle class="cc-brass" cx="163" cy="-108" r="10.5" fill="#d4a943"/>
+    <circle cx="164" cy="-108" r="7.5" fill="#fff3c4"/>
+    <circle cx="166" cy="-110" r="3" fill="#ffffff" opacity="0.9"/>
+    <!-- pilot beam + cowcatcher (lighter so it reads against the dark loco) -->
+    <rect class="cc-trim" x="172" y="-48" width="8" height="26" rx="2" fill="#c0392b"/>
+    <g fill="#59616c">
+      <path d="M180,-46 L214,-5 L180,-5 Z"/>
+    </g>
+    <g stroke="#aeb6c0" stroke-width="2.5">
+      <line x1="185" y1="-39" x2="185" y2="-7"/><line x1="192" y1="-31" x2="192" y2="-7"/>
+      <line x1="199" y1="-23" x2="199" y2="-7"/><line x1="206" y1="-14" x2="206" y2="-7"/>
+    </g>
+    <!-- pilot (leading) wheel -->
+    <circle cx="188" cy="-12" r="12" fill="#101318"/>
+    <circle class="cc-trim" cx="188" cy="-12" r="4" fill="#c0392b"/>
+  </g>
+
+  <!-- ============ CYLINDER ============ -->
+  <g id="cylinder">
+    <rect class="cc-loco" x="138" y="-58" width="40" height="34" rx="5" fill="#23272f"/>
+    <rect x="172" y="-60" width="8" height="38" rx="2" fill="#15181d"/>
+    <rect x="134" y="-56" width="6" height="30" rx="2" fill="#15181d"/>
+  </g>
+
+  <!-- ============ DRIVING WHEELS (rotate these) ============ -->
+  <g id="drivers">
+    <g id="driver-0" transform="rotate(0 0 -27)">
+      <circle cx="0" cy="-27" r="27" fill="#101318"/>
+      <circle cx="0" cy="-27" r="22" fill="#191d24"/>
+      <g stroke="#525a65" stroke-width="3.5">
+        <line x1="0" y1="-49" x2="0" y2="-5"/><line x1="-22" y1="-27" x2="22" y2="-27"/>
+        <line x1="-15.5" y1="-42.5" x2="15.5" y2="-11.5"/><line x1="15.5" y1="-42.5" x2="-15.5" y2="-11.5"/>
+      </g>
+      <ellipse cx="-13" cy="-27" rx="7.5" ry="13" fill="#2b313a"/>
+      <circle class="cc-trim" cx="0" cy="-27" r="7" fill="#c0392b"/>
+      <!-- crank pin marker -->
+      <circle cx="14" cy="-27" r="3.5" fill="#8d949d"/>
+    </g>
+    <g id="driver-1" transform="rotate(0 54 -27)">
+      <circle cx="54" cy="-27" r="27" fill="#101318"/>
+      <circle cx="54" cy="-27" r="22" fill="#191d24"/>
+      <g stroke="#525a65" stroke-width="3.5">
+        <line x1="54" y1="-49" x2="54" y2="-5"/><line x1="32" y1="-27" x2="76" y2="-27"/>
+        <line x1="38.5" y1="-42.5" x2="69.5" y2="-11.5"/><line x1="69.5" y1="-42.5" x2="38.5" y2="-11.5"/>
+      </g>
+      <ellipse cx="41" cy="-27" rx="7.5" ry="13" fill="#2b313a"/>
+      <circle class="cc-trim" cx="54" cy="-27" r="7" fill="#c0392b"/>
+      <circle cx="68" cy="-27" r="3.5" fill="#8d949d"/>
+    </g>
+    <g id="driver-2" transform="rotate(0 108 -27)">
+      <circle cx="108" cy="-27" r="27" fill="#101318"/>
+      <circle cx="108" cy="-27" r="22" fill="#191d24"/>
+      <g stroke="#525a65" stroke-width="3.5">
+        <line x1="108" y1="-49" x2="108" y2="-5"/><line x1="86" y1="-27" x2="130" y2="-27"/>
+        <line x1="92.5" y1="-42.5" x2="123.5" y2="-11.5"/><line x1="123.5" y1="-42.5" x2="92.5" y2="-11.5"/>
+      </g>
+      <ellipse cx="95" cy="-27" rx="7.5" ry="13" fill="#2b313a"/>
+      <circle class="cc-trim" cx="108" cy="-27" r="7" fill="#c0392b"/>
+      <circle cx="122" cy="-27" r="3.5" fill="#8d949d"/>
+    </g>
+  </g>
+
+  <!-- ============ VALVE GEAR / SIDE RODS (animated) ============ -->
+  <g id="valve-gear" stroke-linecap="round">
+    <!-- crosshead guide bar -->
+    <rect x="96" y="-44" width="44" height="4" rx="2" fill="#4a515b"/>
+    <!-- piston rod: cylinder rear -> crosshead -->
+    <line id="piston-rod" x1="138" y1="-40" x2="118" y2="-40" stroke="#c8ced6" stroke-width="5"/>
+    <!-- crosshead block sliding on the guide -->
+    <rect id="crosshead" x="112" y="-48" width="14" height="14" rx="2" fill="#9aa2ab" stroke="#6d747d" stroke-width="1.5"/>
+    <!-- main rod: crosshead -> crank pin of driver-1 (warmer grey so it reads apart from the coupling rod) -->
+    <line id="main-rod" x1="119" y1="-41" x2="68" y2="-27" stroke="#8f98a3" stroke-width="7" stroke-linecap="round"/>
+    <!-- coupling rod: crank pin driver-0 -> crank pin driver-2 (bright — the star of the show) -->
+    <line id="coupling-rod" x1="14" y1="-27" x2="122" y2="-27" stroke="#3c424b" stroke-width="10" stroke-linecap="round"/>
+    <line id="coupling-rod-hi" x1="14" y1="-27" x2="122" y2="-27" stroke="#dbe1e8" stroke-width="6.5" stroke-linecap="round"/>
+    <!-- pin caps -->
+    <circle id="pin-0" cx="14" cy="-27" r="4" fill="#e3e7eb"/>
+    <circle id="pin-1" cx="68" cy="-27" r="4" fill="#e3e7eb"/>
+    <circle id="pin-2" cx="122" cy="-27" r="4" fill="#e3e7eb"/>
+  </g>
+</svg>

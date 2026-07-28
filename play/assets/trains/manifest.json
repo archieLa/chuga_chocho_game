@@ -1,0 +1,89 @@
+{
+  "note": "Rolling stock. y=0 is the rail line, +x forward, vehicles face right. length = total length in local units; originFromRear = distance from the rear end to the local origin (use it to butt vehicles together into a consist).",
+  "vehicles": {
+    "diesel": {
+      "file": "diesel.svg",
+      "kind": "engine",
+      "label": "Diesel-electric (freight)",
+      "length": 470,
+      "originFromRear": 236
+    },
+    "electric-hs": {
+      "file": "electric-hs.svg",
+      "kind": "engine",
+      "label": "High-speed electric (Europe)",
+      "length": 450,
+      "originFromRear": 220
+    },
+    "commuter": {
+      "file": "commuter.svg",
+      "kind": "engine",
+      "label": "Commuter EMU (city)",
+      "length": 400,
+      "originFromRear": 200
+    },
+    "wagon-coach-old": {
+      "file": "wagon-coach-old.svg",
+      "kind": "wagon",
+      "label": "Old passenger coach",
+      "length": 280,
+      "originFromRear": 140.0
+    },
+    "wagon-caboose": {
+      "file": "wagon-caboose.svg",
+      "kind": "wagon",
+      "label": "Caboose",
+      "length": 210,
+      "originFromRear": 105.0
+    },
+    "wagon-coach-modern": {
+      "file": "wagon-coach-modern.svg",
+      "kind": "wagon",
+      "label": "Modern bilevel coach",
+      "length": 290,
+      "originFromRear": 145.0
+    },
+    "wagon-hs-coach": {
+      "file": "wagon-hs-coach.svg",
+      "kind": "wagon",
+      "label": "High-speed coach",
+      "length": 280,
+      "originFromRear": 140.0
+    },
+    "wagon-boxcar": {
+      "file": "wagon-boxcar.svg",
+      "kind": "wagon",
+      "label": "Boxcar",
+      "length": 250,
+      "originFromRear": 125.0
+    },
+    "wagon-tanker": {
+      "file": "wagon-tanker.svg",
+      "kind": "wagon",
+      "label": "Tank car",
+      "length": 250,
+      "originFromRear": 125.0
+    },
+    "wagon-hopper": {
+      "file": "wagon-hopper.svg",
+      "kind": "wagon",
+      "label": "Coal hopper",
+      "length": 235,
+      "originFromRear": 117.5
+    },
+    "wagon-container": {
+      "file": "wagon-container.svg",
+      "kind": "wagon",
+      "label": "Container (double stack)",
+      "length": 270,
+      "originFromRear": 135.0
+    },
+    "steam": {
+      "file": "steam.svg",
+      "kind": "engine",
+      "label": "Steam locomotive (coal)",
+      "length": 404,
+      "originFromRear": 190
+    }
+  }
+}
