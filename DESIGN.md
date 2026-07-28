@@ -65,17 +65,19 @@ Art is authored **interactively with a human reviewing** — rendered, looked at
 
 A **map icon** → a **real map of the United States**. Every state carries its **two-letter abbreviation**; playable states are highlighted with a bolder label. Tapping a state turns it amber and reveals its **full name** — large, at the bottom of the picker, and **spoken aloud** — next to the places you can travel to. Statewide locations get a single button, so the interaction is identical everywhere. Choosing a place reskins the world and speaks the place name.
 
+**Destinations, not states.** Every button names a real destination — a **city** (San Francisco, Chicago) or a **natural place** (Rocky Mountains, Grand Canyon) — and never just repeats the state name. How many destinations a state has follows **how many visually distinct looks it has**: California needs two because the Golden Gate and the palms of LA look nothing alike, while Colorado's icons are all one landscape. The **interaction** is what stays uniform, not the count — tap a state, see its full name, pick a destination. This also means new scenes are purely additive: a state earns another button whenever it earns another look.
+
 The abbreviation-then-full-name flow is deliberate: the map stays uncluttered and readable, and the full name becomes the reward for tapping — which is where the learning happens. Small north-eastern states are labelled in a column off the coast with leader lines, as a classroom map does.
 
 **Launch location set:**
 
 | State | City / scene | Scenery | Train preset |
 |---|---|---|---|
-| Colorado | (statewide) | Georgetown Loop trestle, tan Rockies, golden aspens, Clear Creek, red rock | steam |
+| Colorado | Rocky Mountains | Georgetown Loop trestle, tan Rockies, golden aspens, Clear Creek, red rock | steam |
 | California | San Francisco | Golden Gate Bridge *as the crossing road*, bay, fog | high-speed electric |
 | California | Los Angeles | Palms, downtown skyline, hills | commuter |
 | Illinois | Chicago | Skyline, elevated 'L', tunnel, Lake Michigan | commuter |
-| Arizona | (statewide) | Red-rock desert, saguaro, mesas | diesel |
+| Arizona | Grand Canyon | Layered canyon walls, mesas, rim pines, saguaro | diesel |
 | New York | New York City | Brooklyn Bridge, subway tunnel | commuter |
 | Washington | Seattle | Evergreens, ferry, Cascades | commuter |
 | Louisiana | New Orleans | Bayou, streetcar, live oaks | diesel |

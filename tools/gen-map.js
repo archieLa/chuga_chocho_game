@@ -28,13 +28,15 @@ const geo = geoPath(projection);
 const roundD = d => (d || '').replace(/-?\d+\.\d+/g, n => Math.round(parseFloat(n)).toString());
 const r1 = v => Math.round(v * 10) / 10;
 
-// Supported states -> selectable cities ([] = the whole state is one scene).
+// Supported states -> their destinations. A destination is a city (San Francisco)
+// or a natural place (Rocky Mountains) — never just the state name repeated.
+// A state has as many destinations as it has visually distinct looks.
 // Must stay in sync with play/js/world.js.
 const SUPPORTED = {
   'California': ['San Francisco', 'Los Angeles'],
-  'Colorado': [],
+  'Colorado': ['Rocky Mountains'],
   'Illinois': ['Chicago'],
-  'Arizona': [],
+  'Arizona': ['Grand Canyon'],
   'New York': ['New York City'],
   'Washington': ['Seattle'],
   'Louisiana': ['New Orleans'],

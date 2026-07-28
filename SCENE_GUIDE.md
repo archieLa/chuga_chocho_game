@@ -105,7 +105,7 @@ Sample from the reference rather than inventing: warm peaks `#c2a069` with `#a58
 A scene reads as a *specific place* when it carries these five, and reads generic when it doesn't:
 
 1. **A signature landmark** — the one thing that says "this is here." Colorado: the Georgetown Loop red trestle. San Francisco: the Golden Gate Bridge. Chicago: the skyline + elevated 'L'. Make it prominent, not shy.
-2. **Characteristic flora** — golden aspens and pines (CO), saguaro (AZ), evergreens (WA), live oaks (LA), palms (Los Angeles).
+2. **Characteristic flora** — golden aspens and pines (Rocky Mountains), rim pines and saguaro (Grand Canyon), evergreens (Seattle), live oaks (New Orleans), palms (Los Angeles).
 3. **Characteristic geology & palette** — tan Rockies, red sandstone, ocean blues, grey city concrete.
 4. **A water or terrain feature** that ties the composition together — Clear Creek links the mountains to the foreground pond; the bay, the lake, the bayou play the same role elsewhere.
 5. **A regional/seasonal cue** — fall aspen gold, desert heat haze, coastal fog, snow.
@@ -178,11 +178,11 @@ Iterate: render → review → adjust → re-render. Colorado took eight passes.
 
 | Location | State | Status |
 |---|---|---|
-| Colorado | CO | ✅ Reference scene — the style anchor |
+| Rocky Mountains | CO | ✅ Reference scene — the style anchor |
 | San Francisco | CA | ⬜ Golden Gate Bridge as the crossing road |
 | Los Angeles | CA | ⬜ Palms, downtown skyline, hills |
 | Chicago | IL | ⬜ Skyline, elevated 'L', tunnel, Lake Michigan |
-| Arizona | AZ | ⬜ Red rock, saguaro, mesas |
+| Grand Canyon | AZ | ⬜ Layered canyon walls, mesas, rim pines |
 | New York City | NY | ⬜ Brooklyn Bridge, subway tunnel |
 | Seattle | WA | ⬜ Evergreens, ferry, Cascades |
 | New Orleans | LA | ⬜ Bayou, streetcar, live oaks |

@@ -1,4 +1,9 @@
 /* world.js — locations (the geography system). See DESIGN.md §6.
+   A location is a DESTINATION: a city (San Francisco) or a natural place
+   (Rocky Mountains). It is never just the state name repeated. How many
+   destinations a state has follows how many visually distinct looks it has —
+   California has two, Colorado has one (for now). The interaction is what stays
+   uniform: tap a state -> full name -> pick a destination.
    A location is DATA that scene.js renders, so adding a place = adding an entry
    here (+ art). Place names are spoken in the active language when selected.
 
@@ -11,23 +16,28 @@
   // Each location: id, state, city (optional), spoken names per language,
   // a scenery descriptor (consumed by scene.js), and a suggested train preset.
   const LOCATIONS = [
-    { id:'colorado',   state:'Colorado',   city:null,
-      say:{ en:'Colorado', pl:'Kolorado' },
-      scenery:{ theme:'mountains', palette:['#bfe6fb','#7fb0d8','#5a7f5a','#3f5e3f'], features:['peaks','pines','stream','snow'] },
+    { id:'colorado',   state:'Colorado',   city:'Rocky Mountains',
+      say:{ en:'Rocky Mountains', pl:'Rocky Mountains' },
+      scene:'colorado',
+      scenery:{ theme:'mountains', features:['peaks','aspens','trestle','creek','redrock'] },
       trainPreset:{ engine:'steam' } },
 
     { id:'sf', state:'California', city:'San Francisco',
       say:{ en:'San Francisco', pl:'San Francisco' },
-      scenery:{ theme:'bridge', palette:['#cfe6f5','#e08a5a','#6aa0c8','#355b7a'], features:['goldengate','bay','fog'] },
-      trainPreset:{ engine:'electric' } },
+      scenery:{ theme:'bridge', features:['goldengate','bay','fog','hills'] },
+      trainPreset:{ engine:'electric-hs' } },
+
+    { id:'la', state:'California', city:'Los Angeles',
+      say:{ en:'Los Angeles', pl:'Los Angeles' },
+      scenery:{ theme:'socal', features:['palms','downtown','hills','freeway'] },
+      trainPreset:{ engine:'commuter' } },
 
     // Stubs to fill during Phase 1 (see DESIGN.md §6 table):
-    { id:'chicago',    state:'Illinois',   city:'Chicago',       say:{ en:'Chicago', pl:'Chicago' },           scenery:{ theme:'city',    features:['skyline','L','tunnel','lake'] }, trainPreset:{ engine:'electric' } },
-    { id:'bigsur',     state:'California',  city:'Big Sur',       say:{ en:'Big Sur', pl:'Big Sur' },           scenery:{ theme:'coast',   features:['ocean','cliffs','mountains'] },   trainPreset:{ engine:'diesel' } },
-    { id:'arizona',    state:'Arizona',    city:null,            say:{ en:'Arizona', pl:'Arizona' },           scenery:{ theme:'desert',  features:['redrock','cacti','mesa'] },       trainPreset:{ engine:'diesel' } },
-    { id:'nyc',        state:'New York',   city:'New York City', say:{ en:'New York City', pl:'Nowy Jork' },   scenery:{ theme:'city',    features:['brooklynbridge','subway'] },     trainPreset:{ engine:'electric' } },
-    { id:'seattle',    state:'Washington', city:'Seattle',       say:{ en:'Seattle', pl:'Seattle' },           scenery:{ theme:'cascades',features:['evergreens','ferry','mountains'] },trainPreset:{ engine:'electric' } },
-    { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scenery:{ theme:'bayou',   features:['bayou','streetcar','oaks'] },     trainPreset:{ engine:'steam' } },
+    { id:'chicago',    state:'Illinois',   city:'Chicago',       say:{ en:'Chicago', pl:'Chicago' },           scenery:{ theme:'city',    features:['skyline','L','tunnel','lake'] },   trainPreset:{ engine:'commuter' } },
+    { id:'arizona',    state:'Arizona',    city:'Grand Canyon',  say:{ en:'Grand Canyon', pl:'Wielki Kanion' }, scenery:{ theme:'canyon',  features:['canyonwalls','mesas','rimpines','saguaro'] }, trainPreset:{ engine:'diesel' } },
+    { id:'nyc',        state:'New York',   city:'New York City', say:{ en:'New York City', pl:'Nowy Jork' },   scenery:{ theme:'city',    features:['brooklynbridge','subway'] },      trainPreset:{ engine:'commuter' } },
+    { id:'seattle',    state:'Washington', city:'Seattle',       say:{ en:'Seattle', pl:'Seattle' },           scenery:{ theme:'cascades',features:['evergreens','ferry','mountains'] },trainPreset:{ engine:'commuter' } },
+    { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scenery:{ theme:'bayou',   features:['bayou','streetcar','oaks'] },      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

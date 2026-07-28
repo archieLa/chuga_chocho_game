@@ -1,0 +1,473 @@
+#!/usr/bin/env python3
+"""
+Chuga Chocho — rolling-stock generator.
+
+Writes every locomotive and wagon SVG into play/assets/trains/, plus manifest.json.
+All vehicles share one convention so the engine can place and animate them uniformly:
+
+  * Local coords: y = 0 is the RAIL LINE, +x is FORWARD. Vehicles face RIGHT.
+  * Place with transform="translate(X, railY) scale(s)"; mirror with scale(-1,1).
+  * Every wheel is <g class="cc-wheel" data-cx data-cy data-r> — the engine spins it
+    with rotate(deg cx cy) where deg = (distance / r) in degrees. Radius varies per
+    vehicle, so read data-r rather than assuming.
+  * Recolour hooks (set fill): .cc-loco .cc-wagon .cc-wagon2 .cc-roof .cc-trim .cc-brass
+
+Run:  python3 tools/gen-trains.py
+"""
+import json, pathlib
+
+OUT = pathlib.Path(__file__).resolve().parent.parent / 'play/assets/trains'
+OUT.mkdir(parents=True, exist_ok=True)
+
+# ---------------------------------------------------------------- helpers ----
+
+def wheel(cx, r, hub='#8d949d', tyre='#1b1f25', face='#2b313a', spokes=3):
+    """A wheel that visibly rotates: solid disc, faint spokes, and one bright bolt
+    off-centre so the spin reads instantly (kids watch the wheels)."""
+    import math
+    marks = []
+    for i in range(spokes):
+        a = math.pi * i / spokes
+        dx, dy = math.cos(a) * (r - 6), math.sin(a) * (r - 6)
+        marks.append(f'<line x1="{cx-dx:.1f}" y1="{-r-dy:.1f}" x2="{cx+dx:.1f}" y2="{-r+dy:.1f}"/>')
+    bolt_r = max(2.2, r * 0.15)
+    return (
+        f'<g class="cc-wheel" data-cx="{cx}" data-cy="{-r}" data-r="{r}">'
+        f'<circle cx="{cx}" cy="{-r}" r="{r}" fill="{tyre}"/>'
+        f'<circle cx="{cx}" cy="{-r}" r="{r-3.5:.1f}" fill="{face}"/>'
+        f'<g stroke="#454d57" stroke-width="{max(1.6, r*0.11):.1f}" stroke-linecap="round">{"".join(marks)}</g>'
+        f'<circle cx="{cx}" cy="{-r}" r="{max(3, r*0.24):.1f}" fill="{hub}"/>'
+        f'<circle cx="{cx + r*0.55:.1f}" cy="{-r}" r="{bolt_r:.1f}" fill="#c9d0d8"/>'
+        f'</g>')
+
+
+def truck(cx, r=14, n=2, spacing=40, frame=True, frame_fill='#343b44'):
+    """A bogie: side frame plus n wheels centred on cx."""
+    span = spacing * (n - 1)
+    xs = [cx - span / 2 + i * spacing for i in range(n)]
+    out = []
+    if frame:
+        w = span + r * 2 + 16
+        out.append(f'<rect x="{cx-w/2:.1f}" y="{-r*2-8:.1f}" width="{w:.1f}" height="{r+8:.1f}" rx="4" fill="{frame_fill}"/>')
+        out.append(f'<rect x="{cx-w/2+6:.1f}" y="{-r*2-4:.1f}" width="{w-12:.1f}" height="4" fill="#3a4049"/>')
+    out += [wheel(x, r) for x in xs]
+    return ''.join(out)
+
+
+def underframe(L, truck_dx, y=-44, h=10, fill='#2f343c'):
+    """Centre sill + bolsters. Without this a wagon body appears to float above its
+    trucks — real cars have a visible frame bridging body to bogie."""
+    hh = L / 2
+    out = [f'<rect x="{-hh+8:.0f}" y="{y}" width="{L-16:.0f}" height="{h}" rx="2" fill="{fill}"/>']
+    for s in (-1, 1):
+        cx = s * truck_dx
+        out.append(f'<rect x="{cx-27:.0f}" y="{y+h-3:.0f}" width="54" height="9" rx="3" fill="#262b33"/>')
+    return ''.join(out)
+
+
+def coupler(x, y=-46, w=12):
+    d = w if x > 0 else -w
+    return (f'<rect x="{min(x, x+d):.1f}" y="{y-3}" width="{abs(d):.1f}" height="6" fill="#2a2e35"/>'
+            f'<rect x="{x + (d*0.7 if d>0 else d*0.7)-3:.1f}" y="{y-6}" width="6" height="12" rx="2" fill="#3a4049"/>')
+
+
+def shadow(x0, x1):
+    cx, rx = (x0 + x1) / 2, (x1 - x0) / 2
+    return f'<ellipse cx="{cx:.1f}" cy="2" rx="{rx:.1f}" ry="6" fill="#000" opacity="0.17"/>'
+
+
+def windows(x0, x1, y0, y1, n, gap=10, rx=3, fill='#bfe3f5', top='#dff2fc'):
+    total = x1 - x0
+    w = (total - gap * (n + 1)) / n
+    out = []
+    for i in range(n):
+        x = x0 + gap + i * (w + gap)
+        out.append(f'<rect x="{x:.1f}" y="{y0}" width="{w:.1f}" height="{y1-y0}" rx="{rx}" fill="{fill}"/>')
+        out.append(f'<rect x="{x:.1f}" y="{y0}" width="{w:.1f}" height="{(y1-y0)*0.38:.1f}" rx="{rx}" fill="{top}"/>')
+    return ''.join(out)
+
+
+def ribs(x0, x1, y0, y1, step=14, colour='#000', op=0.10):
+    out = []
+    x = x0 + step
+    while x < x1:
+        out.append(f'<rect x="{x:.1f}" y="{y0}" width="3" height="{y1-y0}" fill="{colour}" opacity="{op}"/>')
+        x += step
+    return ''.join(out)
+
+
+def svg(name, vb, body, note):
+    return (f'<?xml version="1.0" encoding="UTF-8"?>\n'
+            f'<!-- Chuga Chocho — {note}\n'
+            f'     y=0 is the RAIL LINE, +x forward, faces RIGHT.\n'
+            f'     Wheels: <g class="cc-wheel" data-cx data-cy data-r> — spin with rotate(deg cx cy),\n'
+            f'     deg = distance / data-r (radians -> degrees).\n'
+            f'     Recolour: .cc-loco .cc-wagon .cc-wagon2 .cc-roof .cc-trim .cc-brass -->\n'
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" id="{name}">\n{body}\n</svg>\n')
+
+
+VEHICLES = {}
+def emit(name, vb, body, note, length, origin_from_rear, kind, label):
+    (OUT / f'{name}.svg').write_text(svg(name, vb, body, note))
+    VEHICLES[name] = dict(file=f'{name}.svg', kind=kind, label=label,
+                          length=length, originFromRear=origin_from_rear)
+
+# ============================================================ LOCOMOTIVES ====
+
+def diesel():
+    """Big American diesel-electric road unit (Union Pacific / Metra flavour)."""
+    b = [shadow(-230, 235)]
+    # frame / walkway
+    b.append('<rect x="-228" y="-54" width="462" height="12" rx="3" fill="#3a4049"/>')
+    b.append('<rect class="cc-trim" x="-228" y="-46" width="462" height="5" fill="#c0392b"/>')
+    # long hood
+    b.append('<rect class="cc-loco" x="-212" y="-120" width="330" height="66" rx="6" fill="#e8b62c"/>')
+    b.append('<rect class="cc-roof" x="-212" y="-128" width="330" height="12" rx="5" fill="#8d959e"/>')
+    # radiator fans + exhaust
+    b.append('<g fill="#6f7883"><circle cx="-176" cy="-128" r="13"/><circle cx="-140" cy="-128" r="13"/></g>')
+    b.append('<g fill="#4a515b"><circle cx="-176" cy="-128" r="7"/><circle cx="-140" cy="-128" r="7"/></g>')
+    b.append('<rect x="-90" y="-140" width="26" height="14" rx="3" fill="#41474f"/>')
+    # side grilles + louvres
+    b.append(ribs(-206, 110, -114, -60, 20, '#000', 0.13))
+    b.append('<rect x="-60" y="-112" width="120" height="34" rx="4" fill="#000" opacity="0.14"/>')
+    # cab
+    b.append('<rect class="cc-loco" x="118" y="-146" width="86" height="92" rx="7" fill="#e8b62c"/>')
+    b.append('<rect class="cc-roof" x="114" y="-154" width="94" height="12" rx="5" fill="#8d959e"/>')
+    b.append('<rect x="126" y="-138" width="34" height="30" rx="3" fill="#bfe3f5"/>')
+    b.append('<path d="M168,-138 L198,-138 L202,-108 L168,-108 Z" fill="#bfe3f5"/>')
+    b.append('<path d="M168,-138 L198,-138 L200,-124 L168,-124 Z" fill="#dff2fc"/>')
+    # short nose
+    b.append('<path class="cc-loco" d="M204,-118 L226,-108 L232,-54 L204,-54 Z" fill="#e8b62c"/>')
+    b.append('<rect class="cc-trim" x="204" y="-70" width="30" height="8" fill="#c0392b"/>')
+    # headlight + ditch lights + horn
+    b.append('<rect x="208" y="-104" width="20" height="14" rx="3" fill="#2f343c"/>')
+    b.append('<circle cx="224" cy="-97" r="6" fill="#fff3c4"/>')
+    b.append('<g fill="#ffe9a8"><circle cx="212" cy="-58" r="5"/><circle cx="230" cy="-58" r="5"/></g>')
+    b.append('<g class="cc-brass" fill="#d4a943"><rect x="150" y="-160" width="24" height="7" rx="3"/></g>')
+    # number board
+    b.append('<rect x="120" y="-152" width="22" height="9" rx="2" fill="#f2f5f8" opacity="0.9"/>')
+    # pilot / plough
+    b.append('<path d="M232,-54 L240,-30 L232,-10 L206,-10 L206,-54 Z" fill="#41474f"/>')
+    b.append('<g stroke="#8d959e" stroke-width="2"><line x1="212" y1="-46" x2="212" y2="-14"/>'
+             '<line x1="220" y1="-44" x2="220" y2="-14"/><line x1="228" y1="-38" x2="228" y2="-14"/></g>')
+    # three-axle trucks
+    b.append(truck(-150, r=19, n=3, spacing=46))
+    b.append(truck(160, r=19, n=3, spacing=46))
+    b.append(coupler(-232))
+    emit('diesel', '-250 -175 505 190', '  ' + ''.join(b),
+         'DIESEL-ELECTRIC road locomotive (US freight/commuter)', 470, 236, 'engine',
+         'Diesel-electric (freight)')
+
+
+def electric_hs():
+    """European high-speed electric power car (TGV / ICE / Velaro flavour)."""
+    b = [shadow(-220, 230)]
+    # body with a long raked nose
+    b.append('<path class="cc-loco" d="M-216,-118 L120,-118 C 168,-114 206,-92 226,-58 '
+             'L228,-44 L-216,-44 Z" fill="#eef2f6"/>')
+    # dark window / glazing band sweeping into the nose
+    b.append('<path d="M-206,-110 L118,-110 C 156,-106 186,-90 202,-66 L-206,-66 Z" fill="#2b3340"/>')
+    b.append('<path d="M-206,-110 L118,-110 C 150,-107 176,-96 190,-80 L-206,-80 Z" fill="#3b475a"/>')
+    # side windows
+    b.append(windows(-196, 60, -104, -78, 5, gap=14, rx=4))
+    # raked windscreen
+    b.append('<path d="M132,-108 C 164,-103 188,-88 200,-70 L156,-70 L138,-108 Z" fill="#cfe9f8"/>')
+    # bold livery stripe
+    b.append('<path class="cc-trim" d="M-216,-60 L196,-60 C 210,-54 220,-50 226,-46 L228,-44 L-216,-44 Z" fill="#c0392b"/>')
+    b.append('<path class="cc-trim" d="M120,-118 C 168,-114 206,-92 226,-58 L206,-58 C 190,-88 160,-106 120,-110 Z" fill="#c0392b"/>')
+    # roof + insulators + pantograph (raised, single-arm)
+    b.append('<rect class="cc-roof" x="-216" y="-126" width="336" height="10" rx="5" fill="#c3cbd4"/>')
+    b.append('<g fill="#5b636d"><rect x="-150" y="-134" width="10" height="9" rx="2"/>'
+             '<rect x="-60" y="-134" width="10" height="9" rx="2"/></g>')
+    b.append('<g id="pantograph" stroke="#5b636d" stroke-width="5" fill="none" stroke-linecap="round">'
+             '<path d="M-120,-130 L-84,-160"/><path d="M-84,-160 L-134,-186"/></g>')
+    b.append('<rect x="-158" y="-192" width="70" height="7" rx="3" fill="#7b838d"/>')
+    b.append('<rect x="-138" y="-134" width="34" height="7" rx="3" fill="#5b636d"/>')
+    # skirts over the bogies
+    b.append('<rect class="cc-loco" x="-200" y="-46" width="140" height="18" rx="6" fill="#dde4ea"/>')
+    b.append('<rect class="cc-loco" x="10" y="-46" width="140" height="18" rx="6" fill="#dde4ea"/>')
+    # headlights
+    b.append('<g fill="#fff3c4"><circle cx="206" cy="-72" r="6"/><circle cx="214" cy="-58" r="5"/></g>')
+    b.append(truck(-140, r=16, n=2, spacing=46))
+    b.append(truck(70, r=16, n=2, spacing=46))
+    b.append(coupler(-220))
+    emit('electric-hs', '-245 -205 500 220', '  ' + ''.join(b),
+         'HIGH-SPEED ELECTRIC power car (European style, with pantograph)', 450, 220, 'engine',
+         'High-speed electric (Europe)')
+
+
+def commuter():
+    """City commuter EMU — corrugated stainless, CTA / NYC subway flavour."""
+    b = [shadow(-200, 205)]
+    # body with rounded cab end
+    b.append('<path class="cc-loco" d="M-196,-124 L150,-124 C 178,-124 196,-110 198,-88 '
+             'L198,-46 L-196,-46 Z" fill="#ccd3da"/>')
+    # corrugated stainless ribbing
+    b.append('<g fill="#9aa3ad" opacity="0.55">' + ''.join(
+        f'<rect x="-192" y="{y}" width="380" height="2.5"/>' for y in range(-70, -48, 6)) + '</g>')
+    b.append('<g fill="#9aa3ad" opacity="0.45">' + ''.join(
+        f'<rect x="-192" y="{y}" width="380" height="2.5"/>' for y in range(-122, -110, 6)) + '</g>')
+    # belt stripes
+    b.append('<rect class="cc-trim" x="-196" y="-78" width="394" height="7" fill="#0b56a4"/>')
+    b.append('<rect x="-196" y="-71" width="394" height="4" fill="#c0392b"/>')
+    # windows
+    b.append(windows(-190, 40, -114, -84, 4, gap=12, rx=4))
+    b.append(windows(98, 146, -114, -84, 1, gap=5, rx=4))
+    # doors (darker, with their own glazing)
+    for dx in (48,):
+        b.append(f'<rect x="{dx}" y="-120" width="46" height="74" rx="3" fill="#7f8892"/>')
+        b.append(f'<rect x="{dx+4}" y="-114" width="17" height="30" rx="2" fill="#bfe3f5"/>')
+        b.append(f'<rect x="{dx+25}" y="-114" width="17" height="30" rx="2" fill="#bfe3f5"/>')
+        b.append(f'<rect x="{dx+22}" y="-120" width="2" height="74" fill="#5b636d"/>')
+    # cab front: windscreen + destination sign + headlights
+    b.append('<path d="M156,-116 C 178,-116 189,-104 191,-86 L156,-86 Z" fill="#bfe3f5"/>')
+    b.append('<path d="M156,-116 C 174,-116 184,-109 188,-101 L156,-101 Z" fill="#dff2fc"/>')
+    b.append('<g fill="#fff3c4"><circle cx="192" cy="-60" r="5.5"/></g>')
+    b.append('<g class="cc-trim" fill="#c0392b"><circle cx="176" cy="-60" r="4"/></g>')
+    # roof kit
+    b.append('<rect class="cc-roof" x="-196" y="-134" width="352" height="12" rx="5" fill="#aeb6bf"/>')
+    b.append('<g fill="#8d959e"><rect x="-150" y="-146" width="60" height="14" rx="5"/>'
+             '<rect x="-20" y="-146" width="60" height="14" rx="5"/></g>')
+    # third-rail shoe (nice authentic touch)
+    b.append('<rect x="-108" y="-16" width="26" height="5" rx="2" fill="#c0392b"/>')
+    b.append('<rect x="-190" y="-46" width="380" height="10" rx="2" fill="#2f343c"/>')
+    b.append(truck(-130, r=16, n=2, spacing=44))
+    b.append(truck(110, r=16, n=2, spacing=44))
+    b.append(coupler(-200))
+    emit('commuter', '-225 -165 460 180', '  ' + ''.join(b),
+         'COMMUTER EMU (Chicago CTA / New York subway style)', 400, 200, 'engine',
+         'Commuter EMU (city)')
+
+# ================================================================= WAGONS ====
+
+def coach_old():
+    """Heavyweight wooden-era passenger coach with a clerestory roof."""
+    L = 280; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-114" width="{L-16}" height="70" rx="5" fill="#1f4d3a"/>')
+    # gold lining
+    b.append(f'<g class="cc-brass" fill="#d4a943"><rect x="{-h+14}" y="-58" width="{L-28}" height="3"/>'
+             f'<rect x="{-h+14}" y="-110" width="{L-28}" height="2.5"/></g>')
+    # arched windows
+    for i in range(7):
+        x = -h + 22 + i * 34
+        b.append(f'<rect x="{x}" y="-102" width="24" height="34" rx="11" fill="#bfe3f5"/>')
+        b.append(f'<rect x="{x}" y="-102" width="24" height="14" rx="11" fill="#dff2fc"/>')
+    # roof + clerestory
+    b.append(f'<rect class="cc-roof" x="{-h+2}" y="-124" width="{L-4}" height="12" rx="6" fill="#5b636d"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+40}" y="-138" width="{L-80}" height="16" rx="6" fill="#6b737d"/>')
+    b.append('<g fill="#f6d98a" opacity="0.85">' + ''.join(
+        f'<rect x="{-h+52+i*30}" y="-134" width="16" height="8" rx="2"/>' for i in range(6)) + '</g>')
+    # end platforms + railings
+    for s in (-1, 1):
+        b.append(f'<rect x="{s*(h-10)-6}" y="-52" width="12" height="10" fill="#3a4049"/>')
+        b.append(f'<g stroke="#d4a943" stroke-width="2.5" fill="none">'
+                 f'<path d="M{s*(h-4)},-52 L{s*(h-4)},-84"/><path d="M{s*(h-16)},-70 L{s*(h-4)},-70"/></g>')
+    b.append(underframe(L, h - 58))
+    b.append(truck(-h + 58, r=16, n=2, spacing=42) + truck(h - 58, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-coach-old', '-165 -160 330 175', '  ' + ''.join(b),
+         'OLD-SCHOOL PASSENGER COACH (clerestory roof, arched windows)', L, L / 2, 'wagon',
+         'Old passenger coach')
+
+
+def caboose():
+    L = 210; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect class="cc-wagon" x="{-h+10}" y="-106" width="{L-20}" height="62" rx="5" fill="#b8342b"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+4}" y="-116" width="{L-8}" height="12" rx="6" fill="#5b636d"/>')
+    # cupola
+    b.append('<rect class="cc-wagon" x="-34" y="-146" width="68" height="32" rx="4" fill="#b8342b"/>')
+    b.append('<rect class="cc-roof" x="-40" y="-154" width="80" height="10" rx="5" fill="#5b636d"/>')
+    b.append('<rect x="-26" y="-140" width="22" height="18" rx="3" fill="#bfe3f5"/>')
+    b.append('<rect x="6" y="-140" width="22" height="18" rx="3" fill="#bfe3f5"/>')
+    # side windows + door
+    b.append('<rect x="-78" y="-96" width="26" height="26" rx="3" fill="#bfe3f5"/>')
+    b.append('<rect x="52" y="-96" width="26" height="26" rx="3" fill="#bfe3f5"/>')
+    b.append('<rect x="-16" y="-100" width="32" height="56" rx="3" fill="#8f2a22"/>')
+    b.append('<circle cx="8" cy="-72" r="2.5" class="cc-brass" fill="#d4a943"/>')
+    # marker lamps + railings
+    b.append('<g class="cc-brass" fill="#d4a943"><rect x="-98" y="-104" width="8" height="10" rx="2"/>'
+             '<rect x="90" y="-104" width="8" height="10" rx="2"/></g>')
+    for s in (-1, 1):
+        b.append(f'<g stroke="#e8e2c9" stroke-width="2.5" fill="none">'
+                 f'<path d="M{s*(h-4)},-44 L{s*(h-4)},-78"/><path d="M{s*(h-18)},-64 L{s*(h-4)},-64"/></g>')
+    b.append(underframe(L, h - 48))
+    b.append(truck(-h + 48, r=15, n=2, spacing=38) + truck(h - 48, r=15, n=2, spacing=38))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-caboose', '-130 -175 260 190', '  ' + ''.join(b),
+         'CABOOSE with cupola', L, L / 2, 'wagon', 'Caboose')
+
+
+def coach_modern():
+    """Bilevel commuter gallery car (Metra style)."""
+    L = 290; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-140" width="{L-16}" height="96" rx="7" fill="#c8ced5"/>')
+    b.append('<g fill="#9aa3ad" opacity="0.5">' + ''.join(
+        f'<rect x="{-h+12}" y="{y}" width="{L-24}" height="2.5"/>' for y in range(-64, -46, 6)) + '</g>')
+    # upper + lower window rows
+    b.append(windows(-h + 16, h - 16, -132, -108, 6, gap=12, rx=4))
+    b.append(windows(-h + 16, h - 16, -96, -74, 6, gap=12, rx=4))
+    b.append(f'<rect class="cc-trim" x="{-h+8}" y="-104" width="{L-16}" height="7" fill="#0b56a4"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+4}" y="-150" width="{L-8}" height="12" rx="6" fill="#aeb6bf"/>')
+    # end doors
+    for s in (-1, 1):
+        b.append(f'<rect x="{s*(h-40)-16}" y="-136" width="32" height="92" rx="3" fill="#8f98a3"/>')
+        b.append(f'<rect x="{s*(h-40)-12}" y="-130" width="24" height="26" rx="2" fill="#bfe3f5"/>')
+    b.append(underframe(L, h - 56))
+    b.append(truck(-h + 56, r=16, n=2, spacing=42) + truck(h - 56, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-coach-modern', '-170 -175 340 190', '  ' + ''.join(b),
+         'MODERN BILEVEL COMMUTER COACH (Metra gallery car style)', L, L / 2, 'wagon',
+         'Modern bilevel coach')
+
+
+def hs_coach():
+    """Sleek high-speed coach that matches the electric power car."""
+    L = 280; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect class="cc-wagon" x="{-h+6}" y="-118" width="{L-12}" height="74" rx="8" fill="#eef2f6"/>')
+    b.append(f'<rect x="{-h+12}" y="-110" width="{L-24}" height="34" rx="6" fill="#2b3340"/>')
+    b.append(f'<rect x="{-h+12}" y="-110" width="{L-24}" height="14" rx="6" fill="#3b475a"/>')
+    b.append(windows(-h + 18, h - 18, -104, -82, 5, gap=16, rx=5))
+    b.append(f'<rect class="cc-trim" x="{-h+6}" y="-58" width="{L-12}" height="9" fill="#c0392b"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+10}" y="-126" width="{L-20}" height="10" rx="5" fill="#c3cbd4"/>')
+    # bogie skirts
+    b.append(f'<rect class="cc-wagon" x="{-h+14}" y="-46" width="100" height="18" rx="6" fill="#dde4ea"/>')
+    b.append(f'<rect x="{h-114}" y="-46" width="100" height="18" rx="6" class="cc-wagon" fill="#dde4ea"/>')
+    b.append('<g fill="#8f98a3">' + ''.join(
+        f'<rect x="{-h+60+i*52}" y="-124" width="20" height="6" rx="3"/>' for i in range(4)) + '</g>')
+    b.append(truck(-h + 62, r=16, n=2, spacing=44) + truck(h - 62, r=16, n=2, spacing=44))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-hs-coach', '-165 -150 330 165', '  ' + ''.join(b),
+         'HIGH-SPEED COACH (matches the European electric power car)', L, L / 2, 'wagon',
+         'High-speed coach')
+
+
+def boxcar():
+    L = 250; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-118" width="{L-16}" height="74" rx="4" fill="#8a4a2f"/>')
+    b.append(ribs(-h + 14, h - 14, -116, -46, 18, '#000', 0.14))
+    b.append(f'<rect class="cc-roof" x="{-h+2}" y="-128" width="{L-4}" height="12" rx="5" fill="#6b737d"/>')
+    # sliding door
+    b.append('<rect x="-38" y="-114" width="76" height="66" rx="2" fill="#a35a38"/>')
+    b.append('<rect x="-38" y="-114" width="76" height="6" fill="#5f3520"/>')
+    b.append('<rect x="-4" y="-110" width="5" height="58" fill="#5f3520"/>')
+    b.append('<rect x="-42" y="-52" width="84" height="5" fill="#4a2a19"/>')
+    # reporting marks panel
+    b.append('<rect x="-108" y="-102" width="62" height="22" rx="2" fill="#f2ece0" opacity="0.9"/>')
+    b.append('<text x="-77" y="-86" text-anchor="middle" font-family="Trebuchet MS,sans-serif" '
+             'font-size="11" fill="#5f3520">CC 42</text>')
+    # ladders
+    for s in (-1, 1):
+        b.append(f'<g stroke="#d8cfc2" stroke-width="2.5"><line x1="{s*(h-18)}" y1="-116" x2="{s*(h-18)}" y2="-52"/>'
+                 f'<line x1="{s*(h-30)}" y1="-116" x2="{s*(h-30)}" y2="-52"/>'
+                 + ''.join(f'<line x1="{s*(h-30)}" y1="{y}" x2="{s*(h-18)}" y2="{y}"/>' for y in (-104, -88, -72, -58))
+                 + '</g>')
+    b.append(underframe(L, h - 52))
+    b.append(truck(-h + 52, r=16, n=2, spacing=42) + truck(h - 52, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-boxcar', '-150 -155 300 170', '  ' + ''.join(b),
+         'BOXCAR with sliding door', L, L / 2, 'wagon', 'Boxcar')
+
+
+def tanker():
+    L = 250; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect x="{-h+8}" y="-54" width="{L-16}" height="12" rx="3" fill="#3a4049"/>')
+    # tank barrel + end caps
+    b.append('<rect class="cc-wagon" x="-104" y="-116" width="208" height="62" rx="31" fill="#b9c0c8"/>')
+    b.append('<ellipse class="cc-wagon" cx="-104" cy="-85" rx="14" ry="31" fill="#a7aeb7"/>')
+    b.append('<ellipse class="cc-wagon" cx="104" cy="-85" rx="14" ry="31" fill="#a7aeb7"/>')
+    b.append('<rect x="-104" y="-116" width="208" height="18" rx="9" fill="#ffffff" opacity="0.22"/>')
+    # bands
+    b.append('<g fill="#8f98a3">' + ''.join(
+        f'<rect x="{x}" y="-116" width="4" height="62"/>' for x in (-58, -12, 34, 78)) + '</g>')
+    # manway dome + walkway + ladder
+    b.append('<rect class="cc-wagon" x="-16" y="-130" width="32" height="16" rx="4" fill="#a7aeb7"/>')
+    b.append('<rect class="cc-brass" x="-12" y="-136" width="24" height="7" rx="3" fill="#d4a943"/>')
+    b.append('<rect x="-60" y="-122" width="120" height="5" rx="2" fill="#8f98a3"/>')
+    b.append('<g stroke="#8f98a3" stroke-width="2.5"><line x1="96" y1="-118" x2="96" y2="-56"/>'
+             + ''.join(f'<line x1="88" y1="{y}" x2="104" y2="{y}"/>' for y in (-106, -92, -78, -64)) + '</g>')
+    # hazard placard
+    b.append('<g transform="translate(-88,-78) rotate(45)"><rect x="-9" y="-9" width="18" height="18" fill="#ffd24a"/></g>')
+    b.append(underframe(L, h - 52))
+    b.append(truck(-h + 52, r=16, n=2, spacing=42) + truck(h - 52, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-tanker', '-150 -160 300 175', '  ' + ''.join(b),
+         'TANK CAR', L, L / 2, 'wagon', 'Tank car')
+
+
+def hopper():
+    L = 235; h = L / 2
+    b = [shadow(-h, h)]
+    # sloped open-top gondola
+    b.append(f'<path class="cc-wagon" d="M{-h+6},-112 L{h-6},-112 L{h-26},-48 L{-h+26},-48 Z" fill="#4a4f57"/>')
+    b.append(f'<rect class="cc-wagon" x="{-h+2}" y="-118" width="{L-4}" height="10" rx="3" fill="#5b616a"/>')
+    # ribs
+    b.append('<g stroke="#2f343c" stroke-width="4">' + ''.join(
+        f'<line x1="{-h+22+i*32}" y1="-108" x2="{-h+34+i*32}" y2="-52"/>' for i in range(6)) + '</g>')
+    # coal load
+    b.append('<rect x="' + str(-h+12) + '" y="-114" width="' + str(L-24) + '" height="10" fill="#20242a"/>')
+    b.append('<g fill="#14161a">'
+             f'<rect x="{-h+14}" y="-118" width="{L-28}" height="10" rx="3"/>'
+             '<circle cx="-74" cy="-119" r="8"/><circle cx="-44" cy="-122" r="9.5"/><circle cx="-14" cy="-119" r="8"/>'
+             '<circle cx="18" cy="-122" r="9.5"/><circle cx="50" cy="-119" r="8"/><circle cx="76" cy="-118" r="7"/></g>')
+    b.append('<g fill="#333a44" opacity="0.85"><circle cx="-46" cy="-125" r="3"/><circle cx="16" cy="-125" r="2.6"/></g>')
+    b.append(underframe(L, h - 50))
+    b.append(truck(-h + 50, r=16, n=2, spacing=42) + truck(h - 50, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-hopper', '-142 -155 284 170', '  ' + ''.join(b),
+         'OPEN HOPPER / GONDOLA with coal load', L, L / 2, 'wagon', 'Coal hopper')
+
+
+def container():
+    """Double-stack well car — tall and colourful."""
+    L = 270; h = L / 2
+    b = [shadow(-h, h)]
+    b.append(f'<rect x="{-h+6}" y="-56" width="{L-12}" height="14" rx="3" fill="#3a4049"/>')
+    b.append(f'<rect x="{-h+30}" y="-92" width="{L-60}" height="38" rx="3" fill="#2f343c"/>')
+    # lower container (in the well)
+    b.append(f'<rect class="cc-wagon" x="{-h+18}" y="-116" width="{L-36}" height="52" rx="3" fill="#2a6fd6"/>')
+    b.append(ribs(-h + 24, h - 24, -114, -66, 16, '#000', 0.16))
+    b.append(f'<rect x="{h-64}" y="-114" width="44" height="48" rx="2" fill="#000" opacity="0.14"/>')
+    b.append(f'<text x="{-h+70}" y="-84" font-family="Trebuchet MS,sans-serif" font-size="17" '
+             f'fill="#ffffff" opacity="0.85">CHUGA</text>')
+    # upper container
+    b.append(f'<rect class="cc-wagon2" x="{-h+14}" y="-172" width="{L-28}" height="54" rx="3" fill="#d9822b"/>')
+    b.append(ribs(-h + 20, h - 20, -170, -122, 16, '#000', 0.16))
+    b.append(f'<rect x="{-h+18}" y="-170" width="44" height="50" rx="2" fill="#000" opacity="0.14"/>')
+    b.append(f'<text x="{h-96}" y="-140" font-family="Trebuchet MS,sans-serif" font-size="17" '
+             f'fill="#3a2410" opacity="0.8">CHOCHO</text>')
+    # corner castings
+    b.append('<g fill="#8f98a3">' + ''.join(
+        f'<rect x="{x}" y="{y}" width="12" height="7" rx="2"/>'
+        for x in (-h + 14, h - 26) for y in (-176, -122)) + '</g>')
+    b.append(underframe(L, h - 54))
+    b.append(truck(-h + 54, r=16, n=2, spacing=42) + truck(h - 54, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-container', '-160 -200 320 215', '  ' + ''.join(b),
+         'DOUBLE-STACK CONTAINER WELL CAR', L, L / 2, 'wagon', 'Container (double stack)')
+
+
+# ------------------------------------------------------------------- run ----
+diesel(); electric_hs(); commuter()
+coach_old(); caboose(); coach_modern(); hs_coach()
+boxcar(); tanker(); hopper(); container()
+
+# steam is hand-authored; record it in the manifest so consists can use it
+VEHICLES['steam'] = dict(file='steam.svg', kind='engine', label='Steam locomotive (coal)',
+                         length=404, originFromRear=190)
+
+(OUT / 'manifest.json').write_text(json.dumps({
+    'note': 'Rolling stock. y=0 is the rail line, +x forward, vehicles face right. '
+            'length = total length in local units; originFromRear = distance from the rear '
+            'end to the local origin (use it to butt vehicles together into a consist).',
+    'vehicles': VEHICLES,
+}, indent=2))
+
+print(f'wrote {len(VEHICLES)} vehicles + manifest.json into {OUT}')
+for k, v in VEHICLES.items():
+    print(f'  {k:22s} {v["kind"]:6s} len={v["length"]}')

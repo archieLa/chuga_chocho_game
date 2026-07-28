@@ -103,4 +103,6 @@ These are real forks the maintainer should weigh in on:
 4. **Single-file bundle** — is an optional build script that inlines everything into one `.html` wanted for offline sharing, and if so, plain Node script or something else?
 5. **Voice consistency** — `SpeechSynthesis` voices vary by device/OS; decide how to pick/prefer voices and how to degrade gracefully when a language's voice is missing.
 
+6. **Do place names get translated?** — POSTPONED, decide during the language pass. Today the data is mixed: `Rocky Mountains`, `Chicago`, `Seattle`, `San Francisco`, `Los Angeles` are untranslated in Polish, while `Nowy Jork`, `Nowy Orlean` and `Wielki Kanion` are. Pick one rule and apply it to all of `play/js/world.js`. **Tied to a technical wrinkle:** speech uses a Polish voice when Polish is selected, so an English name is pronounced with Polish phonetics. If names stay English, `speech.js` needs a per-utterance language override so proper nouns are spoken with an English voice. "Keep it in English" only sounds right if it is also *pronounced* in English.
+
 Log any decision you make into `DESIGN.md` so the next contributor inherits it.
