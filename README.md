@@ -74,20 +74,15 @@ Want to see the art without running anything? Open `tools/scene-gallery.html` or
 🎨 **All Phase 1 art is finished** — 8 locations, 14 locomotives and wagons, and the offline
 US map are committed and final.
 
-🚧 **The engine is what's left.** In order:
+✅ **Phase 1 — Free Play is playable.** The game opens on the US map, all eight destinations
+load with their preset train, both crossing gates lower together, road cars come from both
+directions and queue at the gate, the child can build and colour their own train, and the
+whole thing speaks English or Polish. It runs with no build step, offline, straight from
+`play/index.html`.
 
-1. **Scene loading** — mount a location's SVG, insert the train between `#gate-far` and
-   `#scenery-front`, drive the scene's own two crossing gates.
-2. **Map → world** — a state press swaps the whole scene and its preset train, speaks the
-   place name, and survives a reload.
-3. **Train customizer** — pick the engine, build the consist, and colour **each wagon
-   individually**, persisted.
-4. **Car counter**, settings panel, and keeping the physical-gate sync working throughout.
-
-**`BUILD_PLAN.md` is the ordered work list** — every task with its contracts, its "done
-when", and a final checklist. It is written to be handed to a coding agent as-is.
+Next up is Phase 2 — the mission modes (Count & Close, Letter Hunt, Picture Word).
 `CLAUDE.md` holds the hard rules and art contracts; `DESIGN.md` has the full roadmap
-through Phases 2 and 3.
+through Phases 2 and 3; `BUILD_PLAN.md` records the Phase 1 work list and its checklist.
 
 ### The physical crossing gate (optional hardware)
 
@@ -99,12 +94,27 @@ The game can talk to a real gate over your local network via a tiny HTTP API:
 | `GET /close` | lower the gate |
 | `GET /status` | returns `{ "state": "up" \| "down" \| "raising" \| "lowering" }` |
 
-The game polls `/status`, so pressing the **physical** button moves the on-screen gate, and on-screen actions move the hardware — two-way sync. The device advertises itself as **`crossinggate.local`** and the game finds it automatically; you can also type a hostname or IP in settings (⚙️).
+The game polls `/status` about five times a second, so pressing the **physical** button moves
+the on-screen gate, and on-screen actions move the hardware — two-way sync. The device
+advertises itself as **`crossinggate.local`** and the game finds it automatically at launch;
+you can also type a hostname or IP in settings (⚙️). When the game connects, the *screen*
+adopts the position the real arm is already in, so nothing swings by itself when the game
+loads.
+
+**Two things the firmware must do:**
+
+- **Send `Access-Control-Allow-Origin: *`** on `/status`. Without it a browser will let the
+  game command the gate but never read its state back, and the physical button will appear
+  to do nothing.
+- **Report `state` honestly**, including `raising` / `lowering` while the arm is moving.
+
+No hardware handy? `python3 tools/fake-gate.py 8099` is a stand-in that speaks the same API
+(plus `/press`, which is the physical button) — put `127.0.0.1:8099` in settings.
 
 > **Note:** browsers block an HTTPS page from talking to a plain-HTTP device on your LAN, so
 > the physical gate works from the **downloaded copy** (open `play/index.html`, or serve it
-> over `http://` on your home network) — not from the HTTPS website. The on-screen game
-> works everywhere either way.
+> over `http://` on your home network) — not from the HTTPS website. The settings panel says
+> so in plain words when it detects HTTPS. The on-screen game works everywhere either way.
 
 ---
 

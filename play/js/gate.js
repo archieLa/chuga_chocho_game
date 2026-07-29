@@ -5,9 +5,13 @@
    disables it. See CLAUDE.md hard-rule #3.
 
    Ported from reference/crossing_playtime.html, including the one non-obvious
-   bit: the `gameInitiated` flag. The device echoes back the state we just asked
-   it for, and without the flag that echo reads as "the physical button was
-   pressed" and the two ends fight each other.
+   bit: the device echoes back the state we just asked it for, and unless we
+   recognise that echo it reads as "the physical button was pressed" and the two
+   ends fight each other. The reference used a one-shot `gameInitiated` flag;
+   this version remembers WHICH state it asked for (and forgets after two
+   seconds), because a flag that is set and never consumed silently eats the
+   next real press — which is exactly what happened the first time this was
+   tested against a device.
 
    THE DEVICE, AND WHAT mDNS REALLY MEANS IN A BROWSER
    The gate advertises itself on the LAN as `crossinggate.local`. There is no
@@ -31,8 +35,9 @@
   let devAddr = localStorage.getItem(STORAGE_KEY) || '';
   let devPrev = 'up';
   let polling = false;
-  let gameInitiated = false;
   let connected = false;
+  let expected = null;                // the state WE last asked the device for
+  let expectedAt = 0;
 
   // GitHub Pages is HTTPS, and a browser will not let an HTTPS page talk to
   // http://crossinggate.local. Nothing we can do about it from the page; the
@@ -54,10 +59,23 @@
     return fetch(url, { signal: c.signal }).finally(() => clearTimeout(t));
   }
 
-  function send(ep) {
+  /** Tell the device to move, and remember what we asked for so its reply is
+      recognised as our own echo rather than as someone pressing the button. */
+  function command(ep) {
+    expected = ep === '/close' ? 'down' : 'up';
+    expectedAt = Date.now();
     const b = base();
     if (!b) return;
     ask(b + ep, 1200).catch(() => {});
+  }
+
+  /** Is this reported state just the device settling into what we asked for?
+      Expires, so a command that never lands cannot block real presses forever. */
+  function isOwnEcho(reported) {
+    if (!expected) return false;
+    if (Date.now() - expectedAt > 2000) { expected = null; return false; }
+    if (reported === expected) { expected = null; return true; }
+    return reported === (expected === 'down' ? 'lowering' : 'raising');
   }
 
   function setState(next, fromDevice) {
@@ -65,12 +83,13 @@
     CC.emit && CC.emit('gate', { state: state, fromDevice: !!fromDevice });
   }
 
-  /** A state the device reported. Only act on changes the DEVICE started. */
+  /** A state the device reported. Only act on changes the DEVICE started —
+      somebody pressing the button on the real crossing gate. */
   function onDeviceState(reported) {
     if (!reported || reported === devPrev) { devPrev = reported || devPrev; return; }
     const prev = devPrev;
     devPrev = reported;
-    if (gameInitiated) { gameInitiated = false; return; }   // our own echo
+    if (isOwnEcho(reported)) return;
     const wentDown = (reported === 'down' || reported === 'lowering') && (prev === 'up' || prev === 'raising');
     const wentUp = (reported === 'up' || reported === 'raising') && (prev === 'down' || prev === 'lowering');
     if (wentDown) gate.close(true);
@@ -87,13 +106,13 @@
     close(fromDevice) {
       if (state === 'open' || state === 'opening') {
         setState('closing', fromDevice);
-        if (!fromDevice) { gameInitiated = true; send('/close'); }
+        if (!fromDevice) command('/close');
       }
     },
     open(fromDevice) {
       if (state === 'closed' || state === 'closing') {
         setState('opening', fromDevice);
-        if (!fromDevice) { gameInitiated = true; send('/open'); }
+        if (!fromDevice) command('/open');
       }
     },
     toggle() { this.isDown() ? this.open() : this.close(); },
@@ -150,7 +169,11 @@
 
     /** Called once at launch. If nothing is stored, quietly try the default
         hostname — in the normal case a parent never types anything. Failure is
-        silent by design: no spinner, no popup, the game is simply unaffected. */
+        silent by design: no spinner, no popup, the game is simply unaffected.
+
+        The SCREEN adopts the device's position rather than the other way round:
+        a real arm swinging by itself the moment the game loads would be a
+        surprise, and the physical thing in the room should win. */
     autoConnect() {
       if (blockedByHttps) return Promise.resolve(false);
       const candidate = devAddr || DEFAULT_HOST;
@@ -160,9 +183,8 @@
         localStorage.setItem(STORAGE_KEY, devAddr);
         devPrev = st;
         connected = true;
-        // Bring the real gate in line with the screen, so the two start together.
-        gameInitiated = true;
-        send(this.isDown() ? '/close' : '/open');
+        if (st === 'down' || st === 'lowering') this.close(true);
+        else this.open(true);
         this.startPolling();
         CC.emit && CC.emit('device', { connected: true, address: devAddr });
         return true;
