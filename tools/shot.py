@@ -155,9 +155,14 @@ def main():
     ap.add_argument('input')
     ap.add_argument('output', nargs='?')
     ap.add_argument('--size', default='1280x800')
-    ap.add_argument('--wait', type=float, default=1.5, help='seconds to let the page run')
+    ap.add_argument('--wait', type=float, action=Step,
+                    help='let the page run for N seconds at this point in the sequence')
+    ap.add_argument('--load-wait', type=float, default=1.5,
+                    help='seconds to settle after navigation, before the first step')
     ap.add_argument('--eval', action=Step, help='JS to run, in command-line order')
     ap.add_argument('--click', action=Step, help='CSS selector to click (synthetic)')
+    ap.add_argument('--key', action=Step,
+                    help='press a key for real, e.g. Space or Escape (a real gesture, like --tap)')
     ap.add_argument('--tap', action=Step,
                     help='CSS selector to tap with a REAL input event. Unlike --click this '
                          'counts as a user gesture, so audio and speech are allowed to start — '
@@ -211,10 +216,12 @@ def main():
         page.call('Emulation.setDeviceMetricsOverride', width=width, height=height,
                   deviceScaleFactor=2, mobile=False)
         page.call('Page.navigate', url=url)
-        page.pump(max(args.wait, 0.6))
+        page.pump(max(args.load_wait, 0.6))
 
         for kind, value in getattr(args, 'steps', None) or []:
-            if kind == 'tap':
+            if kind == 'wait':
+                page.pump(value)
+            elif kind == 'tap':
                 box = page.call('Runtime.evaluate', returnByValue=True, expression=(
                     "(function(){var e=document.querySelector(%s); if(!e) return null;"
                     "var r=e.getBoundingClientRect();"
@@ -229,6 +236,14 @@ def main():
                               button='left', clickCount=1,
                               buttons=1 if ev == 'mousePressed' else 0)
                 page.pump(0.7)
+            elif kind == 'key':
+                keys = {'Space': (32, ' '), 'Escape': (27, ''), 'Enter': (13, '\r')}
+                vk, text = keys.get(value, (0, ''))   # not `code` — that is the exit status
+                for ev in ('keyDown', 'keyUp'):
+                    page.call('Input.dispatchKeyEvent', type=ev, code=value, key=value,
+                              windowsVirtualKeyCode=vk,
+                              **({'text': text} if ev == 'keyDown' and text else {}))
+                page.pump(0.5)
             elif kind == 'click':
                 page.call('Runtime.evaluate', awaitPromise=True, expression=(
                     "(function(){var e=document.querySelector(%s);"

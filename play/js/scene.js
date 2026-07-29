@@ -331,7 +331,11 @@
       lane.forEach(car => {
         const step = car.speed * depthScale(car.y) * secs;
         let want = car.y + dir * step;
-        const beforeLine = dir > 0 ? car.y < stopLine : car.y > stopLine;
+        // Note the >= : a car that has arrived EXACTLY on the stop line is still
+        // waiting at it. With a strict comparison it counts as past the line on
+        // the very next frame and drives straight through the closed gate — one
+        // car escaping per cycle, which is easy to miss and looks like magic.
+        const beforeLine = dir > 0 ? car.y <= stopLine : car.y >= stopLine;
         if (blocked && beforeLine) {
           want = dir > 0 ? Math.min(want, stopLine) : Math.max(want, stopLine);
         }
