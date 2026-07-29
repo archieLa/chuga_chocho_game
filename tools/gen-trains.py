@@ -238,6 +238,89 @@ def commuter():
          'COMMUTER EMU (Chicago CTA / New York subway style)', 400, 200, 'engine',
          'Commuter EMU (city)')
 
+
+def streetcar():
+    """New Orleans St. Charles streetcar (Perley Thomas 900-series): olive green,
+    red belt rail, arched windows, clerestory roof, trolley pole."""
+    L = 300; h = L / 2
+    b = [shadow(-h - 10, h + 10)]
+    # body
+    b.append(f'<rect class="cc-loco" x="{-h+8}" y="-124" width="{L-16}" height="82" rx="7" fill="#3d5233"/>')
+    b.append(f'<rect x="{-h+8}" y="-124" width="{L-16}" height="14" rx="7" fill="#48603c"/>')
+    # arched windows
+    for i in range(7):
+        x = -h + 22 + i * 36
+        b.append(f'<rect x="{x}" y="-116" width="26" height="40" rx="13" fill="#f2ede0"/>')
+        b.append(f'<rect x="{x+3}" y="-113" width="20" height="34" rx="10" fill="#dff0f6"/>')
+        b.append(f'<rect x="{x+3}" y="-113" width="20" height="13" rx="9" fill="#eef8fc"/>')
+    # red belt rail + gold lining
+    b.append(f'<rect class="cc-trim" x="{-h+8}" y="-72" width="{L-16}" height="9" fill="#a63a2c"/>')
+    b.append(f'<g class="cc-brass" fill="#d4a943"><rect x="{-h+8}" y="-64" width="{L-16}" height="2.5"/>'
+             f'<rect x="{-h+8}" y="-110" width="{L-16}" height="2"/></g>')
+    # clerestory roof
+    b.append(f'<rect class="cc-roof" x="{-h+2}" y="-136" width="{L-4}" height="14" rx="7" fill="#e8e4d8"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+40}" y="-148" width="{L-80}" height="14" rx="6" fill="#f2efe4"/>')
+    b.append('<g fill="#cdd6c4" opacity="0.9">' + ''.join(
+        f'<rect x="{-h+56+i*32}" y="-145" width="16" height="8" rx="2"/>' for i in range(6)) + '</g>')
+    # trolley pole reaching up to the wire
+    b.append('<g stroke="#3f4a44" stroke-width="4" stroke-linecap="round">'
+             '<path d="M-10,-148 L-72,-196"/></g>'
+             '<circle cx="-10" cy="-148" r="6" fill="#3f4a44"/>'
+             '<circle cx="-74" cy="-197" r="5" fill="#8d949c"/>')
+    # front: destination box, headlight, fender
+    b.append(f'<rect x="{h-58}" y="-138" width="46" height="13" rx="3" fill="#2c3a26"/>')
+    b.append(f'<circle cx="{h-16}" cy="-92" r="9" class="cc-brass" fill="#d4a943"/>')
+    b.append(f'<circle cx="{h-16}" cy="-92" r="6" fill="#fff3c4"/>')
+    b.append(f'<path d="M{h-6},-48 L{h+22},-16 L{h-6},-16 Z" fill="#59616c"/>')
+    b.append(f'<g stroke="#aeb6c0" stroke-width="2"><line x1="{h+2}" y1="-38" x2="{h+2}" y2="-18"/>'
+             f'<line x1="{h+10}" y1="-30" x2="{h+10}" y2="-18"/></g>')
+    # skirt + trucks
+    b.append(f'<rect x="{-h+10}" y="-44" width="{L-20}" height="10" rx="3" fill="#2c3a26"/>')
+    b.append(truck(-h + 62, r=15, n=2, spacing=40) + truck(h - 62, r=15, n=2, spacing=40))
+    b.append(coupler(-h))
+    emit('streetcar', '-175 -215 350 230', '  ' + ''.join(b),
+         'NEW ORLEANS STREETCAR (St. Charles line, Perley Thomas style)', L, L / 2, 'engine',
+         'Streetcar (New Orleans)')
+
+
+def cable_car():
+    """San Francisco cable car (Powell-Hyde): maroon and cream, open-air front section
+    with bench seats and grab poles, running boards. No pole — it grips a moving cable."""
+    L = 240; h = L / 2
+    b = [shadow(-h - 8, h + 8)]
+    # closed rear saloon
+    b.append(f'<rect class="cc-loco" x="{-h+6}" y="-116" width="128" height="74" rx="5" fill="#8f3b32"/>')
+    b.append(f'<rect x="{-h+6}" y="-116" width="128" height="12" rx="5" fill="#a34a3f"/>')
+    for i in range(3):
+        x = -h + 18 + i * 38
+        b.append(f'<rect x="{x}" y="-106" width="26" height="34" rx="4" fill="#f4efe2"/>')
+        b.append(f'<rect x="{x+3}" y="-103" width="20" height="28" rx="3" fill="#dff0f6"/>')
+    # open front section: posts, bench, roof
+    b.append(f'<rect class="cc-brass" x="{-h+6}" y="-72" width="128" height="4" fill="#d4a943"/>')
+    b.append(f'<rect x="{-h+134}" y="-58" width="98" height="16" fill="#7d3229"/>')
+    b.append('<g fill="#c9a06a">' + ''.join(
+        f'<rect x="{-h+142+i*30}" y="-74" width="24" height="8" rx="3"/>' for i in range(3)) + '</g>')
+    b.append('<g stroke="#5f2a22" stroke-width="5">' + ''.join(
+        f'<line x1="{-h+140+i*32}" y1="-124" x2="{-h+140+i*32}" y2="-58"/>' for i in range(4)) + '</g>')
+    # roof over both sections
+    b.append(f'<rect class="cc-roof" x="{-h}" y="-130" width="{L}" height="14" rx="6" fill="#f2ede0"/>')
+    b.append(f'<rect class="cc-roof" x="{-h+4}" y="-136" width="{L-8}" height="8" rx="4" fill="#fbf7ee"/>')
+    b.append(f'<rect class="cc-trim" x="{-h}" y="-119" width="{L}" height="5" fill="#c0392b"/>')
+    # destination board, headlight, dash
+    b.append(f'<rect x="{-h+14}" y="-146" width="72" height="13" rx="3" fill="#5f2a22"/>')
+    b.append(f'<circle cx="{h-14}" cy="-92" r="8" class="cc-brass" fill="#d4a943"/>')
+    b.append(f'<circle cx="{h-14}" cy="-92" r="5.5" fill="#fff3c4"/>')
+    b.append(f'<rect x="{h-30}" y="-58" width="30" height="16" rx="3" fill="#8f3b32"/>')
+    # running boards + grip slot
+    b.append(f'<rect x="{-h-4}" y="-42" width="{L+8}" height="7" rx="3" fill="#5f2a22"/>')
+    b.append(f'<rect x="{-h+10}" y="-34" width="{L-20}" height="5" rx="2" fill="#3f4a44"/>')
+    b.append(f'<rect x="-14" y="-30" width="28" height="6" rx="2" fill="#8d949c"/>')
+    b.append(truck(-h + 52, r=14, n=2, spacing=38) + truck(h - 52, r=14, n=2, spacing=38))
+    b.append(coupler(-h))
+    emit('cable-car', '-150 -175 300 190', '  ' + ''.join(b),
+         'SAN FRANCISCO CABLE CAR (Powell-Hyde line)', L, L / 2, 'engine',
+         'Cable car (San Francisco)')
+
 # ================================================================= WAGONS ====
 
 def coach_old():
@@ -453,7 +536,7 @@ def container():
 
 
 # ------------------------------------------------------------------- run ----
-diesel(); electric_hs(); commuter()
+diesel(); electric_hs(); commuter(); streetcar(); cable_car()
 coach_old(); caboose(); coach_modern(); hs_coach()
 boxcar(); tanker(); hopper(); container()
 

@@ -47,20 +47,47 @@ A local web server (like the `python3` one above) is recommended over `file://` 
 chuga-chocho/
 ├── index.html          # public landing page ("website")
 ├── DESIGN.md           # full vision & roadmap — the source of truth
+├── BUILD_PLAN.md       # the ordered Phase 1 work list + acceptance criteria
 ├── CLAUDE.md           # build brief for AI coding agents (read this first)
 ├── CONTRIBUTING.md
 ├── LICENSE             # MIT
+├── SCENE_GUIDE.md      # how to author a location scene
 ├── reference/          # the original game, kept for porting reference
+├── tools/              # asset generators + the two review galleries
+│   ├── gen-scenes.py       # → play/assets/scenes/
+│   ├── gen-trains.py       # → play/assets/trains/
+│   ├── gen-map.js          # → play/assets/us-map.svg + play/js/map-data.js
+│   ├── scene-gallery.html  # every location, trains running — open it from disk
+│   └── train-gallery.html  # every locomotive and wagon — open it from disk
 └── play/               # the game itself
     ├── index.html
     ├── css/
     ├── js/             # engine modules (scene, trains, world, modes, speech, gate, settings)
-    └── assets/         # SVG art
+    └── assets/         # SVG art (scenes, trains, US map)
 ```
+
+Want to see the art without running anything? Open `tools/scene-gallery.html` or
+`tools/train-gallery.html` straight from disk — both are self-contained.
 
 ### Status
 
-🚧 **Phase 1 (Free Play) is in progress.** See `DESIGN.md` for the full roadmap and `CLAUDE.md` for the current build plan.
+🎨 **All Phase 1 art is finished** — 8 locations, 14 locomotives and wagons, and the offline
+US map are committed and final.
+
+🚧 **The engine is what's left.** In order:
+
+1. **Scene loading** — mount a location's SVG, insert the train between `#gate-far` and
+   `#scenery-front`, drive the scene's own two crossing gates.
+2. **Map → world** — a state press swaps the whole scene and its preset train, speaks the
+   place name, and survives a reload.
+3. **Train customizer** — pick the engine, build the consist, and colour **each wagon
+   individually**, persisted.
+4. **Car counter**, settings panel, and keeping the physical-gate sync working throughout.
+
+**`BUILD_PLAN.md` is the ordered work list** — every task with its contracts, its "done
+when", and a final checklist. It is written to be handed to a coding agent as-is.
+`CLAUDE.md` holds the hard rules and art contracts; `DESIGN.md` has the full roadmap
+through Phases 2 and 3.
 
 ### The physical crossing gate (optional hardware)
 
@@ -72,7 +99,12 @@ The game can talk to a real gate over your local network via a tiny HTTP API:
 | `GET /close` | lower the gate |
 | `GET /status` | returns `{ "state": "up" \| "down" \| "raising" \| "lowering" }` |
 
-The game polls `/status`, so pressing the **physical** button moves the on-screen gate, and on-screen actions move the hardware — two-way sync. Configure the device address in the game's settings (⚙️).
+The game polls `/status`, so pressing the **physical** button moves the on-screen gate, and on-screen actions move the hardware — two-way sync. The device advertises itself as **`crossinggate.local`** and the game finds it automatically; you can also type a hostname or IP in settings (⚙️).
+
+> **Note:** browsers block an HTTPS page from talking to a plain-HTTP device on your LAN, so
+> the physical gate works from the **downloaded copy** (open `play/index.html`, or serve it
+> over `http://` on your home network) — not from the HTTPS website. The on-screen game
+> works everywhere either way.
 
 ---
 

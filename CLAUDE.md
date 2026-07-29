@@ -55,6 +55,29 @@ Conventions every vehicle honours:
 
 - `reference/crossing_playtime.html` — the **original working game** (single-file canvas). It already implements: gate open/close animation with easing, flashing lights, warning bell, whistle, chug and honk sounds (Web Audio), cars that stop at the gate, and the **physical-device polling + two-way sync**. **Port this logic; don't reinvent it.** Its visuals are placeholder — the new version replaces canvas rectangles with SVG storybook art.
 
+## Where the project actually is (read this first)
+
+**All the art for Phase 1 is finished and committed.** What is left is the engine.
+
+| | State |
+|---|---|
+| Locations | **8/8 done** — Colorado, San Francisco, Los Angeles, Chicago, Grand Canyon, New York City, Seattle, New Orleans. All in `play/assets/scenes/`. |
+| Rolling stock | **14 vehicles + `manifest.json`** — 6 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car) and 8 wagons. All in `play/assets/trains/`. |
+| US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
+| Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
+| The game engine | **NOT built.** `play/js/scene.js` does not yet render the scenes or drive a train. This is the next milestone. |
+
+**`BUILD_PLAN.md` is the ordered work list** — tasks A–H with contracts and acceptance
+criteria, plus the definition-of-done checklist. Work from that; this file is the reference
+for the hard rules and the art contracts it points back to.
+
+So the next real task is **1.1 + 1.3 together**: wire the shell, port the loop from the
+reference game, and make `scene.js` load the committed scene SVG, insert a consist
+assembled from `manifest.json` into the train slot (between `#gate-far` and
+`#scenery-front`), and drive it. Everything it needs — geometry constants, layer
+contract, wheel/rod maths, recolour hooks — is already specified in the two sections
+above and in `SCENE_GUIDE.md`. Do not re-author art to get the engine working.
+
 ## Phase 1 — Free Play (build in this order)
 
 Do these roughly in sequence; each should be a reviewable commit (or small PR). "Done" = the acceptance criteria pass when a human opens the game.
@@ -73,19 +96,76 @@ Do these roughly in sequence; each should be a reviewable commit (or small PR). 
 - Replace canvas-rectangle art with layered SVG (parallax: sky → far → mid → foreground → track). Flat storybook style (see `DESIGN.md` §3).
 - **Done when:** the default scene is illustrated (not rectangles), scales crisply, and layers move with subtle parallax.
 
-### 1.4 World / location system
-- A scene is defined by data (a location descriptor) that the renderer consumes, so locations are swappable.
-- Implement at least 2 locations end-to-end (suggest Colorado + California/San Francisco) to prove the system; stub the rest from `DESIGN.md` §6.
-- **Done when:** switching the active location reskins the background, and adding a new location is a matter of adding data + art.
+### 1.4 Scene loading — put a real location on screen
 
-### 1.5 US map navigation
-- A globe/map icon → zoom into a **real US map** → tap a state → if multiple cities, pick one → exit → world updates → the place name is **spoken**.
-- Needs a US map source (see open decisions).
-- **Done when:** a child can tap the map, choose a supported state/city, and land back in a reskinned world with the place named aloud.
+`play/js/scene.js` owns this. A location is DATA (`play/js/world.js`); the scene is the
+committed SVG named by that data's `scene` field.
 
-### 1.6 Train customizer
-- Train icon → choose engine type (steam / diesel-electric / electric), loco color, wagon color, wagon type (boxcar / container / passenger / gondola / tanker). Choices persist and override per-location presets.
-- **Done when:** changes render immediately on the train, survive reload, and per-location presets apply only until the user overrides them.
+- Fetch/inline `play/assets/scenes/<scene>.svg` and mount it as the game's backdrop, sized
+  to the viewport by its own `viewBox` (`0 0 1280 720`, `preserveAspectRatio="xMidYMid slice"`).
+- Find `#gate-far` and `#scenery-front` in the mounted SVG and **insert a `<g id="cc-train">`
+  between them**. Everything the engine animates — the consist, its smoke, the road cars —
+  goes in there or in sibling groups placed by the same rule. Never re-order the scene's
+  own layers.
+- Take the gates from the scene, don't draw your own: `#gate-near` and `#gate-far` are
+  already in every SVG at the shared coordinates. Animate their arm groups (the
+  `<g transform="translate(0,40)">` inside each post) by rotating about the post top, and
+  flash the two lamp `<circle>`s. Both gates always move together.
+- **`file://` must keep working**, so `fetch()` is not available. Either inline the scenes
+  the way `map-data.js` inlines the map, or load them with an `<object>`/`<img>` fallback —
+  whichever you pick, `play/index.html` opened by double-click has to render.
+- **Done when:** opening `play/index.html` shows the Colorado scene full-bleed, both gates
+  are the scene's own and lower together, and a train runs in the corridor **behind the near
+  gate and in front of the far gate** with nothing clipping wrongly.
+
+### 1.5 Map → world: pressing a state changes everything
+
+The picker (`play/js/map.js`) already renders the map and calls `CC.world.select(id)`,
+which persists to `localStorage` and emits a `location` event. Nothing listens yet.
+
+- Subscribe to the `location` event in `scene.js` and swap the backdrop to the new
+  location's scene, preserving gate state (if the gate is down, it stays down through the
+  swap — the physical device must never desync because the child changed states).
+- Apply the location's `trainPreset` (e.g. Colorado → `steam`, New Orleans → `streetcar`,
+  San Francisco → `cable-car`) **only if the player has not overridden the engine** in the
+  customizer. A user choice outranks a preset until they reset it.
+- Cross-fade rather than cut, and re-speak the place name in the active language
+  (`world.select` already does the speaking — don't double it).
+- The eight ids are `colorado, sf, la, chicago, arizona, nyc, seattle, neworleans`, and
+  `world.js` must stay in sync with `SUPPORTED` in `tools/gen-map.js`.
+- **Done when:** tapping a state on the map, picking a destination, and closing the map
+  lands the child in that scene with its preset train, the name spoken aloud, the gate in
+  the same state it was in, and the choice surviving a reload.
+
+### 1.6 Train customizer — engine, wagons, and per-wagon colour
+
+Reads `play/assets/trains/manifest.json`; drives the recolour hooks documented under
+**Train art** above. This is the feature the kid will use most, so it gets its own screen.
+
+- **Engine picker:** the six powered vehicles — `steam`, `diesel`, `electric-hs`,
+  `commuter`, `streetcar`, `cable-car`. Choosing one replaces the head of the consist.
+- **Consist editor:** add / remove / reorder wagons from the eight available
+  (`boxcar`, `container`, `hopper`, `tanker`, `caboose`, `coach-old`, `coach-modern`,
+  `hs-coach`). Cap the length at something a tablet can hold — 6 wagons is plenty.
+- **Colour, per vehicle instance.** Each slot in the consist keeps its own colours. Scope
+  every recolour to that vehicle's own root — `vehicleRoot.querySelectorAll('.cc-wagon')` —
+  and **never** `document.querySelectorAll`, or all three wagons change together. The
+  hooks are `.cc-loco .cc-wagon .cc-wagon2 .cc-roof .cc-trim .cc-brass`. Offer a small
+  fixed palette of big swatches, not a colour wheel — this is for a three-year-old.
+- **Persistence:** store the consist under one key as an ordered list of
+  `{ type, colours: { loco?, wagon?, wagon2?, roof?, trim? } }`. Reload restores it exactly,
+  including which slot was which colour.
+- **Layout from the manifest:** each vehicle has `length` and `originFromRear`; a vehicle's
+  origin sits `length - originFromRear` behind its front. Lay out from the front of the
+  train, stepping back `length + gap` per vehicle. Don't hard-code lengths.
+- **Wheels and rods keep working after a recolour** — recolouring must not touch
+  `.cc-wheel` transforms or the steam valve-gear geometry.
+- `tools/train-gallery.html` already does engine swapping, consist assembly and recolouring
+  as a working reference — but it recolours **globally on purpose** because it is a
+  catalogue. The game must scope per instance. Read it, don't copy it verbatim.
+- **Done when:** the child can pick an engine, build a train of wagons, give **each wagon
+  its own colour**, see it update immediately on the scene, and find the same train after
+  closing and reopening the game — and a location change does not overwrite their choices.
 
 ### 1.7 Car counter
 - Count road cars that pass the crossing before the gate closes; settings toggle to show/hide.

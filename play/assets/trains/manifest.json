@@ -22,6 +22,20 @@
       "length": 400,
       "originFromRear": 200
     },
+    "streetcar": {
+      "file": "streetcar.svg",
+      "kind": "engine",
+      "label": "Streetcar (New Orleans)",
+      "length": 300,
+      "originFromRear": 150.0
+    },
+    "cable-car": {
+      "file": "cable-car.svg",
+      "kind": "engine",
+      "label": "Cable car (San Francisco)",
+      "length": 240,
+      "originFromRear": 120.0
+    },
     "wagon-coach-old": {
       "file": "wagon-coach-old.svg",
       "kind": "wagon",

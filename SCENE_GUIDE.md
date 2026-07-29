@@ -104,11 +104,41 @@ Sample from the reference rather than inventing: warm peaks `#c2a069` with `#a58
 
 A scene reads as a *specific place* when it carries these five, and reads generic when it doesn't:
 
-1. **A signature landmark** — the one thing that says "this is here." Colorado: the Georgetown Loop red trestle. San Francisco: the Golden Gate Bridge. Chicago: the skyline + elevated 'L'. Make it prominent, not shy.
+1. **ONE signature landmark — two at the very most.** The one thing that says "this is here."
+   Colorado: the Georgetown Loop trestle. San Francisco: the Golden Gate. Chicago: the skyline
+   and the 'L'. Make it prominent, not shy.
+
+   **Do not stack famous things.** The strongest temptation is to cram in every landmark a
+   place is known for — and it is exactly what ruins a scene. San Francisco first shipped with
+   the Golden Gate *and* Lombard Street *and* a tech tower all competing, and the result read as
+   a souvenir shelf rather than a place: with several heroes there is no hero. It was fixed by
+   deleting two of them.
+
+   Everything that is not the hero should be **supporting texture** — generic in form but
+   regional in character, the ordinary fabric of the place. A row of colourful Victorians, brick
+   low-rises, brownstone stoops with water towers, palms and beach umbrellas, live oaks with
+   Spanish moss. Texture is what makes a place *feel* right; the single landmark is what makes
+   it *identifiable*. You need both, in that ratio.
 2. **Characteristic flora** — golden aspens and pines (Rocky Mountains), rim pines and saguaro (Grand Canyon), evergreens (Seattle), live oaks (New Orleans), palms (Los Angeles).
 3. **Characteristic geology & palette** — tan Rockies, red sandstone, ocean blues, grey city concrete.
 4. **A water or terrain feature** that ties the composition together — Clear Creek links the mountains to the foreground pond; the bay, the lake, the bayou play the same role elsewhere.
 5. **A regional/seasonal cue** — fall aspen gold, desert heat haze, coastal fog, snow.
+
+**Be true to what the place actually is — especially the GROUND.** The single biggest
+mistake is dropping every location onto the same green lawn. Ground cover is half of what
+makes a place read correctly:
+
+| Place | Ground should be |
+|---|---|
+| Rocky Mountains | meadow grass, rock, creek |
+| New Orleans | paved streets, kerbs, green "neutral ground" strips |
+| Los Angeles | sand, promenade, beach |
+| Chicago | asphalt, concrete sidewalks, a park strip as accent |
+| Grand Canyon | dry rim dirt and rock |
+
+Match the real density too. Chicago is overwhelmingly built — streets, brick, steel, towers —
+with green as an *accent*. A beach town is mostly sand. Getting this right does more for
+recognition than any single landmark.
 
 **Cohesion test:** do the elements *relate* to each other (creek flows from the ravine under the track into the pond), or are they scattered independently? Related elements read as a place; scattered ones read as a sticker sheet.
 
@@ -122,6 +152,15 @@ A scene reads as a *specific place* when it carries these five, and reads generi
 - [ ] Region-correct rock/ground colours
 - [ ] Grounding shadows on every prop
 - [ ] Both gates present
+- [ ] **If there is water near the horizon, LAND sits behind the road's vanishing point** — a
+      waterfront, seawall, promenade or bluff. Otherwise the road appears to run into the sea.
+      (This one bit LA, New York and Seattle in turn.)
+- [ ] **The band between the horizon feature and the track is not empty.** The strip from
+      `y ≈ 300` down to `y ≈ 440` is the second-largest area in the frame, and left bare it
+      reads as a blank apron that drains the whole scene. Fill it with the *fabric* of the
+      place, at small scale: a row of buildings, a forest, a promenade with people on it, a
+      bike path with cyclists. Seattle needed greenery here, Colorado needed a full forest,
+      LA needed towels and sunbathers. Ordinary things, densely placed — not more landmarks.
 - [ ] Renders correctly (screenshot it — see §6)
 - [ ] Well-formed XML
 
@@ -171,6 +210,8 @@ Iterate: render → review → adjust → re-render. Colorado took eight passes.
 | Elements feel disconnected | Link them (creek flows from ravine → under track → into pond) |
 | Props look like floating stickers | Grounding shadows |
 | Only one crossing gate | Two gates, cars from both directions |
+| A canyon reads as a striped wall | Stack **promontories** — near, dark and jutting in from both sides; middle; far — so the eye reads a void between them. Horizontal strata alone always flatten. |
+| A city block looks like scattered houses | Make it a continuous **wall** of buildings with a taller rank glimpsed behind it. Cities have no gaps at street level. |
 
 ---
 
@@ -178,13 +219,19 @@ Iterate: render → review → adjust → re-render. Colorado took eight passes.
 
 | Location | State | Status |
 |---|---|---|
-| Rocky Mountains | CO | ✅ Reference scene — the style anchor |
-| San Francisco | CA | ⬜ Golden Gate Bridge as the crossing road |
-| Los Angeles | CA | ⬜ Palms, downtown skyline, hills |
-| Chicago | IL | ⬜ Skyline, elevated 'L', tunnel, Lake Michigan |
-| Grand Canyon | AZ | ⬜ Layered canyon walls, mesas, rim pines |
-| New York City | NY | ⬜ Brooklyn Bridge, subway tunnel |
-| Seattle | WA | ⬜ Evergreens, ferry, Cascades |
-| New Orleans | LA | ⬜ Bayou, streetcar, live oaks |
+| Rocky Mountains | CO | ✅ Reference scene — the style anchor (hand-authored) |
+| San Francisco | CA | ✅ Golden Gate Bridge across the bay, rolling fog |
+| Los Angeles | CA | ✅ The Pacific, Muscle Beach, volleyball, HOLLYWOOD on the hills |
+| Chicago | IL | ✅ Skyline, elevated L, Navy Pier and the Centennial Wheel on the lake |
+| Grand Canyon | AZ | ✅ The void framed by near promontories, temples, Watchtower, rim trail |
+| New York City | NY | ✅ Brooklyn Bridge, full skyline, a solid block of brownstones and walk-ups |
+| Seattle | WA | ✅ Space Needle, Mount Rainier, ferry, drizzle |
+| New Orleans | LA | ✅ French Quarter balconies, streetcar, live oaks |
+
+**All eight built.** Seven are generated by `tools/gen-scenes.py`, which owns the shared
+furniture (road, track, both gates) so geometry can't drift and a gate can't go missing;
+each scene supplies only its artwork, slotted into the correct depth layers. Colorado stays
+hand-authored as the reference. Verify with `tools/build-scene-gallery.py`, which renders
+every scene with a train running through it.
 
 Scenes are authored **interactively with a human in the loop** (see `DESIGN.md` §3) — reviewed by eye and iterated, not generated unattended.

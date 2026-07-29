@@ -23,7 +23,7 @@ def parts(path):
     return vb, inner
 
 
-ORDER = ['steam', 'diesel', 'electric-hs', 'commuter',
+ORDER = ['steam', 'diesel', 'electric-hs', 'commuter', 'streetcar', 'cable-car',
          'wagon-coach-old', 'wagon-caboose', 'wagon-coach-modern', 'wagon-hs-coach',
          'wagon-boxcar', 'wagon-tanker', 'wagon-hopper', 'wagon-container']
 
@@ -61,6 +61,8 @@ PRESETS = [
     ('Euro high-speed', ['electric-hs', 'wagon-hs-coach', 'wagon-hs-coach']),
     ('City commuter', ['commuter', 'wagon-coach-modern', 'wagon-coach-modern']),
     ('Mixed freight', ['diesel', 'wagon-boxcar', 'wagon-hopper', 'wagon-caboose']),
+    ('New Orleans streetcar', ['streetcar', 'streetcar']),
+    ('SF cable car', ['cable-car', 'cable-car']),
 ]
 preset_btns = ''.join(
     f'<button class="preset" data-i="{i}">{n}</button>' for i, (n, _) in enumerate(PRESETS))
@@ -317,6 +319,6 @@ html = (TPL
   .replace('__PRESET_BTNS__', preset_btns)
   .replace('__MANIFEST__', json.dumps(manifest))
   .replace('__PRESETS__', json.dumps([[n, l] for n, l in PRESETS])))
-out = pathlib.Path('/root/train-gallery.html')
+out = pathlib.Path(__file__).resolve().parent / 'train-gallery.html'
 out.write_text(html)
 print('wrote', out, len(html) // 1024, 'KB')

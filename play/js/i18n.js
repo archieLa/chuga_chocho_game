@@ -12,7 +12,14 @@
       name: 'English',
       voice: 'en',                // BCP-47 prefix for SpeechSynthesis voice matching
       ui: { close: 'CLOSE', open: 'OPEN', settings: 'Settings', done: 'Done',
-            language: 'Language', counter: 'Show car counter', device: 'Physical gate' },
+            language: 'Language', counter: 'Show car counter', device: 'Physical gate',
+            map: 'Map', train: 'My train', back: 'Back', pickPlace: 'Where shall we go?',
+            engine: 'Engine', wagon: 'Wagon', colour: 'Colour', ride: 'Ride!' },
+      // Spoken once when the game opens, over the map. `sayAs` is what the voice is
+      // given (the brand sound respelled so this language's TTS pronounces it);
+      // `text` is what a reader sees. Keep the brand sound itself untranslated.
+      welcome: { text: "Let's explore the United States. Time to ride… chuga chuga choo choo!",
+                 sayAs: "Let's explore the United States. Time to ride... chuga chuga choo choo!" },
       colors: { red:'red', blue:'blue', yellow:'yellow', green:'green', purple:'purple', orange:'orange' },
       numbers: ['zero','one','two','three','four','five','six','seven','eight','nine','ten'],
       shapes: { circle:'circle', triangle:'triangle', square:'square', star:'star' },
@@ -23,7 +30,11 @@
       name: 'Polski',
       voice: 'pl',
       ui: { close: 'ZAMKNIJ', open: 'OTWÓRZ', settings: 'Ustawienia', done: 'Gotowe',
-            language: 'Język', counter: 'Pokaż licznik aut', device: 'Fizyczna brama' },
+            language: 'Język', counter: 'Pokaż licznik aut', device: 'Fizyczna brama',
+            map: 'Mapa', train: 'Mój pociąg', back: 'Wróć', pickPlace: 'Dokąd jedziemy?',
+            engine: 'Lokomotywa', wagon: 'Wagon', colour: 'Kolor', ride: 'Jedziemy!' },
+      welcome: { text: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę… chuga chuga choo choo!',
+                 sayAs: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę... czuga czuga czu czu!' },
       colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy' },
       numbers: ['zero','jeden','dwa','trzy','cztery','pięć','sześć','siedem','osiem','dziewięć','dziesięć'],
       shapes: { circle:'koło', triangle:'trójkąt', square:'kwadrat', star:'gwiazda' },

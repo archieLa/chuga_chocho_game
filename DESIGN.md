@@ -2,7 +2,7 @@
 
 *A free, open-source, bilingual (English + Polish) learning game for young children, grown from the original "crossing gate" train game.*
 
-Status: **Phase 1 in progress** · Live at https://archiela.github.io/chuga_chocho_game/ · Last updated: 2026-07-28
+Status: **Phase 1 — art complete, engine next** · Live at https://archiela.github.io/chuga_chocho_game/ · Last updated: 2026-07-29
 
 **Companion docs:** `SCENE_GUIDE.md` (how to author a location scene) · `CLAUDE.md` (build brief + art conventions for coding agents).
 
@@ -19,6 +19,14 @@ A gentle, screen-friendly train game for kids roughly **ages 3–5** that teache
 - **Language** — every prompt is spoken aloud in **English (default) or Polish**, more languages later.
 
 It runs in any browser with no install, is free to download, is playable directly on a public website, and can optionally drive a **real physical crossing gate** over the local network.
+
+### Why it exists
+
+The game started as something one dad built for his son. It is being opened up so that any
+kid can play it for nothing, and so that whatever it raises goes to a **children's hospital**.
+That is the point of the project, and it sets the bar for the work: the art gets iterated
+until it is genuinely good, the game never nags or upsells, and nothing about it costs a
+family anything. When a decision is close, pick the one that is better for the kids.
 
 ## 2. Design principles
 
