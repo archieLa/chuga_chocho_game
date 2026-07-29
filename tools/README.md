@@ -20,7 +20,9 @@ Python scripts need only Python 3 (standard library).
 | `build-gallery.py` | Builds **`tools/train-gallery.html`** (committed) — an inspection page with every vehicle (wheels turning, colours changeable) and preset consists running across the Colorado scene. Self-contained; opens from disk. | `python3 tools/build-gallery.py` |
 | `gen-scenes.py` | Generates the location scenes into **`play/assets/scenes/`**. Owns the shared furniture (road, track, both crossing gates) so every scene lines up exactly; each scene supplies only artwork. `colorado.svg` is hand-authored and NOT generated. | `python3 tools/gen-scenes.py` |
 | `build-scene-gallery.py` | Builds **`tools/scene-gallery.html`** (committed) — all eight locations with their trains running through them. The quickest way to spot a scene bug. | `python3 tools/build-scene-gallery.py` |
+| `inline-assets.py` | Bakes every scene, every vehicle and `manifest.json` into **`play/js/asset-data.js`** so the game runs from `file://` (where `fetch()` is blocked). Namespaces the ids inside each asset so several scenes can be mounted at once without their `<defs>` colliding. **Re-run after ANY change to `play/assets/`.** | `python3 tools/inline-assets.py` |
 | `shot.js` | Renders any SVG or HTML file to PNG so you can *look* at it. Reports page errors too. | `node tools/shot.js <input> [out.png] [w] [h]` |
+| `shot.py` | The same review loop without Node: drives headless Google Chrome over the DevTools Protocol using only the Python standard library. Can click things and run JS before the shot, and prints every console message (exit code 1 if any were errors or warnings). | `python3 tools/shot.py play/index.html out.png --wait 3 --click '#closeBtn'` |
 
 ## The two galleries are committed
 
@@ -36,7 +38,8 @@ the art actually looks like.
 - **`steam.svg` is hand-authored** — edit `play/assets/trains/steam.svg` directly. Everything else in `play/assets/trains/` is generated, so changes there are overwritten by `gen-trains.py`.
 - **`map-data.js` is generated.** Never edit it by hand; change `gen-map.js` and re-run. It exists because `fetch()` is blocked on `file://`, so the map has to be inlined as JS for the game to work when opened directly from disk.
 - **Scenes are generated** by `gen-scenes.py` — except `colorado.svg`, which is hand-authored as the style reference. Edit the generator, not the output. See `SCENE_GUIDE.md`.
-- **Always render and look** after an art change — `shot.js` exists for exactly this. Sliced trees and floating wheels don't show up in a diff.
+- **`asset-data.js` is generated** by `inline-assets.py`. The game reads the inlined copy, never the files in `play/assets/`, so **art you change does not reach the game until you re-run the generator.** If a scene edit "does nothing", this is why.
+- **Always render and look** after an art change — `shot.js` (or `shot.py` if you have no Node) exists for exactly this. Sliced trees and floating wheels don't show up in a diff.
 
 ## Typical loops
 
