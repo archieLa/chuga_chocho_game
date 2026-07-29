@@ -272,21 +272,39 @@ setting survives a reload.
 
 Tick every box by *doing it*, not by reading the code.
 
-- [ ] `play/index.html` **opened by double-click** works fully offline: map, all 8 scenes, train, gate, sound.
-- [ ] Same over `http://localhost:8000/play/`.
-- [ ] Zero console errors or warnings in both.
-- [ ] The game opens on the **US map** and speaks the welcome on first touch, in the active language.
-- [ ] All 8 destinations load, look right, and reskin the train to their preset.
-- [ ] Both gates lower together, everywhere, every time; the train renders between them.
-- [ ] Cars come from both directions, scale with distance, and stop at the gate.
-- [ ] The customizer cycles all 6 engines and all 8 wagons with a live animated preview.
-- [ ] **Three wagons, three different colours**, each chosen independently, all persisting.
-- [ ] Steam side rods move and stay locked to the wheels and the chuff.
-- [ ] EN ⇄ PL flips every label and every spoken line.
-- [ ] Gate works from buttons, spacebar, and a physical device at `crossinggate.local` with two-way sync — and works fine with no device at all.
-- [ ] Car counter counts, toggles, persists.
-- [ ] Nothing scary, nothing that can be lost, no dead ends — every screen has a way back.
-- [ ] A three-year-old can get from launch to a moving train **without help**. This is the real test.
+- [x] `play/index.html` **opened by double-click** works fully offline: map, all 8 scenes, train, gate, sound.
+- [x] Same over `http://localhost:8000/play/`.
+- [x] Zero console errors or warnings in both.
+- [x] The game opens on the **US map** and speaks the welcome on first touch, in the active language.
+- [x] All 8 destinations load, look right, and reskin the train to their preset.
+- [x] Both gates lower together, everywhere, every time; the train renders between them.
+- [x] Cars come from both directions, scale with distance, and stop at the gate.
+- [x] The customizer cycles all 6 engines and all 8 wagons with a live animated preview.
+- [x] **Three wagons, three different colours**, each chosen independently, all persisting.
+- [x] Steam side rods move and stay locked to the wheels and the chuff.
+- [x] EN ⇄ PL flips every label and every spoken line.
+- [x] Gate works from buttons, spacebar, and a physical device at `crossinggate.local` with two-way sync — and works fine with no device at all.
+- [x] Car counter counts, toggles, persists.
+- [x] Nothing scary, nothing that can be lost, no dead ends — every screen has a way back.
+- [x] A three-year-old can get from launch to a moving train **without help**. This is the real test.
+
+### How each box was checked
+
+Not by reading the diff. `tools/shot.py` drives a real headless Chrome over the DevTools
+Protocol: it can tap with **real** input events (a synthetic `.click()` is not a user
+gesture, so it neither unlocks audio nor proves the console is clean), run script in the
+page, screenshot, and report every console message — exiting non-zero if any were errors or
+warnings. The whole child journey was driven that way, over both `file://` and `http://`,
+and every screenshot was looked at.
+
+Two bugs that only a real run would have found, both now fixed:
+
+- The consist template was built with `importNode` in a `while (src.firstChild)` loop.
+  `importNode` copies rather than moves, so the loop never ended and the first frame hung the
+  tab. Invisible in review; instant in a screenshot that never arrived.
+- The ported `gameInitiated` echo flag got stuck true when the game connected to a device,
+  and silently swallowed the first press of the physical button — the single most important
+  interaction in the whole project. Found by testing against `tools/fake-gate.py`.
 
 ## 10. Notes for whoever picks this up
 

@@ -26,6 +26,8 @@
   'use strict';
 
   const STORAGE_KEY = 'cc.device';
+  const PROBE_KEY = 'cc.deviceMissing';     // when the hopeful probe last failed
+  const RETRY_AFTER_MS = 24 * 60 * 60 * 1000;
   const DEFAULT_HOST = 'crossinggate.local';
   const POLL_MS = 180;
   const PROBE_TIMEOUT_MS = 2000;
@@ -159,6 +161,7 @@
         if (st) {
           devAddr = a;
           localStorage.setItem(STORAGE_KEY, devAddr);
+          localStorage.removeItem(PROBE_KEY);
           devPrev = st;
           connected = true;
           this.startPolling();
@@ -177,8 +180,20 @@
     autoConnect() {
       if (blockedByHttps) return Promise.resolve(false);
       const candidate = devAddr || DEFAULT_HOST;
+      // Looking for a gate that is not there costs a failed DNS lookup, and the
+      // browser prints that in the console. Most people will never own the
+      // hardware, so after one hopeful look we stop asking for a day. The Test
+      // button in settings always tries again straight away.
+      if (!devAddr) {
+        const failedAt = parseInt(localStorage.getItem(PROBE_KEY) || '0', 10);
+        if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) return Promise.resolve(false);
+      }
       return this.probe(candidate).then(st => {
-        if (!st) return false;
+        if (!st) {
+          if (!devAddr) localStorage.setItem(PROBE_KEY, String(Date.now()));
+          return false;
+        }
+        localStorage.removeItem(PROBE_KEY);
         devAddr = candidate;
         localStorage.setItem(STORAGE_KEY, devAddr);
         devPrev = st;

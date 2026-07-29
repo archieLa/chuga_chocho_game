@@ -441,26 +441,38 @@
       start();
     },
 
-    /** Swap the backdrop, carrying the train and the gate state across. */
+    /** Swap the backdrop. The gate is deliberately untouched: if it was down it
+        stays down, right through the cross-fade, so a real device can never
+        desync because a child hopped to another state mid-crossing. */
     show(loc, opts) {
       const next = mount(loc);
-      if (!next || next === currentScene) {
-        if (next && !currentScene) currentScene = next;
-        else return;
-      }
+      if (!next || next === currentScene) return;
       const prev = currentScene;
       currentScene = next;
       clearSmoke();
       clearCars();
       buildConsist();
       setTrainVisible(train.active);
-      next.svg.classList.add('is-on');
-      if (prev && prev !== next) {
-        prev.svg.classList.remove('is-on');
-        prev.svg.querySelectorAll('.cc-car').forEach(c => c.parentNode.removeChild(c));
+      // Put the arriving scene on top — it may have been mounted long ago and
+      // be sitting underneath — then fade it in over the one being left, and
+      // only switch the old one off once the fade is over. Fading both at once
+      // would show the empty stage through the middle of the journey.
+      stage.appendChild(next.svg);
+      if (opts && opts.instant) {
+        next.svg.classList.add('is-instant');
+        next.svg.classList.add('is-on');
+        requestAnimationFrame(() => next.svg.classList.remove('is-instant'));
+      } else {
+        next.svg.classList.remove('is-instant');
+        // Make the browser notice the new scene at opacity 0 before we turn it
+        // on, or the swap jumps instead of fading.
+        void next.svg.getBoundingClientRect().width;
+        next.svg.classList.add('is-on');
       }
-      if (opts && opts.instant) next.svg.classList.add('is-instant');
-      else next.svg.classList.remove('is-instant');
+      if (prev && prev !== next) {
+        prev.svg.querySelectorAll('.cc-car').forEach(c => c.parentNode.removeChild(c));
+        setTimeout(() => { if (currentScene !== prev) prev.svg.classList.remove('is-on'); }, 480);
+      }
       drawGates(performance.now());
     },
 

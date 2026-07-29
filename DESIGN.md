@@ -114,11 +114,20 @@ Counts **road cars that pass before the gate closes**, with a settings toggle to
 - **English default; Polish day one**, via a settings toggle.
 - Drives UI labels, button text and all narration (numbers, colours, letters, place names, praise).
 - Browser `SpeechSynthesis` — no audio files.
+- **Voice fallback:** a device may have no Polish voice at all. Silence would read as "the
+  game is broken", so `speech.js` falls back — a local voice for the language, then any voice
+  for it, then the default voice saying the words anyway.
+- **Per-utterance language override.** `speech.say(text, { lang: 'en' })` speaks one line in
+  another language. Used for place names that stay English (see the decisions log in §11).
 - **More languages (e.g. Spanish) later** — per-language dictionaries, so adding one is data, not code.
 
 ## 9. Physical crossing gate
 
-`GET /open` · `GET /close` · `GET /status` → `{ "state": "up" | "down" | "raising" | "lowering" }`. The game polls `/status`, so the physical button drives the screen and vice-versa. Configured in settings.
+`GET /open` · `GET /close` · `GET /status` → `{ "state": "up" | "down" | "raising" | "lowering" }`. The game polls `/status` every 180 ms, so the physical button drives the screen and vice-versa. Found automatically at `crossinggate.local`; overridable in settings.
+
+The firmware must send **`Access-Control-Allow-Origin`** on `/status` or the browser will not
+let the game read it back. `tools/fake-gate.py` mocks the whole API (plus `/press`, the
+physical button) for testing without hardware.
 
 ## 10. Public website (GitHub Pages)
 
@@ -126,19 +135,52 @@ The repo *is* the site. **Landing page** (`/`) — description, screenshot, big 
 
 ## 11. Roadmap
 
-### Phase 1 — Free Play (current)
+### Phase 1 — Free Play ✅ complete
 
-1. Graphics overhaul — SVG storybook engine with parallax.
-2. Fix the gate — arms both sides, crossbuck, flashing lights, bell.
-3. World background system — scenery reskins by location.
-4. US map navigation *(map + picker built; reskin pending)*.
-5. Train customizer — engine type, colours, wagon type; presets with persistent per-instance overrides.
-6. Car counter with show/hide toggle.
+1. ✅ Graphics overhaul — the committed SVG scenes are mounted and animated.
+2. ✅ The gate — both scenes' gates, arms either side, crossbuck, flashing lamps, bell.
+3. ✅ World background system — scenery reskins by location, cross-faded.
+4. ✅ US map navigation — and the map is the game's front door.
+5. ✅ Train customizer — engine, three wagons, per-instance colour, all persisted.
+6. ✅ Car counter with show/hide toggle.
 
-Plus: English + Polish speech and toggle, settings panel, `localStorage`, always-on button + physical-gate control, public landing page.
+Plus: English + Polish speech and toggle, settings panel, `localStorage`, always-on buttons + physical-gate two-way sync, public landing page.
 
-**Done:** repo scaffold + `CLAUDE.md` · GitHub repo & Pages live · offline US map + picker (state-name labels, city chooser) · **Colorado reference scene + `SCENE_GUIDE.md`** · **all 12 locomotives and wagons + generators + gallery**.
-**Next:** the scene engine — render `colorado.svg` and drive a real train across it, replacing the placeholder in `play/js/scene.js`.
+**Next:** Phase 2 — the mission modes.
+
+#### Decisions taken while building the engine
+
+These were open questions the plan left to whoever built it. Recorded here so the next
+contributor inherits the reasoning rather than re-deriving it.
+
+- **Assets are inlined by a generator, not fetched.** `tools/inline-assets.py` emits
+  `play/js/asset-data.js`, the same solution `map-data.js` already used for the map. It also
+  **namespaces every id inside each asset** (`s-seattle-sky`, `v-steam-boilerShade`), because
+  the game keeps several scenes mounted at once and SVG resolves `url(#sky)` document-wide —
+  without namespacing, Seattle silently borrows Colorado's sky. **Re-run it after any art change.**
+- **Scenes are cached, never re-parsed.** Returning to a place you have already visited is
+  instant, which is how a three-year-old uses a map.
+- **The screen adopts the physical gate's position at connect,** not the other way round. A
+  real arm swinging by itself the moment the game loads is a surprise; the physical thing in
+  the room wins.
+- **The hopeful `crossinggate.local` probe backs off for a day after it fails.** Looking for
+  hardware that is not there costs a failed DNS lookup, and the browser prints that in the
+  console on every launch. The Test button in settings always retries immediately.
+- **The device firmware must send `Access-Control-Allow-Origin`.** Without it the game can
+  command the gate but never read its state, so the physical button appears dead.
+  `tools/fake-gate.py` is a stand-in that gets this right.
+- **Place names are spoken by a voice that matches the name, not the UI language**
+  (open decision #6, now settled). Names with no Polish form stay English *and are spoken by
+  an English voice* — "Rocky Mountains" read with Polish phonetics is not recognisable. Names
+  `world.js` does translate (Nowy Jork, Nowy Orlean, Wielki Kanion) are spoken in Polish.
+  State names on the map are always English: they are American proper nouns.
+- **The two gate buttons stay on every screen**, shrunk into the corner on the map, the
+  customizer and settings. The hard rule says the gate is never unavailable, and a child
+  mashing the button while the map is open should still get the bell.
+- **The car counter defaults to ON.** `BUILD_PLAN.md` §H could be read either way; a counter
+  that visibly counts is a small free counting lesson, and it is one tap to hide.
+- **Closing the gate calls a train**, and holding it closed keeps them coming. Opening the
+  gate never cancels one — nothing the child does can go wrong.
 
 ### Phase 2 — Learning Modes
 

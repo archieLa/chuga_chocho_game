@@ -61,19 +61,32 @@
         this.close();
       });
 
-      // One delegated handler covers every supported state.
+      // One delegated handler covers the whole map. A tap on a state we can
+      // travel to opens its places; a tap on any OTHER state still says its
+      // name out loud, because a three-year-old will tap Texas and getting
+      // nothing back is the one thing this game never does.
       const svg = o.querySelector('#us-map');
-      svg.addEventListener('click', (e) => {
-        const target = e.target.closest && e.target.closest('.state--supported');
-        if (target) this.pickState(target.getAttribute('data-name'));
-      });
+      const hit = (e) => {
+        const el = e.target.closest && e.target.closest('.state');
+        if (!el) return;
+        const name = el.getAttribute('data-name');
+        if (el.classList.contains('state--supported')) this.pickState(name);
+        else this.nameState(el, name);
+      };
+      svg.addEventListener('click', hit);
       svg.addEventListener('keydown', (e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && e.target.classList
-            && e.target.classList.contains('state--supported')) {
-          e.preventDefault();
-          this.pickState(e.target.getAttribute('data-name'));
-        }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hit(e); }
       });
+    },
+
+    /** A state we have no scene for yet: say its name and give it a moment of
+        colour, so the tap is still worth something. */
+    nameState(el, name) {
+      if (!name) return;
+      CC.audio.blip();
+      CC.speech && CC.speech.say(name, { interrupt: true, lang: 'en' });
+      el.classList.add('state--said');
+      setTimeout(() => el.classList.remove('state--said'), 1100);
     },
 
     relabel() {

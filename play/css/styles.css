@@ -104,8 +104,10 @@ body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
 .map-hint{font-size:3vmin;color:#a9bcdd;}
 .state-name{font-size:4.6vmin;font-weight:bold;color:#ffd166;letter-spacing:.02em;
   text-shadow:0 2px 6px rgba(0,0,0,.55);}
-#us-map .state--supported{cursor:pointer;}
+#us-map .state{cursor:pointer;}
 #us-map .state--picked{fill:#ffd166;}
+/* A state with no scene yet still lights up and says its name when tapped. */
+#us-map .state--said{fill:#9ec9e8;}
 .city-btn{border:none;background:#5dd959;color:#fff;font-weight:bold;font-size:3.6vmin;
   padding:1.5vh 5vw;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 #1a7a1a;}
 .city-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #1a7a1a;}

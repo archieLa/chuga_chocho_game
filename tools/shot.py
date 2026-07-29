@@ -142,13 +142,26 @@ def describe(arg):
 
 
 def main():
+    class Step(argparse.Action):
+        """Collect --eval/--click/--tap into ONE list, in the order given on the
+        command line. Separate lists would silently reorder the steps, and a tap
+        that happens before the eval that was meant to set it up is a test that
+        quietly lies to you."""
+        def __call__(self, parser, ns, value, option_string=None):
+            ns.steps = getattr(ns, 'steps', None) or []
+            ns.steps.append((option_string.lstrip('-'), value))
+
     ap = argparse.ArgumentParser()
     ap.add_argument('input')
     ap.add_argument('output', nargs='?')
     ap.add_argument('--size', default='1280x800')
     ap.add_argument('--wait', type=float, default=1.5, help='seconds to let the page run')
-    ap.add_argument('--eval', action='append', default=[], help='JS to run before the shot')
-    ap.add_argument('--click', action='append', default=[], help='CSS selector to click')
+    ap.add_argument('--eval', action=Step, help='JS to run, in command-line order')
+    ap.add_argument('--click', action=Step, help='CSS selector to click (synthetic)')
+    ap.add_argument('--tap', action=Step,
+                    help='CSS selector to tap with a REAL input event. Unlike --click this '
+                         'counts as a user gesture, so audio and speech are allowed to start — '
+                         'which is the only way to check the console the way a child would see it.')
     ap.add_argument('--serve', action='store_true', help='serve over http instead of file://')
     args = ap.parse_args()
 
@@ -200,21 +213,38 @@ def main():
         page.call('Page.navigate', url=url)
         page.pump(max(args.wait, 0.6))
 
-        for sel in args.click:
-            page.call('Runtime.evaluate', expression=(
-                "(function(){var e=document.querySelector(%s);"
-                "if(!e) throw new Error('no element for %s');"
-                "e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));"
-                "e.click();return true})()" % (json.dumps(sel), sel)), awaitPromise=True)
-            page.pump(0.7)
-        for js in args.eval:
-            r = page.call('Runtime.evaluate', expression=js, awaitPromise=True, returnByValue=True)
-            if r.get('exceptionDetails'):
-                print('eval threw:', r['exceptionDetails'].get('text'), file=sys.stderr)
-                code = 1
-            elif 'result' in r and 'value' in r['result']:
-                print('eval:', json.dumps(r['result']['value'])[:2000])
-            page.pump(0.5)
+        for kind, value in getattr(args, 'steps', None) or []:
+            if kind == 'tap':
+                box = page.call('Runtime.evaluate', returnByValue=True, expression=(
+                    "(function(){var e=document.querySelector(%s); if(!e) return null;"
+                    "var r=e.getBoundingClientRect();"
+                    "return {x:r.left+r.width/2, y:r.top+r.height/2}})()" % json.dumps(value)))
+                pos = box.get('result', {}).get('value')
+                if not pos:
+                    print('no element to tap for ' + value, file=sys.stderr)
+                    code = 1
+                    continue
+                for ev in ('mousePressed', 'mouseReleased'):
+                    page.call('Input.dispatchMouseEvent', type=ev, x=pos['x'], y=pos['y'],
+                              button='left', clickCount=1,
+                              buttons=1 if ev == 'mousePressed' else 0)
+                page.pump(0.7)
+            elif kind == 'click':
+                page.call('Runtime.evaluate', awaitPromise=True, expression=(
+                    "(function(){var e=document.querySelector(%s);"
+                    "if(!e) throw new Error('no element for %s');"
+                    "e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));"
+                    "e.click();return true})()" % (json.dumps(value), value)))
+                page.pump(0.7)
+            else:
+                r = page.call('Runtime.evaluate', expression=value,
+                              awaitPromise=True, returnByValue=True)
+                if r.get('exceptionDetails'):
+                    print('eval threw:', r['exceptionDetails'].get('text'), file=sys.stderr)
+                    code = 1
+                elif 'result' in r and 'value' in r['result']:
+                    print('eval:', json.dumps(r['result']['value'])[:2000])
+                page.pump(0.5)
 
         page.pump(0.6)
         shot = page.call('Page.captureScreenshot', format='png')
