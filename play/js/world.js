@@ -53,13 +53,26 @@
     },
     get current() { return LOCATIONS.find(l => l.id === currentId) || LOCATIONS[0]; },
 
+    /** The place name in the active language, plus which voice should say it.
+        Names that have no Polish form stay English (Rocky Mountains, Seattle),
+        and an English name read by a Polish voice is not recognisable — so it
+        is spoken by an English voice. See DESIGN.md §8. */
+    spoken(loc, code) {
+      const lang = code || CC.i18n.code;
+      const name = (loc.say && loc.say[lang]) || loc.city || loc.state;
+      const untranslated = loc.say && loc.say.en === name && lang !== 'en';
+      return { text: name, lang: untranslated ? 'en' : lang };
+    },
+
     select(id, opts) {
       const loc = LOCATIONS.find(l => l.id === id);
       if (!loc) return;
       currentId = id;
       localStorage.setItem(STORAGE_KEY, id);
-      const name = (loc.say && loc.say[CC.i18n.code]) || loc.city || loc.state;
-      if (!opts || opts.speak !== false) CC.speech && CC.speech.say(name, { interrupt: true });
+      const s = this.spoken(loc);
+      if (!opts || opts.speak !== false) {
+        CC.speech && CC.speech.say(s.text, { interrupt: true, lang: s.lang });
+      }
       CC.emit && CC.emit('location', loc);
     },
   };

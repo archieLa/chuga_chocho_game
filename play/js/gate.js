@@ -1,63 +1,194 @@
-/* gate.js — the crossing-gate state machine + physical device link.
-   THE GATE IS ALWAYS CONTROLLABLE (buttons AND physical endpoint), in every mode.
-   See DESIGN.md §9 and CLAUDE.md hard-rule #3.
+/* gate.js — the crossing-gate state machine + the link to a real crossing gate.
 
-   Port the proven animation + audio + two-way-sync logic from
-   reference/crossing_playtime.html. This stub defines the interface so the rest
-   of the game can wire to it now.
+   THE GATE IS ALWAYS CONTROLLABLE — the two on-screen buttons, the spacebar, and
+   the physical device, in every mode, on every screen. Nothing in this game ever
+   disables it. See CLAUDE.md hard-rule #3.
 
-   Physical device HTTP API:
-     GET /open  · GET /close · GET /status -> { state: up|down|raising|lowering }
+   Ported from reference/crossing_playtime.html, including the one non-obvious
+   bit: the `gameInitiated` flag. The device echoes back the state we just asked
+   it for, and without the flag that echo reads as "the physical button was
+   pressed" and the two ends fight each other.
+
+   THE DEVICE, AND WHAT mDNS REALLY MEANS IN A BROWSER
+   The gate advertises itself on the LAN as `crossinggate.local`. There is no
+   JavaScript mDNS API — you cannot enumerate devices from a page. What works is
+   using the `.local` hostname directly and letting the operating system resolve
+   it via Bonjour. So "auto-connect" here means: quietly try
+   http://crossinggate.local/status once at launch, and if it answers, remember it.
+
+   Device HTTP API:  GET /open · GET /close · GET /status -> { state: up|down|raising|lowering }
 */
 (function (CC) {
   'use strict';
 
   const STORAGE_KEY = 'cc.device';
-  let state = 'open';                 // open | closing | closed | opening
-  let angle = 0;                      // 0 = up, 90 = down (for rendering)
-  let devAddr = localStorage.getItem(STORAGE_KEY) || '';
+  const DEFAULT_HOST = 'crossinggate.local';
+  const POLL_MS = 180;
+  const PROBE_TIMEOUT_MS = 2000;
 
-  function base() {
-    if (!devAddr) return null;
-    return (devAddr.startsWith('http') ? devAddr : 'http://' + devAddr).replace(/\/+$/, '');
+  let state = 'open';                 // open | closing | closed | opening
+  let angle = 0;                      // 0 = up, 90 = down (what the scene draws)
+  let devAddr = localStorage.getItem(STORAGE_KEY) || '';
+  let devPrev = 'up';
+  let polling = false;
+  let gameInitiated = false;
+  let connected = false;
+
+  // GitHub Pages is HTTPS, and a browser will not let an HTTPS page talk to
+  // http://crossinggate.local. Nothing we can do about it from the page; the
+  // settings panel says so in one plain sentence instead of failing silently.
+  const blockedByHttps = location.protocol === 'https:';
+
+  function base(addr) {
+    const a = (addr == null ? devAddr : addr).trim();
+    if (!a) return null;
+    return (/^https?:\/\//.test(a) ? a : 'http://' + a).replace(/\/+$/, '');
   }
-  function devSend(ep) { const b = base(); if (b) fetch(b + ep).catch(() => {}); }
+
+  /** fetch() with a timeout — a missing device must never hang the game. */
+  function ask(url, ms) {
+    if (blockedByHttps) return Promise.reject(new Error('https'));
+    if (typeof AbortController === 'undefined') return fetch(url);
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), ms || PROBE_TIMEOUT_MS);
+    return fetch(url, { signal: c.signal }).finally(() => clearTimeout(t));
+  }
+
+  function send(ep) {
+    const b = base();
+    if (!b) return;
+    ask(b + ep, 1200).catch(() => {});
+  }
+
+  function setState(next, fromDevice) {
+    state = next;
+    CC.emit && CC.emit('gate', { state: state, fromDevice: !!fromDevice });
+  }
+
+  /** A state the device reported. Only act on changes the DEVICE started. */
+  function onDeviceState(reported) {
+    if (!reported || reported === devPrev) { devPrev = reported || devPrev; return; }
+    const prev = devPrev;
+    devPrev = reported;
+    if (gameInitiated) { gameInitiated = false; return; }   // our own echo
+    const wentDown = (reported === 'down' || reported === 'lowering') && (prev === 'up' || prev === 'raising');
+    const wentUp = (reported === 'up' || reported === 'raising') && (prev === 'down' || prev === 'lowering');
+    if (wentDown) gate.close(true);
+    if (wentUp) gate.open(true);
+  }
 
   const gate = {
     get state() { return state; },
     get angle() { return angle; },
     isDown() { return state === 'closed' || state === 'closing'; },
+    /** True the moment the gate starts to come down — that is when cars stop. */
+    isBlocking() { return state !== 'open'; },
 
     close(fromDevice) {
       if (state === 'open' || state === 'opening') {
-        state = 'closing';
-        CC.emit && CC.emit('gate', { state, fromDevice: !!fromDevice });
-        if (!fromDevice) devSend('/close');
+        setState('closing', fromDevice);
+        if (!fromDevice) { gameInitiated = true; send('/close'); }
       }
     },
     open(fromDevice) {
       if (state === 'closed' || state === 'closing') {
-        state = 'opening';
-        CC.emit && CC.emit('gate', { state, fromDevice: !!fromDevice });
-        if (!fromDevice) devSend('/open');
+        setState('opening', fromDevice);
+        if (!fromDevice) { gameInitiated = true; send('/open'); }
       }
     },
     toggle() { this.isDown() ? this.open() : this.close(); },
 
-    /** Advance the animation each frame; call from the render loop. */
+    /** Advance the arm animation. dt is milliseconds; 0.22°/ms matches the
+        reference game, which is about four-tenths of a second end to end. */
     tick(dt) {
-      if (state === 'closing') { angle = Math.min(90, angle + dt * 0.22); if (angle >= 90) { state = 'closed'; CC.emit && CC.emit('gate', { state }); } }
-      else if (state === 'opening') { angle = Math.max(0, angle - dt * 0.22); if (angle <= 0) { state = 'open'; CC.emit && CC.emit('gate', { state }); } }
+      if (state === 'closing') {
+        angle = Math.min(90, angle + dt * 0.22);
+        if (angle >= 90) setState('closed');
+      } else if (state === 'opening') {
+        angle = Math.max(0, angle - dt * 0.22);
+        if (angle <= 0) setState('open');
+      }
     },
 
-    // --- physical device config + polling (two-way sync) ---
+    // --- the physical device ------------------------------------------------
     get address() { return devAddr; },
-    setAddress(addr) { devAddr = (addr || '').trim(); localStorage.setItem(STORAGE_KEY, devAddr); },
-    async testDevice() { const b = base(); if (!b) return null; try { const r = await fetch(b + '/status'); return await r.json(); } catch (e) { return null; } },
+    get connected() { return connected; },
+    get httpsBlocked() { return blockedByHttps; },
+    get defaultHost() { return DEFAULT_HOST; },
 
+    setAddress(addr) {
+      devAddr = (addr || '').trim();
+      localStorage.setItem(STORAGE_KEY, devAddr);
+      connected = false;
+      if (devAddr) this.startPolling();
+    },
+
+    /** Ask a candidate address for its state. Resolves to the state or null. */
+    probe(addr) {
+      const b = base(addr);
+      if (!b) return Promise.resolve(null);
+      return ask(b + '/status', PROBE_TIMEOUT_MS)
+        .then(r => r.json())
+        .then(j => (j && j.state) || 'up')
+        .catch(() => null);
+    },
+
+    /** Settings' Test button. Saves the address when it answers. */
+    testDevice(addr) {
+      const a = (addr || '').trim() || DEFAULT_HOST;
+      return this.probe(a).then(st => {
+        if (st) {
+          devAddr = a;
+          localStorage.setItem(STORAGE_KEY, devAddr);
+          devPrev = st;
+          connected = true;
+          this.startPolling();
+        }
+        return st;
+      });
+    },
+
+    /** Called once at launch. If nothing is stored, quietly try the default
+        hostname — in the normal case a parent never types anything. Failure is
+        silent by design: no spinner, no popup, the game is simply unaffected. */
+    autoConnect() {
+      if (blockedByHttps) return Promise.resolve(false);
+      const candidate = devAddr || DEFAULT_HOST;
+      return this.probe(candidate).then(st => {
+        if (!st) return false;
+        devAddr = candidate;
+        localStorage.setItem(STORAGE_KEY, devAddr);
+        devPrev = st;
+        connected = true;
+        // Bring the real gate in line with the screen, so the two start together.
+        gameInitiated = true;
+        send(this.isDown() ? '/close' : '/open');
+        this.startPolling();
+        CC.emit && CC.emit('device', { connected: true, address: devAddr });
+        return true;
+      });
+    },
+
+    /** Poll /status forever so the PHYSICAL button also drives the screen.
+        Keeps running when the device drops out, so it reconnects on its own. */
     startPolling() {
-      // TODO (Phase 1.1): port polling from reference game. Poll /status; when the
-      // DEVICE initiates a change (physical button), drive close(true)/open(true).
+      if (polling || blockedByHttps) return;
+      polling = true;
+      const tick = () => {
+        const b = base();
+        if (!b) { polling = false; return; }
+        ask(b + '/status', 1200)
+          .then(r => r.json())
+          .then(j => {
+            if (!connected) { connected = true; CC.emit && CC.emit('device', { connected: true, address: devAddr }); }
+            onDeviceState(j && j.state);
+          })
+          .catch(() => {
+            if (connected) { connected = false; CC.emit && CC.emit('device', { connected: false, address: devAddr }); }
+          })
+          .then(() => { if (polling) setTimeout(tick, POLL_MS); });
+      };
+      tick();
     },
   };
 

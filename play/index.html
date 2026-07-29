@@ -2,44 +2,56 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7ec0ee">
 <title>Chuga Chocho — Play</title>
+<!-- Inline favicon: a browser asks for /favicon.ico otherwise, and over http
+     that is a 404 in the console for no reason. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%9A%82%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="wrap">
-    <!-- The SVG scene lives here. Phase 1.3 replaces the placeholder with storybook art. -->
-    <svg id="scene" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+    <!-- Every location scene is mounted in here, sized by its own viewBox. -->
+    <div id="stage"></div>
 
     <div id="title">🚂 Chuga Chocho!</div>
 
-    <!-- Top-right utility icons (wired up during Phase 1) -->
+    <!-- How many cars have crossed. Hidden from the settings panel. -->
+    <div id="counter" hidden>🚗 0</div>
+
     <div id="topbar">
-      <button id="mapBtn"  class="icon" title="Choose a place">🗺️</button>
-      <button id="trainBtn" class="icon" title="Customize train">🚆</button>
-      <button id="gearBtn" class="icon" title="Settings">⚙️</button>
+      <button id="mapBtn"   class="icon" data-i18n-title="map">🗺️</button>
+      <button id="trainBtn" class="icon" data-i18n-title="train">🚆</button>
+      <button id="gearBtn"  class="icon" data-i18n-title="settings">⚙️</button>
     </div>
 
-    <!-- The two always-available gate controls -->
+    <!-- The two gate controls. They stay on top of every screen on purpose:
+         the gate is never unavailable, whatever else is open. -->
     <div id="controls">
       <button class="big" id="closeBtn"><span class="ico">⬇️</span><span class="lbl" data-i18n="close">CLOSE</span></button>
       <button class="big" id="openBtn"><span class="ico">⬆️</span><span class="lbl" data-i18n="open">OPEN</span></button>
     </div>
 
-    <!-- Settings / map / train panels get injected or toggled by their modules -->
+    <!-- Settings. The map and the train customizer build their own overlays. -->
     <div id="panel" hidden></div>
   </div>
 
-  <!-- Classic scripts (no ES modules) so the game runs by opening this file directly. -->
-  <!-- Load order matters: data & services first, then systems, then the orchestrator. -->
+  <!-- Classic scripts (no ES modules) so the game runs by opening this file
+       directly. Load order: data, then services, then systems, then the
+       orchestrator. asset-data.js must come before anything that draws. -->
   <script src="js/i18n.js"></script>
   <script src="js/speech.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/asset-data.js"></script>
+  <script src="js/rolling.js"></script>
+  <script src="js/trains.js"></script>
   <script src="js/gate.js"></script>
   <script src="js/world.js"></script>
   <script src="js/map-data.js"></script>
   <script src="js/map.js"></script>
-  <script src="js/trains.js"></script>
   <script src="js/scene.js"></script>
+  <script src="js/customizer.js"></script>
   <script src="js/modes.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/main.js"></script>
