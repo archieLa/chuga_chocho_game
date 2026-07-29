@@ -62,13 +62,19 @@
       const p = this.panelEl;
       p.textContent = '';
 
+      // Everything scrolls except Done, which stays pinned at the bottom so
+      // there is always one big obvious way out, on any screen height.
+      const scroll = document.createElement('div');
+      scroll.className = 'set-scroll';
+      p.appendChild(scroll);
+
       const h = document.createElement('h2');
       h.textContent = CC.i18n.t('ui.settings');
-      p.appendChild(h);
+      scroll.appendChild(h);
 
       const list = document.createElement('div');
       list.className = 'set-list';
-      p.appendChild(list);
+      scroll.appendChild(list);
 
       // --- language ---
       list.appendChild(this.row(CC.i18n.t('ui.language'), (box) => {

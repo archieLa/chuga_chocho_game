@@ -64,7 +64,8 @@
       o.innerHTML =
         '<div class="tc-head">' +
           '<span class="tc-title" data-i18n="chooseTrain"></span>' +
-          '<button class="tc-done" data-i18n="done"></button>' +
+          // "Ride!" rather than "Done" — leaving this screen is the good bit.
+          '<button class="tc-done"><span data-i18n="ride"></span> 🚂</button>' +
         '</div>' +
         '<div class="tc-stage">' +
           '<button class="tc-arrow tc-prev" aria-label="◀">◀</button>' +
