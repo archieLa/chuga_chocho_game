@@ -4,7 +4,7 @@ A free, open-source **train crossing game for young kids** (ages ~3–5). Press 
 
 It runs in any web browser, needs no install, and can even drive a **real physical crossing gate** if you build one.
 
-> **▶ Play it online:** _(GitHub Pages link goes here once the repo is published, e.g. `https://<your-username>.github.io/chuga-chocho/`)_
+> **▶ Play it online:** **https://archiela.github.io/chuga_chocho_game/**
 
 ---
 
@@ -31,8 +31,8 @@ Plain **HTML + CSS + JavaScript + SVG**. No framework, no build step required to
 ### Run locally
 
 ```bash
-git clone https://github.com/<your-username>/chuga-chocho.git
-cd chuga-chocho
+git clone https://github.com/archieLa/chuga_chocho_game.git
+cd chuga_chocho_game
 # then either double-click play/index.html, or serve it:
 python3 -m http.server 8000
 # open http://localhost:8000/          → landing page
@@ -44,27 +44,36 @@ A local web server (like the `python3` one above) is recommended over `file://` 
 ### Project layout
 
 ```
-chuga-chocho/
+chuga_chocho_game/
 ├── index.html          # public landing page ("website")
 ├── DESIGN.md           # full vision & roadmap — the source of truth
-├── BUILD_PLAN.md       # the ordered Phase 1 work list + acceptance criteria
+├── BUILD_PLAN.md       # ordered work list: §1–9 the Phase 1 record, §11 the Phase 2 tasks
 ├── CLAUDE.md           # build brief for AI coding agents (read this first)
 ├── CONTRIBUTING.md
 ├── LICENSE             # MIT
 ├── SCENE_GUIDE.md      # how to author a location scene
 ├── reference/          # the original game, kept for porting reference
-├── tools/              # asset generators + the two review galleries
+├── tools/              # asset generators + review helpers (none of it runs in the game)
 │   ├── gen-scenes.py       # → play/assets/scenes/
 │   ├── gen-trains.py       # → play/assets/trains/
 │   ├── gen-map.js          # → play/assets/us-map.svg + play/js/map-data.js
+│   ├── inline-assets.py    # → play/js/asset-data.js   ← re-run after ANY art change
+│   ├── shot.py / shot.js   # render a page, tap it, report the console
+│   ├── fake-gate.py        # stand-in physical gate for testing the sync
 │   ├── scene-gallery.html  # every location, trains running — open it from disk
 │   └── train-gallery.html  # every locomotive and wagon — open it from disk
 └── play/               # the game itself
-    ├── index.html
+    ├── index.html      # ← the game; opens straight from disk
     ├── css/
-    ├── js/             # engine modules (scene, trains, world, modes, speech, gate, settings)
+    ├── js/             # i18n · speech · audio · gate · world · map · trains
+    │                   # rolling · scene · customizer · settings · modes · main
+    │                   # + asset-data.js and map-data.js (both GENERATED)
     └── assets/         # SVG art (scenes, trains, US map)
 ```
+
+> **The one thing that trips people up:** the game reads `play/js/asset-data.js`, never the
+> files in `play/assets/`. Change a scene or a vehicle and re-run
+> `python3 tools/inline-assets.py`, or your edit will not reach the game.
 
 Want to see the art without running anything? Open `tools/scene-gallery.html` or
 `tools/train-gallery.html` straight from disk — both are self-contained.
@@ -80,9 +89,13 @@ directions and queue at the gate, the child can build and colour their own train
 whole thing speaks English or Polish. It runs with no build step, offline, straight from
 `play/index.html`.
 
-Next up is Phase 2 — the mission modes (Count & Close, Letter Hunt, Picture Word).
-`CLAUDE.md` holds the hard rules and art contracts; `DESIGN.md` has the full roadmap
-through Phases 2 and 3; `BUILD_PLAN.md` records the Phase 1 work list and its checklist.
+Next up is **Phase 2 — the mission modes** (Count & Close, Letter Hunt, Picture Word), all of
+them optional layers over Free Play, which stays exactly as it is.
+
+Picking the project up? Read `CLAUDE.md` first — it has the hard rules, the art contracts, a
+map of every engine module and the verify loop. `BUILD_PLAN.md` §11 is the ordered Phase 2
+work list with acceptance criteria (§1–9 are the Phase 1 record and its ticked checklist).
+`DESIGN.md` is the full vision and the roadmap through Phases 2 and 3.
 
 ### The physical crossing gate (optional hardware)
 

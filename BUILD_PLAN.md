@@ -1,10 +1,16 @@
-# Build plan — Phase 1, hand this to a coding agent
+# Build plan — hand this to a coding agent
 
-**Goal: a playable game.** All the art is finished and committed. What is missing is the
-engine that puts it on screen and lets a three-year-old drive it.
+> **Phase 1 (Free Play) is complete and playable.** Every box in §9 is ticked, with a note on
+> how each one was actually checked. **If you are picking this project up now, your work list
+> is §11 — Phase 2, the mission modes.** Sections 1–8 are the Phase 1 record: read them to
+> understand why the engine is shaped the way it is before you change it.
 
-Read `CLAUDE.md` (hard rules, art contracts) and `SCENE_GUIDE.md` (scene geometry) first.
-This file is the ordered work list, the acceptance criteria, and the loop to run.
+**Goal: a playable game.** All the art was finished and committed before Phase 1 began; the
+engine that puts it on screen and lets a three-year-old drive it now exists too.
+
+Read `CLAUDE.md` (hard rules, art contracts, the module map and the verify loop) and
+`SCENE_GUIDE.md` (scene geometry) first. This file is the ordered work list, the acceptance
+criteria, and the loop to run.
 
 ---
 
@@ -311,3 +317,141 @@ Two bugs that only a real run would have found, both now fixed:
 The point of this project is that kids play it for free and the proceeds go to a children's
 hospital. That sets the bar: if something is nearly right, it isn't done. When in doubt,
 make it bigger, louder, friendlier and more forgiving than you think it needs to be.
+
+---
+
+## 11. Phase 2 — the mission modes (start here)
+
+The vision for these is `DESIGN.md` §11. This is the ordered work list, same shape as A–H.
+
+**What you are adding:** three optional, gentle mini-games layered on top of Free Play —
+*Count & Close*, *Letter Hunt*, *Picture Word*. Free Play stays the default and stays exactly
+as it is. A mission never becomes the only way to play.
+
+### The rules that do not change
+
+1. **The gate is never disabled or gated behind a mission.** Both buttons, the spacebar and
+   the physical device keep working at all times, in every mode, including mid-mission. A
+   mission *interprets* the child's gate press; it must never *withhold* it.
+2. **Nothing can be lost or failed.** A close at the "wrong" moment gets a warm "not yet —
+   try the next one" and the mission carries on. No timers, no score to lose, no red X, no
+   sad sound. Re-read hard rule #7 before designing any feedback.
+3. **Every new string goes into BOTH dictionaries** in `i18n.js`, and everything on screen is
+   also spoken. `numbers` and `praise` already exist there; `shapes` exists and is unused.
+4. **Free Play remains the default mode** and is always one tap away. `modes.js` must still
+   boot into `freeplay` when nothing is chosen.
+5. Missions are **stateless across launches** unless you deliberately design otherwise —
+   nothing in a mission should feel like homework a child left unfinished.
+
+### The engine hooks you already have
+
+`CC.on(name, fn)` / `CC.emit(name, payload)`, from `main.js`:
+
+| Event | Payload | Emitted by |
+|---|---|---|
+| `gate` | `{ state, fromDevice }` — `open`/`closing`/`closed`/`opening` | `gate.js` |
+| `carpassed` | the running count (a number) | `scene.js` |
+| `location` | the location object | `world.js` |
+| `train` | the whole consist | `trains.js` |
+| `device` | `{ connected, address }` | `gate.js` |
+| `mode` | the mode id | `modes.js` |
+| `languagechange` | the language code | `i18n.js` |
+| `settings` | the settings object | `settings.js` |
+
+`CC.modes` is a registry with `register(id, mode)`, `activate(id)`, `list()` and `active`; a
+mode is `{ id, start(), stop() }`. Only `freeplay` is registered today. `CC.scene.resetCounter()`
+exists. `CC.speech.say(text, { interrupt, lang })` and `CC.speech.praise()` are there.
+
+### I. Engine hooks the missions need (do this first — it is small)
+
+Count & Close needs to know *which car* passed, and needs the car's colour to be
+**nameable**, and neither is true yet.
+
+- `scene.js` emits `carpassed` with only a running count. Widen the payload to
+  `{ count, colour, key, dir }` — keep `count` so the existing counter in `main.js` keeps
+  working, and note that `main.js` currently does `CC.on('carpassed', n => refreshCounter(n))`,
+  so it must be updated in the same commit.
+- `CAR_COLOURS` in `scene.js` is seven raw hexes that do not line up with anything nameable:
+  they differ from `CC.trains.PALETTE`, and one of them (`#e8e8ee`, white) has no name in
+  `i18n.js` `colors` at all. Rework the car palette into `{ key, hex }` entries whose `key`
+  exists in `i18n` `colors`, so a mission can say "two red cars" in either language. Either
+  drop white or add `white` to both dictionaries — don't leave an unnameable car in a mode
+  whose whole job is naming colours.
+- **Done when:** a mission can subscribe to `carpassed` and speak the colour of the car that
+  just went by, in English and Polish, and the existing car counter still counts correctly.
+
+### J. The missions framework
+
+- A **mode picker**: a new button in the topbar next to 🗺️ 🚆 ⚙️, opening a panel of big
+  cards — Free Play + the three missions — each with a spoken label. Same panel conventions
+  as `customizer.js` and `settings.js` (one big Done, no dead ends).
+- Give a mission somewhere to show its prompt: a **big, friendly banner** area in the scene
+  (top-centre, well clear of the topbar and the gate buttons). Prompt text is always spoken
+  as well as shown.
+- Mission lifecycle in `modes.js`: `start()` subscribes, `stop()` unsubscribes **and clears
+  the banner**. Switching modes must not leak listeners — the current registry never had to
+  care, so check this deliberately.
+- **No-fail feedback**, one shared helper both missions and Free Play can use: right answer →
+  `CC.speech.praise()` + a happy sound; not-yet → a gentle spoken nudge and the mission
+  continues unchanged.
+- **Done when:** the child can pick any of the four modes, see and hear its prompt, switch
+  freely between them and back to Free Play, and the gate keeps working the entire time —
+  and switching modes ten times leaves no duplicate listeners.
+
+### K. Count & Close
+
+*Close the gate after N cars have gone by.*
+
+- Pick a target (`2`–`5` at the easiest level), speak it using `i18n` `numbers` — "let three
+  cars go by, then close the gate."
+- Count `carpassed` events; when the child closes the gate at the right count, praise and set
+  a new target. Closing early is a "not yet", not a failure — the count simply keeps running.
+- Show progress as **big countable objects, not a numeral alone** (three car icons, filling
+  in) — the child is pre-literate.
+- Harder levels add a colour: "let two **red** cars go by" — which is what task I exists for.
+- **Done when:** the target is spoken and shown in both languages, the count is visible as
+  objects, closing at the right moment praises and re-targets, closing early is gentle, and
+  nothing about it can be lost.
+
+### L. Letter Hunt
+
+*Spell a word by closing the gate on each next letter.*
+
+- Show a short word (`TRAIN`, `POCIĄG`) with the letters found so far filled in. Wagons cycle
+  past carrying letters; the child closes the gate when the next needed letter is at the
+  crossing.
+- Speak the letter name and the word each time one lands. Wrong letter → gentle nudge, the
+  letter simply passes by.
+- **Polish needs its own word list and its own letters** (`Ą Ć Ę Ł Ń Ó Ś Ź Ż`) — put both
+  lists in `i18n.js` as data, and check the letters actually render in the chosen font.
+- **Done when:** a word can be spelled end to end in both languages, each letter is spoken,
+  and a wrong close never punishes.
+
+### M. Picture Word
+
+*Close the gate when the word naming the picture appears.*
+
+- Show a picture (start with what you already have — a vehicle from `CC.assets.vehicles`, so
+  you are not authoring art; `CLAUDE.md` still says stop if you find yourself drawing).
+  Candidate words ride past; the child closes on the matching one.
+- Speak the picture's name at the start and on request (tapping the picture re-speaks it).
+- **Done when:** matching works in both languages using existing art, and the picture's name
+  can always be re-heard on demand.
+
+### N. Difficulty and polish
+
+- A difficulty setting in ⚙️ (easy / medium) that adjusts targets, word length and how much
+  is spoken. Default to the easiest.
+- Re-check the whole child journey with `tools/shot.py` over both `file://` and `http://`,
+  screenshot every mode, and confirm zero console errors or warnings.
+
+### Phase 2 definition of done
+
+- [ ] All four modes are reachable from one picker, and Free Play is still the default.
+- [ ] Every prompt is shown **and** spoken, in English and Polish.
+- [ ] The gate works from buttons, spacebar and the physical device in **every** mode.
+- [ ] A wrong answer is never punished — no fail state, no timer, no scary feedback.
+- [ ] Switching modes repeatedly leaks no listeners and leaves no stale banner.
+- [ ] `carpassed` reports a nameable colour and the car counter still counts.
+- [ ] Zero console errors or warnings, `file://` and `http://`, every mode.
+- [ ] A three-year-old can still get from launch to a moving train without help.

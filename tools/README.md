@@ -22,7 +22,8 @@ Python scripts need only Python 3 (standard library).
 | `build-scene-gallery.py` | Builds **`tools/scene-gallery.html`** (committed) — all eight locations with their trains running through them. The quickest way to spot a scene bug. | `python3 tools/build-scene-gallery.py` |
 | `inline-assets.py` | Bakes every scene, every vehicle and `manifest.json` into **`play/js/asset-data.js`** so the game runs from `file://` (where `fetch()` is blocked). Namespaces the ids inside each asset so several scenes can be mounted at once without their `<defs>` colliding. **Re-run after ANY change to `play/assets/`.** | `python3 tools/inline-assets.py` |
 | `shot.js` | Renders any SVG or HTML file to PNG so you can *look* at it. Reports page errors too. | `node tools/shot.js <input> [out.png] [w] [h]` |
-| `shot.py` | The same review loop without Node: drives headless Google Chrome over the DevTools Protocol using only the Python standard library. Can click things and run JS before the shot, and prints every console message (exit code 1 if any were errors or warnings). | `python3 tools/shot.py play/index.html out.png --wait 3 --click '#closeBtn'` |
+| `shot.py` | The same review loop without Node: drives headless Google Chrome over the DevTools Protocol using only the Python standard library. Taps with **real** input events (a synthetic `.click()` is not a user gesture, so it neither unlocks audio nor proves the console is clean), can run JS before the shot, and prints every console message (exit code 1 if any were errors or warnings). | `python3 tools/shot.py play/index.html out.png --wait 3 --click '#closeBtn'` |
+| `fake-gate.py` | A stand-in **physical crossing gate** for testing the two-way sync with no hardware. Speaks the real device API — `/open`, `/close`, `/status` — plus `/press`, which acts as the physical button so you can check that the device moves the screen. Sends the CORS header the real firmware must send. Put `127.0.0.1:8099` in the game's ⚙️ settings. | `python3 tools/fake-gate.py 8099` |
 
 ## The two galleries are committed
 
@@ -64,4 +65,23 @@ Adjust a scene:
 python3 tools/gen-scenes.py
 python3 tools/build-scene-gallery.py
 node tools/shot.js tools/scene-gallery.html scenes.png 1400 1000
+python3 tools/inline-assets.py     # <- or the game will not see your change
+```
+
+Verify a change to the **game** (do both — they fail differently):
+
+```bash
+python3 tools/inline-assets.py                                          # only if art changed
+python3 tools/shot.py play/index.html shot.png --size 1280x800 --wait 3  # file://
+python3 -m http.server 8000 &                                            # then over http
+python3 tools/shot.py http://localhost:8000/play/ shot-http.png --size 1280x800 --wait 3
+```
+
+Then **look at the PNG.** Reading your own diff is not looking at it. Exit code 1 means the
+page logged an error or a warning; zero of both is the bar.
+
+Test the physical-gate sync with no hardware:
+
+```bash
+python3 tools/fake-gate.py 8099    # put 127.0.0.1:8099 in ⚙️, then curl /press
 ```
