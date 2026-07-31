@@ -164,6 +164,29 @@ recognition than any single landmark.
 - [ ] Renders correctly (screenshot it — see §6)
 - [ ] Well-formed XML
 
+### Optional: a scenery train that moves
+
+Background trains can run without any engine change. Tag the group `cc-scenery-train`
+and tell it where its rail is; `scene.js` picks it up on mount and drives it in the main
+loop. Colorado's Georgetown Loop trestle is the worked example.
+
+| Attribute | Meaning |
+|---|---|
+| `data-rail` | `x0,y0 cx,cy x1,y1` — a **quadratic Bezier**, normally the same curve as the rail you drew. The train follows it, so it stays on a curved deck instead of sliding flat across it. |
+| `data-run` | `min max` in Bezier `t` (default `0 1`). |
+| `data-fade` | how much of each end is spent fading in/out, in `t` (default `0.1`). |
+| `data-lift` | y offset from the rail to the group's origin (negative = above). |
+| `data-secs` / `data-pause` | seconds to run, then seconds hidden before the next one. |
+
+**`data-run` is the one that bites.** The train has length, and your trestle is drawn *in
+front of* the slopes, so nothing occludes it — run it the full `0 1` and the rear wagon
+hangs in mid-air off the end of the bridge. Work out the range from the group's own extent:
+Colorado's spans `x=-40..+32` about its origin, its deck runs `x=244..394`, and on its rail
+`x = 250 + 138t`, giving `0.25 0.81`.
+
+Use a **class, not an id** — `tools/inline-assets.py` namespaces ids per scene (only the
+handful in `KEEP_IDS` survive), and classes are left alone.
+
 ---
 
 ## 6. Workflow

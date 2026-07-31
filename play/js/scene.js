@@ -134,7 +134,32 @@
       });
     });
 
-    const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps,
+    // Scenery trains — a train that is part of the ARTWORK rather than the one
+    // the child drives (Colorado's Georgetown Loop, up on the trestle). The art
+    // supplies its own rail, so the engine never learns a scene by name: tag a
+    // group .cc-scenery-train and give it data-rail="x0,y0 cx,cy x1,y1".
+    const sceneryTrains = [];
+    svg.querySelectorAll('.cc-scenery-train').forEach(node => {
+      const pts = (node.getAttribute('data-rail') || '').trim().split(/\s+/)
+        .map(pair => pair.split(',').map(Number));
+      if (pts.length !== 3 || pts.some(p => p.length !== 2 || p.some(isNaN))) {
+        console.warn('scenery train has no usable data-rail:', loc.scene);
+        return;
+      }
+      const run = (node.getAttribute('data-run') || '0 1').trim().split(/\s+/).map(Number);
+      sceneryTrains.push({
+        el: node,
+        rail: pts,
+        run: (run.length === 2 && !run.some(isNaN)) ? run : [0, 1],
+        fade: parseFloat(node.getAttribute('data-fade')) || 0.1,
+        lift: parseFloat(node.getAttribute('data-lift')) || 0,
+        secs: parseFloat(node.getAttribute('data-secs')) || 12,
+        pause: parseFloat(node.getAttribute('data-pause')) || 4,
+        phase: 0,
+      });
+    });
+
+    const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -396,6 +421,44 @@
   // =======================================================================
   // The loop
   // =======================================================================
+  // Scenery trains (Colorado's trestle). The ART decides how far along its rail
+  // the train runs, via data-run="min max" in Bezier t. That matters because the
+  // train has length: run it the full 0..1 and a third of it hangs off the end
+  // of the bridge in mid-air, since the trestle is drawn IN FRONT of the slopes
+  // and nothing occludes it. Colorado's range keeps every wagon on the deck.
+  // data-fade is how much of each end is spent fading, so it eases in and out
+  // instead of popping.
+  // =======================================================================
+
+  /** A quadratic Bezier through rail[0..2], extended along the end tangents so
+      the train can run on and off the ends instead of stopping dead on them. */
+  function onRail(rail, t) {
+    const p0 = rail[0], p1 = rail[1], p2 = rail[2];
+    if (t < 0) return { x: p0[0] + t * 2 * (p1[0] - p0[0]), y: p0[1] + t * 2 * (p1[1] - p0[1]) };
+    if (t > 1) return { x: p2[0] + (t - 1) * 2 * (p2[0] - p1[0]),
+                        y: p2[1] + (t - 1) * 2 * (p2[1] - p1[1]) };
+    const u = 1 - t;
+    return { x: u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0],
+             y: u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1] };
+  }
+
+  function updateScenery(dt) {
+    if (!currentScene || !currentScene.sceneryTrains) return;
+    currentScene.sceneryTrains.forEach(st => {
+      const runMs = st.secs * 1000;
+      st.phase = (st.phase + dt) % (runMs + st.pause * 1000);
+      if (st.phase >= runMs) { st.el.setAttribute('opacity', '0'); return; }   // waiting for the next run
+      const t0 = st.run[0], t1 = st.run[1];
+      const t = t0 + (st.phase / runMs) * (t1 - t0);
+      const at = onRail(st.rail, t);
+      st.el.setAttribute('transform',
+        'translate(' + at.x.toFixed(1) + ',' + (at.y + st.lift).toFixed(1) + ')');
+      const fade = Math.min((t - t0) / st.fade, (t1 - t) / st.fade);
+      st.el.setAttribute('opacity', clamp(fade, 0, 1).toFixed(2));
+    });
+  }
+
+  // =======================================================================
   let last = 0;
   let running = false;
 
@@ -407,6 +470,7 @@
     updateTrain(dt);
     updateSmoke(dt);
     updateCars(dt);
+    updateScenery(dt);
     drawGates(t);
     requestAnimationFrame(frame);
   }
