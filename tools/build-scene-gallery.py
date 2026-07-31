@@ -29,6 +29,12 @@ CATALOGUE = [
      ['commuter', 'wagon-coach-modern', 'wagon-coach-modern']),
     ('new-orleans',  'Louisiana',  'New Orleans',     'French Quarter balconies, streetcar, live oaks',
      ['streetcar', 'streetcar']),
+    ('austin',       'Texas',      'Austin',          'A million bats off the Congress Avenue Bridge at sunset',
+     ['commuter', 'wagon-coach-modern', 'wagon-coach-modern']),
+    ('houston',      'Texas',      'Houston',         'The shuttle Independence riding a 747, a Saturn V on its side',
+     ['diesel', 'wagon-tanker', 'wagon-tanker']),
+    ('cape-canaveral','Florida',   'Cape Canaveral',  'A rocket off Pad 39, the VAB, saltmarsh and a gator',
+     ['diesel', 'wagon-boxcar', 'wagon-boxcar']),
 ]
 
 

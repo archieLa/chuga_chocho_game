@@ -40,6 +40,8 @@ const SUPPORTED = {
   'New York': ['New York City'],
   'Washington': ['Seattle'],
   'Louisiana': ['New Orleans'],
+  'Texas': ['Austin', 'Houston'],
+  'Florida': ['Cape Canaveral'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

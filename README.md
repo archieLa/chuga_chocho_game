@@ -80,10 +80,10 @@ Want to see the art without running anything? Open `tools/scene-gallery.html` or
 
 ### Status
 
-🎨 **All Phase 1 art is finished** — 8 locations, 14 locomotives and wagons, and the offline
+🎨 **The art is finished** — **11 locations**, 14 locomotives and wagons, and the offline
 US map are committed and final.
 
-✅ **Phase 1 — Free Play is playable.** The game opens on the US map, all eight destinations
+✅ **Phase 1 — Free Play is playable.** The game opens on the US map, all eleven destinations
 load with their preset train, both crossing gates lower together, road cars come from both
 directions and queue at the gate, the child can build and colour their own train, and the
 whole thing speaks English or Polish. It runs with no build step, offline, straight from

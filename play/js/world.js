@@ -38,6 +38,24 @@
     { id:'arizona',    state:'Arizona',    city:'Grand Canyon',  say:{ en:'Grand Canyon', pl:'Wielki Kanion' }, scene:'grand-canyon', scenery:{ theme:'canyon',  features:['canyonwalls','mesas','rimpines','saguaro'] }, trainPreset:{ engine:'diesel' } },
     { id:'nyc',        state:'New York',   city:'New York City', say:{ en:'New York City', pl:'Nowy Jork' },   scene:'nyc', scenery:{ theme:'city',    features:['brooklynbridge','subway'] },      trainPreset:{ engine:'commuter' } },
     { id:'seattle',    state:'Washington', city:'Seattle',       say:{ en:'Seattle', pl:'Seattle' },           scene:'seattle', scenery:{ theme:'cascades',features:['evergreens','ferry','mountains'] },trainPreset:{ engine:'commuter' } },
+    { id:'austin', state:'Texas', city:'Austin',
+      say:{ en:'Austin', pl:'Austin' },
+      scene:'austin',
+      scenery:{ theme:'dusk-city', features:['bats','congressbridge','capitol','ladybirdlake','foodtrucks'] },
+      trainPreset:{ engine:'commuter' } },
+
+    { id:'houston', state:'Texas', city:'Houston',
+      say:{ en:'Houston', pl:'Houston' },
+      scene:'houston',
+      scenery:{ theme:'space', features:['shuttle','boeing747','saturnv','liveoaks','refinery'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'cape', state:'Florida', city:'Cape Canaveral',
+      say:{ en:'Cape Canaveral', pl:'Cape Canaveral' },
+      scene:'cape-canaveral',
+      scenery:{ theme:'space-coast', features:['rocket','vab','lagoon','saltmarsh','gator','palmetto'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
@@ -54,9 +72,9 @@
     get current() { return LOCATIONS.find(l => l.id === currentId) || LOCATIONS[0]; },
 
     /** The place name in the active language, plus which voice should say it.
-        Names that have no Polish form stay English (Rocky Mountains, Seattle),
-        and an English name read by a Polish voice is not recognisable — so it
-        is spoken by an English voice. See DESIGN.md §8. */
+        Names that have no Polish form stay English (Rocky Mountains, Seattle,
+        Austin), and an English name read by a Polish voice is not recognisable
+        — so it is spoken by an English voice. See DESIGN.md §8. */
     spoken(loc, code) {
       const lang = code || CC.i18n.code;
       const name = (loc.say && loc.say[lang]) || loc.city || loc.state;

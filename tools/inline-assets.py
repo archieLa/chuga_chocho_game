@@ -40,17 +40,13 @@ SCENES = ROOT / 'play/assets/scenes'
 TRAINS = ROOT / 'play/assets/trains'
 OUT = ROOT / 'play/js/asset-data.js'
 
-# Scene key -> file. The keys are the `scene` field in play/js/world.js.
-SCENE_FILES = {
-    'colorado': 'colorado.svg',
-    'sf': 'sf.svg',
-    'la': 'la.svg',
-    'chicago': 'chicago.svg',
-    'grand-canyon': 'grand-canyon.svg',
-    'nyc': 'nyc.svg',
-    'seattle': 'seattle.svg',
-    'new-orleans': 'new-orleans.svg',
-}
+# Scene key -> file, discovered from the directory. The key is the filename stem,
+# which is exactly the `scene` field in play/js/world.js ('grand-canyon.svg' ->
+# 'grand-canyon'). This used to be a hand-maintained list, and adding a location
+# without remembering to extend it dropped the new scene silently: the art was on
+# disk, the world entry existed, and the game still showed nothing. Globbing means
+# a new scene is picked up by dropping the file in.
+SCENE_FILES = {p.stem: p.name for p in sorted(SCENES.glob('*.svg'))}
 
 # Ids the engine animates. Renamed to data-part so N copies of a vehicle can
 # live in one document without clashing (build-gallery.py does the same).

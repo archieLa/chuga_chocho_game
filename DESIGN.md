@@ -89,6 +89,14 @@ The abbreviation-then-full-name flow is deliberate: the map stays uncluttered an
 | New York | New York City | Brooklyn Bridge, subway tunnel | commuter |
 | Washington | Seattle | Evergreens, ferry, Cascades | commuter |
 | Louisiana | New Orleans | Bayou, streetcar, live oaks | streetcar |
+| Texas | Austin | Bats off the Congress Avenue Bridge at sunset, the Capitol dome, Lady Bird Lake, food trucks | commuter |
+| Texas | Houston | Shuttle *Independence* riding a 747, a Saturn V on its side, live oaks, hazy Gulf summer | diesel |
+| Florida | Cape Canaveral | A rocket off Pad 39, the VAB, lagoon, saltmarsh, a gator | diesel |
+
+**11 destinations across 9 states.** Texas is the second state with two destinations, on
+exactly the rule above — the bats at dusk and the Space Center look nothing alike. **Austin
+is the first dusk scene** in the set: structurally ordinary, but it is the one that will show
+it first if the engine ever gains a day/night tint or ambient audio.
 
 **Built (live):** the offline SVG map + picker — `tools/gen-map.js` generates `play/assets/us-map.svg` and the inlined `play/js/map-data.js` from public-domain us-atlas (Albers USA). Picker logic in `play/js/map.js`; locations in `play/js/world.js`. The map is the game's **front door**: it is what a child sees on launch, and the 🗺️ button brings it back. Choosing a place cross-fades the whole scene, applies the location's train preset (unless the child has overridden the engine) and speaks the name.
 

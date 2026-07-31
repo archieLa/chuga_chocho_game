@@ -19,10 +19,11 @@ Python scripts need only Python 3 (standard library).
 | `gen-trains.py` | Generates every locomotive and wagon plus `manifest.json` into **`play/assets/trains/`**. Shared helpers keep wheels, bogies, couplers and underframes consistent across all vehicles. | `python3 tools/gen-trains.py` |
 | `build-gallery.py` | Builds **`tools/train-gallery.html`** (committed) — an inspection page with every vehicle (wheels turning, colours changeable) and preset consists running across the Colorado scene. Self-contained; opens from disk. | `python3 tools/build-gallery.py` |
 | `gen-scenes.py` | Generates the location scenes into **`play/assets/scenes/`**. Owns the shared furniture (road, track, both crossing gates) so every scene lines up exactly; each scene supplies only artwork. `colorado.svg` is hand-authored and NOT generated. | `python3 tools/gen-scenes.py` |
-| `build-scene-gallery.py` | Builds **`tools/scene-gallery.html`** (committed) — all eight locations with their trains running through them. The quickest way to spot a scene bug. | `python3 tools/build-scene-gallery.py` |
+| `build-scene-gallery.py` | Builds **`tools/scene-gallery.html`** (committed) — every location with its train running through it. The quickest way to spot a scene bug. | `python3 tools/build-scene-gallery.py` |
 | `inline-assets.py` | Bakes every scene, every vehicle and `manifest.json` into **`play/js/asset-data.js`** so the game runs from `file://` (where `fetch()` is blocked). Namespaces the ids inside each asset so several scenes can be mounted at once without their `<defs>` colliding. **Re-run after ANY change to `play/assets/`.** | `python3 tools/inline-assets.py` |
 | `shot.js` | Renders any SVG or HTML file to PNG so you can *look* at it. Reports page errors too. | `node tools/shot.js <input> [out.png] [w] [h]` |
 | `shot.py` | The same review loop without Node: drives headless Google Chrome over the DevTools Protocol using only the Python standard library. Taps with **real** input events (a synthetic `.click()` is not a user gesture, so it neither unlocks audio nor proves the console is clean), can run JS before the shot, and prints every console message (exit code 1 if any were errors or warnings). | `python3 tools/shot.py play/index.html out.png --wait 3 --click '#closeBtn'` |
+| `check-scenes.py` | Validates every scene: XML validity, both gates present, near-gate geometry unchanged, layer order, unresolved `url(#…)` / `href="#…"` references (they render solid black), and **props standing in the road**. That last one matters because the road is a *perspective ribbon* — at `y=400` the carriageway is roughly `x=595..674`, but at `y=700` it is `x=515..764`, so a bench that looks safely aside near the horizon sits in the middle of the lane at the bottom of the frame, and cars drive straight through it. Pure stdlib, under a second — worth running before every scene commit. Exit 0 = clean. | `python3 tools/check-scenes.py` |
 | `fake-gate.py` | A stand-in **physical crossing gate** for testing the two-way sync with no hardware. Speaks the real device API — `/open`, `/close`, `/status` — plus `/press`, which acts as the physical button so you can check that the device moves the screen. Sends the CORS header the real firmware must send. Put `127.0.0.1:8099` in the game's ⚙️ settings. | `python3 tools/fake-gate.py 8099` |
 
 ## The two galleries are committed
@@ -63,10 +64,15 @@ Adjust a scene:
 
 ```bash
 python3 tools/gen-scenes.py
+python3 tools/check-scenes.py      # <- catches props standing in the road
 python3 tools/build-scene-gallery.py
 node tools/shot.js tools/scene-gallery.html scenes.png 1400 1000
 python3 tools/inline-assets.py     # <- or the game will not see your change
 ```
+
+Adding a location? Four places must agree — `play/js/world.js`, `gen-scenes.py`,
+`SUPPORTED` in `gen-map.js`, and a re-run of `inline-assets.py`. Miss one and the place
+fails *silently*. The runbook with the in-page cross-check is in `CLAUDE.md`.
 
 Verify a change to the **game** (do both — they fail differently):
 

@@ -355,7 +355,7 @@ def sf():
                        f'<rect x="-3" y="-72" width="7" height="72" fill="#2f333a"/>'
                        f'<circle cx="0" cy="-78" r="9" fill="#ffe9a8"/>'
                        f'<rect x="-9" y="-4" width="19" height="6" rx="2" fill="#2f333a"/></g>'
-                       for x, y in [(180, 648), (700, 670), (860, 642)])
+                       for x, y in [(180, 648), (806, 670), (886, 630)])
              + f'<g transform="translate(1100,700)">{shadow(0, 6, 44, 8)}'
              '<rect x="-42" y="-14" width="84" height="9" rx="3" fill="#4f6b3f"/>'
              '<rect x="-42" y="-30" width="84" height="8" rx="3" fill="#5d7d4a"/>'
@@ -878,7 +878,7 @@ def chicago():
                        f'<rect x="-3" y="-72" width="7" height="72" fill="#3a3f47"/>'
                        f'<circle cx="0" cy="-78" r="9" fill="#ffe9a8"/>'
                        f'<rect x="-9" y="-4" width="19" height="6" rx="2" fill="#3a3f47"/></g>'
-                       for x, y in [(380, 620), (700, 660), (880, 616)])
+                       for x, y in [(380, 620), (802, 662), (900, 616)])
              + f'<g transform="translate(470,690)">{shadow(0, 8, 22)}'
              '<rect x="-9" y="-34" width="18" height="40" rx="4" fill="#c0392b"/>'
              '<rect x="-15" y="-24" width="30" height="8" rx="3" fill="#c0392b"/>'
@@ -1185,7 +1185,7 @@ def grand_canyon():
              + juniper(56, 692, 1.55) + juniper(1236, 702, 1.45)
              + pinyon(150, 706, 1.45) + pinyon(330, 542, 0.7) + pinyon(940, 578, 0.9)
              + pinyon(1240, 566, 0.8) + pinyon(452, 700, 1.05) + pinyon(1054, 596, 0.95)
-             + yucca(420, 664, 1.15) + yucca(860, 690, 1.25) + yucca(640, 712, 1.0)
+             + yucca(420, 664, 1.15) + yucca(860, 690, 1.25) + yucca(452, 712, 1.0)
              + pricklypear(206, 700, 1.35) + pricklypear(1058, 712, 1.25)
              + pricklypear(478, 606, 0.9) + agave(790, 640, 1.1) + agave(360, 580, 0.85)
              + agave(1130, 700, 1.05) + juniper(880, 566, 0.72) + juniper(232, 560, 0.66)
@@ -1195,7 +1195,7 @@ def grand_canyon():
                        f'<path d="M0,0 L13,-16"/></g></g>'
                        for x, y in [(150, 636), (520, 692), (930, 620), (1200, 656),
                                     (330, 706), (760, 578), (1090, 600), (60, 588)])
-             + f'<g transform="translate(700,624)">{shadow(0, 4, 20)}'
+             + f'<g transform="translate(806,624)">{shadow(0, 4, 20)}'
              '<path d="M0,0 L-18,-26 L-4,-22 L0,-44 L4,-22 L18,-26 Z" fill="#6f8f4e"/></g>')
 
     scene('grand-canyon', 'GRAND CANYON — the void, the Colorado far below, the Watchtower on the rim trail', {
@@ -1485,7 +1485,7 @@ def nyc():
                        f'<rect x="-3" y="-74" width="7" height="74" fill="#2f333a"/>'
                        f'<circle cx="0" cy="-80" r="9" fill="#ffe9a8"/>'
                        f'<rect x="-9" y="-4" width="19" height="6" rx="2" fill="#2f333a"/></g>'
-                       for x, y in [(400, 626), (700, 664), (900, 620)])
+                       for x, y in [(400, 626), (804, 666), (912, 620)])
              + f'<g transform="translate(470,700)">{shadow(0, 8, 20)}'
              '<rect x="-9" y="-34" width="18" height="40" rx="4" fill="#c0392b"/>'
              '<rect x="-15" y="-24" width="30" height="8" rx="3" fill="#c0392b"/>'
@@ -1796,7 +1796,7 @@ def seattle():
     front = ('    ' + fir(58, 646, 1.95) + fir(1240, 656, 1.9)
              + crates(210, 636, 1.15) + crates(1090, 660, 1.05) + crates(470, 700, 1.0)
              + crabpot(330, 626, 1.15) + crabpot(392, 640, 0.95) + crabpot(1010, 700, 1.1)
-             + gull(560, 596, 1.1) + gull(880, 610, 1.0)
+             + gull(486, 596, 1.1) + gull(880, 610, 1.0)
              + ''.join(f'<g transform="translate({x},{y})">{shadow(0, 6, 34)}'
                        f'<ellipse cx="0" cy="-14" rx="34" ry="18" fill="#3f7a48"/>'
                        f'<ellipse cx="-14" cy="-20" rx="20" ry="12" fill="#4d8b56"/>'
@@ -1810,8 +1810,8 @@ def seattle():
                        f'<rect x="-3" y="-72" width="7" height="72" fill="#2f333a"/>'
                        f'<circle cx="0" cy="-78" r="9" fill="#ffe9a8"/>'
                        f'<rect x="-9" y="-4" width="19" height="6" rx="2" fill="#2f333a"/></g>'
-                       for x, y in [(400, 634), (720, 670), (880, 628)])
-             + f'<g transform="translate(560,700)">{shadow(0, 6, 44, 8)}'
+                       for x, y in [(400, 634), (808, 672), (896, 628)])
+             + f'<g transform="translate(428,700)">{shadow(0, 6, 44, 8)}'
              '<rect x="-42" y="-14" width="84" height="9" rx="3" fill="#4f6b3f"/>'
              '<rect x="-42" y="-30" width="84" height="8" rx="3" fill="#5d7d4a"/>'
              '<rect x="-36" y="-6" width="8" height="18" fill="#2f333a"/>'
@@ -1968,7 +1968,7 @@ def new_orleans():
              + oak(1150, 656, 1.5, '#3f6b44', '#4b7d50', '#6b4a2a', moss)
              + gaslamp(330, 604, 1.5) + gaslamp(980, 626, 1.5)
              + fern(400, 664, 1.2) + fern(880, 690, 1.3) + fern(240, 700, 1.15)
-             + f'<g transform="translate(640,706)">{shadow(0, 4, 46)}</g>'
+             + f'<g transform="translate(438,706)">{shadow(0, 4, 46)}</g>'
              + ''.join(f'<g transform="translate({x},{y})">{shadow(0, 4, 28)}'
                        f'<ellipse cx="0" cy="-14" rx="30" ry="16" fill="#4f8a54"/>'
                        f'<ellipse cx="-12" cy="-22" rx="17" ry="11" fill="#5f9c64"/>'
@@ -2016,8 +2016,1116 @@ def new_orleans():
     }, d)
 
 
+# ================================================================== 8. AUSTIN
+def austin():
+    """Austin at dusk. HERO: a million and a half bats pouring out from under the
+    Congress Avenue Bridge, unspooling across a burnt-orange sky, with the sun
+    setting straight through one of the arches. Second, quieter landmark: the pink
+    granite Capitol dome catching the last light. Everything on the ground is
+    silhouette and warm bulb light — the only scene in the game lit from behind."""
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f3f66"/><stop offset="0.34" stop-color="#4d7fa6"/>
+      <stop offset="0.60" stop-color="#93b6c6"/><stop offset="0.80" stop-color="#e9c667"/>
+      <stop offset="1" stop-color="#f2913a"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff6d8" stop-opacity="0.95"/>
+      <stop offset="0.34" stop-color="#ffcf72" stop-opacity="0.6"/>
+      <stop offset="0.7" stop-color="#f79a3c" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#f0862c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2c4a5e"/><stop offset="0.5" stop-color="#476a7c"/>
+      <stop offset="1" stop-color="#6d8a93"/>
+    </linearGradient>
+    <linearGradient id="grassg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#27392e"/><stop offset="1" stop-color="#16211b"/>
+    </linearGradient>
+    <g id="bat"><path d="M-3.4,-0.6 Q-1.7,-2.3 0,-0.4 Q1.7,-2.3 3.4,-0.6 Q1.7,1 0,0.5 Q-1.7,1 -3.4,-0.6 Z" fill="#141a22"/></g>
+    <g id="watcher"><path d="M0,0 L-2.1,0 L-2.1,-8.6 A2.3,2.3 0 0 1 2.1,-8.6 L2.1,0 Z" fill="#0d131a"/></g>'''
+
+    SUN = (655, 257)
+    WATER_TOP, BANK = 244, 292
+    DECK_TOP, DECK_BOT, SPRING = 236, 247, 268
+    ARCHES = [115, 385, 655, 925, 1195]
+
+    # ---- sky: dusk gradient, the sun low in the middle arch, warm cloud streaks ----
+    sky_l = (f'    <rect x="0" y="0" width="1280" height="{BANK + 8}" fill="url(#skyg)"/>\n'
+             f'    <circle cx="{SUN[0]}" cy="{SUN[1]}" r="185" fill="url(#sung)"/>\n'
+             '    <g fill="#ffd9a0" opacity="0.3">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{w}" ry="{w*0.09:.0f}"/>'
+                       for x, y, w in [(240, 128, 130), (520, 96, 96), (880, 116, 120),
+                                       (1080, 84, 84), (400, 168, 110), (960, 172, 100)])
+             + '</g>\n'
+             '    <g fill="#ffffff" opacity="0.5">'
+             + ''.join(f'<circle cx="{x}" cy="{y}" r="{r}"/>'
+                       for x, y, r in [(120, 34, 1.4), (300, 22, 1.1), (620, 18, 1.3),
+                                       (900, 30, 1.1), (1140, 26, 1.4), (760, 40, 1),
+                                       (460, 44, 1.1), (1040, 52, 1)])
+             + '</g>')
+
+    # ---- downtown: silhouette with warm windows. The Independent's stacked blocks
+    #      and Frost Bank's faceted crown are the two shapes Austinites recognise. ----
+    def slab(x, y, w, base='#22303f', win='#ffcf7a', step=13, dens=0.55):
+        wins = ''.join(f'<rect x="{x+4}" y="{y+9+r*step}" width="{w-8}" height="4"/>'
+                       for r in range(int((WATER_TOP - y - 12) // step)) if (x + r) % 3)
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{WATER_TOP-y}" rx="1.5" fill="{base}"/>'
+                f'<g fill="{win}" opacity="{dens}">{wins}</g>')
+
+    jenga = ''.join(f'<rect x="{146 + (8 if i % 2 else -8)}" y="{212 - i*22}" width="46" height="23" '
+                    f'rx="2" fill="{"#253444" if i % 2 else "#202d3b"}"/>'
+                    f'<g fill="#ffcf7a" opacity="0.5"><rect x="{152 + (8 if i % 2 else -8)}" '
+                    f'y="{219 - i*22}" width="34" height="4"/></g>' for i in range(5))
+    frost = ('<rect x="286" y="150" width="44" height="94" fill="#243342"/>'
+             '<rect x="286" y="150" width="15" height="94" fill="#2b3d4e"/>'
+             '<g fill="#25384a"><polygon points="286,150 308,120 330,150"/>'
+             '<polygon points="292,150 308,128 324,150" fill="#31485c"/></g>'
+             '<g fill="#ffcf7a" opacity="0.45">'
+             + ''.join(f'<rect x="292" y="{158+r*13}" width="32" height="4"/>' for r in range(6)) + '</g>')
+    skyline = ('    <g>'
+               + ''.join(slab(*t) for t in
+                         [(34, 196, 30), (68, 172, 24), (98, 208, 28), (196, 186, 26),
+                          (228, 206, 30), (262, 214, 22), (336, 178, 26), (368, 200, 30),
+                          (404, 212, 24), (434, 190, 28), (468, 206, 26), (500, 218, 30),
+                          (536, 200, 24), (566, 212, 26), (700, 214, 24), (730, 200, 28),
+                          (762, 216, 22), (1040, 206, 26), (1074, 218, 30), (1112, 200, 24),
+                          (1146, 212, 28), (1182, 204, 26), (1218, 216, 30), (1252, 198, 26)])
+               + jenga + frost + '</g>\n'
+               + '    <g stroke="#2a3a4a" stroke-width="2.5" fill="none" opacity="0.9">'
+               '<path d="M600,176 L600,244 M572,176 L640,176 M600,176 L600,166"/>'
+               '<path d="M986,166 L986,244 M958,166 L1026,166 M986,166 L986,156"/></g>')
+
+    # ---- the Capitol: pink granite, uplit, the one warm solid thing on the horizon ----
+    capitol = ('    <g id="capitol">'
+               '<circle cx="880" cy="212" r="88" fill="#f7c078" opacity="0.14"/>'
+               # wings, wide and low
+               '<rect x="786" y="216" width="188" height="30" fill="#a26a4c"/>'
+               '<rect x="786" y="216" width="62" height="30" fill="#bb7d59"/>'
+               '<rect x="782" y="212" width="196" height="6" rx="2" fill="#c2825b"/>'
+               '<g fill="#6f4634" opacity="0.5">'
+               + ''.join(f'<rect x="{792+i*14}" y="222" width="5" height="20"/>' for i in range(13)) + '</g>'
+               # centre pavilion + portico
+               '<rect x="846" y="192" width="68" height="54" fill="#b97b56"/>'
+               '<rect x="846" y="192" width="23" height="54" fill="#cf8d63"/>'
+               '<polygon points="840,192 880,176 920,192" fill="#c2825b"/>'
+               '<g fill="#7a4c37" opacity="0.55">'
+               + ''.join(f'<rect x="{851+i*11}" y="198" width="5" height="48"/>' for i in range(6)) + '</g>'
+               # drum, then a proper broad dome
+               '<rect x="858" y="170" width="44" height="24" fill="#c2825b"/>'
+               '<rect x="858" y="170" width="16" height="24" fill="#d69a6e"/>'
+               '<g fill="#6f4634" opacity="0.45">'
+               + ''.join(f'<rect x="{862+i*10}" y="175" width="4" height="16"/>' for i in range(4)) + '</g>'
+               '<path d="M852,172 A28,30 0 0 1 908,172 Z" fill="#cf8d63"/>'
+               '<path d="M852,172 A28,30 0 0 1 874,145 L874,172 Z" fill="#e0a87b"/>'
+               '<g stroke="#a26a4c" stroke-width="1.4" opacity="0.5" fill="none">'
+               '<path d="M866,148 L864,172 M880,143 L880,172 M894,148 L896,172"/></g>'
+               # lantern + the Goddess of Liberty on top
+               '<rect x="871" y="128" width="18" height="16" rx="2" fill="#c2825b"/>'
+               '<rect x="869" y="125" width="22" height="4" rx="2" fill="#d69a6e"/>'
+               '<path d="M873,125 A7,8 0 0 1 887,125 Z" fill="#d69a6e"/>'
+               '<rect x="879" y="108" width="2.4" height="10" fill="#c2825b"/>'
+               '<circle cx="880" cy="105" r="3.6" fill="#f2d08a"/></g>')
+
+    # ---- Lady Bird Lake: gold road of light under the sun, kayaks out on it ----
+    refl = ''.join(f'<rect x="{SUN[0] - w//2 + o}" y="{y}" width="{w}" height="2.5" rx="1.2"/>'
+                   for y, w, o in [(272, 34, 0), (277, 52, -4), (282, 74, 6), (287, 96, -8)])
+    water = (f'    <rect x="0" y="{WATER_TOP}" width="1280" height="{BANK-WATER_TOP}" fill="url(#lake)"/>\n'
+             '    <g fill="#f7bd63" opacity="0.75">' + refl + '</g>\n'
+             '    <g fill="#e8dcc0" opacity="0.18">'
+             + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2" rx="1"/>'
+                       for x, y, w in [(90, 276, 70), (250, 284, 88), (420, 272, 60),
+                                       (830, 280, 76), (1010, 288, 92), (1160, 274, 58)])
+             + '</g>\n'
+             '    <g opacity="0.2" transform="translate(0,488) scale(1,-1)">'
+             + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{WATER_TOP-y}" fill="#2a3a4a"/>'
+                       for x, y, w in [(34, 196, 30), (146, 116, 46), (286, 150, 44),
+                                       (434, 190, 28), (500, 218, 30)]) + '</g>\n'
+             + '    <g fill="#16202a">'
+             + ''.join(f'<g transform="translate({x},{y})"><ellipse cx="0" cy="0" rx="{r}" ry="1.8"/>'
+                       f'<rect x="-0.9" y="-5" width="1.8" height="5"/>'
+                       f'<rect x="{-r*0.8:.0f}" y="-4" width="{r*1.6:.0f}" height="1.2" rx="0.6"/></g>'
+                       for x, y, r in [(556, 282, 9), (604, 288, 8), (668, 284, 9), (712, 279, 7),
+                                       (760, 286, 8), (498, 287, 7), (846, 283, 8), (884, 289, 9)])
+             + '</g>')
+
+    # ---- the far bank: LAND behind the road's vanishing point ----
+    bank = (f'    <rect x="0" y="{BANK}" width="1280" height="10" fill="#25342c"/>\n'
+            f'    <rect x="0" y="{BANK}" width="1280" height="3" fill="#33463a"/>\n'
+            '    <g fill="#1b271f">'
+            + ''.join(f'<ellipse cx="{x}" cy="{BANK+1}" rx="{r}" ry="{r*0.42:.0f}"/>'
+                      for x, r in [(60, 30), (170, 24), (300, 28), (430, 22), (520, 26),
+                                   (740, 24), (860, 30), (980, 22), (1120, 28), (1240, 24)])
+            + '</g>')
+
+    # ---- the Ann Richards Congress Avenue Bridge ----
+    holes = ''.join(f'M{cx-104},{SPRING} A104,{SPRING-DECK_BOT-1} 0 0 1 {cx+104},{SPRING} Z'
+                    for cx in ARCHES)
+    crowd = ''.join(f'<use href="#watcher" transform="translate({x},{DECK_TOP}) scale({0.95 + (x%6)/8:.2f})"/>'
+                    for x in range(6, 1280, 10))
+    lamps = ''.join(f'<g transform="translate({x},{DECK_TOP})">'
+                    f'<rect x="-1.2" y="-34" width="2.4" height="34" fill="#141c24"/>'
+                    f'<path d="M-1,-34 q7,-3 9,3" stroke="#141c24" stroke-width="2" fill="none"/>'
+                    f'<circle cx="9" cy="-30" r="3.4" fill="#ffe3a0" opacity="0.9"/>'
+                    f'<circle cx="9" cy="-30" r="8" fill="#ffd98a" opacity="0.22"/></g>'
+                    for x in (150, 420, 690, 960, 1230))
+    bridge = (f'    <g id="congress-bridge">'
+              f'<path fill-rule="evenodd" fill="#18212b" '
+              f'd="M-10,{DECK_BOT} H1290 V{SPRING+6} H-10 Z {holes}"/>'
+              f'<rect x="-10" y="{DECK_TOP}" width="1300" height="{DECK_BOT-DECK_TOP}" fill="#1b242e"/>'
+              f'<rect x="-10" y="{DECK_TOP}" width="1300" height="2.5" fill="#5b7488"/>'
+              f'<g>{crowd}</g><g>{lamps}</g></g>\n'
+              f'    <circle cx="{SUN[0]}" cy="{SUN[1]}" r="120" fill="url(#sung)" opacity="0.5"/>\n'
+              f'    <circle cx="{SUN[0]}" cy="{SUN[1]}" r="11" fill="#fff8e0"/>')
+
+    # ---- THE BATS: the hero. Not a flock — a river. Density is the whole point. ----
+    PATH = [(594, 232), (534, 196), (462, 158), (404, 118), (398, 80), (456, 50),
+            (566, 34), (694, 34), (812, 54), (896, 88), (946, 132), (966, 178),
+            (1002, 204), (1082, 184), (1164, 146), (1246, 110)]
+    state = [20260729]
+    def rnd():
+        state[0] = (state[0] * 1103515245 + 12345) % 2147483648
+        return state[0] / 2147483648.0
+
+    bands = [[], [], [], []]
+    def bat(x, y, sc, band):
+        bands[band].append(f'<use href="#bat" transform="translate({x:.0f},{y:.0f}) '
+                           f'rotate({-34 + rnd()*68:.0f}) scale({sc:.2f})"/>')
+
+    segs = len(PATH) - 1
+    for i2 in range(segs):
+        (x0, y0), (x1, y1) = PATH[i2], PATH[i2 + 1]
+        dx, dy = x1 - x0, y1 - y0
+        L = max(1.0, (dx * dx + dy * dy) ** 0.5)
+        nx, ny = -dy / L, dx / L
+        t_along = i2 / segs
+        thin = max(0.18, 1.0 - t_along * 1.05)          # the tail thins out
+        core_n = int(150 * thin)                         # the dense spine
+        halo_n = int(90 * thin)                          # the loose cloud around it
+        core_w = 7 + 13 * (1 - abs(t_along - 0.4) * 1.4)
+        halo_w = 22 + 44 * max(0.2, 1 - abs(t_along - 0.45) * 1.5)
+        for k in range(core_n):
+            t = (k + rnd()) / core_n
+            off = (rnd() + rnd() - 1) * core_w
+            bat(x0 + dx * t + nx * off + (rnd() - 0.5) * 5,
+                y0 + dy * t + ny * off + (rnd() - 0.5) * 5,
+                0.34 + rnd() * 0.42, k % 2)
+        for k in range(halo_n):
+            t = (k + rnd()) / halo_n
+            off = (rnd() + rnd() + rnd() - 1.5) * halo_w
+            bat(x0 + dx * t + nx * off + (rnd() - 0.5) * 12,
+                y0 + dy * t + ny * off + (rnd() - 0.5) * 12,
+                0.3 + rnd() * 0.5, 2 + (k % 2))
+
+    # the emergence: a dense plume boiling straight up from under the deck, then bending
+    for k in range(470):
+        u = rnd()
+        h = u ** 1.35 * 196                               # packed low, fanning as it rises
+        jx = 592 + (rnd() + rnd() + rnd() - 1.5) * (17 + h * 0.36) - h * 0.36
+        jy = DECK_TOP - 2 - h
+        bat(jx, jy, 0.28 + rnd() * 0.44, 1 + (k % 3))
+    # a low scatter skimming the water either side of the bridge
+    for k in range(120):
+        bat(380 + rnd() * 560, DECK_BOT + 2 + rnd() * rnd() * 22, 0.24 + rnd() * 0.3, 2 + (k % 2))
+
+    bats = ('    <g id="bats">'
+            + ''.join(f'<g opacity="{op}">' + ''.join(b) + '</g>'
+                      for op, b in zip((0.96, 0.82, 0.6, 0.4), bands))
+            + '</g>')
+
+    # ---- ground: park at dusk, the hike-and-bike trail, a gravel apron ----
+    ground_l = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#grassg)"/>\n'
+                '    <rect x="0" y="336" width="1280" height="21" fill="#4e483c"/>\n'
+                '    <rect x="0" y="336" width="1280" height="3" fill="#5e5747"/>\n'
+                '    <g fill="#3a352c" opacity="0.7">'
+                + ''.join(f'<rect x="{x}" y="{342 + (x % 5)}" width="{6 + x % 4}" height="3" rx="1.5"/>'
+                          for x in range(4, 1280, 21)) + '</g>\n'
+                '    <rect x="0" y="357" width="1280" height="3" fill="#1c2a20"/>\n'
+                '    <g fill="#1a2820" opacity="0.6">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.3:.0f}"/>'
+                          for x, y, r in [(180, 400, 120), (620, 420, 150), (1080, 404, 130),
+                                          (380, 500, 140), (900, 520, 160)]) + '</g>\n'
+                '    <path d="M742,720 L806,556 L1280,556 L1280,720 Z" fill="#3b3730"/>\n'
+                '    <path d="M742,720 L806,556 L1280,556 L1280,566 L816,566 L760,720 Z" fill="#474238"/>\n'
+                '    <g fill="#2f2b25" opacity="0.6">'
+                + ''.join(f'<rect x="{x}" y="{y}" width="{7 + x % 5}" height="3" rx="1.5"/>'
+                          for x, y in [(880, 600), (1010, 640), (1150, 596), (940, 690),
+                                       (1200, 676), (830, 660)]) + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def cypress(x, y, s=1.0, a='#0d1512', b='#121c18', rim='#557a60'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-5" y="-46" width="10" height="46" fill="#0b1210"/>'
+                f'<path d="M-9,0 L0,-14 L9,0 Z" fill="#0b1210"/>'
+                f'<ellipse cx="0" cy="-96" rx="40" ry="30" fill="{a}"/>'
+                f'<ellipse cx="-24" cy="-78" rx="26" ry="20" fill="{b}"/>'
+                f'<ellipse cx="25" cy="-82" rx="24" ry="18" fill="{b}"/>'
+                f'<ellipse cx="4" cy="-118" rx="27" ry="18" fill="{b}"/>'
+                f'<path d="M22,-112 A34,26 0 0 1 40,-88" stroke="{rim}" stroke-width="2.5" '
+                f'fill="none" opacity="0.55"/></g>')
+
+    def oak2(x, y, s=1.0, a='#0e1613', b='#131d19', rim='#557a60'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-7,2 C -9,-22 -18,-32 -25,-42 L-11,-38 C -6,-46 -2,-52 0,-64 '
+                f'C 3,-52 8,-46 14,-38 L28,-44 C 19,-32 8,-22 7,2 Z" fill="#0b1210"/>'
+                f'<ellipse cx="0" cy="-66" rx="58" ry="30" fill="{a}"/>'
+                f'<ellipse cx="-30" cy="-54" rx="30" ry="19" fill="{b}"/>'
+                f'<ellipse cx="30" cy="-56" rx="28" ry="17" fill="{b}"/>'
+                f'<ellipse cx="4" cy="-84" rx="35" ry="19" fill="{b}"/>'
+                f'<path d="M28,-80 A44,24 0 0 1 54,-58" stroke="{rim}" stroke-width="2.5" '
+                f'fill="none" opacity="0.5"/></g>')
+
+    def person(x, y, s=1.0, col='#131b22', arms='down'):
+        A = {'down': 'M-5,-26 L-9,-12 M5,-26 L9,-12',
+             'out':  'M-5,-26 L-16,-21 M5,-26 L16,-21',
+             'up':   'M-5,-27 L-13,-42 M5,-27 L13,-42'}[arms]
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<g stroke="{col}" stroke-width="4.4" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-13 L-4,0 M3,-13 L5,0"/><path d="{A}"/></g>'
+                f'<rect x="-6" y="-29" width="12" height="17" rx="5" fill="{col}"/>'
+                f'<circle cx="0" cy="-35" r="5.6" fill="{col}"/></g>')
+
+    def cyclist(x, y, s=1.0, col='#131b22'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<g stroke="{col}" stroke-width="2.6" fill="none">'
+                f'<circle cx="-15" cy="-7" r="7.5"/><circle cx="15" cy="-7" r="7.5"/>'
+                f'<path d="M-15,-7 L0,-24 L15,-7 M0,-24 L-5,-7 M0,-24 L9,-26"/></g>'
+                + person(0, -22, 0.5, col, 'out') + '</g>')
+
+    def truck(x, y, s=1.0, body='#2f7f96', trim='#f2b134', win='#ffd98a'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 5, 70, 8, 0.3)}'
+                f'<rect x="-66" y="-70" width="132" height="62" rx="5" fill="{body}"/>'
+                f'<rect x="-66" y="-70" width="132" height="9" rx="4" fill="{trim}"/>'
+                f'<rect x="-66" y="-16" width="132" height="8" fill="#1d2730"/>'
+                f'<rect x="-46" y="-56" width="88" height="32" rx="3" fill="{win}"/>'
+                f'<rect x="-46" y="-56" width="88" height="32" rx="3" fill="#fff0c0" opacity="0.5"/>'
+                f'<path d="M-52,-58 L48,-58 L44,-74 L-48,-74 Z" fill="{trim}"/>'
+                f'<g fill="#1d2730" opacity="0.8">'
+                f'<rect x="-30" y="-48" width="12" height="18" rx="2"/>'
+                f'<rect x="6" y="-48" width="12" height="18" rx="2"/></g>'
+                f'<rect x="-60" y="-24" width="40" height="6" rx="2" fill="{trim}" opacity="0.85"/>'
+                f'<g fill="#0f151b"><circle cx="-40" cy="-6" r="10"/><circle cx="40" cy="-6" r="10"/></g>'
+                f'<g fill="#39424c"><circle cx="-40" cy="-6" r="3.6"/><circle cx="40" cy="-6" r="3.6"/></g>'
+                f'<ellipse cx="0" cy="-30" rx="86" ry="34" fill="#ffd98a" opacity="0.09"/></g>')
+
+    def table(x, y, s=1.0, col='#3a2f24'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 42, 6, 0.28)}'
+                f'<rect x="-40" y="-22" width="80" height="7" rx="2" fill="{col}"/>'
+                f'<rect x="-40" y="-22" width="80" height="2.5" rx="1" fill="#4c3d2e"/>'
+                f'<rect x="-46" y="-11" width="92" height="5" rx="2" fill="#31281f"/>'
+                f'<g stroke="#2a2219" stroke-width="4"><path d="M-30,-15 L-34,2 M30,-15 L34,2"/></g></g>')
+
+    def lightstring(x0, x1, y, sag=26, col='#ffdc96'):
+        n = max(6, (x1 - x0) // 26)
+        pts = [(x0 + (x1 - x0) * (i / n), y + sag * (4 * (i / n) * (1 - i / n))) for i in range(n + 1)]
+        d_ = 'M' + ' L'.join(f'{px:.0f},{py:.0f}' for px, py in pts)
+        bulbs = ''.join(f'<circle cx="{px:.0f}" cy="{py+4:.0f}" r="2.6" fill="{col}"/>'
+                        f'<circle cx="{px:.0f}" cy="{py+4:.0f}" r="7" fill="{col}" opacity="0.2"/>'
+                        for px, py in pts[1:-1])
+        return f'<path d="{d_}" stroke="#4a4234" stroke-width="1.4" fill="none"/>{bulbs}'
+
+    def mural(x, y, w, h):
+        """The angel wings — the most photographed wall in Austin. Reads instantly."""
+        cx, cy = w / 2, -h * 0.5
+        def wing(g):
+            return (f'<path d="M{cx + g*5:.0f},{cy + h*0.26:.0f} '
+                    f'C {cx + g*18:.0f},{cy - h*0.16:.0f} {cx + g*54:.0f},{cy - h*0.44:.0f} '
+                    f'{cx + g*96:.0f},{cy - h*0.5:.0f} '
+                    f'C {cx + g*86:.0f},{cy - h*0.08:.0f} {cx + g*66:.0f},{cy + h*0.2:.0f} '
+                    f'{cx + g*40:.0f},{cy + h*0.36:.0f} '
+                    f'L{cx + g*30:.0f},{cy + h*0.2:.0f} L{cx + g*22:.0f},{cy + h*0.34:.0f} '
+                    f'L{cx + g*14:.0f},{cy + h*0.18:.0f} L{cx + g*7:.0f},{cy + h*0.3:.0f} Z" '
+                    f'fill="#f2ead6"/>'
+                    + ''.join(f'<path d="M{cx + g*(12 + k*15):.0f},{cy + h*(0.2 - k*0.03):.0f} '
+                              f'L{cx + g*(26 + k*16):.0f},{cy - h*(0.06 + k*0.07):.0f}" '
+                              f'stroke="#cdc2a5" stroke-width="1.7" opacity="0.85"/>' for k in range(5)))
+        return (f'<g transform="translate({x},{y})">'
+                f'<rect x="0" y="{-h}" width="{w}" height="{h}" rx="3" fill="#282932"/>'
+                f'<rect x="0" y="{-h}" width="{w}" height="4" rx="2" fill="#383944"/>'
+                f'<rect x="0" y="-6" width="{w}" height="6" fill="#1e1f28"/>'
+                f'{wing(-1)}{wing(1)}'
+                f'<ellipse cx="{cx}" cy="{cy:.0f}" rx="{w*0.36:.0f}" ry="{h*0.44:.0f}" '
+                f'fill="#ffd98a" opacity="0.08"/></g>')
+
+    back = ('    '
+            + '<g fill="#131d17">'
+            + ''.join(f'<ellipse cx="{x}" cy="{318 - (x % 4)}" rx="{r}" ry="{r*0.5:.0f}"/>'
+                      for x, r in [(48, 20), (128, 15), (232, 18), (352, 13), (466, 17),
+                                   (556, 12), (716, 16), (822, 20), (932, 14), (1046, 18),
+                                   (1168, 15), (1256, 19)]) + '</g>'
+            + '<g stroke="#1a2820" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.9">'
+            + ''.join(f'<path d="M{x},322 L{x-4},{306 - (x%5)} M{x+5},322 L{x+8},{308 - (x%4)} '
+                      f'M{x+10},322 L{x+7},{304 - (x%6)}"/>'
+                      for x in range(20, 1280, 63)) + '</g>'
+            + ''.join(cypress(x, y, s) for x, y, s in
+                      [(66, 404, 0.9), (1146, 402, 0.84), (1256, 396, 0.7)])
+            + ''.join(oak2(x, y, s) for x, y, s in
+                      [(214, 400, 0.64), (348, 406, 0.86), (486, 396, 0.48),
+                       (828, 402, 0.72), (982, 406, 0.9), (1066, 396, 0.52)])
+            + ''.join(oak2(x, 332, s) for x, s in [(150, 0.38), (420, 0.3), (900, 0.34)])
+            + cypress(1012, 330, 0.32)
+            + cyclist(238, 354, 0.72) + cyclist(690, 352, 0.66) + cyclist(1074, 355, 0.7)
+            + person(456, 353, 0.6, '#131b22', 'out') + person(486, 354, 0.56)
+            + person(880, 353, 0.58, '#131b22', 'up') + person(146, 355, 0.6)
+            + person(632, 352, 0.6, '#131b22', 'up') + person(1200, 354, 0.58, '#131b22', 'out')
+            + ''.join(f'<g transform="translate({x},344)">'
+                      f'<rect x="-1.2" y="-40" width="2.4" height="40" fill="#141c24"/>'
+                      f'<circle cx="0" cy="-43" r="4" fill="#ffe3a0" opacity="0.85"/>'
+                      f'<circle cx="0" cy="-43" r="10" fill="#ffd98a" opacity="0.16"/></g>'
+                      for x in (300, 780, 1180)))
+
+    front = ('    '
+             # LEFT: the wings wall, with people posing in front of it as they actually do
+             + mural(30, 678, 296, 104)
+             + lightstring(26, 336, 550, 26)
+             + oak2(116, 556, 0.72)
+             + person(150, 708, 1.1, '#131b22', 'out') + person(204, 712, 1.02, '#131b22', 'up')
+             + cypress(338, 716, 1.38)
+             # a family stopped on the grass to watch — the whole point of Austin at dusk
+             + person(424, 604, 0.86, '#131b22', 'up') + person(456, 608, 0.64, '#131b22', 'up')
+             + person(484, 606, 0.72, '#131b22', 'out')
+             + '<g transform="translate(512,610) scale(0.58)">'
+             '<g stroke="#131b22" stroke-width="4" stroke-linecap="round" fill="none">'
+             '<path d="M-12,-6 L-13,2 M8,-6 L9,2 M-4,-6 L-5,2 M14,-8 L21,-15"/></g>'
+             '<rect x="-16" y="-14" width="30" height="9" rx="4.5" fill="#131b22"/>'
+             '<circle cx="19" cy="-18" r="5" fill="#131b22"/>'
+             '<path d="M22,-22 l5,-4 l1,5 z" fill="#131b22"/></g>'
+             # RIGHT: the food-truck lot
+             + lightstring(792, 1280, 512, 34) + lightstring(812, 1280, 556, 30)
+             + truck(910, 690, 0.94, '#2f7f96', '#f2b134')
+             + truck(1148, 706, 1.0, '#b8512f', '#f2d06a')
+             + table(986, 716, 1.0) + table(1074, 700, 0.9)
+             + f'<g transform="translate(812,646)">{shadow(0, 4, 40, 6, 0.3)}'
+             '<rect x="-36" y="-14" width="72" height="6" rx="2" fill="#33291f"/>'
+             '<rect x="-36" y="-28" width="72" height="6" rx="2" fill="#3c3125"/>'
+             '<g stroke="#231c14" stroke-width="4"><path d="M-28,-8 L-30,4 M28,-8 L30,4"/></g></g>'
+             + person(892, 716, 1.15, '#131b22', 'out') + person(1040, 712, 1.1)
+             + person(1112, 700, 1.0, '#131b22', 'down') + person(958, 704, 1.05, '#131b22', 'up')
+             + person(1224, 716, 1.15) + person(838, 648, 0.72, '#131b22', 'up')
+             + ''.join(f'<g transform="translate({x},{y})">'
+                       f'<rect x="-1.4" y="-70" width="2.8" height="70" fill="#141c24"/>'
+                       f'<circle cx="0" cy="-74" r="5.5" fill="#ffe3a0" opacity="0.9"/>'
+                       f'<circle cx="0" cy="-74" r="15" fill="#ffd98a" opacity="0.14"/></g>'
+                       for x, y in [(760, 640), (1276, 620)]))
+
+    scene('austin', 'AUSTIN — a million bats off the Congress Avenue Bridge at sunset, the Capitol dome', {
+        'sky': sky_l,
+        'far': (skyline + '\n' + capitol + '\n' + water + '\n' + bank + '\n'
+                + bridge + '\n' + bats),
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#141f19" opacity="0.55"><rect x="0" y="708" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#4a4a52', surface2='#37373e', shoulder='#8a8470', dash='#e8c85a'),
+        'trackkw': dict(ballast='#6a5a48', ballast_hi='#7a6a54', tie='#4a3422', rail='#a8adb4'),
+    }, d)
+
+
+# ================================================================= 9. HOUSTON
+def houston():
+    """Houston is where the ground crew sits. Rockets don't launch here — they are
+    FLOWN here, which is why the hero is hardware parked on grass: the shuttle
+    Independence riding piggyback on NASA 905. Second landmark: a Saturn V lying on
+    its side, so long it reads as a wall. Flat, humid, hazy midday — the opposite of
+    Florida's vertical launch and of Austin's dusk."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f93cf"/><stop offset="0.5" stop-color="#8cc0de"/>
+      <stop offset="0.86" stop-color="#d3e4e6"/><stop offset="1" stop-color="#e8eee8"/>
+    </linearGradient>
+    <linearGradient id="grassg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ea457"/><stop offset="1" stop-color="#5c8140"/>
+    </linearGradient>
+    <linearGradient id="pave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9ccc6"/><stop offset="1" stop-color="#aeb2ad"/>
+    </linearGradient>''')
+
+    # ---- hazy sky, big Gulf-coast cumulus ----
+    def cumulus(cx, cy, r, op=0.95):
+        return (f'<g opacity="{op}">'
+                f'<ellipse cx="{cx}" cy="{cy}" rx="{r}" ry="{r*0.5:.0f}" fill="#ffffff"/>'
+                f'<ellipse cx="{cx-r*0.55:.0f}" cy="{cy+r*0.16:.0f}" rx="{r*0.6:.0f}" ry="{r*0.4:.0f}" fill="#ffffff"/>'
+                f'<ellipse cx="{cx+r*0.6:.0f}" cy="{cy+r*0.12:.0f}" rx="{r*0.55:.0f}" ry="{r*0.36:.0f}" fill="#ffffff"/>'
+                f'<ellipse cx="{cx-r*0.18:.0f}" cy="{cy-r*0.34:.0f}" rx="{r*0.5:.0f}" ry="{r*0.34:.0f}" fill="#ffffff"/>'
+                f'<ellipse cx="{cx+r*0.28:.0f}" cy="{cy-r*0.26:.0f}" rx="{r*0.42:.0f}" ry="{r*0.28:.0f}" fill="#ffffff"/>'
+                f'<ellipse cx="{cx}" cy="{cy+r*0.36:.0f}" rx="{r*0.94:.0f}" ry="{r*0.2:.0f}" fill="#cfdbe2"/></g>')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="304" fill="url(#skyg)"/>\n'
+             '    ' + cumulus(210, 92, 74) + cumulus(520, 62, 54, 0.9) + cumulus(830, 104, 64)
+             + cumulus(1120, 70, 58, 0.88) + cumulus(660, 150, 44, 0.6) + '\n'
+             # the humid haze that flattens every Houston horizon
+             '    <rect x="0" y="222" width="1280" height="82" fill="#e2ecec" opacity="0.5"/>\n'
+             # a T-38 chase plane, because they are always overhead here
+             '    <g transform="translate(1010,176) rotate(-8) scale(0.9)" opacity="0.85">'
+             '<path d="M-34,0 L20,-3 L38,0 L20,3 Z" fill="#f2f4f6"/>'
+             '<path d="M-6,-1 L-26,-16 L-14,-16 L6,-2 Z" fill="#dfe3e6"/>'
+             '<path d="M-6,1 L-26,16 L-14,16 L6,2 Z" fill="#dfe3e6"/>'
+             '<path d="M-30,-1 L-40,-13 L-32,-13 L-24,-1 Z" fill="#c9ced4"/>'
+             '<circle cx="16" cy="-1" r="2" fill="#4a90c0"/></g>\n'
+             '    <g stroke="#ffffff" stroke-width="2.5" opacity="0.35" fill="none">'
+             '<path d="M1006,178 q-90,10 -190,26"/></g>')
+
+    # ---- downtown, 25 miles off and half-dissolved in haze ----
+    def tower(x, y, w, base='#93aab8', lit='#a6bac6'):
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{292-y}" rx="1.5" fill="{base}"/>'
+                f'<rect x="{x}" y="{y}" width="{w*0.34:.0f}" height="{292-y}" fill="{lit}"/>')
+    downtown = ('    <g opacity="0.62">'
+                + ''.join(tower(*t) for t in
+                          [(28, 244, 22), (54, 232, 18), (78, 250, 24), (128, 238, 20),
+                           (152, 252, 26), (206, 240, 18), (230, 254, 24), (300, 246, 20),
+                           (326, 236, 16), (348, 252, 22), (376, 244, 18), (400, 256, 24)])
+                # JPMorgan Chase Tower: the tall one with the sloped, notched crown
+                + '<polygon points="98,292 98,196 122,182 122,292" fill="#8ba3b2"/>'
+                + '<polygon points="98,196 122,182 122,196" fill="#a6bac6"/>'
+                + '<rect x="108" y="150" width="2.5" height="34" fill="#8ba3b2"/>'
+                # Heritage Plaza: the stepped crown everyone in Houston can name
+                + '<rect x="256" y="212" width="34" height="80" fill="#8ba3b2"/>'
+                + '<rect x="256" y="212" width="12" height="80" fill="#a6bac6"/>'
+                + ''.join(f'<rect x="{258+i*4}" y="{204-i*7}" width="{30-i*8}" height="8" fill="#7f97a6"/>'
+                          for i in range(3))
+                + '</g>')
+
+    # ---- the ship channel: stacks and steam, the other half of Houston ----
+    refinery = ('    <g opacity="0.5">'
+                + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{292-y}" fill="#9aa6ae"/>'
+                          for x, y, w in [(1186, 236, 9), (1204, 224, 7), (1218, 244, 11),
+                                          (1238, 230, 8), (1256, 248, 13), (1272, 238, 8)])
+                + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{h/2:.0f}" fill="#aab4bb"/>'
+                          for x, y, w, h in [(1192, 268, 26, 24), (1230, 274, 22, 18)])
+                + '<g fill="#ffffff" opacity="0.7"><ellipse cx="1206" cy="212" rx="13" ry="9"/>'
+                '<ellipse cx="1214" cy="196" rx="17" ry="11"/><ellipse cx="1204" cy="180" rx="20" ry="12"/></g>'
+                + '</g>')
+
+    # ---- a live-oak treeline sitting on the flat horizon ----
+    treeline = ('    <g fill="#4a7048" opacity="0.85">'
+                + ''.join(f'<ellipse cx="{x}" cy="{292 - (x % 7)}" rx="{r}" ry="{r*0.42:.0f}"/>'
+                          for x, r in [(470, 34), (528, 26), (582, 30), (640, 22), (700, 28),
+                                       (756, 33), (820, 25), (880, 30), (944, 22), (1010, 28),
+                                       (1074, 33), (1136, 24), (160, 30), (250, 24), (350, 28)])
+                + '</g>\n'
+                '    <rect x="0" y="290" width="1280" height="12" fill="#43663f"/>')
+
+    # ---- ground: mown NASA-campus lawn and a big concrete apron ----
+    ground_l = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#grassg)"/>\n'
+                # mowing stripes, which is exactly what a NASA lawn looks like
+                '    <g fill="#87ad5e" opacity="0.45">'
+                + ''.join(f'<rect x="0" y="{y}" width="1280" height="{h}"/>'
+                          for y, h in [(312, 14), (344, 16), (382, 18), (426, 20)]) + '</g>\n'
+                # the apron the hardware stands on
+                '    <path d="M604,404 L1280,404 L1280,470 L586,470 Z" fill="url(#pave)"/>\n'
+                '    <path d="M604,404 L1280,404 L1280,410 L601,410 Z" fill="#d6d9d3"/>\n'
+                '    <g stroke="#9aa09a" stroke-width="2" opacity="0.6">'
+                + ''.join(f'<path d="M{x},404 L{x-6},470"/>' for x in range(660, 1280, 78)) + '</g>\n'
+                # a second apron on the left under the Saturn V
+                '    <path d="M0,392 L560,392 L548,446 L0,446 Z" fill="url(#pave)"/>\n'
+                '    <path d="M0,392 L560,392 L559,398 L0,398 Z" fill="#d6d9d3"/>\n'
+                # visitor walkway across the front
+                '    <path d="M0,560 L1280,560 L1280,606 L0,606 Z" fill="#c2c6c0"/>\n'
+                '    <rect x="0" y="560" width="1280" height="5" fill="#d6d9d3"/>\n'
+                '    <g stroke="#a3a8a2" stroke-width="2.5" opacity="0.7">'
+                + ''.join(f'<path d="M{x},560 L{x-4},606"/>' for x in range(46, 1280, 92)) + '</g>')
+
+    # ------------------------------------------------------------ hardware ----
+    def plaza(x, y, s=1.0):
+        """The Independence Plaza block that stands right behind the aircraft."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-78" y="-196" width="156" height="196" fill="#b8bcc0"/>'
+                f'<rect x="-78" y="-196" width="52" height="196" fill="#cbcfd2"/>'
+                f'<rect x="-82" y="-204" width="164" height="10" rx="2" fill="#9ea3a8"/>'
+                f'<rect x="-58" y="-176" width="94" height="120" fill="#2f3d47"/>'
+                + ''.join(f'<rect x="-54" y="{-170+r*22}" width="86" height="15" fill="#5f7e92" opacity="0.75"/>'
+                          for r in range(5))
+                + ''.join(f'<rect x="{-54+c*30}" y="-176" width="3" height="120" fill="#8d949c"/>'
+                          for c in range(4))
+                + f'<g stroke="#8d949c" stroke-width="3" fill="none">'
+                f'<path d="M-58,-56 L36,-56 M-58,-96 L36,-96 M-58,-136 L36,-136"/></g>'
+                f'<rect x="-72" y="-186" width="60" height="7" rx="2" fill="#4a6f9c"/>'
+                f'<rect x="40" y="-176" width="34" height="176" fill="#c4c8cb"/>'
+                f'<g stroke="#9ea3a8" stroke-width="2.5" fill="none">'
+                + ''.join(f'<path d="M42,{-160+i*28} L72,{-174+i*28}"/>' for i in range(6)) + '</g></g>')
+
+    def b747(x, y, s=1.0):
+        """NASA 905. Nose left, tail right, four fans, blue cheatline."""
+        white, shade, blue, dark = '#f4f6f7', '#dde2e6', '#2f6fb5', '#2c3a46'
+        wins = ''.join(f'<rect x="{86+i*13}" y="-64" width="7" height="6" rx="1.5"/>' for i in range(28))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="262" cy="4" rx="250" ry="10" fill="#000" opacity="0.16"/>'
+                # far wing, behind the fuselage
+                f'<polygon points="250,-52 316,-56 470,-96 424,-96" fill="{shade}"/>'
+                # fuselage
+                f'<path d="M8,-56 C 8,-74 26,-84 58,-84 L470,-80 C 502,-78 520,-70 522,-58 '
+                f'L522,-52 C 520,-40 500,-32 470,-32 L58,-30 C 26,-30 8,-40 8,-56 Z" fill="{white}"/>'
+                f'<path d="M8,-56 C 8,-46 26,-30 58,-30 L470,-32 C 500,-32 520,-40 522,-52 '
+                f'L8,-52 Z" fill="{shade}" opacity="0.55"/>'
+                # upper-deck hump
+                f'<path d="M56,-84 C 62,-104 96,-112 138,-110 L188,-100 L188,-82 Z" fill="{white}"/>'
+                f'<path d="M62,-96 C 76,-104 104,-108 132,-106 L132,-96 Z" fill="{dark}"/>'
+                # cheatline + windows
+                f'<rect x="18" y="-58" width="500" height="9" fill="{blue}"/>'
+                f'<rect x="18" y="-49" width="500" height="3" fill="#1f5590"/>'
+                f'<g fill="{dark}" opacity="0.85">{wins}</g>'
+                f'<text x="150" y="-88" font-family="Trebuchet MS,Arial,sans-serif" font-size="13" '
+                f'font-weight="bold" fill="{blue}" letter-spacing="2">NASA</text>'
+                # tail
+                f'<path d="M470,-72 L500,-176 L528,-176 L528,-64 Z" fill="{white}"/>'
+                f'<path d="M470,-72 L500,-176 L512,-176 L490,-66 Z" fill="{shade}"/>'
+                f'<path d="M500,-176 L528,-176 L528,-150 L494,-150 Z" fill="{blue}"/>'
+                f'<polygon points="500,-78 566,-92 574,-84 508,-70" fill="{shade}"/>'
+                # near wing + engines
+                f'<polygon points="216,-40 300,-44 452,-4 378,-4" fill="{white}"/>'
+                f'<polygon points="216,-40 300,-44 452,-4 430,-4 268,-38" fill="{shade}"/>'
+                + ''.join(f'<g transform="translate({ex},{ey})">'
+                          f'<rect x="-26" y="-14" width="52" height="28" rx="13" fill="{white}"/>'
+                          f'<rect x="-26" y="-14" width="52" height="9" rx="4" fill="{shade}"/>'
+                          f'<ellipse cx="-24" cy="0" rx="5" ry="13" fill="{dark}"/>'
+                          f'<rect x="-4" y="-24" width="9" height="12" fill="{shade}"/></g>'
+                          for ex, ey in [(292, -12), (356, -6)])
+                # landing gear
+                + ''.join(f'<g><rect x="{gx-4}" y="-30" width="8" height="{26}" fill="#7d848b"/>'
+                          f'<circle cx="{gx-7}" cy="-2" r="7" fill="#242a30"/>'
+                          f'<circle cx="{gx+7}" cy="-2" r="7" fill="#242a30"/></g>'
+                          for gx in (232, 288))
+                + f'<g><rect x="72" y="-30" width="7" height="26" fill="#7d848b"/>'
+                f'<circle cx="75" cy="-2" r="6" fill="#242a30"/></g></g>')
+
+    def shuttle(x, y, s=1.0):
+        """Independence, mated on the back. The black belly is what separates her
+        from the white 747 underneath — without it the two read as one blob."""
+        white, shade, tile, edge = '#fbfcfd', '#dbe0e4', '#1c2126', '#9aa4ad'
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                # mounting struts onto the 747 spine
+                f'<g fill="#7d848b"><rect x="70" y="-2" width="13" height="20"/>'
+                f'<rect x="252" y="-2" width="15" height="20"/></g>'
+                # delta wing, black underside
+                f'<polygon points="96,-14 186,-14 322,12 190,14" fill="{white}"/>'
+                f'<polygon points="120,-4 200,-2 322,12 190,14" fill="{tile}"/>'
+                # fuselage: white top, black belly the whole length
+                f'<path d="M0,-18 C 14,-38 46,-46 84,-46 L300,-44 L332,-32 L332,-8 '
+                f'L60,-6 C 22,-6 0,-10 0,-18 Z" fill="{white}"/>'
+                f'<path d="M0,-18 C 8,-8 24,-6 60,-6 L332,-8 L332,-19 L2,-22 Z" fill="{tile}"/>'
+                f'<path d="M0,-18 C 12,-36 30,-44 48,-45 C 28,-33 18,-25 15,-15 Z" fill="{tile}"/>'
+                f'<path d="M0,-18 C 14,-38 46,-46 84,-46 L300,-44 L332,-32" fill="none" '
+                f'stroke="{edge}" stroke-width="1.6"/>'
+                # cargo-bay hinge line and payload doors
+                f'<path d="M96,-42 L296,-40" stroke="{edge}" stroke-width="1.4" opacity="0.8"/>'
+                # tall vertical fin, clear of the 747 tail
+                f'<path d="M236,-44 L280,-128 L314,-128 L318,-42 Z" fill="{white}"/>'
+                f'<path d="M236,-44 L280,-128 L292,-128 L262,-42 Z" fill="{shade}"/>'
+                f'<path d="M280,-128 L314,-128 L316,-108 L288,-108 Z" fill="{tile}"/>'
+                f'<path d="M236,-44 L280,-128 L314,-128 L318,-42" fill="none" stroke="{edge}" '
+                f'stroke-width="1.4"/>'
+                # OMS pods + main engine bells
+                f'<polygon points="286,-50 340,-62 346,-54 292,-44" fill="{white}"/>'
+                f'<polygon points="286,-50 340,-62 342,-58 290,-46" fill="{shade}"/>'
+                f'<g fill="{tile}"><ellipse cx="330" cy="-28" rx="13" ry="11"/></g>'
+                f'<g fill="#7d848b"><circle cx="338" cy="-24" r="4.5"/>'
+                f'<circle cx="338" cy="-12" r="4.5"/></g>'
+                f'<text x="150" y="-27" font-family="Trebuchet MS,Arial,sans-serif" font-size="11" '
+                f'font-weight="bold" fill="#5a6570" letter-spacing="1.5">Independence</text>'
+                f'<g fill="#c0392b"><rect x="62" y="-40" width="3.4" height="14"/></g>'
+                f'<rect x="68" y="-40" width="3.4" height="14" fill="#2f6fb5"/></g>')
+
+    def saturn_v(x, y, s=1.0):
+        """A Saturn V on its side in the rocket park. It reads as a wall."""
+        white, dark, shade = '#f2f2ee', '#2b2f34', '#d8dad6'
+        rings = ''.join(f'<rect x="{78+i*84}" y="-46" width="22" height="46" fill="{dark}"/>'
+                        f'<rect x="{78+i*84}" y="-46" width="22" height="12" fill="#4a4f55"/>'
+                        for i in range(5))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="230" cy="6" rx="240" ry="9" fill="#000" opacity="0.14"/>'
+                f'<rect x="24" y="-46" width="440" height="46" fill="{white}"/>'
+                f'<rect x="24" y="-46" width="440" height="46" fill="none" stroke="#aeb3b8" stroke-width="1.6"/>'
+                f'<rect x="24" y="-46" width="440" height="13" fill="{shade}"/>'
+                f'<g opacity="0.9">{rings}</g>'
+                f'<path d="M24,-46 L24,0 L-16,-8 L-16,-38 Z" fill="{white}"/>'
+                f'<path d="M-16,-38 L-16,-8 L-52,-16 L-52,-30 Z" fill="{shade}"/>'
+                f'<path d="M-52,-30 L-52,-16 L-84,-23 Z" fill="{white}"/>'
+                f'<rect x="-118" y="-26" width="34" height="6" fill="{dark}"/>'
+                f'<path d="M-118,-26 l-8,3 8,3 Z" fill="{dark}"/>'
+                f'<rect x="464" y="-46" width="26" height="46" fill="{dark}"/>'
+                + ''.join(f'<ellipse cx="{500+i*22}" cy="{-36+i*9}" rx="12" ry="10" fill="{dark}"/>'
+                          for i in range(3))
+                + f'<text x="180" y="-18" font-family="Trebuchet MS,Arial,sans-serif" font-size="15" '
+                f'font-weight="bold" fill="#c0392b" letter-spacing="3">USA</text>'
+                # display cradles — tall and obvious, so she reads as an exhibit on
+                # stands and never as a rocket that fell over
+                + ''.join(f'<g>{shadow(cx, 26, 46, 7, 0.2)}'
+                          f'<rect x="{cx-44}" y="18" width="88" height="11" rx="3" fill="#6f767d"/>'
+                          f'<rect x="{cx-44}" y="18" width="88" height="4" rx="2" fill="#878f96"/>'
+                          f'<path d="M{cx-30},18 L{cx-16},2 M{cx+30},18 L{cx+16},2" '
+                          f'stroke="#7d848b" stroke-width="9"/>'
+                          f'<path d="M{cx-22},2 q22,-9 44,0 l0,7 q-22,-8 -44,0 Z" fill="#5f676e"/>'
+                          f'</g>' for cx in (96, 244, 392))
+                + '</g>')
+
+    # ------------------------------------------------------------- nature ----
+    def liveoak(x, y, s=1.0, a='#3d6b41', b='#4c8050', trunk='#6b5340', moss='#96a68c'):
+        """Gulf-coast live oak: wide horizontal limbs, moss hanging in curtains."""
+        strands = ''.join(f'<path d="M{mx},{my} q{3 if i%2 else -3},{ml*0.34:.0f} {1 if i%3 else -1},'
+                          f'{ml*0.66:.0f} q{-2 if i%2 else 2},{ml*0.3:.0f} 0,{ml*0.34:.0f}" '
+                          f'stroke="{moss}" stroke-width="{1.2 + (i % 3) * 0.35:.1f}" fill="none" '
+                          f'opacity="{0.34 + (i % 4) * 0.1:.2f}"/>'
+                          for i, (mx, my, ml) in enumerate(
+                              [(-100, -38, 30), (-92, -44, 44), (-84, -46, 36), (-74, -52, 52),
+                               (-66, -54, 38), (-56, -58, 58), (-48, -60, 34), (-38, -64, 48),
+                               (-30, -66, 40), (-20, -68, 56), (-12, -70, 32), (0, -70, 46),
+                               (10, -68, 38), (20, -66, 54), (30, -62, 36), (42, -60, 50),
+                               (52, -56, 34), (62, -52, 46), (72, -48, 38), (82, -44, 52),
+                               (90, -40, 30), (100, -34, 42)]))
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 96, 12, 0.16)}'
+                f'<path d="M-12,4 C -14,-26 -22,-40 -30,-52 L-13,-48 C -8,-58 -3,-66 0,-82 '
+                f'C 4,-66 10,-58 16,-48 L34,-54 C 24,-40 12,-26 10,4 Z" fill="{trunk}"/>'
+                f'<g stroke="{trunk}" stroke-width="9" stroke-linecap="round" fill="none">'
+                f'<path d="M-6,-56 C -40,-58 -66,-50 -96,-38"/>'
+                f'<path d="M6,-58 C 40,-60 70,-52 100,-36"/>'
+                f'<path d="M-4,-70 C -30,-78 -52,-76 -70,-66"/>'
+                f'<path d="M4,-72 C 30,-80 54,-78 74,-66"/></g>'
+                f'<ellipse cx="0" cy="-92" rx="104" ry="40" fill="{a}"/>'
+                f'<ellipse cx="-58" cy="-74" rx="52" ry="26" fill="{b}"/>'
+                f'<ellipse cx="58" cy="-76" rx="48" ry="24" fill="{b}"/>'
+                f'<ellipse cx="6" cy="-116" rx="62" ry="26" fill="{b}"/>'
+                f'<g>{strands}</g></g>')
+
+    def crepe(x, y, s=1.0, bloom='#e28ab0'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 30, 5)}'
+                f'<g stroke="#8a7259" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M0,0 L-6,-26 M0,0 L4,-28 M0,-14 L-16,-34 M0,-16 L16,-32"/></g>'
+                f'<g fill="{bloom}"><ellipse cx="-16" cy="-42" rx="18" ry="14"/>'
+                f'<ellipse cx="14" cy="-46" rx="20" ry="15"/><ellipse cx="0" cy="-58" rx="16" ry="12"/></g>'
+                f'<g fill="#f0aac8" opacity="0.7"><ellipse cx="-8" cy="-50" rx="11" ry="8"/>'
+                f'<ellipse cx="16" cy="-40" rx="9" ry="7"/></g></g>')
+
+    def flagpole(x, y, s=1.0, kind='us'):
+        if kind == 'us':
+            flag = ('<rect x="3" y="-96" width="58" height="34" fill="#f2f2ee"/>'
+                    + ''.join(f'<rect x="3" y="{-96+i*10}" width="58" height="5" fill="#c0392b"/>' for i in range(4))
+                    + '<rect x="3" y="-96" width="26" height="18" fill="#2f4d8f"/>'
+                    + ''.join(f'<circle cx="{8+c*6}" cy="{-92+r*6}" r="1.2" fill="#f2f2ee"/>'
+                              for r in range(3) for c in range(4)))
+        else:
+            flag = ('<rect x="3" y="-96" width="58" height="34" fill="#f2f2ee"/>'
+                    '<rect x="3" y="-79" width="58" height="17" fill="#c0392b"/>'
+                    '<rect x="3" y="-96" width="20" height="34" fill="#2f4d8f"/>'
+                    '<path d="M13,-84 l2.6,5.4 5.8,0.8 -4.2,4.1 1,5.8 -5.2,-2.8 -5.2,2.8 1,-5.8 '
+                    '-4.2,-4.1 5.8,-0.8 Z" fill="#f2f2ee"/>')
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 14, 4)}'
+                f'<rect x="-2" y="-104" width="4" height="104" fill="#d2d6d9"/>'
+                f'<circle cx="0" cy="-107" r="4" fill="#e0b64a"/>{flag}</g>')
+
+    def person(x, y, s=1.0, shirt='#2f6fb5', skin='#c98d5e', hair='#33241c', hat=None, arms='down'):
+        A = {'down': 'M-6,-30 L-11,-13 M6,-30 L11,-13',
+             'out':  'M-6,-30 L-19,-24 M6,-30 L19,-24',
+             'up':   'M-6,-31 L-15,-49 M6,-31 L15,-49',
+             'point':'M-6,-30 L-11,-13 M6,-31 L21,-46'}[arms]
+        cap = ''
+        if hat == 'cowboy':
+            cap = ('<path d="M-15,-42 q15,5 30,0 q-4,7 -15,7 q-11,0 -15,-7 Z" fill="#8a6a45"/>'
+                   '<path d="M-8,-42 q0,-9 8,-9 q8,0 8,9 Z" fill="#a3814f"/>')
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 13, 3.5)}'
+                f'<g stroke="{skin}" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-15 L-5,-1 M3,-15 L6,-1"/><path d="{A}"/></g>'
+                f'<rect x="-7" y="-33" width="14" height="20" rx="6" fill="{shirt}"/>'
+                f'<circle cx="0" cy="-40" r="6.5" fill="{skin}"/>'
+                + (cap if cap else f'<path d="M-6.5,-42 a6.5,6.5 0 0 1 13,0 z" fill="{hair}"/>') + '</g>')
+
+    def astronaut(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 20, 5)}'
+                f'<g stroke="#f2f2ee" stroke-width="9" stroke-linecap="round" fill="none">'
+                f'<path d="M-5,-18 L-8,-1 M5,-18 L9,-1"/><path d="M-9,-38 L-22,-22 M9,-38 L22,-22"/></g>'
+                f'<rect x="-13" y="-46" width="26" height="30" rx="9" fill="#f2f2ee"/>'
+                f'<rect x="-13" y="-34" width="26" height="5" fill="#2f6fb5"/>'
+                f'<rect x="-6" y="-42" width="12" height="6" rx="2" fill="#c0392b"/>'
+                f'<circle cx="0" cy="-56" r="12" fill="#f2f2ee"/>'
+                f'<path d="M-8,-58 a8,7 0 0 1 16,0 a8,9 0 0 1 -16,0 Z" fill="#3b4a57"/>'
+                f'<path d="M-6,-59 a5,4 0 0 1 8,-1" stroke="#8fb6d4" stroke-width="2" fill="none"/></g>')
+
+    def fence(x0, x1, y, h=34):
+        posts = ''.join(f'<rect x="{x}" y="{-h}" width="3" height="{h}" fill="#2a2f34"/>'
+                        for x in range(x0, x1, 15))
+        return (f'<g transform="translate(0,{y})" opacity="0.92"><g>{posts}</g>'
+                f'<rect x="{x0}" y="{-h}" width="{x1-x0}" height="4" fill="#2a2f34"/>'
+                f'<rect x="{x0}" y="{-h*0.42:.0f}" width="{x1-x0}" height="3" fill="#2a2f34"/></g>')
+
+    # NOTE: draw order matters — the car park and treeline sit BEHIND the hardware,
+    # so they are emitted first. Put a car after the 747 and it parks on the wing.
+    carpark = ('    '
+               + ''.join(f'<g transform="translate({x},{y}) scale({sc})">{shadow(0, 4, 34, 5)}'
+                         f'<rect x="-30" y="-15" width="60" height="13" rx="4" fill="{c}"/>'
+                         f'<path d="M-17,-15 L-11,-26 L14,-26 L21,-15 Z" fill="{c}"/>'
+                         f'<path d="M-14,-16 L-9,-24 L1,-24 L1,-16 Z" fill="#bfe3f5"/>'
+                         f'<path d="M4,-16 L4,-24 L13,-24 L18,-16 Z" fill="#bfe3f5"/>'
+                         f'<g fill="#22272d"><circle cx="-17" cy="-1" r="5"/>'
+                         f'<circle cx="17" cy="-1" r="5"/></g></g>'
+                         for x, y, sc, c in [(84, 346, 0.62, '#c0392b'), (152, 348, 0.62, '#3f6fa8'),
+                                             (220, 346, 0.62, '#e8e8e2'), (288, 348, 0.62, '#4f8a56'),
+                                             (356, 346, 0.62, '#8d949c'), (424, 348, 0.62, '#e8752a'),
+                                             (786, 344, 0.56, '#e8e8e2'), (846, 342, 0.56, '#c0392b'),
+                                             (1128, 344, 0.58, '#8d949c'), (1192, 346, 0.58, '#4f8a56')])
+               + f'<g transform="translate(560,344) scale(0.72)">{shadow(0, 5, 66, 7)}'
+               '<rect x="-64" y="-34" width="128" height="30" rx="5" fill="#f2f4f6"/>'
+               '<rect x="-64" y="-34" width="128" height="9" rx="4" fill="#2f6fb5"/>'
+               '<g fill="#bfe3f5">'
+               + ''.join(f'<rect x="{-56+k*22}" y="-22" width="16" height="11" rx="2"/>' for k in range(5))
+               + '</g><g fill="#22272d"><circle cx="-38" cy="-2" r="7"/>'
+               '<circle cx="38" cy="-2" r="7"/></g></g>'
+               + ''.join(f'<g transform="translate({x},358) scale({sc})">'
+                         f'<ellipse cx="0" cy="-30" rx="46" ry="20" fill="#456f45"/>'
+                         f'<ellipse cx="-22" cy="-24" rx="24" ry="13" fill="#547f52"/>'
+                         f'<ellipse cx="22" cy="-25" rx="22" ry="12" fill="#547f52"/>'
+                         f'<rect x="-4" y="-14" width="8" height="16" fill="#6b5340"/></g>'
+                         for x, sc in [(40, 0.8), (472, 0.86), (700, 0.66), (1246, 0.8)]))
+
+    back = (carpark
+            + plaza(950, 398, 0.92)
+            + b747(690, 398, 0.92)
+            + shuttle(812, 322, 0.92)
+            + saturn_v(150, 396, 0.8)
+            + flagpole(496, 402, 0.66, 'us') + flagpole(540, 402, 0.66, 'tx')
+            + crepe(268, 402, 0.5)
+            + ''.join(f'<g transform="translate({x},400)">'
+                      f'<rect x="-2" y="-52" width="4" height="52" fill="#9aa0a6"/>'
+                      f'<rect x="-9" y="-58" width="18" height="7" rx="3" fill="#b4bac0"/></g>'
+                      for x in (140, 380, 760, 1120))
+            + person(1210, 400, 0.5, '#2f6fb5', arms='out'))
+
+    front = ('    ' + liveoak(112, 690, 1.25) + liveoak(1216, 700, 1.15)
+             + fence(756, 1280, 566) + fence(0, 528, 566)
+             + crepe(360, 640, 1.0) + crepe(880, 596, 0.8, '#e8a0be')
+             # a family on the walkway: dad in a cowboy hat, kid pointing at the shuttle
+             + person(430, 604, 1.0, '#3f7d4f', hat='cowboy', arms='out')
+             + person(468, 606, 0.72, '#f2b134', arms='point')
+             + person(500, 604, 0.92, '#c0392b', arms='down')
+             + astronaut(856, 700, 1.15)
+             + person(912, 706, 1.1, '#2f6fb5', arms='out')
+             + person(956, 710, 0.78, '#e8752a', arms='up')
+             + person(268, 600, 0.9, '#7a3f9e', arms='down')
+             + f'<g transform="translate(1122,688)">{shadow(0, 6, 56, 8)}'
+             '<rect x="-52" y="-30" width="104" height="24" rx="5" fill="#2f3d47"/>'
+             '<rect x="-52" y="-30" width="104" height="8" rx="4" fill="#41505c"/>'
+             '<text x="0" y="-13" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+             'font-size="12" font-weight="bold" fill="#f2f4f6" letter-spacing="0.5">SPACE CENTER</text>'
+             '<g stroke="#7d848b" stroke-width="5"><path d="M-34,-6 L-34,10 M34,-6 L34,10"/></g>'
+             '<circle cx="-70" cy="-18" r="15" fill="#2f4d8f"/>'
+             '<path d="M-82,-16 q12,-9 24,-3" stroke="#c0392b" stroke-width="3" fill="none"/>'
+             '<circle cx="-74" cy="-21" r="1.6" fill="#ffffff"/>'
+             '<circle cx="-66" cy="-16" r="1.4" fill="#ffffff"/></g>'
+             + f'<g transform="translate(424,668)">{shadow(0, 4, 30, 6)}'
+             '<rect x="-24" y="-16" width="48" height="6" rx="2" fill="#5f6b74"/>'
+             '<rect x="-24" y="-30" width="48" height="6" rx="2" fill="#6d7982"/>'
+             '<g stroke="#454f57" stroke-width="4"><path d="M-18,-10 L-20,4 M18,-10 L20,4"/></g></g>')
+
+    scene('houston', 'HOUSTON — the shuttle Independence riding a 747, a Saturn V on its side, hazy Gulf summer', {
+        'sky': sky_l,
+        'far': downtown + '\n' + refinery + '\n' + treeline,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#4f7248" opacity="0.5"><rect x="0" y="708" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#74777c', surface2='#5e6165', shoulder='#e8e2c9', dash='#ffe066'),
+    }, d)
+
+
+# ============================================================ 10. CAPE CANAVERAL
+def cape_canaveral():
+    """The launch. HERO: a rocket lifting off the pad with the service tower beside
+    it and the smoke rolling out sideways. Second landmark: the Vehicle Assembly
+    Building, that vast pale box you can see from twenty miles away. Everything else
+    is what the Cape actually is — saltmarsh, lagoon, palmetto scrub, and a gator."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1663a8"/><stop offset="0.45" stop-color="#3d92cf"/>
+      <stop offset="0.82" stop-color="#8fc4e2"/><stop offset="1" stop-color="#cfe4ec"/>
+    </linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2c6f96"/><stop offset="1" stop-color="#4f9cb8"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfd3ae"/><stop offset="1" stop-color="#c6b78c"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff3c0" stop-opacity="0.75"/>
+      <stop offset="0.55" stop-color="#ffb54a" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ff9a2e" stop-opacity="0"/>
+    </radialGradient>''')
+
+    PAD_X, PAD_Y = 886, 292
+    WATER_TOP, BANK = 258, 292
+    LIFT = 74          # how far off the pad she already is
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="304" fill="url(#skyg)"/>\n'
+             '    <g fill="#ffffff" opacity="0.9">'
+             + ''.join(f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.48:.0f}"/>'
+                       f'<ellipse cx="{x-r*0.6:.0f}" cy="{y+r*0.18:.0f}" rx="{r*0.6:.0f}" ry="{r*0.36:.0f}"/>'
+                       f'<ellipse cx="{x+r*0.62:.0f}" cy="{y+r*0.14:.0f}" rx="{r*0.55:.0f}" ry="{r*0.32:.0f}"/>'
+                       f'<ellipse cx="{x}" cy="{y+r*0.34:.0f}" rx="{r*0.92:.0f}" ry="{r*0.2:.0f}" '
+                       f'fill="#d3e2ea"/></g>'
+                       for x, y, r in [(180, 96, 52), (486, 66, 40), (1140, 110, 58)])
+             + '</g>\n'
+             '    <g stroke="#ffffff" stroke-width="3" fill="none" opacity="0.35" stroke-linecap="round">'
+             '<path d="M60,52 q60,-10 130,-4"/><path d="M1010,44 q70,-8 150,-2"/></g>')
+
+    # ---- the lagoon, the far bank, and the marsh we stand on ----
+    water = (f'    <rect x="0" y="{WATER_TOP}" width="1280" height="{BANK-WATER_TOP}" fill="url(#lake)"/>\n'
+             '    <g fill="#ffffff" opacity="0.22">'
+             + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2" rx="1"/>'
+                       for x, y, w in [(60, 280, 70), (250, 288, 92), (430, 278, 64),
+                                       (620, 286, 80), (1010, 282, 74), (1180, 290, 60)])
+             + '</g>\n'
+             # the flame's reflection running toward us across the water
+             '    <g fill="#ffb54a" opacity="0.5">'
+             + ''.join(f'<rect x="{878 - w//2}" y="{y}" width="{w}" height="2.5" rx="1.2"/>'
+                       for y, w in [(276, 26), (281, 44), (286, 68), (291, 96)])
+             + '</g>')
+
+    bank = (f'    <rect x="0" y="{BANK}" width="1280" height="12" fill="#4a6b46"/>\n'
+            f'    <rect x="0" y="{BANK}" width="1280" height="3" fill="#5c8054"/>\n'
+            '    <g fill="#3c5a3a">'
+            + ''.join(f'<ellipse cx="{x}" cy="{BANK+2}" rx="{r}" ry="{r*0.44:.0f}"/>'
+                      for x, r in [(50, 30), (150, 22), (270, 28), (390, 20), (500, 26),
+                                   (600, 22), (700, 27), (1020, 24), (1120, 30), (1240, 22)])
+            + '</g>')
+
+    # ---- the Vehicle Assembly Building: the biggest single-storey box on earth ----
+    vab = ('    <g id="vab">'
+           '<rect x="118" y="176" width="176" height="92" fill="#d8dad6"/>'
+           '<rect x="118" y="176" width="176" height="10" fill="#eceee9"/>'
+           '<rect x="118" y="176" width="46" height="92" fill="#e4e6e2"/>'
+           # the four vertical high-bay doors
+           + ''.join(f'<rect x="{132+i*42}" y="192" width="26" height="76" fill="#9aa0a2"/>'
+                     f'<rect x="{132+i*42}" y="192" width="26" height="7" fill="#7f8688"/>'
+                     f'<g fill="#8a9092">'
+                     + ''.join(f'<rect x="{132+i*42}" y="{208+k*16}" width="26" height="2.5"/>'
+                               for k in range(4)) + '</g>' for i in range(4))
+           # the flag and the meatball painted on the side, which are really there
+           + '<rect x="122" y="182" width="26" height="16" fill="#f2f2ee"/>'
+           + ''.join(f'<rect x="122" y="{183+i*3}" width="26" height="1.5" fill="#c0392b"/>' for i in range(5))
+           + '<rect x="122" y="182" width="11" height="8" fill="#2f4d8f"/>'
+           + '<circle cx="276" cy="192" r="9" fill="#2f4d8f"/>'
+           '<path d="M269,194 q7,-6 14,-2" stroke="#c0392b" stroke-width="2" fill="none"/>'
+           # low support buildings, a water tower, and the spherical propellant tanks
+           + '<g fill="#c6c9c4"><rect x="60" y="244" width="52" height="24"/>'
+           '<rect x="300" y="248" width="70" height="20"/><rect x="380" y="252" width="44" height="16"/></g>'
+           '<g><rect x="437" y="240" width="4" height="28" fill="#9aa0a2"/>'
+           '<ellipse cx="439" cy="236" rx="15" ry="11" fill="#e4e6e2"/>'
+           '<g stroke="#9aa0a2" stroke-width="2"><path d="M430,246 L432,268 M448,246 L446,268"/></g></g>'
+           + ''.join(f'<g><circle cx="{x}" cy="{254}" r="12" fill="#eceee9"/>'
+                     f'<circle cx="{x-4}" cy="250" r="7" fill="#f7f8f6"/>'
+                     f'<rect x="{x-11}" y="258" width="22" height="10" fill="#b4b8b3"/></g>'
+                     for x in (500, 540))
+           + '</g>')
+
+    # ---- the crawlerway running out to the pad ----
+    crawlerway = ('    <polygon points="286,292 470,292 700,304 250,304" fill="#cbc4a8"/>\n'
+                  '    <polygon points="286,292 470,292 700,304 660,304 300,295" fill="#dbd5bb"/>\n'
+                  '    <g stroke="#b6ae92" stroke-width="2" opacity="0.7">'
+                  '<path d="M356,292 L392,304"/><path d="M420,292 L520,304"/></g>')
+
+    # ---- the pad: rocket, tower, flame, and the smoke rolling out sideways ----
+    def rocket(x, y, s=1.0):
+        white, black, grey = '#f4f4f0', '#22262b', '#cfd2ce'
+        bands = ''.join(f'<rect x="-15" y="{-46-i*46}" width="30" height="9" fill="{black}"/>'
+                        f'<rect x="-15" y="{-46-i*46}" width="8" height="9" fill="#3b4148"/>' for i in range(4))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-15" y="-206" width="30" height="206" fill="{white}"/>'
+                f'<rect x="-15" y="-206" width="10" height="206" fill="{grey}"/>'
+                f'<g>{bands}</g>'
+                f'<path d="M-15,-206 L0,-238 L15,-206 Z" fill="{white}"/>'
+                f'<path d="M-15,-206 L0,-238 L-5,-206 Z" fill="{grey}"/>'
+                f'<rect x="-3" y="-266" width="6" height="30" fill="{black}"/>'
+                f'<rect x="-1.4" y="-282" width="3" height="18" fill="{black}"/>'
+                f'<text x="0" y="-108" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+                f'font-size="13" font-weight="bold" fill="#c0392b" letter-spacing="1">USA</text>'
+                f'<g fill="{white}"><polygon points="-15,-30 -30,4 -15,4"/>'
+                f'<polygon points="15,-30 30,4 15,4"/></g>'
+                f'<g fill="{grey}"><polygon points="-15,-30 -30,4 -22,4"/></g>'
+                f'<g fill="{black}">' + ''.join(f'<ellipse cx="{-9+i*9}" cy="2" rx="4.4" ry="4"/>'
+                                                for i in range(3)) + '</g></g>')
+
+    def tower(x, y, s=1.0, col='#b4563a', col2='#8f4029'):
+        legs = ''.join(f'<path d="M{-16+i*32},0 L{-16+i*32},-206" stroke="{col}" stroke-width="5"/>'
+                       for i in range(2))
+        braces = ''.join(f'<path d="M-16,{-14-i*24} L16,{-32-i*24} M16,{-14-i*24} L-16,{-32-i*24}" '
+                         f'stroke="{col2}" stroke-width="2.6"/>' for i in range(8))
+        decks = ''.join(f'<rect x="-24" y="{-30-i*30}" width="48" height="6" fill="{col2}"/>'
+                        f'<rect x="-46" y="{-30-i*30}" width="24" height="5" fill="{col}"/>' for i in range(6))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<g fill="none">{legs}{braces}</g><g>{decks}</g>'
+                f'<rect x="-26" y="-222" width="52" height="18" fill="{col2}"/>'
+                f'<rect x="-3" y="-252" width="6" height="30" fill="{col}"/>'
+                f'<path d="M-46,-186 L-96,-178 L-96,-170 L-46,-178 Z" fill="{col2}"/></g>')
+
+    def flame(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-22,0 C -30,34 -22,72 -8,104 C -2,80 2,80 8,104 '
+                f'C 22,72 30,34 22,0 Z" fill="#ff9a2e"/>'
+                f'<path d="M-14,0 C -20,30 -13,62 -4,86 C -1,66 1,66 4,86 '
+                f'C 13,62 20,30 14,0 Z" fill="#ffd35e"/>'
+                f'<path d="M-7,0 C -10,26 -6,50 0,68 C 6,50 10,26 7,0 Z" fill="#fff6d2"/></g>')
+
+    def smoke(cx, cy):
+        puffs = [(-250, 24, 82, 0.95), (-160, 2, 72, 0.98), (-84, 22, 64, 0.96),
+                 (-14, 38, 54, 0.92), (56, 16, 68, 0.96), (134, 32, 76, 0.94),
+                 (218, 12, 62, 0.92), (300, 30, 72, 0.9), (382, 18, 56, 0.86),
+                 (-330, 34, 62, 0.88), (-410, 22, 50, 0.8), (452, 34, 48, 0.8),
+                 (-120, -42, 52, 0.9), (48, -52, 46, 0.88), (186, -34, 40, 0.84),
+                 (-30, -84, 36, 0.8), (110, -92, 30, 0.72), (-210, -60, 34, 0.78)]
+        body = ''.join(f'<ellipse cx="{cx+dx}" cy="{cy+dy}" rx="{r}" ry="{r*0.62:.0f}" '
+                       f'fill="#f4f6f7" opacity="{op}"/>' for dx, dy, r, op in puffs)
+        under = ''.join(f'<ellipse cx="{cx+dx}" cy="{cy+dy+r*0.4:.0f}" rx="{r*0.8:.0f}" '
+                        f'ry="{r*0.3:.0f}" fill="#d2d8dc" opacity="0.75"/>'
+                        for dx, dy, r, op in puffs[:9])
+        warm = ''.join(f'<ellipse cx="{cx+dx}" cy="{cy+dy}" rx="{r*0.7:.0f}" ry="{r*0.4:.0f}" '
+                       f'fill="#ffcf8a" opacity="0.4"/>' for dx, dy, r, op in puffs[2:6])
+        return f'<g>{body}{under}{warm}</g>'
+
+    pad = ('    <g id="pad">'
+           # the flame trench and the pad apron
+           '<polygon points="790,286 996,286 1016,304 770,304" fill="#c6c9c4"/>'
+           '<polygon points="790,286 996,286 1000,292 792,292" fill="#dcdfda"/>'
+           + tower(958, 292, 0.82)
+           + f'<circle cx="{PAD_X}" cy="{PAD_Y-LIFT}" r="190" fill="url(#sung)"/>'
+           + rocket(PAD_X, PAD_Y - LIFT - 26, 0.62)
+           + flame(PAD_X, PAD_Y - LIFT - 28, 1.05)
+           + smoke(PAD_X - 10, PAD_Y - 16)
+           + '</g>')
+
+    # ---- ground: sand, saltmarsh grass, and a tidal creek ----
+    ground_l = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#sand)"/>\n'
+                '    <g fill="#7f9358" opacity="0.62">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.22:.0f}"/>'
+                          for x, y, r in [(120, 330, 150), (430, 344, 130), (770, 332, 160),
+                                          (1100, 346, 140), (70, 400, 120), (990, 404, 150),
+                                          (310, 476, 170), (1190, 492, 140), (150, 566, 160),
+                                          (870, 596, 180), (490, 646, 150), (1130, 666, 160)])
+                + '</g>\n'
+                # saltmarsh grass, drawn as strokes so it reads as grass and not as pads
+                '    <g stroke="#6f8a4c" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.75">'
+                + ''.join(f'<path d="M{x},{y} l{-3 - (x % 4)},{-10 - (x % 7)} M{x+5},{y} l{1 + (x % 3)},'
+                          f'{-13 - (x % 6)} M{x+10},{y} l{4 + (x % 4)},{-9 - (x % 5)}"/>'
+                          for y in (322, 348, 384, 428, 476, 540, 610, 686)
+                          for x in range(6 + (y % 17), 1280, 34)) + '</g>\n'
+                # a tidal creek winding across, the way the whole Cape is cut up by water
+                '    <path d="M-20,398 C 180,392 340,418 452,438 C 560,458 606,492 566,522 '
+                'C 522,556 330,552 196,572 C 96,586 22,606 -20,602 Z" fill="#4f8fa8" opacity="0.9"/>\n'
+                '    <path d="M-20,398 C 180,392 340,418 452,438 C 560,458 606,492 566,522" '
+                'fill="none" stroke="#8ccadb" stroke-width="3" opacity="0.75"/>\n'
+                '    <g fill="#6fa8bd" opacity="0.5">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.3:.0f}"/>'
+                          for x, y, r in [(120, 430, 46), (300, 470, 40), (420, 520, 34)]) + '</g>\n'
+                '    <g fill="#c9bb92" opacity="0.6">'
+                + ''.join(f'<path d="M{x},{y} q 40,-6 80,0"/>'
+                          for x, y in [(600, 560), (900, 700), (1160, 600), (700, 660)])
+                + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def seaoats(x, y, s=1.0, blade='#a3b066', head='#cfc48d'):
+        blades = ''.join(f'<path d="M0,0 C {dx*0.3:.0f},{-h*0.5:.0f} {dx*0.7:.0f},{-h*0.8:.0f} {dx},{-h}" '
+                         f'stroke="{blade}" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+                         f'<ellipse cx="{dx}" cy="{-h-4}" rx="1.7" ry="5.5" fill="{head}" '
+                         f'transform="rotate({dx*0.5:.0f} {dx} {-h-4})"/>'
+                         for dx, h in [(-26, 42), (-15, 56), (-5, 66), (6, 60), (17, 48), (27, 36)])
+        low = ''.join(f'<path d="M0,0 C {dx*0.4:.0f},{-h*0.6:.0f} {dx*0.8:.0f},{-h*0.85:.0f} {dx},{-h}" '
+                      f'stroke="#8fa055" stroke-width="2" fill="none" stroke-linecap="round"/>'
+                      for dx, h in [(-34, 26), (-20, 32), (10, 30), (24, 24), (34, 18)])
+        return f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 30, 5)}{low}{blades}</g>'
+
+    def palmetto(x, y, s=1.0, a='#3f7a4a', b='#4d8f58'):
+        fans = ''.join(f'<g transform="rotate({r} 0 0)">'
+                       f'<path d="M0,0 L-4,-34 L0,-46 L4,-34 Z" fill="{a}"/>'
+                       f'<path d="M0,-10 L-18,-32 L-13,-40 L0,-26 Z" fill="{b}"/>'
+                       f'<path d="M0,-10 L18,-32 L13,-40 L0,-26 Z" fill="{b}"/></g>'
+                       for r in (-42, -20, 0, 20, 42))
+        return f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 30, 5)}{fans}</g>'
+
+    def sabal(x, y, s=1.0, trunk='#9a8465', frond='#3f7a4a', frond2='#4d8f58'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 24)}'
+                f'<path d="M-6,0 C -8,-40 2,-72 8,-100 L18,-98 C 10,-70 2,-40 6,0 Z" fill="{trunk}"/>'
+                f'<g fill="{trunk}" opacity="0.5">'
+                + ''.join(f'<rect x="{-6+i*0.6:.0f}" y="{-14-i*11}" width="13" height="3" rx="1.5"/>'
+                          for i in range(8)) + '</g>'
+                f'<g fill="{frond}">'
+                f'<path d="M12,-100 C -16,-116 -40,-112 -54,-98 C -32,-104 -8,-102 10,-94 Z"/>'
+                f'<path d="M12,-100 C 40,-118 64,-114 78,-100 C 56,-106 32,-104 14,-94 Z"/>'
+                f'<path d="M12,-100 C 2,-128 -12,-140 -30,-146 C -12,-132 2,-118 8,-98 Z"/></g>'
+                f'<g fill="{frond2}">'
+                f'<path d="M12,-100 C 26,-130 44,-140 62,-146 C 44,-130 28,-116 18,-96 Z"/>'
+                f'<path d="M12,-100 C 38,-92 56,-78 64,-60 C 48,-76 30,-88 12,-92 Z"/></g>'
+                f'<circle cx="12" cy="-100" r="5" fill="#7a6a4a"/></g>')
+
+    def gator(x, y, s=1.0, a='#3f4a3a', b='#4d5a44'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 62, 6)}'
+                f'<path d="M-66,0 L-40,-9 L28,-11 L58,-6 L70,0 L54,3 L26,2 L-38,2 Z" fill="{a}"/>'
+                f'<path d="M-66,0 L-40,-9 L28,-11 L34,-8 L-36,-5 Z" fill="{b}"/>'
+                f'<g fill="{b}">' + ''.join(f'<path d="M{-30+i*13},-11 l4,-6 l4,6 Z"/>' for i in range(6)) + '</g>'
+                f'<path d="M58,-6 L70,0 L54,3 Z" fill="{a}"/>'
+                f'<circle cx="-46" cy="-9" r="3.4" fill="#d8cf9a"/>'
+                f'<circle cx="-46" cy="-9" r="1.6" fill="#22262b"/>'
+                f'<g stroke="{a}" stroke-width="5" stroke-linecap="round">'
+                f'<path d="M-14,2 L-20,8 M18,2 L24,8"/></g></g>')
+
+    def spoonbill(x, y, s=1.0, body='#e88fae', wing='#d9709a'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 12, 3)}'
+                f'<g stroke="#c9737f" stroke-width="2.2"><path d="M-3,-14 L-4,0 M4,-14 L6,0"/></g>'
+                f'<ellipse cx="0" cy="-22" rx="14" ry="10" fill="{body}"/>'
+                f'<path d="M-8,-24 q10,-6 18,2 q-9,4 -18,-2 Z" fill="{wing}"/>'
+                f'<path d="M10,-28 C 18,-36 22,-40 24,-44" stroke="{body}" stroke-width="4.5" fill="none"/>'
+                f'<ellipse cx="26" cy="-46" rx="5" ry="3.6" fill="#d8d2c0"/>'
+                f'<circle cx="23" cy="-48" r="1.2" fill="#22262b"/></g>')
+
+    def pelicanpost(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 12, 4)}'
+                f'<rect x="-5" y="-52" width="10" height="52" fill="#8a7458"/>'
+                f'<rect x="-5" y="-52" width="10" height="4" rx="2" fill="#9c8666"/>'
+                f'<ellipse cx="0" cy="-64" rx="15" ry="11" fill="#c9ccc4"/>'
+                f'<path d="M-10,-66 q10,-6 18,2 q-9,4 -18,-2 Z" fill="#a8ada4"/>'
+                f'<circle cx="9" cy="-74" r="7" fill="#dfe2da"/>'
+                f'<path d="M14,-72 C 24,-70 26,-64 20,-62 C 16,-64 14,-68 14,-72 Z" fill="#e0a13c"/>'
+                f'<circle cx="11" cy="-76" r="1.4" fill="#22262b"/></g>')
+
+    back = ('    ' + ''.join(sabal(x, y, s) for x, y, s in
+                             [(72, 400, 0.66), (300, 396, 0.54), (1160, 402, 0.7), (1244, 394, 0.58)])
+            + ''.join(palmetto(x, y, s) for x, y, s in
+                      [(180, 404, 0.6), (392, 400, 0.5), (470, 406, 0.66), (760, 402, 0.56),
+                       (846, 406, 0.68), (1046, 400, 0.6), (1108, 406, 0.52)])
+            + ''.join(seaoats(x, y, s) for x, y, s in
+                      [(126, 340, 0.5), (352, 336, 0.44), (642, 340, 0.4), (930, 338, 0.46),
+                       (1206, 342, 0.5)])
+            + spoonbill(232, 392, 0.62) + spoonbill(266, 396, 0.54)
+            + spoonbill(1006, 394, 0.58)
+            + pelicanpost(546, 400, 0.6)
+            + ''.join(f'<g transform="translate({x},{y}) scale(0.5)">'
+                      f'<path d="M-16,0 q8,-7 16,-1 q8,-6 16,1 q-8,4 -16,1 q-8,3 -16,-1 Z" '
+                      f'fill="#e8e8e2" opacity="0.9"/></g>'
+                      for x, y in [(660, 200), (712, 224), (598, 232)]))
+
+    front = ('    ' + sabal(96, 704, 1.35) + sabal(1214, 712, 1.25) + sabal(258, 640, 0.92)
+             + gator(404, 604, 0.86)
+             + ''.join(seaoats(x, y, s) for x, y, s in
+                       [(40, 640, 1.25), (168, 690, 1.4), (300, 716, 1.3), (452, 700, 1.15),
+                        (860, 664, 1.2), (960, 716, 1.35), (1090, 690, 1.25), (1250, 650, 1.1),
+                        (818, 578, 0.9), (1150, 566, 0.85), (222, 570, 0.9)])
+             + ''.join(palmetto(x, y, s) for x, y, s in
+                       [(348, 660, 1.0), (520, 716, 1.05), (900, 604, 0.9), (1030, 640, 1.0),
+                        (128, 596, 0.86)])
+             + pelicanpost(786, 700, 1.15)
+             + spoonbill(432, 690, 1.0) + spoonbill(470, 700, 0.86)
+             + f'<g transform="translate(1120,596)">{shadow(0, 4, 34, 6)}'
+             '<rect x="-30" y="-30" width="60" height="24" rx="3" fill="#2f4d8f"/>'
+             '<rect x="-30" y="-30" width="60" height="7" rx="3" fill="#3f5f9f"/>'
+             '<text x="0" y="-13" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+             'font-size="11" font-weight="bold" fill="#f2f4f6">PAD 39</text>'
+             '<g stroke="#8a9096" stroke-width="4"><path d="M-16,-6 L-16,8 M16,-6 L16,8"/></g></g>')
+
+    scene('cape-canaveral', 'CAPE CANAVERAL — a rocket off Pad 39, the VAB, saltmarsh and a gator', {
+        'sky': sky_l,
+        'far': vab + '\n' + water + '\n' + bank + '\n' + crawlerway + '\n' + pad,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#b6a97e" opacity="0.5"><rect x="0" y="708" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#7a7a74', surface2='#63635e', shoulder='#e8dfc0', dash='#ffe066'),
+    }, d)
+
+
 # -------------------------------------------------------------------- run ----
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans()
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

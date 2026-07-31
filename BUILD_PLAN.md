@@ -46,10 +46,10 @@ tired parent would prefer at 6am and write down what you chose.
 
 | Asset | Where | State |
 |---|---|---|
-| 8 location scenes | `play/assets/scenes/*.svg` | **Final.** 1280×720, horizon y=300, track band y=450–516, both gates at fixed coords. |
+| 11 location scenes | `play/assets/scenes/*.svg` | **Final.** 1280×720, horizon y=300, track band y=450–516, both gates at fixed coords. |
 | 14 vehicles + manifest | `play/assets/trains/` | **Final.** Recolour hooks and wheel data baked in. |
 | US map | `play/assets/us-map.svg`, `play/js/map-data.js` | **Final**, offline, picker wired in `map.js`. |
-| Location data | `play/js/world.js` | 8 locations, each with `scene`, `say` (en/pl) and `trainPreset`. |
+| Location data | `play/js/world.js` | 11 locations, each with `scene`, `say` (en/pl) and `trainPreset`. |
 | Consist data layer | `play/js/trains.js` | **Written for you.** Engine + 3 wagon slots, per-slot colours, cycling helpers, preset latch. Build the UI on top; don't redesign the model. |
 | Language dictionaries | `play/js/i18n.js` | EN + PL, including the spoken welcome. |
 | Galleries | `tools/scene-gallery.html`, `tools/train-gallery.html` | Working references — scene mounting, consist assembly from the manifest, wheel spin, recolouring. **Read these before writing a renderer.** |
@@ -140,7 +140,7 @@ language on first touch, tapping a state and picking a destination rides you the
   are functions of its `y`. Cars stop at whichever gate faces them.
 - One `requestAnimationFrame` loop with real delta timing. Pause it when the tab is hidden.
 
-**Done when:** each of the 8 locations renders full-bleed, both gates lower together, the
+**Done when:** every location renders full-bleed, both gates lower together, the
 train passes **behind the near gate and in front of the far gate**, cars approach from top
 and bottom and stop when the gate is down, and nothing clips into the track band.
 
@@ -160,7 +160,7 @@ and emits `location`. Nothing listens yet.
 - The 8 ids are `colorado, sf, la, chicago, arizona, nyc, seattle, neworleans` and must stay
   in sync with `SUPPORTED` in `tools/gen-map.js`.
 
-**Done when:** picking any of the 8 destinations reskins the world, applies its preset engine
+**Done when:** picking any destination reskins the world, applies its preset engine
 (unless overridden), speaks the name in the active language, keeps the gate as it was, and
 survives a reload.
 
@@ -282,7 +282,7 @@ Tick every box by *doing it*, not by reading the code.
 - [x] Same over `http://localhost:8000/play/`.
 - [x] Zero console errors or warnings in both.
 - [x] The game opens on the **US map** and speaks the welcome on first touch, in the active language.
-- [x] All 8 destinations load, look right, and reskin the train to their preset.
+- [x] Every destination loads, looks right, and reskins the train to its preset.
 - [x] Both gates lower together, everywhere, every time; the train renders between them.
 - [x] Cars come from both directions, scale with distance, and stop at the gate.
 - [x] The customizer cycles all 6 engines and all 8 wagons with a live animated preview.

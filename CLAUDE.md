@@ -58,7 +58,7 @@ Conventions every vehicle honours:
 ## Where the project actually is (read this first)
 
 **Phase 1 is built and playable.** The art was already finished; the engine now exists.
-Open `play/index.html` and you get the map, all eight destinations, both gates, cars, a
+Open `play/index.html` and you get the map, all eleven destinations, both gates, cars, a
 train you can build and colour, English and Polish, and two-way sync with a real gate.
 The definition-of-done checklist in `BUILD_PLAN.md` §9 is ticked, with a note on how each
 box was actually checked. Next up is Phase 2 — the mission modes in `DESIGN.md` §11.
@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **8/8 done** — Colorado, San Francisco, Los Angeles, Chicago, Grand Canyon, New York City, Seattle, New Orleans. All in `play/assets/scenes/`. |
+| Locations | **11 done** — Colorado, San Francisco, Los Angeles, Chicago, Grand Canyon, New York City, Seattle, New Orleans, **Austin**, **Houston**, **Cape Canaveral**. All in `play/assets/scenes/`. Texas has two destinations (like California); Austin is the first **dusk** scene. |
 | Rolling stock | **14 vehicles + `manifest.json`** — 6 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car) and 8 wagons. All in `play/assets/trains/`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
@@ -88,7 +88,7 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
 | `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
-| `world.js` | The 8 locations as data, `select()`, persistence. Source of truth for train presets. |
+| `world.js` | The 11 locations as data, `select()`, `spoken()`, persistence. Source of truth for train presets. |
 | `map.js` | The map overlay — and the game's front door. |
 | `trains.js` | The consist data layer: 1 loco + 3 wagons, per-slot colours, cycling helpers, preset latch. **Was given; don't redesign it.** |
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |
@@ -97,6 +97,28 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `settings.js` | The ⚙️ panel: language, counter, sound, gate address + Test, reset train. |
 | `modes.js` | Mode registry. **Only `freeplay` is registered — this is the Phase 2 hook.** |
 | `main.js` | Event bus (`CC.on` / `CC.emit`) and boot. Loaded last. |
+
+### Adding a location (four places must agree)
+
+A destination only exists if all four are in sync. Miss one and it fails *silently* —
+the art is on disk and nothing errors, the place is just unreachable:
+
+1. **`play/js/world.js`** — the entry. `scene:` must equal the SVG's filename stem
+   (`cape-canaveral.svg` → `scene:'cape-canaveral'`). `say.pl` only gets a Polish form if a
+   real one exists; otherwise repeat the English and `spoken()` will pick an English voice.
+2. **`tools/gen-scenes.py`** — the scene itself, then `python3 tools/gen-scenes.py`.
+3. **`tools/gen-map.js`** `SUPPORTED` — or the state is not tappable, and `world.byState()`
+   offers a destination the map can never reach. Then `node tools/gen-map.js`.
+4. **`python3 tools/inline-assets.py`** — the game reads `asset-data.js`, never
+   `play/assets/`. The scene list is globbed from the directory now, so this is just a re-run.
+
+Then `python3 tools/check-scenes.py` (props in the road, gate geometry, layer order) and
+drive it with `shot.py`. There is a ready-made cross-check — it catches all four mistakes:
+
+```js
+CC.world.all().filter(l => !CC.assets.scenes[l.scene])          // scene not inlined
+Object.keys(CC.world.byState())                                 // vs data-supported in the map
+```
 
 ### How to verify a change (do this, don't skip it)
 
