@@ -77,6 +77,13 @@ const slug = s => s.toLowerCase().replace(/[^a-z]+/g, '-');
 
 const paths = [];
 const labels = [];
+// A second, invisible copy of each PLAYABLE state, drawn on top with a fat
+// transparent stroke. Thin states are brutal tap targets for a three-year-old —
+// only 29% of Florida's bounding box is actually Florida, and the peninsula is
+// about as wide as a fingertip. This adds a forgiving halo around the outline
+// without changing how the map looks. `fill:none` means the interior still
+// belongs to the real path, so hover and focus keep working normally.
+const hits = [];
 
 fc.features
   .filter(f => f.properties && f.properties.name)
@@ -96,6 +103,11 @@ fc.features
       `tabindex="${sup ? 0 : -1}"`,
     ].filter(Boolean).join(' ');
     paths.push(`    <path ${attrs} d="${d}"><title>${name}</title></path>`);
+    if (sup) {
+      // Carries .state and .state--supported so map.js's delegated handler routes
+      // it exactly like the real shape; tabindex -1 so it is not a second tab stop.
+      hits.push(`    <path class="state state--supported state-hit" data-name="${name}" tabindex="-1" d="${d}"/>`);
+    }
 
     const ab = ABBR[name];
     if (!ab) return;
@@ -134,9 +146,18 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
       pointer-events:none; }
     #us-map .lbl--on{ fill:#12401f; font-size:15px; stroke-width:3; }
     #us-map .leader{ stroke:#9fb0a4; stroke-width:1; pointer-events:none; }
+    /* The forgiving halo. Listed last and repeated for :hover/:focus so it beats
+       the .state--supported rules above it and never paints anything. */
+    #us-map .state-hit,
+    #us-map .state-hit:hover,
+    #us-map .state-hit:focus{ fill:none; stroke:transparent; stroke-width:14;
+      pointer-events:stroke; cursor:pointer; outline:none; }
   </style>
   <g class="states">
 ${paths.join('\n')}
+  </g>
+  <g class="hits">
+${hits.join('\n')}
   </g>
   <g class="labels">
 ${labels.join('\n')}
