@@ -53,12 +53,19 @@ button{font-family:inherit;}
 #closeBtn{background:radial-gradient(circle at 35% 30%,#ff6b6b,#d62828);}
 #openBtn{background:radial-gradient(circle at 35% 30%,#5dd959,#2a9d2a);}
 
-/* On the map and the other full-screen pages the buttons shrink into the
-   bottom-right corner — smaller, but still there and still working. The gate is
-   never unavailable, whatever screen the child is on. */
-body.map-open #controls,
+/* On the customizer and settings the buttons shrink into the bottom-right
+   corner — smaller, but still there and still working. */
 body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
   justify-content:flex-end;padding-right:2vw;gap:3vw;}
+
+/* The welcome and the map are the only screens with no crossing on them, so the
+   buttons are hidden there: they acted on a gate the child could not see, and on
+   the welcome they competed with the one button that matters. Hidden, NOT
+   disabled — CC.gate still runs, the spacebar still works, and a real crossing
+   gate on the LAN still drives the game and stays in sync while these are open.
+   Every screen that actually shows a crossing keeps both buttons at full size. */
+body.welcome-open #controls,
+body.map-open #controls{opacity:0;pointer-events:none;}
 
 /* ---------- settings ---------- */
 #panel{position:absolute;inset:0;z-index:40;background:#141f37;
@@ -97,7 +104,8 @@ body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
 .cc-ground{position:absolute;left:0;right:0;bottom:0;height:27vh;z-index:0;
   background:linear-gradient(#8ed35f 0%,#7ac74f 30%,#67b243 70%,#569b37 100%);
   border-top:3px solid #a2e075;pointer-events:none;}
-.cc-rail{position:absolute;left:0;right:0;bottom:9vh;height:17vh;
+/* Tall enough for chimney smoke to rise into; the strip itself is transparent. */
+.cc-rail{position:absolute;left:0;right:0;bottom:9vh;height:27vh;
   overflow:hidden;pointer-events:none;z-index:1;}
 /* Ballast, sleepers and two steel rails — the same motif as the landing page. */
 .cc-track{position:absolute;left:0;right:0;bottom:0;height:1.7vh;min-height:11px;
@@ -105,7 +113,7 @@ body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
   border-top:.5vh solid #c9ccd1;border-bottom:.4vh solid #b6bac0;}
 /* bottom is tuned so the vehicles' y=0 (their rail line) lands on the top of
    .cc-track — see TOP/BOT in welcome.js for the world slice the viewBox shows. */
-svg.cc-roller{position:absolute;bottom:0;height:14vh;width:auto;
+svg.cc-roller{position:absolute;bottom:0;height:22vh;width:auto;
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.22));will-change:transform;}
 
 /* ---------- stage one: the welcome ---------- */
@@ -160,13 +168,16 @@ svg.cc-roller{position:absolute;bottom:0;height:14vh;width:auto;
    cut-out feel of the scenes. */
 .map-holder svg#us-map{width:100%;height:auto;max-height:62vh;background:none;
   filter:drop-shadow(0 6px 10px rgba(23,58,94,.28));}
-.map-cities{display:flex;flex-wrap:wrap;gap:1.2vh 2.4vw;align-items:center;justify-content:center;
-  min-height:9vh;position:relative;z-index:2;}
+/* align-items:center alone was not enough: the label and the buttons have very
+   different box heights, so they were centred as boxes but read as misaligned
+   text. Matching line-height and vertical padding lines the WORDS up. */
+.map-cities{display:flex;flex-wrap:wrap;gap:1.2vh 2vw;align-items:center;justify-content:center;
+  min-height:9vh;position:relative;z-index:2;line-height:1.15;}
 .map-hint{font-size:3vmin;font-weight:bold;color:#17456e;text-shadow:0 2px 0 rgba(255,255,255,.65);}
 /* The state name is a LABEL, not a button — no pill, so it never reads as one
    of the green things you can press next to it. */
-.state-name{font-size:5vmin;font-weight:bold;color:#123f16;letter-spacing:.02em;
-  padding:0 1.5vw;text-shadow:0 2px 0 rgba(255,255,255,.45);}
+.state-name{font-size:4.4vmin;font-weight:bold;color:#123f16;letter-spacing:.02em;
+  line-height:1.15;padding:1.5vh 1.5vw;text-shadow:0 2px 0 rgba(255,255,255,.45);}
 #us-map .state{cursor:pointer;}
 
 /* The places you can go breathe gently, which is the whole instruction — it
@@ -188,9 +199,14 @@ svg.cc-roller{position:absolute;bottom:0;height:14vh;width:auto;
 #us-map .state--picked{fill:#ffd166;}
 /* A state with no scene yet still lights up and says its name when tapped. */
 #us-map .state--said{fill:#9ec9e8;}
-.city-btn{border:none;background:#5dd959;color:#fff;font-weight:bold;font-size:3.6vmin;
-  padding:1.5vh 5vw;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 #1a7a1a;}
-.city-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #1a7a1a;}
+/* Light blue, not green: these sit on the grass bank, and green-on-green made
+   them disappear into it. Blue also ties them back to the sky and the map. */
+.city-btn{border:none;background:linear-gradient(#7fd3f5,#43aee4);color:#0d3550;
+  font-weight:bold;font-size:3.6vmin;line-height:1.15;
+  padding:1.5vh 5vw;border-radius:999px;cursor:pointer;
+  box-shadow:0 6px 0 #2b83b3,0 9px 14px rgba(0,0,0,.22);
+  text-shadow:0 1px 0 rgba(255,255,255,.45);}
+.city-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2b83b3;}
 
 /* ---------- the train customizer ---------- */
 .train-overlay{position:absolute;inset:0;z-index:40;background:linear-gradient(#1b2a4a,#101a30);

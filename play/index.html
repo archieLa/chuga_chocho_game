@@ -8,7 +8,12 @@
 <!-- Inline favicon: a browser asks for /favicon.ico otherwise, and over http
      that is a 404 in the console for no reason. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%9A%82%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/styles.css">
+<!-- ?v= is a cache-buster. GitHub Pages and browsers cache these hard, so a
+     release can otherwise leave a returning visitor on the OLD game with a
+     stale index.html that never even requests a newly added file. BUMP THIS
+     NUMBER on every deploy — it is the whole release process for a site with
+     no build step. -->
+<link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
   <div id="wrap">
@@ -40,21 +45,21 @@
   <!-- Classic scripts (no ES modules) so the game runs by opening this file
        directly. Load order: data, then services, then systems, then the
        orchestrator. asset-data.js must come before anything that draws. -->
-  <script src="js/i18n.js"></script>
-  <script src="js/speech.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/asset-data.js"></script>
-  <script src="js/rolling.js"></script>
-  <script src="js/trains.js"></script>
-  <script src="js/gate.js"></script>
-  <script src="js/world.js"></script>
-  <script src="js/map-data.js"></script>
-  <script src="js/map.js"></script>
-  <script src="js/scene.js"></script>
-  <script src="js/customizer.js"></script>
-  <script src="js/welcome.js"></script>
-  <script src="js/modes.js"></script>
-  <script src="js/settings.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/i18n.js?v=2"></script>
+  <script src="js/speech.js?v=2"></script>
+  <script src="js/audio.js?v=2"></script>
+  <script src="js/asset-data.js?v=2"></script>
+  <script src="js/rolling.js?v=2"></script>
+  <script src="js/trains.js?v=2"></script>
+  <script src="js/gate.js?v=2"></script>
+  <script src="js/world.js?v=2"></script>
+  <script src="js/map-data.js?v=2"></script>
+  <script src="js/map.js?v=2"></script>
+  <script src="js/scene.js?v=2"></script>
+  <script src="js/customizer.js?v=2"></script>
+  <script src="js/welcome.js?v=2"></script>
+  <script src="js/modes.js?v=2"></script>
+  <script src="js/settings.js?v=2"></script>
+  <script src="js/main.js?v=2"></script>
 </body>
 </html>

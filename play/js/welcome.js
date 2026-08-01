@@ -34,7 +34,11 @@
 
   const SPEED = 90;          // local units per second — an amble, not a dash
   const GAP = 10;
-  const TOP = -150, BOT = 22; // the world slice the strip shows
+  // The world slice the strip shows. TOP is well above the stack so smoke has
+  // somewhere to rise into, and SMOKE_ROOM extends the viewBox behind the train
+  // so puffs are not clipped the moment they leave the chimney.
+  const TOP = -250, BOT = 22;
+  const SMOKE_ROOM = 320;
 
   const welcome = {
     el: null,
@@ -50,10 +54,10 @@
       if (!this.el) this.build();
       this.el.hidden = false;
       this.shown = true;
-      // Shrinks the two gate buttons into the corner, the same way the map and
-      // the other overlays do. They stay live — rule #1 — but on this screen the
-      // green button has to be the obvious thing to press.
-      document.body.classList.add('overlay-open');
+      // Hides the two gate buttons for this screen only. CC.gate keeps running:
+      // the spacebar and a real crossing gate on the LAN still work and stay in
+      // sync — there is simply no crossing on screen for the buttons to act on.
+      document.body.classList.add('welcome-open');
       this.start();
     },
 
@@ -61,7 +65,7 @@
       if (!this.el) return;
       this.el.hidden = true;
       this.shown = false;
-      document.body.classList.remove('overlay-open');
+      document.body.classList.remove('welcome-open');
       this.stop();
     },
 
@@ -114,23 +118,55 @@
         maxX = Math.max(maxX, it.offset + (m.length - m.originFromRear));
       });
 
+      const left = minX - SMOKE_ROOM;
       const svg = document.createElementNS(NS, 'svg');
       svg.setAttribute('class', 'cc-roller');
-      svg.setAttribute('viewBox', minX + ' ' + TOP + ' ' + (maxX - minX) + ' ' + (BOT - TOP));
+      svg.setAttribute('viewBox', left + ' ' + TOP + ' ' + (maxX - left) + ' ' + (BOT - TOP));
       svg.setAttribute('aria-hidden', 'true');
+
+      // Smoke goes in first so the train draws over it.
+      const smokeG = document.createElementNS(NS, 'g');
+      svg.appendChild(smokeG);
 
       const g = document.createElementNS(NS, 'g');
       const cars = [];
       items.forEach(it => {
         const v = CC.rolling.build(it.type, it.colours);
         v.setAttribute('transform', 'translate(' + it.offset + ',0)');
+        if (CC.rolling.isSteam(it.type)) this.addDriver(v);
         g.appendChild(v);
-        cars.push(v);
+        cars.push({ el: v, type: it.type });
       });
       svg.appendChild(g);
       this.el.querySelector('.cc-rail').appendChild(svg);
 
-      this.train = { svg: svg, cars: cars, world: maxX - minX, dist: 0, x: 0, started: false };
+      this.train = { svg: svg, cars: cars, smokeG: smokeG, left: left,
+                     world: maxX - left, dist: 0, x: 0, started: false,
+                     lastChuff: 0, puffs: [], arm: null, wave: 0 };
+    },
+
+    /** A child leaning out of the cab window, waving. The window is the
+        28x26 pane at x=-66..-38, y=-112..-86 in steam.svg, so he sits on its
+        sill. Plain fills, no .cc-* hooks, so recolouring the loco never
+        repaints him. */
+    addDriver(loco) {
+      const mk = (tag, attrs) => {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        return e;
+      };
+      const boy = mk('g', {});
+      boy.appendChild(mk('rect', { x: -61, y: -99, width: 17, height: 14, rx: 5, fill: '#f2b134' })); // body
+      boy.appendChild(mk('circle', { cx: -52.5, cy: -108, r: 8.5, fill: '#f6c9a0' }));                // head
+      boy.appendChild(mk('path', { d: 'M-61,-111 a8.5,8.5 0 0 1 17,0 z', fill: '#6b4a2a' }));         // hair
+      boy.appendChild(mk('circle', { cx: -49, cy: -108, r: 1.4, fill: '#2f2118' }));                  // eye
+      // The waving arm — rotated about the shoulder every frame.
+      const arm = mk('g', {});
+      arm.appendChild(mk('rect', { x: -46, y: -104, width: 13, height: 5, rx: 2.5, fill: '#f6c9a0' }));
+      arm.appendChild(mk('circle', { cx: -32, cy: -101.5, r: 3.8, fill: '#f6c9a0' }));
+      boy.appendChild(arm);
+      loco.appendChild(boy);
+      loco._ccArm = arm;
     },
 
     start() {
@@ -165,11 +201,73 @@
       // with the coaches leading.
       if (!tr.started) { tr.x = -box.width; tr.started = true; }
       tr.x += SPEED * scale * (dt / 1000);
-      if (tr.x > railW) tr.x = -box.width;                    // round again
-      tr.dist += SPEED * (dt / 1000);
+      if (tr.x > railW) { tr.x = -box.width; this.clearSmoke(); }   // round again
+      const step = SPEED * (dt / 1000);
+      tr.dist += step;
 
       tr.svg.style.transform = 'translateX(' + tr.x.toFixed(1) + 'px)';
-      tr.cars.forEach(v => CC.rolling.spin(v, tr.dist));
+      // roll(), not spin(): spin only turns .cc-wheel, and the steam engine's
+      // drivers and side rods are real geometry driven by driveSteam(). Using
+      // spin() left the locomotive's wheels and rods dead while the coaches ran.
+      tr.cars.forEach(c => CC.rolling.roll(c.el, tr.dist, c.type));
+
+      // Same quarter-revolution trigger the scene uses, so the puffs stay locked
+      // to the wheels instead of drifting out of step with them.
+      const head = tr.cars[0];
+      if (head && CC.rolling.isSteam(head.type)) {
+        const idx = CC.rolling.chuffIndex(tr.dist);
+        if (idx !== tr.lastChuff) { tr.lastChuff = idx; this.puff(); }
+      }
+      this.updateSmoke(dt, step);
+
+      // The wave. Slower than the wheels so it reads as a person, not a machine.
+      tr.wave += dt / 1000;
+      if (head && head.el._ccArm) {
+        // Held UP and swinging, not level — a level arm reads as pointing at
+        // something rather than waving at you.
+        const a = -38 + Math.sin(tr.wave * 6) * 20;
+        head.el._ccArm.setAttribute('transform', 'rotate(' + a.toFixed(1) + ' -46 -101.5)');
+      }
+    },
+
+    puff() {
+      const tr = this.train, S = CC.rolling.STACK;
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('fill', '#ffffff');
+      tr.smokeG.appendChild(c);
+      tr.puffs.push({ x: S.x, y: S.y, r: 9, o: 0.95, el: c });
+      if (tr.puffs.length > 26) this.dropPuff();
+    },
+
+    dropPuff() {
+      const p = this.train.puffs.shift();
+      if (p && p.el.parentNode) p.el.parentNode.removeChild(p.el);
+    },
+
+    updateSmoke(dt, step) {
+      const tr = this.train, secs = dt / 1000;
+      for (let i = tr.puffs.length - 1; i >= 0; i--) {
+        const p = tr.puffs[i];
+        // Drifting back by exactly the distance the train moved leaves the puff
+        // standing still over the ground — the whole SVG is what is moving.
+        p.x -= step;
+        p.y -= 34 * secs;
+        p.r += 11 * secs;
+        p.o -= 0.22 * secs;
+        if (p.o <= 0 || p.x < tr.left) {
+          if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
+          tr.puffs.splice(i, 1);
+          continue;
+        }
+        p.el.setAttribute('cx', p.x.toFixed(1));
+        p.el.setAttribute('cy', p.y.toFixed(1));
+        p.el.setAttribute('r', p.r.toFixed(1));
+        p.el.setAttribute('opacity', p.o.toFixed(2));
+      }
+    },
+
+    clearSmoke() {
+      while (this.train.puffs.length) this.dropPuff();
     },
   };
 
