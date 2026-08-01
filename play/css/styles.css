@@ -87,24 +87,104 @@ body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
 .set-done:active{transform:translateY(4px);box-shadow:0 3px 0 #1a7a1a;}
 
 /* ---------- the US map (also the home screen) ---------- */
-.map-overlay{position:absolute;inset:0;z-index:30;background:radial-gradient(circle at 50% 30%,#26406e,#131f3c);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2vh 3vw 16vh;gap:1.6vh;}
+/* ---------- the front door: welcome, then map ----------
+   Both of these used to be dark panels, which read like a settings screen rather
+   than a train game. They now stand in the same world the scenes do — the sky
+   from #stage, a grass bank and the rail motif from the landing page — so the
+   first thing a child sees belongs to the game. Shared, because there are two
+   screens wearing it and a third (the mode picker) is coming. */
+.cc-sky{background:linear-gradient(#8fd0f0 0%,#a8dcf5 38%,#cdeafd 62%,#e4f5fd 100%);}
+.cc-ground{position:absolute;left:0;right:0;bottom:0;height:27vh;z-index:0;
+  background:linear-gradient(#8ed35f 0%,#7ac74f 30%,#67b243 70%,#569b37 100%);
+  border-top:3px solid #a2e075;pointer-events:none;}
+.cc-rail{position:absolute;left:0;right:0;bottom:9vh;height:17vh;
+  overflow:hidden;pointer-events:none;z-index:1;}
+/* Ballast, sleepers and two steel rails — the same motif as the landing page. */
+.cc-track{position:absolute;left:0;right:0;bottom:0;height:1.7vh;min-height:11px;
+  background:repeating-linear-gradient(90deg,#9a8366 0 22px,#6b4a2a 22px 34px);
+  border-top:.5vh solid #c9ccd1;border-bottom:.4vh solid #b6bac0;}
+/* bottom is tuned so the vehicles' y=0 (their rail line) lands on the top of
+   .cc-track — see TOP/BOT in welcome.js for the world slice the viewBox shows. */
+svg.cc-roller{position:absolute;bottom:0;height:14vh;width:auto;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.22));will-change:transform;}
+
+/* ---------- stage one: the welcome ---------- */
+.wel-overlay{position:absolute;inset:0;z-index:50;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2.4vh;padding:4vh 4vw 30vh;}
+.wel-overlay[hidden]{display:none;}
+/* Soft clouds, so the sky is part of the picture rather than empty space. Pure
+   CSS — the scenes already have drawn clouds; this is page chrome, not art. */
+.cc-cloud{position:absolute;z-index:0;pointer-events:none;border-radius:999px;
+  background:#fff;opacity:.82;
+  box-shadow:2.6vmin -1.4vmin 0 -.2vmin #fff, 6vmin -.4vmin 0 -.8vmin #fff, -2.8vmin .2vmin 0 -.6vmin #fff;}
+.cc-cloud--a{top:11%;left:9%;width:11vmin;height:5vmin;}
+.cc-cloud--b{top:22%;right:12%;width:14vmin;height:6vmin;opacity:.7;}
+.cc-cloud--c{top:47%;left:16%;width:9vmin;height:4vmin;opacity:.55;}
+.wel-title{position:relative;z-index:2;font-size:9.5vmin;font-weight:bold;color:#d62828;
+  text-align:center;line-height:1.02;letter-spacing:.01em;
+  text-shadow:0 3px 0 #fff,0 7px 16px rgba(0,0,0,.2);}
+.wel-sub{position:relative;z-index:2;font-size:4.4vmin;font-weight:bold;color:#17456e;
+  text-align:center;text-shadow:0 2px 0 rgba(255,255,255,.7);}
+.wel-go{position:relative;z-index:2;border:none;color:#fff;cursor:pointer;
+  background:radial-gradient(circle at 35% 28%,#6ee36a,#2a9d2a);
+  font-size:6.4vmin;font-weight:bold;padding:2.6vh 11vw;border-radius:999px;
+  box-shadow:0 11px 0 #1a7a1a,0 18px 28px rgba(0,0,0,.32);
+  text-shadow:0 2px 3px rgba(0,0,0,.3);white-space:nowrap;
+  animation:wel-bob 2.4s ease-in-out infinite;}
+.wel-go:active{transform:translateY(8px);box-shadow:0 3px 0 #1a7a1a;animation:none;}
+@keyframes wel-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-1.1vh);}}
+@media (prefers-reduced-motion:reduce){.wel-go{animation:none;}}
+
+/* ---------- stage two: the map ---------- */
+/* Centred, not top-aligned: with the white card gone there is nothing to anchor
+   the map to the top, and .map-cities already reserves its height so the map
+   does not jump when a state is tapped. */
+.map-overlay{position:absolute;inset:0;z-index:30;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2vh 3vw 22vh;gap:1vh;}
 .map-overlay[hidden]{display:none;}
-.map-head{display:flex;align-items:center;gap:3vw;color:#fff;}
-.map-title{font-size:4.4vmin;font-weight:bold;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+.map-head{display:flex;align-items:center;gap:3vw;position:relative;z-index:2;}
+/* No pill. The heading is a question, not branding — the welcome already shouted
+   the name in red — so it sits straight on the sky in calm ink with a white
+   outline, and the map itself gets to be the loudest thing on screen. */
+.map-title{font-size:5.2vmin;font-weight:bold;color:#17456e;white-space:nowrap;
+  text-shadow:0 2px 0 #fff,0 4px 12px rgba(255,255,255,.75);}
 .map-close{border:none;background:#5dd959;color:#fff;width:10vmin;height:10vmin;max-width:58px;max-height:58px;
   border-radius:50%;font-size:4.6vmin;cursor:pointer;box-shadow:0 5px 0 #1a7a1a;}
 .map-close[hidden]{display:none;}
 .map-close:active{transform:translateY(3px);box-shadow:0 2px 0 #1a7a1a;}
-.map-holder{width:min(96vw,1040px);}
-.map-holder svg#us-map{width:100%;height:auto;max-height:58vh;background:#eaf4ff;border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.45);}
-.map-cities{display:flex;flex-wrap:wrap;gap:1.2vh 2.4vw;align-items:center;justify-content:center;color:#fff;
-  min-height:9vh;}
-.map-hint{font-size:3vmin;color:#a9bcdd;}
-.state-name{font-size:4.6vmin;font-weight:bold;color:#ffd166;letter-spacing:.02em;
-  text-shadow:0 2px 6px rgba(0,0,0,.55);}
+.map-holder{width:min(98vw,1120px);position:relative;z-index:2;}
+/* The map floats straight on the sky — no white card. A soft drop-shadow on the
+   shapes themselves lifts it off the background instead, which keeps the paper
+   cut-out feel of the scenes. */
+.map-holder svg#us-map{width:100%;height:auto;max-height:62vh;background:none;
+  filter:drop-shadow(0 6px 10px rgba(23,58,94,.28));}
+.map-cities{display:flex;flex-wrap:wrap;gap:1.2vh 2.4vw;align-items:center;justify-content:center;
+  min-height:9vh;position:relative;z-index:2;}
+.map-hint{font-size:3vmin;font-weight:bold;color:#17456e;text-shadow:0 2px 0 rgba(255,255,255,.65);}
+/* The state name is a LABEL, not a button — no pill, so it never reads as one
+   of the green things you can press next to it. */
+.state-name{font-size:5vmin;font-weight:bold;color:#123f16;letter-spacing:.02em;
+  padding:0 1.5vw;text-shadow:0 2px 0 rgba(255,255,255,.45);}
 #us-map .state{cursor:pointer;}
+
+/* The places you can go breathe gently, which is the whole instruction — it
+   replaces "Tap a coloured state", a sentence the player cannot read.
+   :not(.state-hit) is load-bearing: the hit halos carry .state--supported too,
+   and an animation outranks their fill:none, so without it the invisible tap
+   targets would light up and smear across the map. */
+@keyframes cc-state-pulse{0%,100%{fill:#7fc17a;}50%{fill:#a3dd9c;}}
+#us-map .state--supported:not(.state-hit):not(.state--picked){
+  animation:cc-state-pulse 2.8s ease-in-out infinite;}
+/* A small stagger so it reads as a gentle wave, not a heartbeat in unison. */
+#us-map .state--supported:nth-of-type(3n){animation-delay:-.9s;}
+#us-map .state--supported:nth-of-type(3n+1){animation-delay:-1.8s;}
+#us-map .state--supported:hover,
+#us-map .state--supported:focus{animation:none;}
+@media (prefers-reduced-motion:reduce){
+  #us-map .state--supported:not(.state-hit):not(.state--picked){animation:none;}
+}
 #us-map .state--picked{fill:#ffd166;}
 /* A state with no scene yet still lights up and says its name when tapped. */
 #us-map .state--said{fill:#9ec9e8;}

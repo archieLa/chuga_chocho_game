@@ -91,8 +91,11 @@
     // no device the game is simply unaffected — no spinner, no error.
     CC.gate.autoConnect().catch(() => {});
 
-    // The map is the front door. The game opens here every launch.
-    CC.map.open();
+    // The front door is two stages: a welcome poster with one big green button,
+    // then the map. The button is a real gesture, so it is also what unlocks
+    // audio and lets the welcome line be spoken. Returning later via 🗺️ goes
+    // straight to the map — a child with a train is never walked back here.
+    CC.welcome.open();
 
     console.log('🚂 Chuga Chocho ready — language:', CC.i18n.code, '· location:', loc.id);
   }

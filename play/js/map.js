@@ -44,15 +44,25 @@
 
     build() {
       const o = document.createElement('div');
-      o.className = 'map-overlay';
+      // Same world chrome as the welcome screen: this is stage two of the front
+      // door, not a separate panel. No moving train here on purpose — the map is
+      // the thing to look at, so nothing competes with it.
+      o.className = 'map-overlay cc-sky';
       o.hidden = true;
       o.innerHTML =
+        '<div class="cc-ground"></div>' +
+        // The rail continues from the welcome screen, but with no train on it:
+        // the map is the thing to look at, so nothing here moves.
+        '<div class="cc-rail"><div class="cc-track"></div></div>' +
         '<div class="map-head">' +
           '<span class="map-title" data-i18n="pickPlace">Where shall we go?</span>' +
           '<button class="map-close" data-i18n-title="back" title="Back">✕</button>' +
         '</div>' +
         '<div class="map-holder">' + CC.US_MAP_SVG + '</div>' +
-        '<div class="map-cities"><span class="map-hint" data-i18n="tapAState"></span></div>';
+        // No written instruction here: the playable states pulse instead, which
+        // is an affordance a pre-reader can actually use. This row stays empty
+        // until a state is tapped, then fills with its name and destinations.
+        '<div class="map-cities"></div>';
       document.getElementById('wrap').appendChild(o);
       this.overlay = o;
 
@@ -100,7 +110,7 @@
       if (!this.overlay) return;
       this.overlay.querySelectorAll('.state--picked').forEach(e => e.classList.remove('state--picked'));
       const box = this.overlay.querySelector('.map-cities');
-      box.innerHTML = '<span class="map-hint">' + CC.i18n.t('ui.tapAState') + '</span>';
+      box.innerHTML = '';                 // back to "nothing chosen": the pulse is the cue
     },
 
     /* The map only shows two-letter abbreviations. Tapping a state reveals its

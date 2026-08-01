@@ -23,7 +23,10 @@
             deviceHint: 'Leave this empty and we look for crossinggate.local by ourselves.',
             deviceHttps: 'To use the real gate, open the copy you downloaded to your own computer.',
             deviceOk: 'Connected', deviceFail: 'Not found', deviceSearching: 'Looking…',
-            chooseTrain: 'My train', tapAState: 'Tap a coloured state' },
+            chooseTrain: 'My train', tapAState: 'Tap a coloured state',
+            // The welcome screen — the front door. `allAboard` is the one big
+            // green button, and it doubles as the gesture that unlocks speech.
+            allAboard: 'ALL ABOARD!', readyToRide: 'Ready for an adventure?' },
       // Spoken once when the game opens, over the map. `sayAs` is what the voice is
       // given (the brand sound respelled so this language's TTS pronounces it);
       // `text` is what a reader sees. Keep the brand sound itself untranslated.
@@ -59,7 +62,10 @@
             deviceHint: 'Zostaw puste — sami poszukamy crossinggate.local.',
             deviceHttps: 'Aby użyć prawdziwego szlabanu, otwórz kopię pobraną na swój komputer.',
             deviceOk: 'Połączono', deviceFail: 'Nie znaleziono', deviceSearching: 'Szukam…',
-            chooseTrain: 'Mój pociąg', tapAState: 'Dotknij kolorowego stanu' },
+            chooseTrain: 'Mój pociąg', tapAState: 'Dotknij kolorowego stanu',
+            // "Wsiadamy" is what you actually say to a child boarding a train —
+            // not a literal translation of "all aboard".
+            allAboard: 'WSIADAMY!', readyToRide: 'Gotowi na przygodę?' },
       welcome: { text: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę… chuga chuga choo choo!',
                  sayAs: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę... czuga czuga czu czu!' },
       colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy' },
