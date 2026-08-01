@@ -141,6 +141,7 @@
       this.el.querySelector('.cc-rail').appendChild(svg);
 
       this.train = { svg: svg, cars: cars, smokeG: smokeG, left: left,
+                     headOffset: items.length ? items[0].offset : 0,
                      world: maxX - left, dist: 0, x: 0, started: false,
                      lastChuff: 0, puffs: [], arm: null, wave: 0 };
     },
@@ -233,9 +234,15 @@
     puff() {
       const tr = this.train, S = CC.rolling.STACK;
       const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'cc-puff');
       c.setAttribute('fill', '#ffffff');
       tr.smokeG.appendChild(c);
-      tr.puffs.push({ x: S.x, y: S.y, r: 9, o: 0.95, el: c });
+      // STACK is VEHICLE-local, and the head vehicle's origin is not at 0 — the
+      // layout puts it at -(length - originFromRear). Emitting at plain STACK.x
+      // put the smoke 214 units ahead of the chimney and past the right edge of
+      // the viewBox, so it appeared detached and hard-clipped. The scene has
+      // always added head.offset here; this does the same.
+      tr.puffs.push({ x: tr.headOffset + S.x, y: S.y, r: 9, o: 0.95, el: c });
       if (tr.puffs.length > 26) this.dropPuff();
     },
 
@@ -250,10 +257,14 @@
         const p = tr.puffs[i];
         // Drifting back by exactly the distance the train moved leaves the puff
         // standing still over the ground — the whole SVG is what is moving.
+        // Rise and fade are balanced against TOP: the stack sits at y=-134 and
+        // the viewBox ends at -250, so a puff has ~116 units of headroom. At
+        // 28/s it needs ~4.1s to reach the ceiling and ~3.2s to fade out, so it
+        // is always gone before it would be sliced off against the top edge.
         p.x -= step;
-        p.y -= 34 * secs;
+        p.y -= 28 * secs;
         p.r += 11 * secs;
-        p.o -= 0.22 * secs;
+        p.o -= 0.30 * secs;
         if (p.o <= 0 || p.x < tr.left) {
           if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
           tr.puffs.splice(i, 1);

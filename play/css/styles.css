@@ -65,7 +65,13 @@ body.overlay-open #controls{transform:scale(.46);transform-origin:bottom right;
    gate on the LAN still drives the game and stays in sync while these are open.
    Every screen that actually shows a crossing keeps both buttons at full size. */
 body.welcome-open #controls,
-body.map-open #controls{opacity:0;pointer-events:none;}
+body.map-open #controls{opacity:0;}
+/* The buttons must be silenced individually. #controls is already
+   pointer-events:none and .big sets pointer-events:auto to punch back through
+   it — so hiding only the container left two invisible 26vmin circles sitting
+   over the bottom of the screen, eating a fifth of every city button. */
+body.welcome-open #controls .big,
+body.map-open #controls .big{pointer-events:none;}
 
 /* ---------- settings ---------- */
 #panel{position:absolute;inset:0;z-index:40;background:#141f37;
