@@ -32,7 +32,7 @@
       // `text` is what a reader sees. Keep the brand sound itself untranslated.
       welcome: { text: "Let's explore the United States. Time to ride… chuga chuga choo choo!",
                  sayAs: "Let's explore the United States. Time to ride... chuga chuga choo choo!" },
-      colors: { red:'red', blue:'blue', yellow:'yellow', green:'green', purple:'purple', orange:'orange' },
+      colors: { red:'red', blue:'blue', yellow:'yellow', green:'green', purple:'purple', orange:'orange', black:'black' },
       numbers: ['zero','one','two','three','four','five','six','seven','eight','nine','ten'],
       shapes: { circle:'circle', triangle:'triangle', square:'square', star:'star' },
       praise: ['Yay!', 'Great!', 'Wow!', 'Well done!'],
@@ -68,7 +68,7 @@
             allAboard: 'WSIADAMY!', readyToRide: 'Gotowi na przygodę?' },
       welcome: { text: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę… chuga chuga choo choo!',
                  sayAs: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę... czuga czuga czu czu!' },
-      colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy' },
+      colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy', black:'czarny' },
       numbers: ['zero','jeden','dwa','trzy','cztery','pięć','sześć','siedem','osiem','dziewięć','dziesięć'],
       shapes: { circle:'koło', triangle:'trójkąt', square:'kwadrat', star:'gwiazda' },
       praise: ['Brawo!', 'Super!', 'Wow!', 'Świetnie!'],

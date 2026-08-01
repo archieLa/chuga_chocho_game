@@ -38,6 +38,10 @@
     { key: 'green',  hex: '#4f9d4f' },
     { key: 'purple', hex: '#7a3f9e' },
     { key: 'orange', hex: '#e8752a' },
+    // A soft charcoal rather than #000: the vehicles carry their shape in
+    // shading, and at pure black a wagon flattens into a silhouette — you lose
+    // the roof, the panel lines and the windows. This still reads as black.
+    { key: 'black',  hex: '#26292f' },
   ];
 
   const STORAGE_KEY = 'cc.train';
