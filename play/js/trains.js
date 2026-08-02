@@ -23,9 +23,11 @@
 
   // Catalogue — keys are manifest.json vehicle ids. Order is the cycling order,
   // so it is deliberate: the most kid-legible engines come first.
-  const ENGINES = ['steam', 'diesel', 'electric-hs', 'commuter', 'streetcar', 'cable-car'];
+  const ENGINES = ['steam', 'diesel', 'electric-hs', 'commuter', 'streetcar', 'cable-car',
+                   'cane-tank', 'monorail'];
   const WAGONS  = ['wagon-coach-old', 'wagon-coach-modern', 'wagon-boxcar', 'wagon-container',
-                   'wagon-hopper', 'wagon-tanker', 'wagon-hs-coach', 'wagon-caboose'];
+                   'wagon-hopper', 'wagon-tanker', 'wagon-hs-coach', 'wagon-caboose',
+                   'wagon-cane', 'wagon-monorail'];
 
   const WAGON_SLOTS = 3;                    // fixed: one loco + three wagons
 
@@ -45,6 +47,9 @@
   ];
 
   const STORAGE_KEY = 'cc.train';
+
+  // What an engine is painted when the location it is visiting has no opinion.
+  const DEFAULT_LOCO = '#1c1c1e';
 
   function defaultConsist() {
     return {
@@ -155,12 +160,32 @@
     /** Apply a location's suggested engine, unless the child has chosen one. */
     applyPreset(preset) {
       if (!preset || consist.userSet) return false;
+      let did = false;
       if (preset.engine && ENGINES.indexOf(preset.engine) >= 0 && preset.engine !== consist.engine.type) {
         consist.engine.type = preset.engine;
-        changed();
-        return true;
+        did = true;
       }
-      return false;
+      // A location may also suggest a LIVERY, not just an engine — Boston's
+      // streetcar is the Green Line and wants to be green. Written straight into
+      // the colours object rather than through setBodyColour(), which would fire
+      // a second 'train' event and rebuild the consist twice. Deliberately does
+      // NOT touch userSet: latching it here would mean simply arriving somewhere
+      // locked the child out of every later preset and quietly broke
+      // releasePreset() — "let the places choose again" — forever.
+      //
+      // A location with NO bodyColour must actively restore the default, not
+      // just leave whatever was there. Otherwise Boston's green leaks: ride
+      // Boston -> New Orleans and the Green Line livery follows you, because
+      // both places use the streetcar and nothing ever repainted it. While the
+      // presets are in charge the engine's colour is theirs to decide, so it is
+      // set on every arrival either way.
+      const wantLoco = preset.bodyColour || DEFAULT_LOCO;
+      if (consist.engine.colours.loco !== wantLoco) {
+        consist.engine.colours = Object.assign({}, consist.engine.colours, { loco: wantLoco });
+        did = true;
+      }
+      if (did) changed();
+      return did;
     },
     /** "Let the places choose again" — hands control back to the presets. */
     releasePreset() { consist.userSet = false; changed(); },

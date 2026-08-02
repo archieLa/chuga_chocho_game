@@ -36,6 +36,20 @@
       "length": 240,
       "originFromRear": 120.0
     },
+    "cane-tank": {
+      "file": "cane-tank.svg",
+      "kind": "engine",
+      "label": "Cane plantation tank engine",
+      "length": 250,
+      "originFromRear": 125.0
+    },
+    "monorail": {
+      "file": "monorail.svg",
+      "kind": "engine",
+      "label": "Monorail (Las Vegas)",
+      "length": 430,
+      "originFromRear": 215.0
+    },
     "wagon-coach-old": {
       "file": "wagon-coach-old.svg",
       "kind": "wagon",
@@ -91,6 +105,20 @@
       "label": "Container (double stack)",
       "length": 270,
       "originFromRear": 135.0
+    },
+    "wagon-cane": {
+      "file": "wagon-cane.svg",
+      "kind": "wagon",
+      "label": "Cane car (open)",
+      "length": 210,
+      "originFromRear": 105.0
+    },
+    "wagon-monorail": {
+      "file": "wagon-monorail.svg",
+      "kind": "wagon",
+      "label": "Monorail car",
+      "length": 400,
+      "originFromRear": 200.0
     },
     "steam": {
       "file": "steam.svg",

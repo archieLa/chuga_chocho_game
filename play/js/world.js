@@ -56,6 +56,52 @@
       scenery:{ theme:'space-coast', features:['rocket','vab','lagoon','saltmarsh','gator','palmetto'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'oahu', state:'Hawaii', city:'O\u02bbahu',
+      say:{ en:'Oahu', pl:'Oahu' },
+      scene:'oahu',
+      scenery:{ theme:'island', features:['diamondhead','reef','waikiki','outrigger','palms','hula'] },
+      trainPreset:{ engine:'cane-tank' } },
+
+    { id:'denali', state:'Alaska', city:'Denali',
+      say:{ en:'Denali', pl:'Denali' },
+      scene:'denali',
+      // The view is the real one: the Alaska Range from the Susitna flats near
+      // Talkeetna, where the Alaska Railroad runs. Night, aurora, September.
+      scenery:{ theme:'aurora', features:['alaskarange','aurora','spruce','susitna','moose','cabin'] },
+      // Alaska Railroad livery is a recolour of the diesel — blue and gold.
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'vegas', state:'Nevada', city:'Las Vegas',
+      say:{ en:'Las Vegas', pl:'Las Vegas' },
+      scene:'las-vegas',
+      scenery:{ theme:'night-city', features:['neon','welcomesign','strip','palms','desertmountains'] },
+      // The game's only NIGHT scene — if a day/night tint or ambient audio is ever
+      // added, this is the one that will show it.
+      trainPreset:{ engine:'monorail' } },
+
+    { id:'moab', state:'Utah', city:'Moab',
+      say:{ en:'Moab', pl:'Moab' },
+      scene:'moab',
+      // Viewpoint: Delicate Arch from the slickrock bowl below it, La Sals behind.
+      scenery:{ theme:'redrock', features:['delicatearch','slickrock','lasals','juniper','jeep'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'nashville', state:'Tennessee', city:'Nashville',
+      say:{ en:'Nashville', pl:'Nashville' },
+      scene:'nashville',
+      // Viewpoint: Lower Broadway looking west, late afternoon — honky tonk neon on
+      // Victorian commercial brick, downtown and the AT&T building stacked up behind.
+      scenery:{ theme:'city', features:['honkytonks','neon','batmanbuilding','busker'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'boston', state:'Massachusetts', city:'Boston',
+      say:{ en:'Boston', pl:'Boston' },
+      scene:'boston',
+      // Viewpoint: Back Bay across the Charles from the Cambridge bank, early autumn.
+      // The engine is the Green Line, which is why no trolley is drawn into the scene.
+      scenery:{ theme:'river', features:['backbay','hancock','charles','esplanade','bridge'] },
+      trainPreset:{ engine:'streetcar', bodyColour:'#2f7d4a' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

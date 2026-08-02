@@ -35,6 +35,18 @@ CATALOGUE = [
      ['diesel', 'wagon-tanker', 'wagon-tanker']),
     ('cape-canaveral','Florida',   'Cape Canaveral',  'A rocket off Pad 39, the VAB, saltmarsh and a gator',
      ['diesel', 'wagon-boxcar', 'wagon-boxcar']),
+    ('oahu',         'Hawaii',     'Oʻahu',           'Diamond Head over the Waikīkī reef, outriggers, the Duke, hula',
+     ['cane-tank', 'wagon-cane', 'wagon-cane']),
+    ('denali',       'Alaska',     'Denali',          'The Alaska Range from the Susitna flats, aurora over a spruce valley',
+     ['diesel', 'wagon-coach-modern', 'wagon-coach-modern']),
+    ('las-vegas',    'Nevada',     'Las Vegas',       'The Strip after dark, neon pooling on wet asphalt',
+     ['monorail', 'wagon-monorail', 'wagon-monorail']),
+    ('moab',         'Utah',       'Moab',            'Delicate Arch from the slickrock, the La Sals behind',
+     ['diesel', 'wagon-boxcar', 'wagon-hopper']),
+    ('nashville',    'Tennessee',  'Nashville',       'Lower Broadway, honky tonk neon, late afternoon',
+     ['diesel', 'wagon-coach-modern', 'wagon-caboose']),
+    ('boston',       'Massachusetts', 'Boston',       'Back Bay across the Charles, early autumn',
+     ['streetcar', 'wagon-coach-old', 'wagon-coach-old']),
 ]
 
 
@@ -53,9 +65,14 @@ def veh_inner(key):
 
 # Scene defs use the same ids in every file (skyg, sung, grassg...). Namespace them
 # per scene so eight inlined scenes don't fight over one id.
+# Namespace the DEFINITION, never a bare id="…". 'water' is both a gradient name (in
+# Colorado) and a layer name (in every scene) — a blind id="water" rewrite renamed the
+# layer too, which silently breaks anything looking layers up by id.
 def namespace(inner, sid):
-    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade']:
-        inner = inner.replace(f'id="{gid}"', f'id="{sid}-{gid}"')
+    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles']:
+        # match the definition, not any element that happens to share the name
+        for kind in ('linearGradient', 'radialGradient', 'pattern', 'filter', 'clipPath'):
+            inner = inner.replace(f'<{kind} id="{gid}"', f'<{kind} id="{sid}-{gid}"')
         inner = inner.replace(f'url(#{gid})', f'url(#{sid}-{gid})')
     return inner
 

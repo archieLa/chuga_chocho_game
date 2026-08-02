@@ -7,6 +7,8 @@ Catches the bugs that are invisible in a diff and easy to miss in a render:
   2. a missing gate / road / track, or gate geometry that has drifted
   3. layers emitted out of depth order
   4. url(#id) or href="#id" that resolves to nothing (renders as solid black)
+  4b. shapes with NO fill and NO stroke — SVG defaults those to solid black, which is
+      how a cliff face ends up looking like a hole in the picture
   5. props standing IN THE ROAD — a bench, a person or a fence where cars drive
 
 Check 5 is the one that keeps biting. The road is a perspective ribbon, so its
@@ -14,6 +16,7 @@ width depends on y; a prop at x=700 is fine at y=400 and in the middle of the
 carriageway at y=700.
 """
 import re, sys, pathlib, xml.dom.minidom
+import xml.etree.ElementTree as ET
 
 SCENES = pathlib.Path(__file__).resolve().parent.parent / 'play/assets/scenes'
 ORDER = ['sky', 'far', 'mid', 'ground', 'water', 'scenery-back', 'road', 'track',
@@ -53,6 +56,39 @@ def check(path):
     for ref in sorted(set(re.findall(r'(?:url\(#|href="#)([^)"]+)', svg))):
         if ref not in defined:
             probs.append('unresolved reference #%s' % ref)
+
+    # --- shapes that will render solid black because nothing sets their fill ---
+    # SVG defaults fill to black. A shape is only safe if it, or one of its ancestors,
+    # sets fill (or it is stroke-only). Walk the real tree — a text-window heuristic
+    # gets this wrong constantly.
+    try:
+        root = ET.fromstring(svg)
+        SHAPES = {'path', 'polygon', 'polyline', 'rect', 'circle', 'ellipse'}
+        # Contents of these never paint directly — their fill comes from the use site,
+        # or they are geometry-only (gradients, clip paths, masks).
+        SKIP = {'defs', 'clipPath', 'mask', 'marker', 'symbol', 'pattern'}
+
+        def sets(node, prop):
+            if prop in node.attrib:
+                return True
+            style = node.attrib.get('style', '')
+            return bool(re.search(r'(?:^|;)\s*%s\s*:' % prop, style))
+
+        def walk(node, in_fill, in_stroke):
+            tag = node.tag.split('}')[-1]
+            if tag in SKIP:
+                return
+            has_fill = in_fill or sets(node, 'fill')
+            has_stroke = in_stroke or sets(node, 'stroke')
+            if tag in SHAPES and not has_fill and not has_stroke:
+                snippet = ' '.join(f'{k}="{v}"' for k, v in list(node.attrib.items())[:3])
+                probs.append('no fill or stroke anywhere up the tree (renders BLACK): <%s %s>'
+                             % (tag, snippet[:70]))
+            for kid in node:
+                walk(kid, has_fill, has_stroke)
+        walk(root, False, False)
+    except ET.ParseError:
+        pass
 
     # --- props standing in the road ---
     for layer in LAYERS_TO_SCAN:

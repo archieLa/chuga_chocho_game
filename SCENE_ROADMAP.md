@@ -1,0 +1,607 @@
+# Scene roadmap — the remaining 43 states
+
+*Wave 1 is locked. Photo list is at the bottom.*
+
+> **Wave 1 is COMPLETE** — Austin, Houston, Cape Canaveral, Oʻahu, Denali, Las Vegas, Moab,
+> Nashville and Boston are all built and passing `tools/check-scenes.py`. That takes the set
+> to **seventeen** locations. Wave 2 opens with **Miami Beach** and **San Antonio**.
+
+Eight are built (Colorado, California ×2, Illinois, Arizona, New York, Washington, Louisiana).
+This plans the rest: what each state's scene should be, and exactly which photographs I need
+from you to build it well.
+
+Read `SCENE_GUIDE.md` for the rules this plan obeys. The short version, learned the hard way
+over eight scenes:
+
+- **ONE hero landmark, two at the very most.** Stacking famous things turns a place into a
+  souvenir shelf. Everything else is *supporting texture* — generic in form, regional in
+  character.
+- **Ground cover is half the recognition.** Sand, asphalt, red dirt, prairie, snow, marsh.
+  The single biggest mistake is dropping every place onto the same green lawn.
+- **The band between the horizon and the track must not be empty** — fill it with the fabric
+  of the place at small scale.
+- **Match the real density.** Chicago is overwhelmingly built. Kansas is overwhelmingly open.
+
+## Three editorial rules
+
+**1. If it's classic for the place, it goes in.** A battleship, a rocket, a neon casino sign —
+kids read big machines and bright lights instantly, and authenticity beats squeamishness. So
+the USS *Alabama* is in, Las Vegas is in, and rockets appear in **both** Florida and Texas
+because they genuinely belong to both.
+
+The only things I'm still steering around are sites whose whole meaning is grief, where the
+picture can't be separated from what happened there: the **Arizona Memorial** at Pearl Harbor
+(a shrine over a war grave), the **Oklahoma City National Memorial** (a field of empty chairs),
+and **Arlington National Cemetery**. Those states get something else. Everything else that's
+iconic is fair game.
+
+**2. Represent each place honestly first; distinctiveness comes second.** The risk at this
+scale is 50 scenes that blur together — but the cure is never to strip a place of something
+true about it just because a neighbour has it too. Savannah and New Orleans both get their
+moss-hung live oaks; Pennsylvania and Wisconsin both get their red barn; Ohio and anywhere
+else with a famous park both get their roller coaster. Those are facts about America, and a
+kid learning that live oaks grow all over the South is a feature, not a bug.
+
+Difference is bought with the **hero, the palette, the light and the composition** instead:
+Florida's rocket stands vertical on a marsh pad about to fly, Houston's hardware lies parked
+flat on mown grass. Same subject, opposite picture. Nashville is late afternoon, Austin is
+sunset, Las Vegas is full night. When two scenes still feel alike, strengthen each hero —
+don't subtract truth.
+
+**3. It's a train game.** Where a state has a genuinely famous railway, that becomes the
+scene's train — and in a few cases the hero itself. Utah's Golden Spike and New Hampshire's cog
+railway are the best examples: the landmark *is* a train.
+
+---
+
+## Wave 1 — ✅ COMPLETE (nine scenes; Texas got two)
+
+Chosen because they're the most recognisable and the most different from each other and from
+what's already built. Between them: a desert night, a tropical coast, an arctic mountain, a
+music city, a colonial harbour, a space coast, a red-rock arch, a Spanish plaza and a
+sky full of bats.
+
+**Eight states, nine scenes** — Texas ships two: Houston for NASA, Austin for the bats. San
+Antonio and the Alamo move to Wave 2, first in the queue.
+
+| # | State | Destination | New rolling stock |
+|---|---|---|---|
+| 1 | Texas | **Houston — Space Center** | — |
+| 1b | Texas | **Austin** | — |
+| 2 | Florida | Cape Canaveral | — |
+| 3 | Hawaii | Oʻahu / Diamond Head | cane tank engine |
+| 4 | Alaska | Denali | *(recolour only)* |
+| 5 | Nevada | Las Vegas at night | monorail |
+| 6 | Utah | **Moab — Arches** | — |
+| 7 | Tennessee | Nashville | — |
+| 8 | Massachusetts | Boston | *(recolour only)* |
+
+### Texas — Houston, Space Center
+**Hero:** the **Space Shuttle riding on the back of a Boeing 747** — *Independence* mounted atop
+NASA 905, out in the open at Independence Plaza. It is a spaceship sitting on top of a jumbo jet.
+No explanation required, at any age.
+**Second landmark:** Mission Control's low mid-century building with its NASA roundel, and a
+Saturn V stage lying on its side in the rocket park — a rocket so long it reads as a wall.
+**Texture:** live oaks with that heavy humid droop, mown campus lawn, chain-link and light
+poles, a water tower, cicada-summer haze, refinery stacks and a bayou far off on the flat.
+**Ground:** mown grass and hot concrete apron, not sand — this is inland, industrial and green.
+**Extras:** an astronaut in a white suit, a crawler-transporter tread, a T-38 trainer parked.
+**Palette:** NASA white and blue, orange external-tank rust, live-oak green, hazy pale sky.
+**Train:** diesel-electric with tank cars — Houston is a petrochemical port, and tank cars are
+the honest local freight.
+**Time of day:** flat bright midday. Humid, hazy, a bit washed out. That haze is the tell.
+
+**How this stays different from Florida** — and it genuinely does. Florida is **vertical, wild
+and about flight**: a rocket standing on the pad over saltmarsh, gators and pelicans, about to
+leave. Houston is **horizontal, human and grounded**: hardware parked on grass, the building
+where people sat and watched, live oaks and heat. One is the launch. The other is the ground crew.
+
+### Texas — Austin
+**Hero:** the **bat colony pouring out from under the Congress Avenue Bridge at dusk** — a
+ribbon of a million and a half bats unspooling across a burnt-orange sky. It's the largest
+urban bat colony in North America, it happens every evening from spring to autumn, and nothing
+else in this game looks remotely like it. A child will ask to go back to Austin.
+**Second, quieter landmark:** the Capitol's **pink granite dome** catching the last of the light
+behind the skyline. Two heroes, which is my limit — and they don't compete, because one is a
+silhouette in the sky and the other is a glow on the ground.
+**Texture:** Lady Bird Lake with paddleboards and kayaks, bald cypress on the banks, a
+food-truck lot strung with warm bulbs, hand-painted murals on brick, cyclists on the shore
+trail, live oaks.
+**Ground:** lake water, pale limestone bank, city street.
+**Palette:** burnt orange sunset, pink granite, deep teal water, dusk violet, warm bulb light.
+**Train:** commuter (Capital MetroRail).
+**Time of day:** dusk — which completes a deliberate three-way split across the wave. Nashville
+is warm late afternoon with its neon already lit, Austin is sunset, Las Vegas is full night.
+
+*Texas also gets a third destination in Wave 2: **Houston — Space Center**. A Saturn V lying on
+its side under a roof, a shuttle mounted piggyback on a 747, Mission Control, live oaks and
+bayou humidity. Deliberately horizontal and man-made where Florida's is vertical and wild.*
+
+### Florida — Cape Canaveral
+**Hero:** a rocket standing on the pad with the service tower beside it, exhaust plume just
+starting. Nothing else in the game looks like this.
+**Texture:** palmetto scrub, mangrove, a causeway on pilings, pelicans on posts.
+**Ground:** pale sand and brackish marsh water.
+**Extras:** an alligator on the bank, roseate spoonbills (pink, kid-visible), an orange grove.
+**Palette:** white and orange rocket, turquoise Atlantic, marsh olive, hot blue sky.
+**Train:** diesel-electric. *(A NASA crawler in the far distance would be a fun texture.)*
+
+### Hawaii — Oʻahu, Diamond Head
+**Hero:** Diamond Head crater's tilted rim seen along the beach.
+**Texture:** palms, hibiscus, plumeria, outrigger canoe, longboard surfers, a rainbow, a
+waterfall in the green cliffs behind.
+**Ground:** golden sand, black lava rock, lush green.
+**Extras:** sea turtle, shave-ice cart.
+**Palette:** volcanic brown-green, jade water, hibiscus red. Deliberately more saturated than LA.
+**Train:** NEW — a small sugar-cane plantation tank engine with open cane cars.
+
+### Alaska — Denali, under the aurora
+**Hero:** the **northern lights** — a curtain sweeping diagonally across the sky with a bright
+fold, long rays, and the magenta fringe along their lower edge.
+**Second:** the Range itself — hand-placed and deliberately unequal, Denali as the dominant
+massif with everything else at irregular heights and spacings. Evenly-matched peaks read as
+wallpaper.
+**The viewpoint is specific:** the Alaska Range seen from the Susitna flats near Talkeetna,
+where the Alaska Railroad runs. Drawing "Alaska generally" is what made the first two attempts
+read as generic.
+**Texture:** forested ridges stepping down toward the viewer, spruce-covered valley walls
+closing in from both bottom corners, the braided Susitna on the valley floor, dense taiga of
+black spruce and September-gold birch, log cabins with lit windows, tents, a campfire with two
+people sitting at it, a moose.
+**Ground:** dark tundra washed faintly green by the sky.
+**Palette:** navy and indigo, aurora green and magenta, muted gold birch, one warm window.
+**Train:** diesel in Alaska Railroad blue-and-gold (a recolour).
+**Time of day:** night — the set's second, and nothing like Las Vegas. Vegas is hot neon in a
+built-up street; this is cold light over empty country.
+
+### Nevada — Las Vegas at night ✅
+**Hero:** a big neon arch blazing over the boulevard — bulb-chase borders, colour everywhere.
+**Texture:** neon and marquee signs stacked down the street, palms lit from below, low desert
+mountains as a dark silhouette behind, stars above the glow.
+**Ground:** wet-looking asphalt boulevard reflecting the signs, desert gravel at the edges.
+**Why it matters:** this is our **only night scene**, and it buys enormous variety. It also
+gives the crossing lights something to play against — the flashing gate reads beautifully in
+the dark.
+**Palette:** deep indigo sky, hot neon pink / cyan / gold, warm pooled light on the road.
+**Train:** NEW — a monorail (elevated, sleek, lit windows).
+*Nevada gets a second destination later: Valley of Fire, red sandstone under a starry desert
+night — a quiet counterpart to the loud one.*
+
+### Utah — Moab, Arches
+**Hero:** **Delicate Arch** — a freestanding ribbon of red sandstone with sky through the
+middle. It is on the state's licence plate for a reason; it is what people picture when they
+picture Utah.
+**Second landmark:** the La Sal Mountains behind it, snow-capped and blue — the contrast of
+snow peaks above red desert is the thing that makes Moab look like nowhere else.
+**Texture:** slickrock domes and fins, blackbrush and rabbitbrush, a lone juniper growing out
+of bare rock, cryptobiotic crust, a dirt track, a raven.
+**Ground:** bare red slickrock and rust-red sand — not the layered browns of the Grand Canyon.
+**Palette:** hot orange-red rock, deep blue sky, blue-white peaks, sage green.
+**Train:** diesel-electric.
+**How it differs from the Grand Canyon:** the Canyon is a *void* you look down into, framed by
+dark near promontories. Moab is *objects standing up* in the open — an arch, fins, domes —
+under a blue sky with mountains behind. Opposite shape, opposite composition. Both are red
+rock, and that's fine: Utah is red rock.
+
+*Utah gets more later. **Park City** would be the game's first winter scene — snow, a chairlift,
+a Main Street of painted storefronts — and **Promontory Summit** stays queued as the third,
+because two steam locomotives nose to nose is still the best train scene in the country. It
+just isn't what a child's parent pictures when they hear "Utah."*
+
+### Tennessee — Nashville
+**Hero:** a giant neon guitar sign over a honky-tonk row.
+**Texture:** brick storefronts with painted signs, fiddle/banjo details, string lights, a
+pedestrian bridge and the Cumberland River behind.
+**Ground:** city street and brick sidewalk.
+**Palette:** warm brick red, neon amber and turquoise, late-afternoon gold.
+**Time of day:** **late afternoon, not night** — Broadway's signs are lit all day, so we get the
+neon without spending our night slot. Vegas owns the night; Austin owns the sunset.
+**Train:** streetcar or commuter.
+
+### Massachusetts — Boston
+**Hero:** a tall ship at the wharf, masts and rigging against the sky.
+**Texture:** red-brick row houses with white trim, cobbled street, gas lamps, a white church
+steeple, swan boats on the pond, sugar-maple autumn colour.
+**Ground:** cobblestone and brick, harbour water.
+**Palette:** brick red, cream trim, harbour slate, maple orange.
+**Train:** streetcar in Green Line livery (a recolour).
+
+---
+
+## Wave 2
+
+### Texas — San Antonio *(first in the queue)*
+**Hero:** the Alamo, low and wide, warm limestone with its curved parapet.
+**Texture:** the River Walk one level *below* the street — cypress trees, stone arch bridges,
+striped umbrellas, a flat-bottomed tour barge. Spanish-colonial stucco, wrought iron.
+**Ground:** paved plaza and river, not grass. Caliche dust at the edges.
+**Extras:** a longhorn steer, bluebonnets, a windmill and a pumpjack far off on the flat.
+**Palette:** cream limestone, live-oak green, river jade, big pale sky.
+**Train:** diesel-electric freight (Union Pacific).
+
+### Pennsylvania — Lancaster County (Amish)
+**Hero:** a huge red bank barn with hex signs, and a horse-drawn buggy on the lane.
+**Texture:** contour-striped fields like a quilt, silos, corn shocks, laundry on a line, a
+covered bridge. **No power lines and no tractors** — that's what makes it read Amish.
+**Ground:** ploughed brown earth and crop stripes. **Train:** steam (Strasburg).
+
+### Michigan — the Straits of Mackinac
+**Hero:** the Mackinac Bridge, long white-and-green suspension span.
+**Texture:** a Great Lakes ore freighter, a squat lighthouse, dune grass, white pines, a
+cherry orchard. **Ground:** dune sand and cold blue water. **Train:** diesel.
+
+### Georgia — Savannah
+**Hero:** the Forsyth Park fountain, white and tiered.
+**Texture:** live oaks with Spanish moss, ironwork balconies, pastel townhouses, azaleas.
+**Distinct from New Orleans by:** spring green + white + soft pink daylight, vs NOLA's sunset
+gold and French Quarter density. **Train:** diesel.
+*Alternative: a peach orchard on Georgia red clay — a completely different look. Say the word.*
+
+### Wyoming — Yellowstone
+**Hero:** Old Faithful mid-eruption, a white column against dark pines.
+**Texture:** steaming geyser basin with orange-and-blue mineral terraces, lodgepole pines,
+boardwalks. **Extras:** a bison herd, elk. **Ground:** pale sinter crust and thermal runoff.
+**Train:** diesel. *(Union Pacific "Big Boy" articulated steam is a stretch-goal engine.)*
+
+### Montana — Glacier
+**Hero:** a jagged glacial horn peak above a turquoise lake.
+**Texture:** larch and fir, a red "jammer" tour bus on a cliff road, a mountain goat, alpine
+wildflowers. **Distinct from Colorado by:** grey-blue vertical rock and glacial turquoise, vs
+Colorado's warm tan peaks and gold aspens. **Train:** diesel.
+
+### Maine — the coast
+**Hero:** a candy-striped lighthouse on grey granite with surf breaking below.
+**Texture:** lobster boats, buoy clusters, a weathered shingled shack, dark spruce right down
+to the water, blueberry barrens. **Ground:** wet granite, seaweed, cold navy water.
+**Train:** steam (two-foot narrow gauge — genuinely tiny, charming).
+
+### South Dakota — the Black Hills
+**Hero:** Mount Rushmore's four faces in the granite.
+**Texture:** ponderosa pines, granite spires, a winding road with a stone tunnel, bison,
+prairie dogs. **Ground:** granite and pine duff. **Train:** steam (the 1880 Train).
+
+### New Mexico — Albuquerque / Taos
+**Hero:** a sky full of hot-air balloons — dozens of them, every colour.
+**Texture:** adobe pueblo with protruding vigas, chile ristras drying, cottonwoods, flat-topped
+mesas. **Ground:** rose-tan dust and sage. **Palette:** adobe pink-brown, turquoise doors,
+chile red, balloon rainbow. **Train:** steam (Cumbres & Toltec narrow gauge).
+
+---
+
+## Wave 3
+
+### Ohio — Cedar Point
+**Hero:** a roller coaster's tangled steel against the sky on the Lake Erie shore.
+**Texture:** midway stalls, striped awnings, beach, gulls. **Ground:** midway asphalt and sand.
+**Train:** diesel. *(Coasters, not a Ferris wheel — Chicago already has the wheel.)*
+
+### North Carolina — the Blue Ridge
+**Hero:** the Linn Cove Viaduct curving around a mountainside.
+**Texture:** ridge after ridge fading to blue, morning fog in the valleys, rhododendron,
+hardwood autumn colour, a black bear. **Ground:** leaf litter and mountain rock.
+**Palette:** the layered blue haze is the whole point. **Train:** diesel.
+
+### Virginia — Colonial Williamsburg
+**Hero:** the Governor's Palace, brick and white with its cupola.
+**Texture:** colonial main street, white picket fences, a horse-drawn carriage, tricorn-hat
+flags, boxwood hedges, dogwood in bloom. **Ground:** packed dirt street and brick walks.
+**Train:** steam.
+
+### Missouri — St. Louis
+**Hero:** the Gateway Arch, a giant silver curve.
+**Texture:** Mississippi riverfront, brick warehouses, a barge tow, cobbled levee.
+**Ground:** cobblestone levee and river. **Train:** diesel.
+
+### Minnesota — Minneapolis
+**Hero:** the Stone Arch Bridge — a curving stone *railroad* viaduct over St. Anthony Falls.
+**Texture:** old mill buildings, birch, a canoe, a loon, pines. **Ground:** river rock, falls
+whitewater. **Train:** steam. *(Winter variant with ice would be lovely later.)*
+
+### Wisconsin — dairy country
+**Hero:** a big red gambrel barn with a silo cluster.
+**Texture:** Holstein cows, milk cans, rolling green, a cheese shop, Door County water beyond.
+**Distinct from Pennsylvania by:** modern dairy (Holsteins, milk truck, metal silos) vs Amish
+(buggies, hex signs, no machinery). **Train:** diesel.
+*Alternative: Wisconsin Dells sandstone gorges — say the word if the two barns bother you.*
+
+### Oregon — Crater Lake
+**Hero:** the caldera's impossible deep blue with Wizard Island in it.
+**Texture:** snow on the rim, hemlock and fir, a deer. **Ground:** volcanic pumice and snow.
+**Palette:** that blue is unlike anything else in the game. **Train:** diesel.
+
+### Idaho — Shoshone Falls
+**Hero:** a wide horseshoe waterfall thundering into a basalt canyon.
+**Texture:** dark columnar basalt, sagebrush rim, potato fields, an osprey.
+**Ground:** basalt and sage. **Train:** diesel.
+
+---
+
+## Wave 4
+
+### Kentucky — horse country
+**Hero:** white four-board fences running over green hills with thoroughbreds and a foal.
+**Texture:** a black-and-white barn with a cupola, bluegrass, dogwood, stacked bourbon barrels.
+**Ground:** deep green pasture. **Train:** steam.
+
+### Alabama — Mobile Bay
+**Hero:** the **USS *Alabama*** — a battleship at her berth, grey and enormous, guns raised.
+A three-year-old will lose their mind over this, and it is genuinely what Alabama shows you.
+**Texture:** live oaks, azaleas, a shrimp boat with its nets out, Spanish moss, a causeway over
+the bay, pelicans on pilings.
+**Ground:** bay water, boardwalk, humid green.
+**Palette:** battleship grey against warm gulf haze and deep oak green.
+**Train:** diesel.
+*Second destination later: **Birmingham** — the Vulcan iron statue on its hilltop over the city,
+old steel-mill stacks, red iron-rich soil, an ore train. A completely different Alabama.*
+
+### Mississippi — the Delta
+**Hero:** a juke joint at a lonely crossroads, hand-painted, with a guitar sign.
+**Texture:** cotton fields to the horizon, an enormous flat sky, cypress in a slough, a water
+tower with the town name. **Ground:** black delta soil and cotton white.
+**Train:** diesel.
+
+### Arkansas — Hot Springs
+**Hero:** Bathhouse Row — a line of ornate pastel bathhouses with tiled roofs and steam rising.
+**Texture:** Ouachita forest hills, a magnolia promenade, quartz crystals in a rock shop.
+**Ground:** brick promenade. **Train:** steam.
+
+### Oklahoma — Route 66
+**Hero:** a big neon motel/diner sign beside the old highway.
+**Texture:** a chrome diner, vintage gas pumps, red-dirt plains, oil pumpjacks nodding, wind
+turbines far off, a bruise-coloured storm on one edge of the sky.
+**Ground:** red dirt and cracked blacktop. **Train:** diesel.
+
+### Kansas — the tallgrass prairie
+**Hero:** a towering white concrete grain elevator — the "prairie cathedral."
+**Texture:** a field of sunflowers, wheat stubble, a windmill, a huge anvil thundercloud
+building on the horizon with sun still on the field.
+**Ground:** wheat gold and prairie grass. The sky is 60% of this picture. **Train:** diesel
+with covered grain hoppers.
+
+### Nebraska — Chimney Rock
+**Hero:** Chimney Rock's spire rising off the plain.
+**Texture:** the Platte River, wagon ruts, a flock of sandhill cranes (thousands of them, in
+the air and on the sandbars — this is a real Nebraska spectacle), cottonwoods, prairie.
+**Ground:** river sand and short grass. **Train:** steam.
+
+### Iowa — Field of Dreams
+**Hero:** a baseball diamond cut into a corn field, with a white farmhouse and lights.
+**Texture:** contour-striped corn hills, a red barn, a windmill, a covered bridge.
+**Ground:** black Iowa soil and corn green. **Train:** diesel.
+
+---
+
+## Wave 5 — the remaining eleven
+
+### Indiana — Indianapolis Motor Speedway
+**Hero:** the pagoda tower beside the track, with a race car on the brickyard start line.
+**Texture:** grandstands, checkered flags, tyre stacks, corn beyond the fence.
+**Ground:** asphalt and the strip of original bricks. **Train:** diesel.
+
+### West Virginia — New River Gorge
+**Hero:** the New River Gorge Bridge — an immense single steel arch across a deep green gorge.
+**Texture:** hardwood ridges, rhododendron, whitewater far below, a logging trestle.
+**Ground:** forest and river rock.
+**Train:** NEW — a **Shay geared logging locomotive** (vertical cylinders, side-mounted
+drive shaft, completely different silhouette from anything we have). Worth building.
+
+### Maryland — Chesapeake Bay
+**Hero:** a skipjack under sail — a working oyster boat with a raked mast.
+**Texture:** a screwpile lighthouse on stilts, crab pots, a crab shack, marsh grass, blue crabs.
+**Ground:** marsh and bay water. **Train:** diesel in B&O livery.
+
+### Delaware — Rehoboth Beach
+**Hero:** the boardwalk with its arcade and painted signs.
+**Texture:** dune fence and sea oats, striped umbrellas, saltwater-taffy shop, horseshoe crabs,
+gulls. **Distinct from LA by:** wooden Atlantic boardwalk, cooler light, dune grass instead of
+palms. **Ground:** boardwalk planks and pale sand. **Train:** commuter.
+
+### New Jersey — Lucy the Elephant
+**Hero:** Lucy — a six-storey elephant-shaped building on the shore. Delightfully strange and
+instantly memorable for a child.
+**Texture:** Jersey Shore boardwalk, beach badges, dune grass, gulls, a diner.
+**Ground:** sand and boardwalk. **Train:** commuter.
+
+### Connecticut — Mystic
+**Hero:** a wooden whaling ship at a seaport wharf, with the bascule drawbridge raised.
+**Texture:** white clapboard houses, a church steeple, stone walls, sugar maples in flame.
+**Ground:** wharf planking and river. **Train:** steam (Essex Steam Train).
+
+### Rhode Island — Newport
+**Hero:** a Gilded-Age mansion above the sea with the Cliff Walk below it.
+**Texture:** sailing yachts, a stone lighthouse, hydrangeas (big blue mopheads), shingled
+cottages. **Ground:** clifftop lawn and rock. **Train:** commuter.
+
+### Vermont — a village in fall
+**Hero:** a red covered bridge over a stream, with a white church steeple behind.
+**Texture:** peak maple colour, sugaring buckets and tubing, a dairy herd, stone walls, green
+mountains. **Ground:** fallen leaves and pasture.
+**Palette:** the most saturated autumn in the game. **Train:** steam.
+
+### New Hampshire — Mount Washington
+**Hero:** the **cog railway** climbing a bare granite ridge at an absurd angle.
+**Texture:** alpine krummholz, a weather station, autumn hardwoods below, granite boulders.
+**Ground:** rock and scree.
+**Train:** NEW — a **cog locomotive with a tilted boiler**, pushing a single slanted coach.
+The tilt is the joke and kids will love it.
+
+### North Dakota — Theodore Roosevelt badlands
+**Hero:** banded badland buttes glowing at low sun.
+**Texture:** a bison herd, wild horses, prairie dog town, cottonwoods in a draw, sunflower
+fields. **Distinct from South Dakota by:** SD is granite faces and ponderosa; ND is striped
+clay and bison. **Ground:** bare striped clay. **Train:** diesel.
+
+### South Carolina — Charleston
+**Hero:** Rainbow Row — a terrace of pastel houses.
+**Texture:** palmetto trees, wrought-iron gates, a horse carriage, church steeples, harbour
+sailboats, sweetgrass baskets. **Ground:** cobbles and brick.
+**Distinct from Savannah by:** pastel row of façades vs a park fountain under mossy oaks.
+**Train:** streetcar.
+
+---
+
+## Second destinations — now that a state can have more than one
+
+Since more than one per state is on the table, these are the states with a genuinely different
+*second* look worth building. This is the phase-2 list — none of it competes with getting all
+fifty states on the map once, but a few of these are strong enough to jump the queue.
+
+**The three I'd jump the queue for:**
+
+| State | Second destination | Why it's worth it now |
+|---|---|---|
+| **New York** | **Niagara Falls** | One of the most recognisable places in the country and completely unlike NYC — a wall of water, mist, a boat in the spray, a rainbow. Probably the single best unbuilt scene in America. |
+| **Texas** | **San Antonio — the Alamo** | Moved to the front of Wave 2. Houston and Austin ship first; Texas ends up with three, which it earns. |
+| **Hawaii** | **Big Island — Kīlauea** | Glowing orange lava against black rock at dusk. Nothing else in the game looks remotely like it, and it pairs with Oʻahu as "the other Hawaii." |
+
+**Florida — Miami Beach** *(promoted to early Wave 2)*
+**Hero:** the Ocean Drive Art Deco strip — pastel hotels with rounded corners, eyebrow ledges,
+porthole windows and vertical neon signs.
+**Second landmark:** the candy-coloured lifeguard towers, which exist nowhere else.
+**Texture:** coconut palms, a pastel convertible on the strip, turquoise water, striped
+umbrellas, rollerbladers.
+**Ground:** the promenade and pale sand.
+**How it differs from LA:** architecture-forward with the beach as backdrop, where LA is
+sand-forward with the city as backdrop. Deco pastels and turquoise against LA's bleached gold.
+**Train:** commuter (Brightline).
+
+**Orlando — not planned, and the reason is legal, not visual.** Cinderella Castle is Disney's
+corporate logo, and the parks' characters and trade dress are heavily protected. This is an
+open-source project raising money for a children's hospital; a trademark letter is not a risk
+worth one scene. A *generic* theme park would be legally fine — and if we build one it should
+be built proudly, not watered down. Florida's third, if we want one, is **Key West**: pastel
+conch houses, the Southernmost Point buoy, a shrimp boat, roosters in the street.
+
+**The rest, roughly in order of how distinct the second look is:**
+
+| State | First (built or Wave 1) | Second |
+|---|---|---|
+| Alaska | Denali | Inside Passage — glacier calving, the White Pass railway on a cliff ledge |
+| Alabama | Mobile / USS *Alabama* | Birmingham — the Vulcan, steel stacks, red soil |
+| Nevada | Las Vegas at night | Valley of Fire — red sandstone under stars |
+| Utah | Promontory Summit | Arches or Bryce — arches and hoodoos |
+| Tennessee | Nashville | Great Smoky Mountains — layered blue ridges, fog, a bear |
+| Louisiana | New Orleans *(built)* | the bayou — cypress knees, airboat, gator, Spanish moss |
+| Washington | Seattle *(built)* | Olympic rainforest — moss-draped, or Mount Rainier's meadows |
+| Colorado | Rocky Mountains *(built)* | Mesa Verde cliff dwellings, or Garden of the Gods |
+| California | SF + LA *(built)* | Yosemite — Half Dome and giant sequoias |
+| Arizona | Grand Canyon *(built)* | Monument Valley — freestanding mesas on red sand |
+| Florida | Cape Canaveral *(built)* | **Miami Beach** — Art Deco strip, candy lifeguard towers (early Wave 2); then Key West |
+| Michigan | Mackinac | Detroit — the auto line, Motown, a muscle car |
+| Pennsylvania | Amish country | Philadelphia — Independence Hall, the Liberty Bell |
+| Massachusetts | Boston | Cape Cod — dunes, a shingled cottage, a lighthouse |
+| Illinois | Chicago *(built)* | Route 66 origins, or Springfield |
+
+**How this affects the map picker:** nothing needs building. `world.js` and the map already
+handle multiple destinations per state — that's exactly how California works today. Adding one
+is a data entry plus art. Two-destination states get the same tap-state → pick-city flow that
+California already has.
+
+## What I need you to find — the photo list
+
+**Fastest way to gather them:** `REFERENCE_PROMPT.md` has a ready-to-paste prompt for an
+image-searching AI that asks for exactly the six shots below, so you're only screenshotting
+rather than hunting. It has the next three scenes already filled in.
+
+**How to send them:** one folder per state, named for the state; filenames like
+`utah-01-golden-spike-wide.jpg`. Ten or fewer per state is plenty. Screenshots are fine —
+I only need to see shape, colour and density, not print quality.
+
+**What makes a reference useful to me** (this matters more than the photo being pretty):
+
+1. **A wide establishing shot** that shows the hero *and* the ground it sits on. I need to see
+   where the land meets the sky and what the ground actually is.
+2. **The ground itself, close up.** Red dirt, prairie grass, cobbles, dune sand, marsh, snow.
+   This is the thing I get wrong without a reference, and it's half of recognition.
+3. **The local plants.** What tree, what shape, what colour, how dense. A photo of "ordinary
+   roadside" in that state is worth more than a postcard of the landmark.
+4. **The ordinary buildings** — not the landmark. The houses, shopfronts and barns that make up
+   the fabric. This is the supporting texture, and it's what actually sells a place.
+5. **Midday, flat light**, unless the scene is deliberately a sunset or night one (Nevada,
+   Tennessee, Oklahoma, North Dakota).
+
+**Start with Wave 1 only.** These eight are what I'll actually build next — don't spend an
+evening on Kansas yet. Roughly five to ten shots per state:
+
+- **Texas** — the Alamo façade straight on; the River Walk from water level; Hill Country
+  flat with a pumpjack; a longhorn.
+- **Florida** — a rocket on the pad with the tower; mangrove/palmetto shoreline; marsh water
+  colour; an alligator on a bank.
+- **Hawaii** — Diamond Head from Waikiki beach; black lava rock against sand; a green cliff
+  with waterfalls; an outrigger canoe.
+- **Alaska** — Denali from a distance with tundra in front; autumn tundra colour close up;
+  black spruce shape; a glacier meeting water.
+- **Nevada** — this is the one I most need help with, because it's our first night scene:
+  several neon signs at night (the more the better — I need to see how the light *pools* and
+  what it does to the road surface); a wide night shot of the boulevard; the desert mountains as
+  a dark silhouette behind the glow; the monorail.
+- **Utah** — the Golden Spike locomotives nose to nose; sagebrush flat close up; telegraph
+  poles receding; the Wasatch from the salt flats.
+- **Tennessee** — Broadway neon at dusk; a honky-tonk brick façade; the river and bridge.
+- **Massachusetts** — a tall ship at the wharf; a brick row-house street; cobblestones;
+  Boston maples in autumn.
+
+**Then, the ones I'm least sure I can get right from memory** — these are where a photo would
+change the result most:
+
+- **Kansas** — a grain elevator from the base looking up; a real prairie thunderhead; a
+  sunflower field.
+- **Mississippi** — a Delta juke joint; a cotton field at picking time; that flat enormous sky.
+- **North Dakota** — badlands striping and its exact colours; a bison herd on it.
+- **New Mexico** — the balloon mass ascension; adobe wall texture and the shadows the vigas
+  throw; chile ristras.
+- **West Virginia** — the New River Gorge bridge from below; a Shay locomotive from the side
+  (I need to see the drive shaft and vertical cylinders clearly).
+- **New Hampshire** — the cog railway on the steepest grade, side on, showing the boiler tilt.
+- **Maryland** — a skipjack under sail; a screwpile lighthouse; crab pots stacked on a dock.
+- **New Jersey** — Lucy the Elephant, side on and front on.
+- **Idaho** — Shoshone Falls wide; columnar basalt close up.
+- **Alabama** — the Vulcan statue with the city below; Alabama red soil.
+
+**Everything else is lower priority** — I can get Rushmore, the Gateway Arch, Old Faithful and
+a red barn convincingly close without references. Send those only if you happen to have them.
+
+---
+
+## New rolling stock this plan needs
+
+| Vehicle | For | Why it's worth building |
+|---|---|---|
+| **Shay geared logging loco** | West Virginia | Vertical cylinders and an exposed drive shaft — a completely different silhouette, and the moving shaft is a side-rod-level delight. |
+| **Cog locomotive** | New Hampshire | Tilted boiler, pushing one slanted coach. Instantly funny and instantly memorable. |
+| **Sugar-cane plantation engine** | Hawaii | **Wave 1.** Tiny tank engine with open cane cars. |
+| **Monorail** | Nevada | **Wave 1.** Elevated, sleek, lit windows — and it belongs to a night scene. |
+| **Dome observation car** | Any western state | A glass-topped car — kids would love riding "on top." Cheap win, reusable everywhere. |
+| **Big Boy articulated steam** | Nebraska / Wyoming | Stretch goal. Two sets of drivers that pivot — hard, but spectacular. |
+
+Recolours only (no new art): Alaska Railroad blue-and-gold diesel, Green Line trolley for
+Boston, B&O livery for Maryland.
+
+---
+
+## Settled
+
+- **Nevada** is Las Vegas at night.
+- **Georgia is Savannah**, live oaks, Spanish moss, ironwork and all — shared with New
+  Orleans and that's fine. Different hero (the Forsyth Park fountain), different palette
+  (spring green and white against NOLA's sunset gold).
+- **Pennsylvania and Wisconsin both keep their barn.** Amish quilt-fields and buggies with no
+  machinery; modern dairy with Holsteins and metal silos. Two real, different farms.
+- Classic landmarks are in — battleships, rockets, neon.
+- Shipping in waves of eight; more than one destination per state where it earns it.
+
+**Still avoided, for one reason only:** anything whose whole meaning is grief (the Arizona
+Memorial, the Oklahoma City memorial, Arlington), and anything with a live trademark problem
+— see Orlando below. Neither is a sameness judgement.
+
+## What happens next
+
+I build Wave 1 as the photos arrive — I don't need all eight states' references before
+starting, so send whatever you gather first and I'll begin with that state. Each scene follows
+the same loop the first eight did: draft, render, look at it, iterate. Expect a few rounds per
+scene; that loop *is* the process.
+
+Alongside them: the cane tank engine and the monorail are new art, and Alaska's blue-and-gold
+diesel and Boston's Green Line trolley are recolours of what we already have.
+
+Sources: [Iconic landmark by state](https://dailypassport.com/most-iconic-landmark-every-state/) · [Heritage railroads in the United States](https://en.wikipedia.org/wiki/List_of_heritage_railroads_in_the_United_States) · [West Virginia tourist railroads](https://www.trains.com/trn/travel/attractions/west-virginia-tourist-railroads-you-must-visit/)

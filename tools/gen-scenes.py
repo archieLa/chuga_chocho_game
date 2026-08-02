@@ -3124,8 +3124,2619 @@ def cape_canaveral():
     }, d)
 
 
+# =============================================================== 11. OʻAHU
+def oahu():
+    """Waikīkī looking east. HERO: Diamond Head's crater rim, fluted and gold, across
+    the reef. Second: the wall of hotels down the beach with the pink Royal Hawaiian
+    in it. Everything in front is what Waikīkī actually is — turquoise reef water,
+    outrigger canoes, coconut palms, the Duke with leis on his arms, and hula."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f7ec4"/><stop offset="0.52" stop-color="#63aede"/>
+      <stop offset="1" stop-color="#c2e2ee"/>
+    </linearGradient>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d6f9e"/><stop offset="0.34" stop-color="#2e9fc0"/>
+      <stop offset="0.68" stop-color="#4fc8d2"/><stop offset="1" stop-color="#8fe0dc"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4e8cc"/><stop offset="1" stop-color="#e0cfa6"/>
+    </linearGradient>
+    <linearGradient id="grassg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5f9e4a"/><stop offset="1" stop-color="#457a37"/>
+    </linearGradient>''')
+
+    WATER_TOP, SURF, BEACH = 248, 282, 294
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="304" fill="url(#skyg)"/>\n'
+             '    <g fill="#ffffff">'
+             + ''.join(f'<g opacity="{op}"><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.44:.0f}"/>'
+                       f'<ellipse cx="{x-r*0.58:.0f}" cy="{y+r*0.16:.0f}" rx="{r*0.56:.0f}" ry="{r*0.34:.0f}"/>'
+                       f'<ellipse cx="{x+r*0.6:.0f}" cy="{y+r*0.12:.0f}" rx="{r*0.5:.0f}" ry="{r*0.3:.0f}"/>'
+                       f'<ellipse cx="{x-r*0.1:.0f}" cy="{y-r*0.3:.0f}" rx="{r*0.44:.0f}" ry="{r*0.28:.0f}"/></g>'
+                       for x, y, r, op in [(150, 78, 62, 0.95), (430, 52, 46, 0.9),
+                                           (720, 88, 54, 0.92), (1010, 58, 44, 0.88),
+                                           (1210, 96, 50, 0.9)])
+             + '</g>\n'
+             # the rainbow you get almost daily over the Koʻolau
+             '    <g fill="none" opacity="0.26" stroke-linecap="round">'
+             + ''.join(f'<path d="M96,262 A 148,148 0 0 1 392,262" stroke="{c}" stroke-width="6" '
+                       f'transform="translate(0,{k*6})"/>'
+                       for k, c in enumerate(['#e8574a', '#f2a13c', '#f2d84a', '#6fc45f', '#4f9fd6', '#8f6fc4']))
+             + '</g>')
+
+    # ---- the Koʻolau ridge behind town, blue with distance ----
+    koolau = ('    <polygon points="-20,252 40,214 120,232 210,196 300,224 380,206 460,236 '
+              '540,248 -20,252" fill="#6f93a8" opacity="0.75"/>\n'
+              '    <g stroke="#5d8296" stroke-width="2.5" opacity="0.5" fill="none">'
+              + ''.join(f'<path d="M{x},{y} l{-6 - (x % 5)},{22 + (x % 9)}"/>'
+                        for x, y in [(50, 220), (128, 238), (216, 202), (306, 230), (386, 212), (466, 240)])
+              + '</g>')
+
+    # ---- Waikīkī's hotel wall, with the pink one in it ----
+    def hotel(x, y, w, base='#eef0ea', lit='#f8f9f4', win='#b9c9d2', step=11):
+        rows = int((252 - y - 10) // step)
+        wins = ''.join(f'<rect x="{x+3}" y="{y+8+r*step}" width="{w-6}" height="4"/>' for r in range(rows))
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{252-y}" rx="1.5" fill="{base}"/>'
+                f'<rect x="{x}" y="{y}" width="{w*0.3:.0f}" height="{252-y}" fill="{lit}"/>'
+                f'<g fill="{win}" opacity="0.75">{wins}</g>')
+    hotels = ('    <g>'
+              + ''.join(hotel(*t) for t in
+                        [(0, 176, 34), (36, 158, 26), (66, 188, 30), (100, 166, 24),
+                         (128, 182, 32), (164, 154, 26), (194, 190, 30), (230, 172, 24),
+                         (258, 196, 34), (296, 178, 26), (326, 200, 30), (362, 184, 24),
+                         (390, 202, 32), (426, 190, 26), (456, 206, 30), (494, 196, 24),
+                         (524, 210, 26), (556, 200, 22), (582, 214, 28)])
+              # the Royal Hawaiian — the pink one everybody looks for
+              + hotel(214, 222, 40, '#f0b8c2', '#f7cbd2', '#d99aa8', 12)
+              + '<path d="M209,222 L234,210 L259,222 Z" fill="#e0a2ae"/>'
+              + '</g>\n'
+              # the strip of palms and low buildings at the hotels\' feet
+              '    <rect x="0" y="246" width="616" height="8" fill="#3f6b3f"/>\n'
+              '    <g fill="#3f6b3f">'
+              + ''.join(f'<ellipse cx="{x}" cy="248" rx="{r}" ry="{r*0.7:.0f}"/>'
+                        for x, r in [(24, 11), (78, 9), (136, 12), (198, 8), (262, 11),
+                                     (322, 9), (384, 12), (444, 9), (500, 11),
+                                     (556, 10), (604, 12)]) + '</g>')
+
+    # ---- Diamond Head ----
+    diamond = ('    <g id="diamond-head">'
+               # the crater's asymmetric profile: steep to the peak, long tail east
+               '<polygon points="628,252 704,240 772,214 838,182 898,158 952,148 998,154 '
+               '1042,176 1104,198 1180,218 1252,236 1280,244 1280,252" fill="#a8865c"/>'
+               '<polygon points="952,148 998,154 1042,176 1104,198 1180,218 1252,236 1280,244 '
+               '1280,252 1090,252 1000,190" fill="#c2a070"/>'
+               '<polygon points="628,252 704,240 772,214 838,182 898,158 952,148 1000,190 '
+               '880,252" fill="#8a6844"/>'
+               # the notch in the rim
+               '<path d="M898,158 L936,166 L952,148" fill="none" stroke="#7a5c3c" stroke-width="3"/>'
+               # tapered erosion gullies — wide at the ridge, pinching out at the base
+               + '<g fill="#8a6b46" opacity="0.17">'
+               + ''.join(f'<polygon points="{x},{170 + abs(x-975)*0.108:.0f} '
+                         f'{x + 5},{172 + abs(x-975)*0.108:.0f} '
+                         f'{x + (x-975)*0.05 + 3:.0f},252 {x + (x-975)*0.05 - 2:.0f},252"/>'
+                         for x in range(672, 1276, 34)) + '</g>'
+               + '<g fill="#cfae7c" opacity="0.16">'
+               + ''.join(f'<polygon points="{x},{174 + abs(x-975)*0.108:.0f} '
+                         f'{x + 6},{176 + abs(x-975)*0.108:.0f} '
+                         f'{x + (x-975)*0.05 + 2:.0f},250 {x + (x-975)*0.05 - 1:.0f},250"/>'
+                         for x in range(686, 1276, 52)) + '</g>'
+               # kiawe scrub skirting the base
+               + '<path d="M628,252 Q 760,238 900,236 T 1180,238 T 1280,244 L1280,252 Z" '
+               'fill="#5d8a4a" opacity="0.9"/>'
+               + '<g fill="#4f7a40" opacity="0.7">'
+               + ''.join(f'<ellipse cx="{x}" cy="{248}" rx="{r}" ry="{r*0.3:.0f}"/>'
+                         for x, r in [(672, 26), (760, 20), (856, 24), (960, 18),
+                                      (1064, 24), (1168, 20), (1250, 22)]) + '</g>'
+               + '</g>')
+
+    # ---- the reef: pale turquoise inshore, deep blue out, coral mottling ----
+    water = (f'    <rect x="0" y="{WATER_TOP}" width="1280" height="{BEACH-WATER_TOP}" fill="url(#ocean)"/>\n'
+             '    <g fill="#2a7f9c" opacity="0.35">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.24:.0f}"/>'
+                       for x, y, r in [(140, 268, 54), (330, 274, 40), (520, 266, 46),
+                                       (700, 276, 52), (900, 268, 38), (1090, 274, 48),
+                                       (240, 262, 30), (820, 262, 34), (1210, 266, 40)])
+             + '</g>\n'
+             # surf lines on the reef edge and the breakwater groins
+             '    <g fill="#ffffff" opacity="0.8">'
+             + ''.join(f'<path d="M{x},{y} q {w*0.5:.0f},-4 {w},0 q {-w*0.5:.0f},3 {-w},0 Z"/>'
+                       for x, y, w in [(90, 262, 120), (330, 256, 96), (600, 260, 140),
+                                       (880, 254, 110), (1120, 260, 120)])
+             + '</g>\n'
+             '    <g fill="#c6bda4">'
+             + ''.join(f'<polygon points="{x},{SURF} {x+9},{SURF} {x+5},{264} {x+2},{264}"/>'
+                       for x in (352, 596, 848)) + '</g>\n'
+             # catamarans and an outrigger out on the water
+             + '    ' + ''.join(f'<g transform="translate({x},{y}) scale({s})">'
+                                f'<path d="M-20,0 L20,0 L15,5 L-15,5 Z" fill="#f2f2ea"/>'
+                                f'<rect x="-1" y="-26" width="2" height="26" fill="#8a7f6c"/>'
+                                f'<path d="M1,-25 L1,-3 L16,-3 Z" fill="{c}"/>'
+                                f'<path d="M-1,-22 L-1,-3 L-12,-3 Z" fill="#f7f4e8"/></g>'
+                                for x, y, s, c in [(196, 272, 0.9, '#e8574a'), (760, 268, 0.8, '#f2b134'),
+                                                   (1024, 276, 0.95, '#4fb8d6')]))
+
+    # ---- the beach: white crescent, wet sand, foam ----
+    beach = (f'    <path d="M0,{SURF} Q 220,{SURF+8} 460,{SURF+3} T 900,{SURF+6} T 1280,{SURF+2} '
+             f'L1280,{BEACH+10} L0,{BEACH+10} Z" fill="#cfc3a4"/>\n'
+             '    <g fill="#ffffff" opacity="0.92">'
+             f'<path d="M0,{SURF-2} Q 220,{SURF+6} 460,{SURF+1} T 900,{SURF+4} T 1280,{SURF} '
+             f'L1280,{SURF+7} Q 900,{SURF+11} 460,{SURF+8} T 0,{SURF+5} Z"/></g>\n'
+             f'    <rect x="0" y="{BEACH}" width="1280" height="12" fill="#efe2c0"/>')
+
+    ground_l = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#sand)"/>\n'
+                # the grass of Kapiʻolani-side park, where the hula happens
+                '    <path d="M0,430 Q 300,408 640,428 T 1280,418 L1280,720 L0,720 Z" fill="url(#grassg)"/>\n'
+                '    <path d="M0,430 Q 300,408 640,428 T 1280,418 L1280,438 Q 640,448 0,440 Z" '
+                'fill="#6fae55" opacity="0.7"/>\n'
+                # the beach walk
+                '    <rect x="0" y="358" width="1280" height="26" fill="#e6d9b4"/>\n'
+                '    <rect x="0" y="358" width="1280" height="4" fill="#f2e7c8"/>\n'
+                '    <g fill="#d3c39c" opacity="0.7">'
+                + ''.join(f'<rect x="{x}" y="365" width="{9 + x % 6}" height="4" rx="2"/>'
+                          for x in range(6, 1280, 26)) + '</g>\n'
+                '    <g fill="#d8c9a2" opacity="0.55">'
+                + ''.join(f'<path d="M{x},{y} q 44,-6 88,0" stroke="#d8c9a2" stroke-width="3" fill="none"/>'
+                          for x, y in [(60, 328), (340, 340), (700, 326), (1000, 344), (1180, 332)])
+                + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def palm(x, y, s=1.0, trunk='#a38a63', frond='#3f8f52', frond2='#4fa862'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 28)}'
+                f'<path d="M-6,0 C -9,-42 3,-76 10,-104 L20,-102 C 12,-74 2,-42 6,0 Z" fill="{trunk}"/>'
+                f'<g fill="{trunk}" opacity="0.45">'
+                + ''.join(f'<rect x="{-6+i*0.7:.0f}" y="{-14-i*12}" width="14" height="3" rx="1.5"/>'
+                          for i in range(8)) + '</g>'
+                f'<g fill="{frond}">'
+                f'<path d="M14,-104 C -18,-120 -44,-114 -58,-98 C -34,-106 -8,-104 12,-96 Z"/>'
+                f'<path d="M14,-104 C 46,-122 72,-116 86,-100 C 62,-108 36,-106 16,-96 Z"/>'
+                f'<path d="M14,-104 C 2,-136 -14,-148 -34,-154 C -14,-140 2,-124 10,-102 Z"/></g>'
+                f'<g fill="{frond2}">'
+                f'<path d="M14,-104 C 30,-136 50,-146 70,-152 C 50,-136 32,-120 20,-100 Z"/>'
+                f'<path d="M14,-104 C 42,-96 62,-80 70,-60 C 52,-78 32,-90 14,-94 Z"/></g>'
+                f'<g fill="#8a6f3f"><circle cx="10" cy="-100" r="4"/><circle cx="19" cy="-98" r="3.4"/>'
+                f'<circle cx="14" cy="-93" r="3.4"/></g></g>')
+
+    def person(x, y, s=1.0, suit='#e8574a', skin='#a9724a', hair='#241a14', arms='down'):
+        A = {'down': 'M-6,-30 L-11,-13 M6,-30 L11,-13',
+             'out':  'M-6,-30 L-19,-24 M6,-30 L19,-24',
+             'up':   'M-6,-31 L-15,-49 M6,-31 L15,-49'}[arms]
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 13, 3.5)}'
+                f'<g stroke="{skin}" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-15 L-5,-1 M3,-15 L6,-1"/><path d="{A}"/></g>'
+                f'<rect x="-7" y="-33" width="14" height="20" rx="6" fill="{suit}"/>'
+                f'<circle cx="0" cy="-40" r="6.5" fill="{skin}"/>'
+                f'<path d="M-6.5,-42 a6.5,6.5 0 0 1 13,0 z" fill="{hair}"/></g>')
+
+    def hula(x, y, s=1.0, top='#c0392b', skin='#a9724a', flip=1):
+        """Ti-leaf skirt, lei, a flower over the ear, ʻuliʻuli in the raised hands."""
+        leaves = ''.join(f'<path d="M{dx},-30 L{dx*1.9:.0f},{6 + abs(dx)*0.5:.0f} '
+                         f'L{dx*1.55:.0f},{10 + abs(dx)*0.5:.0f} L{dx*0.5:.0f},-28 Z" '
+                         f'fill="{"#4f9e3a" if i % 2 else "#5fb045"}"/>'
+                         for i, dx in enumerate([-15, -11, -7, -3, 2, 6, 10, 14]))
+        return (f'<g transform="translate({x},{y}) scale({s * flip},{s})">{shadow(0, 2, 16, 4)}'
+                f'<g stroke="{skin}" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-4,-12 L-6,-1 M4,-12 L7,-1"/></g>'
+                f'<g>{leaves}</g>'
+                f'<rect x="-7" y="-44" width="14" height="18" rx="5" fill="{top}"/>'
+                f'<path d="M-7,-40 q7,5 14,0 l0,4 q-7,5 -14,0 Z" fill="#f2c84a"/>'
+                # lei
+                f'<path d="M-8,-42 q8,9 16,0" stroke="#f7f4e8" stroke-width="4" fill="none"/>'
+                f'<g fill="#f7f4e8"><circle cx="-6" cy="-40" r="2"/><circle cx="0" cy="-37" r="2.2"/>'
+                f'<circle cx="6" cy="-40" r="2"/></g>'
+                # raised arms with ʻuliʻuli
+                f'<g stroke="{skin}" stroke-width="4.6" stroke-linecap="round" fill="none">'
+                f'<path d="M-6,-42 L-20,-56"/><path d="M6,-42 L21,-52"/></g>'
+                f'<g><circle cx="-22" cy="-58" r="4" fill="#a3854f"/>'
+                f'<circle cx="-22" cy="-64" r="5.5" fill="#d8342c"/>'
+                f'<circle cx="-26" cy="-62" r="3.4" fill="#f2c84a"/>'
+                f'<circle cx="23" cy="-54" r="4" fill="#a3854f"/>'
+                f'<circle cx="23" cy="-60" r="5.5" fill="#d8342c"/>'
+                f'<circle cx="27" cy="-58" r="3.4" fill="#f2c84a"/></g>'
+                f'<circle cx="0" cy="-51" r="6.5" fill="{skin}"/>'
+                f'<path d="M-6.5,-53 a6.5,6.5 0 0 1 13,0 z" fill="#241a14"/>'
+                f'<path d="M-7,-52 q-2,7 1,11" stroke="#241a14" stroke-width="4" fill="none"/>'
+                f'<circle cx="7" cy="-55" r="3" fill="#f7f4e8"/>'
+                f'<circle cx="7" cy="-55" r="1.2" fill="#f2c84a"/></g>')
+
+    def ukulele(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 14, 4)}'
+                f'<g stroke="#a9724a" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-14 L-5,-1 M3,-14 L6,-1"/></g>'
+                f'<rect x="-7" y="-34" width="14" height="20" rx="5" fill="#f2e8d0"/>'
+                f'<g fill="#4f9e3a"><path d="M-7,-30 q7,4 14,0 l0,5 q-7,4 -14,0 Z"/></g>'
+                f'<circle cx="0" cy="-41" r="6.5" fill="#a9724a"/>'
+                f'<path d="M-6.5,-43 a6.5,6.5 0 0 1 13,0 z" fill="#241a14"/>'
+                f'<g transform="translate(9,-24) rotate(-24)">'
+                f'<ellipse cx="0" cy="0" rx="8" ry="10" fill="#c9954f"/>'
+                f'<circle cx="0" cy="-1" r="3" fill="#7a5a2f"/>'
+                f'<rect x="-1.6" y="-24" width="3.2" height="15" fill="#8a6a3f"/>'
+                f'<rect x="-3" y="-27" width="6" height="4" rx="1.5" fill="#7a5a2f"/></g>'
+                f'<g stroke="#a9724a" stroke-width="4.4" stroke-linecap="round" fill="none">'
+                f'<path d="M-6,-30 L-12,-20"/><path d="M6,-30 L14,-26"/></g></g>')
+
+    def duke(x, y, s=1.0):
+        """The Duke Kahanamoku statue: arms out, board behind, leis on his wrists."""
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 40, 7)}'
+                f'<ellipse cx="0" cy="-6" rx="42" ry="12" fill="#8a8578"/>'
+                f'<ellipse cx="-6" cy="-10" rx="34" ry="9" fill="#9c9789"/>'
+                f'<rect x="-15" y="-108" width="30" height="92" rx="15" fill="#6b5a44"/>'
+                f'<rect x="-11" y="-104" width="10" height="84" rx="5" fill="#84704f"/>'
+                f'<rect x="-15" y="-108" width="30" height="92" rx="15" fill="none" stroke="#4f4232" stroke-width="1.6"/>'
+                f'<g stroke="#8a6a3f" stroke-width="7" stroke-linecap="round" fill="none">'
+                f'<path d="M-5,-20 L-7,-8 M5,-20 L8,-8"/></g>'
+                f'<rect x="-9" y="-56" width="18" height="26" rx="6" fill="#b8823f"/>'
+                f'<g stroke="#b8823f" stroke-width="6" stroke-linecap="round" fill="none">'
+                f'<path d="M-8,-52 L-30,-44"/><path d="M8,-52 L30,-44"/></g>'
+                f'<circle cx="0" cy="-64" r="8.5" fill="#b8823f"/>'
+                f'<path d="M-8,-66 a8,8 0 0 1 16,0 z" fill="#4a3a26"/>'
+                # leis hanging off both wrists
+                + ''.join(f'<g fill="#d9709a"><path d="M{sx},-44 q{sx*0.2:.0f},16 {sx*0.06:.0f},26" '
+                          f'stroke="#d9709a" stroke-width="4.5" fill="none"/>'
+                          f'<circle cx="{sx*0.95:.0f}" cy="-34" r="3"/>'
+                          f'<circle cx="{sx*0.9:.0f}" cy="-26" r="3"/>'
+                          f'<circle cx="{sx*0.85:.0f}" cy="-18" r="3"/></g>' for sx in (-31, 31))
+                + f'<g fill="#f2c84a"><circle cx="-3" cy="-10" r="3"/><circle cx="5" cy="-9" r="3"/>'
+                f'<circle cx="12" cy="-11" r="3"/></g>'
+                f'<g fill="#d9709a"><circle cx="-12" cy="-10" r="3"/><circle cx="-20" cy="-11" r="3"/></g></g>')
+
+    def board_rack(x, y, s=1.0):
+        cols = ['#e8574a', '#f2b134', '#4fb8d6', '#f7f4e8', '#7bc86c']
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 40, 6)}'
+                + ''.join(f'<g transform="translate({-32 + i*16},0) rotate({-8 + i*4})">'
+                          f'<rect x="-6" y="-76" width="12" height="78" rx="6" fill="{cols[i]}"/>'
+                          f'<rect x="-1.6" y="-72" width="3.2" height="70" rx="1.6" fill="#ffffff" '
+                          f'opacity="0.5"/></g>' for i in range(5))
+                + f'<rect x="-42" y="-16" width="84" height="5" rx="2" fill="#8a7458"/></g>')
+
+    def outrigger(x, y, s=1.0, hull='#f2e8d0', trim='#c0392b'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 76, 8)}'
+                f'<path d="M-78,-10 C -50,-22 50,-22 78,-10 L70,2 C 40,-6 -40,-6 -70,2 Z" fill="{hull}"/>'
+                f'<path d="M-78,-10 C -50,-22 50,-22 78,-10 L74,-6 C 46,-17 -46,-17 -74,-6 Z" fill="{trim}"/>'
+                f'<g stroke="#8a7458" stroke-width="4"><path d="M-40,-6 L-56,14 M22,-6 L6,14"/></g>'
+                f'<path d="M-70,14 C -40,6 20,6 44,14 L40,20 C 18,13 -38,13 -66,20 Z" fill="#c9954f"/>'
+                f'<g fill="#8a7458"><rect x="-30" y="-14" width="7" height="6"/>'
+                f'<rect x="10" y="-14" width="7" height="6"/></g></g>')
+
+    def umbrella(x, y, s=1.0, a='#e8574a', b='#f7f4e8'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 26)}'
+                f'<rect x="-2" y="-42" width="4" height="42" fill="#a89880"/>'
+                f'<path d="M-34,-40 A34,20 0 0 1 34,-40 Z" fill="{a}"/>'
+                f'<path d="M-34,-40 A34,20 0 0 1 -12,-40 Z" fill="{b}"/>'
+                f'<path d="M0,-40 A34,20 0 0 1 22,-40 Z" fill="{b}"/></g>')
+
+    def hibiscus(x, y, s=1.0, col='#e8574a'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 26, 5)}'
+                f'<g fill="#3f7a44"><ellipse cx="0" cy="-16" rx="26" ry="17"/>'
+                f'<ellipse cx="-14" cy="-24" rx="17" ry="12"/><ellipse cx="15" cy="-25" rx="15" ry="11"/></g>'
+                + ''.join(f'<g fill="{c}"><circle cx="{cx}" cy="{cy}" r="6"/>'
+                          f'<circle cx="{cx+3}" cy="{cy-3}" r="3.4" fill="#f2c84a"/></g>'
+                          for cx, cy, c in [(-16, -30, col), (12, -34, col), (0, -20, col)]) + '</g>')
+
+    back = ('    ' + ''.join(palm(x, y, s) for x, y, s in
+                             [(70, 400, 0.66), (196, 404, 0.56), (318, 398, 0.62), (536, 402, 0.5),
+                              (760, 400, 0.54), (964, 404, 0.52), (1104, 398, 0.66), (1236, 404, 0.56)])
+            + duke(430, 400, 0.86)
+            + board_rack(846, 398, 0.66)
+            + ''.join(umbrella(x, y, s, a) for x, y, s, a in
+                      [(126, 336, 0.46, '#4fb8d6'), (250, 340, 0.42, '#f2b134'),
+                       (392, 336, 0.46, '#e8574a'), (700, 338, 0.44, '#7bc86c'),
+                       (900, 334, 0.48, '#4fb8d6'), (1050, 340, 0.42, '#f2b134'),
+                       (1190, 336, 0.46, '#e8574a')])
+            + outrigger(560, 344, 0.44, '#f2e8d0', '#f2b134')
+            + outrigger(1010, 348, 0.4, '#f2e8d0', '#4fb8d6')
+            + board_rack(236, 346, 0.4) + board_rack(1146, 348, 0.38)
+            + ''.join(person(x, y, s, c, arms=a) for x, y, s, c, a in
+                      [(180, 344, 0.4, '#f2b134', 'out'), (330, 340, 0.38, '#4fb8d6', 'up'),
+                       (462, 342, 0.38, '#e8574a', 'down'), (830, 342, 0.4, '#7bc86c', 'out'),
+                       (988, 338, 0.38, '#f2b134', 'up'), (1140, 344, 0.4, '#4fb8d6', 'down')]))
+
+    front = ('    ' + palm(78, 700, 1.5) + palm(1230, 712, 1.42) + palm(226, 604, 0.92)
+             + hibiscus(188, 592, 0.9) + hibiscus(1096, 664, 0.9, '#f2b134')
+             # the hālau: three dancers and a player, out on the grass
+             + ukulele(378, 664, 1.15)
+             + hula(452, 668, 1.2, '#c0392b')
+             + hula(268, 690, 1.12, '#e08a2c', flip=-1)
+             + hula(880, 672, 1.18, '#7a3f9e')
+             + outrigger(986, 706, 1.0)
+             + board_rack(126, 716, 0.9)
+             + umbrella(1160, 596, 0.9, '#e8574a')
+             + person(806, 596, 0.86, '#4fb8d6', arms='out')
+             + person(1046, 604, 0.9, '#f2b134', arms='up')
+             + f'<g transform="translate(958,596)">{shadow(0, 4, 30, 6)}'
+             '<rect x="-26" y="-30" width="52" height="24" rx="4" fill="#3f8f8a"/>'
+             '<rect x="-26" y="-30" width="52" height="7" rx="3" fill="#4fb0a8"/>'
+             '<text x="0" y="-13" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+             'font-size="10" font-weight="bold" fill="#f7f4e8">SHAVE ICE</text>'
+             '<g stroke="#2f6b68" stroke-width="4"><path d="M-14,-6 L-14,6 M14,-6 L14,6"/></g>'
+             '<g fill="#e8574a"><path d="M22,-40 a9,9 0 0 1 18,0 l-9,14 Z"/></g>'
+             '<path d="M22,-40 a9,9 0 0 1 18,0" fill="#4fb8d6"/></g>')
+
+    scene('oahu', 'OʻAHU — Diamond Head over the Waikīkī reef, outriggers, the Duke, and hula', {
+        'sky': sky_l,
+        'far': koolau + '\n' + hotels + '\n' + diamond + '\n' + water + '\n' + beach,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#d8c9a2" opacity="0.5"><rect x="0" y="708" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#6f6f6a', surface2='#585853', shoulder='#efe2c0', dash='#ffe066'),
+    }, d)
+
+
+# ================================================================ 12. DENALI
+def denali():
+    """DENALI, seen the way almost everyone actually sees it: from the south, across
+    the Susitna flats near Talkeetna, where the Alaska Railroad runs. That is a real
+    place with a real composition — the Range fills the whole horizon, forested
+    ridges step down toward you, spruce-covered valley walls close in on both sides,
+    and the braided river threads the floor. Aurora overhead, September.
+
+    The mountains must be IRREGULAR. Evenly-spaced matching triangles read as
+    wallpaper; a real range is one dominant massif and a mess of unequal peaks."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#040a1c"/><stop offset="0.44" stop-color="#0b1836"/>
+      <stop offset="0.8" stop-color="#132a4e"/><stop offset="1" stop-color="#1a3a5c"/>
+    </linearGradient>
+    <linearGradient id="aurora" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ef5b0" stop-opacity="0"/>
+      <stop offset="0.22" stop-color="#4ef5b0" stop-opacity="0.5"/>
+      <stop offset="0.62" stop-color="#6effc4" stop-opacity="0.52"/>
+      <stop offset="0.86" stop-color="#ff7fbf" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#e0508f" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="aurora2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe8d0" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#5cf0bc" stop-opacity="0.32"/>
+      <stop offset="0.78" stop-color="#a8ff9e" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ffd36a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12283f"/><stop offset="1" stop-color="#1d4258"/>
+    </linearGradient>
+    <linearGradient id="grassg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2a22"/><stop offset="1" stop-color="#111a16"/>
+    </linearGradient>''')
+
+    state = [77042]
+    def rnd():
+        state[0] = (state[0] * 1103515245 + 12345) % 2147483648
+        return state[0] / 2147483648.0
+
+    stars = ''.join(f'<circle cx="{rnd()*1280:.0f}" cy="{rnd()*230:.0f}" '
+                    f'r="{0.6 + rnd()*1.5:.1f}" opacity="{0.28 + rnd()*0.66:.2f}"/>'
+                    for _ in range(250))
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             f'    <g fill="#ffffff">{stars}</g>\n'
+             '    <g stroke="#ffffff" stroke-width="1.4" opacity="0.7" stroke-linecap="round">'
+             '<path d="M300,44 l26,16"/><path d="M1076,88 l-20,12"/></g>')
+
+    def curtain(pts, grad='aurora', rays=26, ray_op=0.34):
+        body = f'<polygon points="{pts}" fill="url(#{grad})"/>'
+        coords = [tuple(map(float, p.split(','))) for p in pts.split()]
+        top = coords[:len(coords) // 2]
+        out = []
+        for i in range(rays):
+            t = i / max(1, rays - 1)
+            k = t * (len(top) - 1)
+            k0, k1 = int(k), min(int(k) + 1, len(top) - 1)
+            f = k - k0
+            x = top[k0][0] + (top[k1][0] - top[k0][0]) * f
+            y = top[k0][1] + (top[k1][1] - top[k0][1]) * f
+            h, w, lean = 130 + rnd() * 210, 6 + rnd() * 16, (rnd() - 0.5) * 40
+            out.append(f'<polygon points="{x-w:.0f},{y:.0f} {x+w:.0f},{y:.0f} '
+                       f'{x + w*0.42 + lean:.0f},{y+h:.0f} {x - w*0.42 + lean:.0f},{y+h:.0f}" '
+                       f'fill="url(#{grad})" opacity="{ray_op * (0.5 + rnd()):.2f}"/>')
+        return f'<g>{body}{"".join(out)}</g>'
+
+    aurora = ('    <g id="aurora">'
+              + curtain('-60,2 130,22 320,48 500,68 660,52 820,26 1000,10 1180,28 1300,52 '
+                        '1300,112 1180,88 1000,72 820,88 660,114 500,130 320,110 130,84 -60,62',
+                        'aurora', 34, 0.42)
+              + curtain('-60,44 120,64 300,92 460,116 600,134 720,150 '
+                        '720,208 600,192 460,174 300,150 120,124 -60,104', 'aurora2', 20, 0.28)
+              + '<polygon points="596,18 668,12 730,208 644,218" fill="url(#aurora)" opacity="0.58"/>'
+              '<polygon points="620,22 652,18 686,202 648,208" fill="#b6ffdc" opacity="0.32"/>'
+              '<polygon points="632,24 646,22 664,196 646,200" fill="#eafff4" opacity="0.28"/>'
+              + '<g fill="#ff7fbf" opacity="0.26">'
+              + ''.join(f'<polygon points="{x},{170 + (x % 23)} {x+13},{174 + (x % 19)} '
+                        f'{x+9},{222 + (x % 17)} {x-3},{218 + (x % 21)}"/>'
+                        for x in range(470, 900, 27)) + '</g></g>')
+
+    # ---- THE ALASKA RANGE. Hand-placed, deliberately unequal. ----
+    # Denali is the broad massif left of centre; Foraker sits beside it; everything
+    # else trails away at irregular heights and spacings.
+    RIDGE = [(-50, 262), (14, 226), (52, 206), (92, 232), (128, 190), (162, 210),
+             (196, 158), (226, 184), (262, 140), (296, 112), (330, 92), (362, 84),
+             (392, 100), (416, 138), (444, 120), (468, 152), (500, 128), (524, 166),
+             (556, 142), (584, 178), (614, 156), (646, 194), (676, 170), (712, 202),
+             (748, 182), (784, 214), (818, 190), (856, 220), (894, 198), (934, 226),
+             (976, 204), (1018, 232), (1062, 208), (1108, 236), (1152, 212), (1198, 240),
+             (1246, 218), (1300, 244)]
+
+    def snowcap(x, y, half, drop, op=0.95):
+        return (f'<polygon points="{x},{y} {x + half*1.1:.0f},{y + drop} '
+                f'{x + half*0.45:.0f},{y + drop*0.72:.0f} {x - half*0.3:.0f},{y + drop*0.9:.0f} '
+                f'{x - half:.0f},{y + drop*0.66:.0f}" fill="#dbe8ee" opacity="{op}"/>')
+
+    range_pts = ' '.join(f'{x},{y}' for x, y in RIDGE)
+    ranges = ('    <g id="alaska-range">'
+              f'<polygon points="{range_pts} 1300,286 -50,286" fill="#3d5266"/>'
+              # the lit south-east flanks
+              f'<polygon points="296,112 330,92 362,84 392,100 416,138 444,120 468,152 '
+              f'500,128 524,166 556,142 584,178 500,286 330,286" fill="#556e82"/>'
+              f'<polygon points="196,158 226,184 262,140 296,112 330,286 200,286" fill="#31465a"/>'
+              # snow only on the ones high enough to hold it, at varied sizes
+              + ''.join(snowcap(x, y, h, dr, o) for x, y, h, dr, o in
+                        [(362, 84, 40, 46, 0.95), (330, 92, 30, 38, 0.9), (296, 112, 24, 32, 0.85),
+                         (262, 140, 20, 26, 0.8), (196, 158, 17, 22, 0.72), (444, 120, 22, 28, 0.85),
+                         (500, 128, 19, 26, 0.8), (556, 142, 16, 22, 0.72), (128, 190, 13, 17, 0.6),
+                         (614, 156, 14, 19, 0.65), (676, 170, 12, 16, 0.55), (52, 206, 10, 13, 0.45)])
+              # rock ribs, angled with the slope
+              + '<g fill="#22303e" opacity="0.9">'
+              + ''.join(f'<polygon points="{x},{y} {x+w},{y+3} {x + w*0.5 + lean:.0f},{y+h} '
+                        f'{x + lean:.0f},{y+h-4}"/>'
+                        for x, y, w, h, lean in [(316, 106, 13, 62, -14), (350, 96, 11, 54, -9),
+                                                 (378, 96, 12, 58, 10), (410, 128, 10, 46, 11),
+                                                 (462, 146, 11, 48, 12), (516, 156, 10, 42, 11),
+                                                 (242, 154, 10, 44, -11), (206, 172, 9, 38, -9),
+                                                 (592, 176, 9, 36, 10), (664, 190, 8, 30, 9)])
+              + '</g>'
+              # the haze that stacks up at the foot of a big range
+              + '<rect x="0" y="242" width="1280" height="46" fill="#5c7488" opacity="0.28"/>'
+              + '</g>')
+
+    # ---- forested ridges stepping DOWN toward us. This is what was missing. ----
+    def comb(y0, amp, phase, step, h, fill, seed):
+        """A ridgeline with a fine comb of spruce along its top edge."""
+        import math
+        pts, trees = [], []
+        x = -20
+        while x < 1300:
+            yy = y0 + math.sin((x + phase) / 130.0) * amp + math.sin((x + phase) / 47.0) * (amp * 0.35)
+            pts.append(f'{x},{yy:.0f}')
+            if int(x) % step == 0:
+                th = h + ((x * seed) % 7)
+                trees.append(f'<polygon points="{x},{yy:.0f} {x + th*0.36:.1f},{yy - th:.0f} '
+                             f'{x + th*0.72:.1f},{yy:.0f}"/>')
+            x += 6
+        return (f'<polygon points="{" ".join(pts)} 1300,300 -20,300" fill="{fill}"/>'
+                f'<g fill="{fill}">{"".join(trees)}</g>')
+
+    ridges = ('    <g id="ridges">'
+              + comb(256, 9, 0, 12, 9, '#1e3340', 7)
+              + comb(270, 11, 220, 12, 11, '#152834', 5)
+              + comb(284, 8, 90, 12, 12, '#0f1e28', 3)
+              + '</g>')
+
+    # ---- the braided Susitna threading the valley floor ----
+    river = ('    <g id="river">'
+             '<path d="M-20,292 C 160,286 300,298 470,292 C 640,286 800,298 980,292 '
+             'C 1120,288 1220,296 1300,292 L1300,306 L-20,306 Z" fill="url(#river)"/>'
+             '<g fill="#2a4d60" opacity="0.9">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.16:.0f}"/>'
+                       for x, y, r in [(120, 297, 70), (380, 300, 54), (640, 296, 66),
+                                       (900, 300, 58), (1160, 297, 62)]) + '</g>'
+             '<g opacity="0.35">'
+             + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="3" rx="1.5" fill="{c}"/>'
+                       for x, y, w, c in [(200, 294, 160, '#4ef5b0'), (520, 299, 190, '#6effc4'),
+                                          (860, 294, 170, '#4ef5b0'), (1080, 300, 140, '#ff7fbf')])
+             + '</g></g>')
+
+    # ---- ground: a valley floor with spruce-covered WALLS closing in either side ----
+    def wall(side):
+        """A forested valley wall rising out of the frame corner."""
+        import math
+        sgn = 1 if side == 'L' else -1
+        x0 = -30 if side == 'L' else 1310
+        pts, trees = [], []
+        for i in range(34):
+            t = i / 33.0
+            x = x0 + sgn * (t ** 1.35) * 470
+            y = 316 + (t ** 0.8) * 404
+            wob = math.sin(i * 1.7) * 16
+            pts.append(f'{x + sgn*wob:.0f},{y:.0f}')
+            if i % 2 == 0:
+                th = 16 + (i % 5) * 5
+                trees.append(f'<polygon points="{x + sgn*wob:.0f},{y:.0f} '
+                             f'{x + sgn*(wob + th*0.4):.0f},{y - th:.0f} '
+                             f'{x + sgn*(wob + th*0.8):.0f},{y:.0f}"/>')
+        edge = ' '.join(pts)
+        corner = '-30,720' if side == 'L' else '1310,720'
+        return (f'<polygon points="{x0},316 {edge} {corner}" fill="#16241d"/>'
+                f'<g fill="#16241d">{"".join(trees)}</g>'
+                f'<polygon points="{x0},316 {edge} {corner}" fill="#4ef5b0" opacity="0.03"/>')
+
+    ground_l = ('    <rect x="0" y="306" width="1280" height="414" fill="url(#grassg)"/>\n'
+                '    <g fill="#2b3a2c" opacity="0.5">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.22:.0f}"/>'
+                          for x, y, r in [(300, 344, 170), (760, 360, 190), (1080, 340, 150),
+                                          (200, 452, 150), (860, 490, 180), (520, 580, 160),
+                                          (1120, 620, 150), (300, 680, 170)]) + '</g>\n'
+                '    <g fill="#4ef5b0" opacity="0.045">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.2:.0f}"/>'
+                          for x, y, r in [(320, 340, 280), (800, 366, 300), (1140, 340, 220)])
+                + '</g>\n'
+                # a creek coming down the valley floor to join the river
+                '    <path d="M452,306 C 436,352 470,392 448,436 C 424,484 356,506 320,552 '
+                'C 288,592 274,646 268,720 L318,720 C 324,652 338,610 368,574 C 408,528 '
+                '478,502 500,452 C 524,398 486,354 500,306 Z" fill="#14293a"/>\n'
+                '    <path d="M466,306 C 452,350 484,390 462,434 C 438,482 372,504 338,550 '
+                'C 308,590 294,644 288,720 L300,720 C 306,648 322,606 350,570 C 390,524 '
+                '458,498 478,450 C 500,398 464,352 476,306 Z" fill="#4ef5b0" opacity="0.14"/>\n'
+                + '    ' + wall('L') + wall('R'))
+
+    # ---------------------------------------------------------------- props ----
+    def spruce(x, y, s=1.0, a='#0c1713', b='#122019'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-2.4" y="-18" width="4.8" height="18" fill="{a}"/>'
+                f'<polygon points="0,-104 13,-70 -13,-70" fill="{a}"/>'
+                f'<polygon points="0,-104 8,-78 -8,-78" fill="{b}"/>'
+                f'<polygon points="0,-84 17,-46 -17,-46" fill="{a}"/>'
+                f'<polygon points="0,-84 11,-56 -11,-56" fill="{b}"/>'
+                f'<polygon points="0,-60 20,-16 -20,-16" fill="{a}"/>'
+                f'<polygon points="0,-60 13,-30 -13,-30" fill="{b}"/>'
+                f'<path d="M0,-108 L0,-96" stroke="{a}" stroke-width="2.6"/></g>')
+
+    def birch(x, y, s=1.0, gold='#7f6428', gold2='#9c7c33', bark='#b8b6ac'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-3.4,0 L-2.2,-58 L2.2,-58 L3.4,0 Z" fill="{bark}"/>'
+                f'<g fill="#2a2a26"><rect x="-3" y="-16" width="4" height="2.4" rx="1"/>'
+                f'<rect x="0" y="-31" width="3.4" height="2" rx="1"/>'
+                f'<rect x="-3" y="-45" width="3.6" height="2" rx="1"/></g>'
+                f'<ellipse cx="0" cy="-74" rx="25" ry="20" fill="{gold}"/>'
+                f'<ellipse cx="-13" cy="-66" rx="14" ry="11" fill="{gold2}"/>'
+                f'<ellipse cx="13" cy="-68" rx="13" ry="10" fill="{gold2}"/>'
+                f'<ellipse cx="2" cy="-88" rx="15" ry="10" fill="{gold2}"/></g>')
+
+    def redshrub(x, y, s=1.0, a='#4f281e', b='#653522'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="-15" cy="-8" rx="14" ry="8" fill="{a}"/>'
+                f'<ellipse cx="11" cy="-7" rx="16" ry="9" fill="{a}"/>'
+                f'<ellipse cx="-3" cy="-13" rx="19" ry="10" fill="{b}"/>'
+                f'<ellipse cx="8" cy="-20" rx="12" ry="7" fill="{b}"/></g>')
+
+    def forest():
+        out = []
+        for by, bs, op in [(322, 0.20, 0.5), (340, 0.27, 0.62),
+                           (362, 0.36, 0.78), (388, 0.46, 0.9), (412, 0.58, 1.0)]:
+            row, x = [], 40
+            while x < 1250:
+                if rnd() < 0.20:
+                    x += 44 + rnd() * 78
+                    continue
+                for _ in range(3 + int(rnd() * 7)):
+                    r, yy = rnd(), by + (rnd() * 8) - 4
+                    sc = bs * (0.82 + rnd() * 0.42)
+                    row.append(spruce(x, yy, sc) if r < 0.68 else
+                               (birch(x, yy, sc * 1.15) if r < 0.92 else redshrub(x, yy, sc * 1.1)))
+                    x += 10 + rnd() * 13
+                x += 18 + rnd() * 28
+            out.append(f'<g opacity="{op}">' + ''.join(row) + '</g>')
+        return '    ' + ''.join(out)
+
+    def cabin(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="0" cy="2" rx="86" ry="16" fill="#ffcf72" opacity="0.07"/>'
+                f'<rect x="-48" y="-46" width="96" height="46" fill="#1f1d19"/>'
+                f'<polygon points="-58,-46 0,-76 58,-46" fill="#292c27"/>'
+                f'<rect x="-60" y="-49" width="120" height="6" rx="2" fill="#36322c"/>'
+                f'<rect x="-14" y="-30" width="28" height="30" rx="2" fill="#14130e"/>'
+                f'<g><rect x="-38" y="-34" width="18" height="16" rx="2" fill="#ffcf72"/>'
+                f'<rect x="22" y="-34" width="18" height="16" rx="2" fill="#ffcf72"/>'
+                f'<ellipse cx="-29" cy="-26" rx="26" ry="18" fill="#ffcf72" opacity="0.14"/>'
+                f'<ellipse cx="31" cy="-26" rx="26" ry="18" fill="#ffcf72" opacity="0.14"/></g>'
+                f'<rect x="24" y="-84" width="10" height="16" fill="#2a261e"/>'
+                f'<g fill="#8fa0a8" opacity="0.26"><circle cx="30" cy="-92" r="6"/>'
+                f'<circle cx="36" cy="-102" r="8"/><circle cx="30" cy="-114" r="9"/></g></g>')
+
+    def moose(x, y, s=1.0):
+        c = '#141a15'
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<g stroke="{c}" stroke-width="6" stroke-linecap="round">'
+                f'<path d="M-22,-22 L-24,0 M-10,-22 L-8,0 M14,-22 L16,0 M24,-22 L27,0"/></g>'
+                f'<ellipse cx="0" cy="-32" rx="34" ry="17" fill="{c}"/>'
+                f'<path d="M28,-40 L40,-58 L48,-56 L38,-36 Z" fill="{c}"/>'
+                f'<ellipse cx="50" cy="-60" rx="12" ry="8" fill="{c}"/>'
+                f'<g fill="{c}">'
+                f'<path d="M44,-70 C 38,-84 46,-94 60,-96 L64,-88 C 54,-86 50,-80 52,-70 Z"/>'
+                f'<path d="M60,-96 l14,-6 l2,8 l-12,6 Z"/><path d="M62,-88 l16,-2 l0,8 l-14,2 Z"/>'
+                f'<path d="M46,-72 C 40,-88 30,-96 16,-96 L14,-88 C 26,-86 34,-80 36,-70 Z"/>'
+                f'<path d="M16,-96 l-14,-8 l-3,8 l13,7 Z"/><path d="M14,-88 l-16,-4 l-1,8 l15,3 Z"/></g>'
+                f'<path d="M-34,-34 L-44,-26" stroke="{c}" stroke-width="6" stroke-linecap="round"/></g>')
+
+    def tent(x, y, s=1.0, fly='#c4562f', fly2='#a8462a', lit=True):
+        """An A-frame with a lamp inside. Canvas glows from within at night."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + (f'<ellipse cx="0" cy="2" rx="62" ry="14" fill="#ffcf72" opacity="0.06"/>' if lit else '')
+                + f'<polygon points="-34,0 0,-40 34,0" fill="{fly}"/>'
+                f'<polygon points="-34,0 0,-40 -12,0" fill="{fly2}"/>'
+                f'<polygon points="-13,0 0,-40 13,0" fill="{"#ffcf72" if lit else "#3a2a22"}" '
+                f'opacity="{0.75 if lit else 1}"/>'
+                f'<polygon points="-6,0 0,-22 6,0" fill="#2a1e18" opacity="0.5"/>'
+                f'<g stroke="#6b5a44" stroke-width="1.6" opacity="0.85">'
+                f'<path d="M-34,0 L-48,5 M34,0 L48,5 M0,-42 L0,-46"/></g>'
+                f'<rect x="-36" y="-2" width="72" height="3" rx="1.5" fill="#2a2620"/></g>')
+
+    def campfire(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="0" cy="2" rx="70" ry="18" fill="#ff9a3c" opacity="0.1"/>'
+                f'<ellipse cx="0" cy="0" rx="40" ry="11" fill="#ff9a3c" opacity="0.13"/>'
+                f'<g stroke="#3a2c22" stroke-width="5" stroke-linecap="round">'
+                f'<path d="M-15,2 L9,-6 M15,2 L-9,-6"/></g>'
+                f'<path d="M-9,0 C -12,-14 -5,-22 0,-34 C 5,-22 12,-14 9,0 Z" fill="#ff8c2e"/>'
+                f'<path d="M-5,0 C -7,-11 -3,-17 0,-26 C 3,-17 7,-11 5,0 Z" fill="#ffd25e"/>'
+                f'<path d="M-2,0 C -3,-8 -1,-12 0,-18 C 1,-12 3,-8 2,0 Z" fill="#fff2c0"/>'
+                f'<g fill="#8fa0a8" opacity="0.2"><circle cx="2" cy="-42" r="6"/>'
+                f'<circle cx="7" cy="-54" r="8"/><circle cx="1" cy="-68" r="9"/></g>'
+                # two people sitting at it, backs to us
+                f'<g fill="#141a15"><ellipse cx="-32" cy="-8" rx="9" ry="12"/>'
+                f'<circle cx="-32" cy="-22" r="6"/>'
+                f'<ellipse cx="32" cy="-7" rx="9" ry="12"/><circle cx="32" cy="-21" r="6"/></g>'
+                f'<g fill="#ff9a3c" opacity="0.35"><ellipse cx="-24" cy="-14" rx="5" ry="9"/>'
+                f'<ellipse cx="24" cy="-13" rx="5" ry="9"/></g></g>')
+
+    def boulder(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<polygon points="-38,6 -30,-20 -10,-32 14,-30 32,-14 38,6" fill="#212831"/>'
+                f'<polygon points="-10,-32 14,-30 32,-14 4,-12 -12,-20" fill="#2f3944"/>'
+                f'<polygon points="-38,6 -30,-20 -12,-20 -8,4" fill="#181d24"/></g>')
+
+    back = (forest()
+            + cabin(1064, 404, 0.56) + cabin(232, 402, 0.5) + cabin(792, 398, 0.44)
+            + tent(360, 400, 0.5) + tent(1176, 402, 0.44, '#3f7d6a', '#33685a')
+            + moose(500, 398, 0.5))
+
+    front = ('    ' + ''.join(spruce(x, y, s) for x, y, s in
+                              [(60, 716, 1.5), (188, 672, 1.2), (1196, 716, 1.45),
+                               (1112, 660, 1.25), (356, 566, 0.74), (930, 580, 0.8),
+                               (452, 700, 1.2), (760, 706, 1.3), (486, 616, 0.66),
+                               (1050, 620, 0.86), (240, 596, 0.68), (1246, 654, 1.0)])
+             + ''.join(birch(x, y, s) for x, y, s in
+                       [(258, 704, 1.35), (1104, 712, 1.3), (466, 560, 0.7),
+                        (166, 700, 1.15), (838, 596, 0.8)])
+             + boulder(392, 656, 1.1) + boulder(1010, 704, 1.0) + boulder(216, 716, 1.15)
+             # a camp on the flat, which is what people actually come here to do
+             + tent(948, 596, 1.0) + campfire(1044, 608, 0.92)
+             + tent(300, 606, 0.72, '#3f7d6a', '#33685a')
+             + ''.join(redshrub(x, y, s) for x, y, s in
+                       [(150, 700, 1.25), (496, 664, 1.1), (784, 660, 1.15), (1136, 668, 1.15),
+                        (60, 648, 1.0), (1252, 704, 1.1)]))
+
+    scene('denali', 'DENALI — the Alaska Range from the Susitna flats, aurora over a spruce valley', {
+        'sky': sky_l + '\n' + aurora,
+        'far': ranges + '\n' + ridges + '\n' + river,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#0d1512" opacity="0.5"><rect x="0" y="708" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#2e3238', surface2='#22262b', shoulder='#42493f', dash='#e8d55a'),
+        'trackkw': dict(ballast='#38382f', ballast_hi='#44443a', tie='#201e18', rail='#9aa4ac'),
+    }, d)
+
+# ============================================================= 13. LAS VEGAS
+def las_vegas():
+    """The Strip after dark — the game's only night scene. The whole trick is that
+    night is NOT black: the sky is deep indigo with an orange sodium glow along the
+    horizon, the mountains are a flat silhouette against it, and every light source
+    POOLS on the ground and smears down the wet asphalt. Hero: the Welcome sign."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1030"/><stop offset="0.38" stop-color="#1c1c4a"/>
+      <stop offset="0.66" stop-color="#3d2358"/><stop offset="0.86" stop-color="#7a3050"/>
+      <stop offset="1" stop-color="#c25a2c"/>
+    </linearGradient>
+    <linearGradient id="asphalt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20202c"/><stop offset="1" stop-color="#14141d"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd9a0" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#e8874a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#c25a2c" stop-opacity="0"/>
+    </radialGradient>''')
+
+    def glow(x, y, r, col, op=0.3):
+        """Three stacked haloes. Doing this around every light is what sells night."""
+        return (f'<circle cx="{x}" cy="{y}" r="{r*1.55:.0f}" fill="{col}" opacity="{op*0.10:.3f}"/>'
+                f'<circle cx="{x}" cy="{y}" r="{r*1.0:.0f}" fill="{col}" opacity="{op*0.20:.3f}"/>'
+                f'<circle cx="{x}" cy="{y}" r="{r*0.55:.0f}" fill="{col}" opacity="{op*0.38:.3f}"/>')
+
+    def smear(x, top, w, h, col, op=0.22):
+        """A light's reflection running down the wet road toward the viewer."""
+        return (f'<path d="M{x-w*0.35:.0f},{top} L{x+w*0.35:.0f},{top} L{x+w},{top+h} '
+                f'L{x-w},{top+h} Z" fill="{col}" opacity="{op*0.6:.3f}"/>'
+                f'<path d="M{x-w*0.15:.0f},{top} L{x+w*0.15:.0f},{top} L{x+w*0.45:.0f},{top+h} '
+                f'L{x-w*0.45:.0f},{top+h} Z" fill="{col}" opacity="{op*1.5:.3f}"/>')
+
+    PINK, CYAN, GOLD, PURPLE, RED, GREEN = ('#ff3d7f', '#35e0f0', '#ffc93c',
+                                            '#b45cff', '#ff4a3d', '#4dff9e')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             '    <g fill="#ffffff">'
+             + ''.join(f'<circle cx="{x}" cy="{y}" r="{r}" opacity="{o}"/>'
+                       for x, y, r, o in [(90, 34, 1.4, 0.8), (250, 20, 1.1, 0.6), (410, 48, 1.3, 0.7),
+                                          (560, 26, 1, 0.5), (700, 40, 1.4, 0.75), (860, 18, 1.1, 0.55),
+                                          (1010, 44, 1.2, 0.65), (1160, 28, 1.4, 0.8),
+                                          (330, 74, 1, 0.45), (940, 76, 1.1, 0.5), (1240, 62, 1, 0.4)])
+             + '</g>\n'
+             # the city's own glow, thrown back up into the sky
+             '    <ellipse cx="640" cy="306" rx="620" ry="140" fill="#e8874a" opacity="0.16"/>\n'
+             '    <ellipse cx="640" cy="306" rx="420" ry="96" fill="#ffb35c" opacity="0.14"/>\n'
+             '    <ellipse cx="560" cy="300" rx="230" ry="70" fill="#ff7fb0" opacity="0.1"/>')
+
+    # ---- the desert ranges, flat black against the glow ----
+    mountains = ('    <polygon points="-20,300 60,254 150,272 250,236 350,266 440,244 540,270 '
+                 '640,250 740,272 840,242 950,268 1050,246 1160,270 1280,250 1300,300" '
+                 'fill="#14152c"/>\n'
+                 '    <polygon points="-20,300 60,254 150,272 250,236 300,300" fill="#0e0f22"/>\n'
+                 '    <polygon points="840,242 950,268 1050,246 1160,270 1280,250 1300,300 900,300" '
+                 'fill="#0e0f22" opacity="0.7"/>')
+
+    # ---- the Strip itself: lit towers, the pyramid's beam, the wheel ----
+    def tower(x, y, w, base='#2a2a3e', win=GOLD, step=11, dens=0.55):
+        rows = int((296 - y - 8) // step)
+        wins = ''.join(f'<rect x="{x+3+c*7}" y="{y+7+r*step}" width="4" height="4"/>'
+                       for r in range(rows) for c in range(max(1, (w - 6) // 7))
+                       if (r * 7 + c * 3 + x) % 5)
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{296-y}" rx="1.5" fill="{base}"/>'
+                f'<g fill="{win}" opacity="{dens}">{wins}</g>')
+
+    strip = ('    <g>'
+             + ''.join(tower(*t) for t in
+                       [(40, 214, 26), (72, 196, 22), (100, 226, 28), (170, 206, 24),
+                        (200, 230, 30), (236, 212, 22), (300, 222, 26), (332, 200, 24),
+                        (392, 228, 28), (426, 208, 22), (486, 224, 26), (520, 202, 24),
+                        (560, 232, 22), (700, 226, 24), (732, 204, 26), (768, 230, 22),
+                        (830, 214, 28), (866, 234, 24), (924, 208, 26), (1000, 228, 24),
+                        (1034, 206, 28), (1074, 232, 22), (1130, 216, 26), (1170, 234, 28),
+                        (1214, 210, 24), (1250, 230, 26)])
+             + '</g>\n'
+             # the pyramid and its beam — the one thing visible from orbit
+             '    <g><polygon points="596,296 656,196 716,296" fill="#1e1e30"/>'
+             '<polygon points="626,296 656,196 686,296" fill="#26263c"/>'
+             + ''.join(f'<circle cx="{656 + (i-3)*9}" cy="{236 + abs(i-3)*15}" r="1.7" fill="{GOLD}" '
+                       f'opacity="0.7"/>' for i in range(7))
+             + f'<polygon points="650,196 662,196 700,0 604,0" fill="{CYAN}" opacity="0.09"/>'
+             f'<polygon points="653,196 659,196 676,0 634,0" fill="#ffffff" opacity="0.09"/>'
+             + glow(656, 200, 12, CYAN, 0.4) + '</g>\n'
+             # the observation wheel, small and far off
+             + '    <g transform="translate(1112,232)">'
+             '<g stroke="#4a4a66" stroke-width="2" fill="none"><circle cx="0" cy="0" r="30"/></g>'
+             + ''.join(f'<circle cx="{30 * __import__("math").cos(i*0.5236):.1f}" '
+                       f'cy="{30 * __import__("math").sin(i*0.5236):.1f}" r="2.6" '
+                       f'fill="{[PINK, CYAN, GOLD, PURPLE][i % 4]}" opacity="0.9"/>' for i in range(12))
+             + f'<path d="M-18,26 L0,2 L18,26" stroke="#3a3a52" stroke-width="3" fill="none"/>'
+             + glow(1112, 232, 15, PINK, 0.22) + '</g>\n'
+             # a lattice tower, because the Strip has one
+             + '    <g transform="translate(880,296)">'
+             '<path d="M-22,0 L-7,-84 L7,-84 L22,0" fill="none" stroke="#3a3a52" stroke-width="3"/>'
+             '<path d="M-15,-40 L15,-40 M-11,-62 L11,-62 M-19,-20 L19,-20" stroke="#3a3a52" stroke-width="2"/>'
+             '<path d="M-7,-84 L-3,-112 L3,-112 L7,-84" fill="none" stroke="#3a3a52" stroke-width="2.6"/>'
+             + glow(0, -112, 5, GOLD, 0.55) + '</g>\n'
+             # the glow the whole skyline throws
+             + '    <ellipse cx="640" cy="298" rx="560" ry="54" fill="#ffb35c" opacity="0.12"/>')
+
+    # ---- ground: wet black asphalt that reflects everything ----
+    ground_l = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#asphalt)"/>\n'
+                # the pooled spill of the city onto the near ground
+                '    <ellipse cx="640" cy="304" rx="600" ry="66" fill="#ffb35c" opacity="0.1"/>\n'
+                # kerbs and a lit sidewalk on each side
+                '    <rect x="0" y="352" width="1280" height="26" fill="#2a2a38"/>\n'
+                '    <rect x="0" y="352" width="1280" height="3" fill="#43435c"/>\n'
+                '    <rect x="0" y="596" width="1280" height="34" fill="#26262f"/>\n'
+                '    <rect x="0" y="596" width="1280" height="3" fill="#3c3c4e"/>\n'
+                # long reflection smears running down the wet road
+                + '    ' + ''.join(smear(x, t, w, h, c, o)
+                                   for x, t, w, h, c, o in
+                                   [(120, 380, 18, 130, PINK, 0.16), (196, 384, 16, 150, PINK, 0.18),
+                                    (300, 382, 16, 120, CYAN, 0.14), (392, 384, 16, 140, CYAN, 0.16),
+                                    (560, 386, 14, 100, GOLD, 0.12), (656, 340, 20, 110, CYAN, 0.1),
+                                    (880, 384, 16, 150, GOLD, 0.17), (980, 382, 16, 120, GREEN, 0.13),
+                                    (1084, 384, 16, 140, PURPLE, 0.16), (1170, 382, 16, 120, PURPLE, 0.13),
+                                    (268, 640, 30, 76, GOLD, 0.2), (1020, 646, 24, 68, PINK, 0.2)])
+                + '\n    <g fill="#ffffff" opacity="0.05">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.2:.0f}"/>'
+                          for x, y, r in [(200, 470, 150), (700, 560, 190), (1100, 500, 160),
+                                          (420, 660, 170), (960, 690, 180)]) + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def palm(x, y, s=1.0, uplight=CYAN):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + glow(8, -16, 9, uplight, 0.34)
+                + f'<path d="M-6,0 C -9,-40 3,-72 10,-100 L20,-98 C 12,-70 2,-40 6,0 Z" fill="#2a2620"/>'
+                f'<g fill="#1d3a2c">'
+                f'<path d="M14,-100 C -18,-116 -44,-110 -58,-94 C -34,-102 -8,-100 12,-92 Z"/>'
+                f'<path d="M14,-100 C 46,-118 72,-112 86,-96 C 62,-104 36,-102 16,-92 Z"/>'
+                f'<path d="M14,-100 C 2,-132 -14,-144 -34,-150 C -14,-136 2,-120 10,-98 Z"/>'
+                f'<path d="M14,-100 C 30,-132 50,-142 70,-148 C 50,-132 32,-116 20,-96 Z"/></g>'
+                f'<g fill="{uplight}" opacity="0.5">'
+                f'<path d="M14,-100 C -18,-116 -44,-110 -58,-94 C -40,-100 -20,-99 -2,-95 Z"/>'
+                f'<path d="M14,-100 C 46,-118 72,-112 86,-96 C 66,-102 44,-101 24,-96 Z"/></g>'
+                f'<rect x="-3" y="-14" width="18" height="14" fill="{uplight}" opacity="0.3"/></g>')
+
+    def neon_sign(x, y, s=1.0, w=54, h=90, col=PINK, col2=GOLD, word='MOTEL'):
+        """A vertical motel sign on a pole: bulb-chased border, stacked letters."""
+        letters = ''.join(f'<text x="0" y="{-h + 16 + i*13}" text-anchor="middle" '
+                          f'font-family="Trebuchet MS,Arial,sans-serif" font-size="12" '
+                          f'font-weight="bold" fill="{col2}">{ch}</text>'
+                          for i, ch in enumerate(word[:4]))
+        bulbs = ''.join(f'<circle cx="{bx}" cy="{by}" r="1.9" fill="{col2}" opacity="0.95"/>'
+                        for bx, by in ([(-w/2, -h + 8 + k*12) for k in range(int(h/12))]
+                                       + [(w/2, -h + 8 + k*12) for k in range(int(h/12))]))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + glow(0, -h*0.55, w*0.42, col, 0.4)
+                + f'<rect x="-3" y="{-h}" width="6" height="{h}" fill="#33333f"/>'
+                f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="#1a1a26"/>'
+                f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="none" '
+                f'stroke="{col}" stroke-width="2.6"/>'
+                f'<g>{bulbs}</g><g>{letters}</g>'
+                f'<path d="M{-w/2 - 10},{-h*0.2:.0f} l{w*0.4:.0f},-12 l0,6 l{w*0.5:.0f},0 l0,12 '
+                f'l{-w*0.5:.0f},0 l0,6 Z" fill="{col}" opacity="0.9"/></g>')
+
+    def welcome_sign(x, y, s=1.0):
+        """The Welcome to Fabulous Las Vegas sign. Diamond body, star on top,
+        yellow bulb border, WELCOME spelled in white circles."""
+        bulbs = ''.join(f'<circle cx="{bx:.0f}" cy="{by:.0f}" r="3" fill="{GOLD}"/>'
+                        for bx, by in
+                        [(-84 + i * 12, -66 + abs(i - 7) * 3.2) for i in range(15)]
+                        + [(-84 + i * 12, 24 - abs(i - 7) * 3.2) for i in range(15)])
+        letters = ''.join(f'<g><circle cx="{-66 + i*19}" cy="-44" r="9.5" fill="#f4f2ea"/>'
+                          f'<text x="{-66 + i*19}" y="-40" text-anchor="middle" '
+                          f'font-family="Trebuchet MS,Arial,sans-serif" font-size="11" '
+                          f'font-weight="bold" fill="#c0392b">{ch}</text></g>'
+                          for i, ch in enumerate('WELCOME'))
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + glow(0, -34, 54, GOLD, 0.32)
+                + f'<g fill="#3a3a48"><rect x="-7" y="-30" width="14" height="30"/>'
+                f'<rect x="-30" y="-4" width="60" height="8" rx="3"/></g>'
+                # the diamond body
+                f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="#f4f2ea"/>'
+                f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="none" '
+                f'stroke="#2f4d8f" stroke-width="3"/>'
+                f'<g>{bulbs}</g><g>{letters}</g>'
+                f'<text x="0" y="-16" text-anchor="middle" font-family="Georgia,serif" '
+                f'font-size="17" font-style="italic" fill="#2f4d8f">to Fabulous</text>'
+                f'<text x="0" y="4" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+                f'font-size="22" font-weight="bold" fill="#c0392b" letter-spacing="1">LAS VEGAS</text>'
+                f'<text x="0" y="22" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
+                f'font-size="12" font-weight="bold" fill="#2f4d8f" letter-spacing="3">NEVADA</text>'
+                # the star
+                + glow(0, -98, 13, GOLD, 0.6)
+                + f'<path d="M0,-124 L7,-104 L28,-101 L13,-89 L17,-69 L0,-80 L-17,-69 L-13,-89 '
+                f'L-28,-101 L-7,-104 Z" fill="{GOLD}"/>'
+                f'<path d="M0,-118 L5,-104 L19,-101 L9,-93 L12,-79 L0,-87 L-12,-79 L-9,-93 '
+                f'L-19,-101 L-5,-104 Z" fill="#fff3c0"/></g>')
+
+    def lowmotel(x, y, s=1.0, col=CYAN):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + glow(0, -30, 26, col, 0.18)
+                + f'<rect x="-70" y="-40" width="140" height="40" fill="#20202c"/>'
+                f'<rect x="-74" y="-44" width="148" height="6" rx="2" fill="#2c2c3c"/>'
+                + ''.join(f'<rect x="{-58 + i*30}" y="-32" width="18" height="18" rx="2" '
+                          f'fill="{GOLD}" opacity="0.6"/>' for i in range(4))
+                + f'<rect x="-70" y="-46" width="140" height="4" fill="{col}" opacity="0.9"/></g>')
+
+    def car(x, y, s=1.0, body='#8f2f3f', head=True):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-52" y="-22" width="104" height="17" rx="6" fill="{body}"/>'
+                f'<path d="M-30,-22 L-22,-38 L24,-38 L34,-22 Z" fill="{body}"/>'
+                f'<path d="M-26,-24 L-19,-35 L0,-35 L0,-24 Z" fill="#2a3a4e"/>'
+                f'<path d="M4,-24 L4,-35 L22,-35 L30,-24 Z" fill="#2a3a4e"/>'
+                f'<g fill="#1a1a22"><circle cx="-32" cy="-3" r="10"/><circle cx="32" cy="-3" r="10"/></g>'
+                f'<g fill="#4a4a5a"><circle cx="-32" cy="-3" r="4"/><circle cx="32" cy="-3" r="4"/></g>'
+                + (glow(-56, -14, 6, '#fff3c0', 0.7) + f'<ellipse cx="-56" cy="-14" rx="5" ry="3.4" '
+                   f'fill="#fff8e0"/>' if head else '')
+                + glow(54, -14, 5, RED, 0.7) + f'<ellipse cx="54" cy="-14" rx="4" ry="3" fill="{RED}"/></g>')
+
+    def person(x, y, s=1.0, col='#2a2a38', rim=CYAN):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<g stroke="{col}" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-15 L-5,-1 M3,-15 L6,-1"/><path d="M-6,-30 L-11,-13 M6,-30 L11,-13"/></g>'
+                f'<rect x="-7" y="-33" width="14" height="20" rx="6" fill="{col}"/>'
+                f'<circle cx="0" cy="-40" r="6.5" fill="{col}"/>'
+                f'<path d="M4,-46 a6.5,6.5 0 0 1 3,10" stroke="{rim}" stroke-width="2" '
+                f'fill="none" opacity="0.75"/></g>')
+
+    def streetlamp(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-2.4" y="-84" width="4.8" height="84" fill="#33333f"/>'
+                f'<path d="M-2,-84 q10,-4 13,4" stroke="#33333f" stroke-width="3" fill="none"/>'
+                + glow(12, -78, 7, '#ffd9a0', 0.5)
+                + f'<ellipse cx="12" cy="-78" rx="6" ry="4" fill="#fff3d0"/></g>')
+
+    back = ('    ' + ''.join(lowmotel(x, y, s, c) for x, y, s, c in
+                             [(120, 350, 0.62, CYAN), (300, 352, 0.56, PINK),
+                              (980, 352, 0.58, GREEN), (1170, 350, 0.62, PURPLE)])
+            + ''.join(neon_sign(x, y, s, w, h, c, c2, wd) for x, y, s, w, h, c, c2, wd in
+                      [(196, 348, 0.62, 50, 88, PINK, GOLD, 'MOTL'),
+                       (392, 350, 0.56, 46, 80, CYAN, GOLD, 'CAFE'),
+                       (880, 348, 0.6, 50, 86, GOLD, RED, 'STAY'),
+                       (1084, 350, 0.58, 46, 82, PURPLE, CYAN, 'LUCK')])
+            + ''.join(palm(x, y, s, c) for x, y, s, c in
+                      [(60, 404, 0.6, CYAN), (250, 400, 0.52, PINK), (452, 404, 0.58, GOLD),
+                       (760, 400, 0.54, CYAN), (940, 404, 0.6, PINK), (1240, 400, 0.56, GOLD)])
+            + ''.join(streetlamp(x, 352, 0.6) for x in (80, 340, 520, 820, 1120))
+            + car(566, 392, 0.42, '#3f5f8f') + car(1006, 396, 0.4, '#8f2f3f')
+            + person(676, 396, 0.4) + person(700, 398, 0.36))
+
+    front = ('    ' + welcome_sign(268, 636, 1.0)
+             + ''.join(palm(x, y, s, c) for x, y, s, c in
+                       [(60, 700, 1.45, CYAN), (1230, 712, 1.4, PINK), (860, 620, 1.0, GOLD),
+                        (452, 600, 0.9, PURPLE)])
+             + neon_sign(1020, 640, 1.0, 56, 96, PINK, GOLD, 'EATS')
+             + car(920, 700, 1.0, '#8f2f3f') + car(180, 716, 0.9, '#2f6f8f', head=False)
+             + ''.join(streetlamp(x, y, s) for x, y, s in
+                       [(120, 596, 0.95), (760, 600, 1.0), (1160, 604, 0.95)])
+             + person(438, 704, 1.05) + person(478, 710, 0.92, '#2a2a38', PINK)
+             + person(1104, 700, 1.0, '#2a2a38', GOLD))
+
+    scene('las-vegas', 'LAS VEGAS — the Strip after dark, neon pooling on wet asphalt', {
+        'sky': sky_l,
+        'far': mountains + '\n' + strip,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#ffffff" opacity="0.04"><rect x="0" y="706" width="1280" height="6"/></g>',
+        'roadkw': dict(surface='#26262f', surface2='#191922', shoulder='#4a4a5e', dash='#ffd94a'),
+        'trackkw': dict(ballast='#3a3a46', ballast_hi='#47475a', tie='#2a2620', rail='#8f95a8'),
+    }, d)
+
+
+# ================================================================== 14. MOAB
+def moab():
+    """MOAB — the slickrock bench below Delicate Arch, looking south-east across Arches
+    to the La Sal Mountains. Named viewpoint, because "Utah desert" is what produced the
+    flat field with an arch sitting on it. Three things make this place and nothing else:
+    the snow-topped La Sals floating blue behind red rock, the Wingate wall that runs off
+    the top of the frame, and slickrock — bare cross-bedded stone in swells and domes, not
+    soil with trees on it. Plants are the exception here, not the ground cover."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a6ab4"/><stop offset="0.46" stop-color="#5ea6d6"/>
+      <stop offset="0.82" stop-color="#a8cfe2"/><stop offset="1" stop-color="#dfe8e6"/>
+    </linearGradient>
+    <linearGradient id="lasal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7b7fae"/><stop offset="1" stop-color="#9a8aa8"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cf7a3c"/><stop offset="0.4" stop-color="#c06432"/>
+      <stop offset="1" stop-color="#a04e28"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff0c8" stop-opacity="0.4"/>
+      <stop offset="0.6" stop-color="#ffc06a" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
+    </radialGradient>''')
+
+    state = [90210]
+    def rnd():
+        state[0] = (state[0] * 1103515245 + 12345) % 2147483648
+        return state[0] / 2147483648.0
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             '    <circle cx="250" cy="80" r="210" fill="url(#sung)"/>\n'
+             '    <g fill="#ffffff" opacity="0.66">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{w}" ry="{w*0.09:.0f}"/>'
+                       for x, y, w in [(160, 40, 128), (452, 26, 96), (742, 50, 116),
+                                       (300, 84, 104), (598, 96, 80), (128, 128, 72),
+                                       (860, 112, 66)]) + '</g>')
+
+    # ---------------------------------------------------------- La Sal Mountains ----
+    # Laccoliths, not a range: a compact clump of rounded 12,000-ft peaks that stand
+    # completely apart from the desert in front of them. Snow lingers into summer.
+    lasals = ('    <g id="la-sals">'
+              # haze layer behind, so the clump has depth
+              '<polygon points="700,300 742,258 786,268 830,236 878,252 918,222 962,244 '
+              '1010,230 1056,254 1094,240 1140,262 1186,246 1230,268 1280,254 1280,300" '
+              'fill="#8f92bc" opacity="0.5"/>'
+              # the clump itself, irregular on purpose
+              '<polygon points="662,302 712,266 748,276 792,238 818,250 856,206 884,224 '
+              '916,190 952,214 984,196 1018,232 1050,214 1084,248 1122,226 1158,258 '
+              '1196,240 1238,266 1280,248 1280,302" fill="url(#lasal)"/>'
+              # snow on the high ground only — patchy, following the ridges
+              '<g fill="#eef2f6" opacity="0.92">'
+              '<polygon points="916,190 936,204 928,212 946,208 952,214 934,222 918,214 906,220 898,208"/>'
+              '<polygon points="856,206 872,218 866,226 880,222 884,224 872,234 858,226 848,232 842,218"/>'
+              '<polygon points="984,196 1002,212 996,220 1010,218 1018,232 1000,236 986,226 976,232 970,214"/>'
+              '<polygon points="792,238 806,248 800,254 812,252 818,250 810,262 796,256 788,262 782,250"/>'
+              '<polygon points="1084,248 1096,256 1092,262 1104,260 1108,266 1094,270 1084,264 1076,268"/>'
+              '</g>'
+              # shadowed north-east flanks
+              '<g fill="#6a6c96" opacity="0.4">'
+              '<polygon points="916,190 952,214 984,196 1018,232 1050,214 1084,248 1122,226 '
+              '1158,258 1196,240 1238,266 1280,248 1280,302 900,302"/></g>'
+              # a low mesa line in front, the Moab valley rim, cutting their feet off
+              '<polygon points="600,302 660,282 720,286 800,276 880,282 960,272 1050,280 '
+              '1140,272 1220,282 1280,276 1280,306 600,306" fill="#a06a72" opacity="0.72"/>'
+              '</g>')
+
+    # ------------------------------------------------- red rock across the middle ----
+    def tower(x, base, h, w, lit='#e08c46', mid='#c2662e', dark='#8f451f'):
+        """A free-standing sandstone tower — vertical, fluted, wider at the foot."""
+        f = w * 0.42
+        return (f'<g>'
+                # the tower body, with a stepped and broken crown rather than a flat cut
+                f'<path d="M{x-w:.0f},{base} L{x-f*1.1:.0f},{base-h*0.62:.0f} '
+                f'L{x-f:.0f},{base-h*0.88:.0f} L{x-f*0.7:.0f},{base-h*0.9:.0f} '
+                f'L{x-f*0.55:.0f},{base-h:.0f} L{x+f*0.3:.0f},{base-h*0.97:.0f} '
+                f'L{x+f*0.45:.0f},{base-h*0.82:.0f} L{x+f:.0f},{base-h*0.8:.0f} '
+                f'L{x+f*1.08:.0f},{base-h*0.5:.0f} L{x+w:.0f},{base} Z" fill="{mid}"/>'
+                f'<path d="M{x-w:.0f},{base} L{x-f*1.1:.0f},{base-h*0.62:.0f} '
+                f'L{x-f:.0f},{base-h*0.88:.0f} L{x-f*0.55:.0f},{base-h:.0f} '
+                f'L{x-f*0.28:.0f},{base-h*0.99:.0f} L{x-f*0.6:.0f},{base-h*0.6:.0f} '
+                f'L{x-w*0.5:.0f},{base} Z" fill="{lit}"/>'
+                f'<path d="M{x+f*0.3:.0f},{base-h*0.97:.0f} L{x+f*0.45:.0f},{base-h*0.82:.0f} '
+                f'L{x+f:.0f},{base-h*0.8:.0f} L{x+f*1.08:.0f},{base-h*0.5:.0f} '
+                f'L{x+w:.0f},{base} L{x+w*0.42:.0f},{base} '
+                f'L{x+f*0.34:.0f},{base-h*0.6:.0f} Z" fill="{dark}"/>'
+                # skirt of rubble at the foot — nothing in the desert meets the ground flat
+                f'<path d="M{x-w*1.5:.0f},{base} C {x-w*0.7:.0f},{base-h*0.12:.0f} '
+                f'{x+w*0.7:.0f},{base-h*0.12:.0f} {x+w*1.5:.0f},{base} Z" fill="{dark}"/>'
+                + '<g fill="%s" opacity="0.22">' % dark
+                + ''.join(f'<rect x="{x-w*0.9:.0f}" y="{base - h*fr:.0f}" '
+                          f'width="{w*1.8:.0f}" height="{max(3, h*0.035):.0f}"/>'
+                          for fr in (0.72, 0.46, 0.24))
+                + '</g></g>')
+
+    def fin(x, base, w, h, lit='#dd8742', mid='#bf6430', dark='#8d441f'):
+        """A slickrock fin: a long whaleback ridge, flat on top, blunt at the ends."""
+        return (f'<g><path d="M{x-w:.0f},{base} C {x-w*0.86:.0f},{base-h*0.86:.0f} '
+                f'{x-w*0.62:.0f},{base-h:.0f} {x-w*0.2:.0f},{base-h:.0f} '
+                f'L{x+w*0.34:.0f},{base-h*0.96:.0f} C {x+w*0.76:.0f},{base-h*0.9:.0f} '
+                f'{x+w*0.92:.0f},{base-h*0.4:.0f} {x+w:.0f},{base} Z" fill="{mid}"/>'
+                f'<path d="M{x-w:.0f},{base} C {x-w*0.86:.0f},{base-h*0.86:.0f} '
+                f'{x-w*0.62:.0f},{base-h:.0f} {x-w*0.2:.0f},{base-h:.0f} '
+                f'L{x-w*0.24:.0f},{base-h*0.86:.0f} C {x-w*0.56:.0f},{base-h*0.82:.0f} '
+                f'{x-w*0.74:.0f},{base-h*0.5:.0f} {x-w*0.8:.0f},{base} Z" fill="{lit}"/>'
+                f'<path d="M{x+w*0.34:.0f},{base-h*0.96:.0f} C {x+w*0.76:.0f},{base-h*0.9:.0f} '
+                f'{x+w*0.92:.0f},{base-h*0.4:.0f} {x+w:.0f},{base} '
+                f'L{x+w*0.64:.0f},{base} C {x+w*0.6:.0f},{base-h*0.46:.0f} '
+                f'{x+w*0.5:.0f},{base-h*0.8:.0f} {x+w*0.34:.0f},{base-h*0.96:.0f} Z" fill="{dark}"/>'
+                + f'<g fill="{dark}" opacity="0.2">'
+                + ''.join(f'<path d="M{x-w*0.94:.0f},{base-h*fr:.0f} '
+                          f'C {x-w*0.2:.0f},{base-h*(fr+0.06):.0f} '
+                          f'{x+w*0.4:.0f},{base-h*(fr+0.04):.0f} {x+w*0.9:.0f},{base-h*fr*0.8:.0f} '
+                          f'L{x+w*0.9:.0f},{base-h*fr*0.8+h*0.05:.0f} '
+                          f'C {x+w*0.4:.0f},{base-h*(fr+0.04)+h*0.05:.0f} '
+                          f'{x-w*0.2:.0f},{base-h*(fr+0.06)+h*0.05:.0f} '
+                          f'{x-w*0.94:.0f},{base-h*fr+h*0.05:.0f} Z"/>' for fr in (0.62, 0.34))
+                + '</g></g>')
+
+    def balanced(x, base, s=1.0, lit='#e28e48', mid='#c26730', dark='#8d441f'):
+        """Balanced Rock, the real one on the park road. The proportions matter more than
+        the detail: the caprock is TALLER than it is wide and only modestly overhangs. Make
+        it a wide dome on a thin stalk and you have drawn a mushroom, which is exactly what
+        happened the first two times."""
+        return (f'<g transform="translate({x},{base}) scale({s})">{shadow(0, 4, 50, 9, 0.24)}'
+                # the mound it stands on
+                f'<path d="M-58,2 C -38,-18 -16,-28 6,-28 C 30,-28 50,-16 62,2 Z" fill="{mid}"/>'
+                f'<path d="M-58,2 C -38,-18 -16,-28 6,-28 C -14,-18 -36,-6 -58,2 Z" fill="{lit}"/>'
+                # pedestal: tapers upward, and is stubbier than instinct says
+                f'<path d="M-26,-24 L-20,-64 L-16,-92 L18,-92 L21,-64 L27,-24 Z" fill="{mid}"/>'
+                f'<path d="M-26,-24 L-20,-64 L-16,-92 L-4,-92 L-6,-64 L-9,-24 Z" fill="{lit}"/>'
+                f'<path d="M9,-92 L18,-92 L21,-64 L27,-24 L14,-24 L11,-64 Z" fill="{dark}"/>'
+                # caprock: a boxy tower, taller than wide, overhanging by about a third
+                f'<path d="M-34,-88 L-30,-128 L-22,-158 L-6,-172 L18,-172 L32,-156 '
+                f'L38,-124 L40,-86 L14,-78 L-14,-78 Z" fill="{mid}"/>'
+                f'<path d="M-34,-88 L-30,-128 L-22,-158 L-6,-172 L0,-160 L-14,-148 '
+                f'L-20,-124 L-22,-84 Z" fill="{lit}"/>'
+                f'<path d="M18,-172 L32,-156 L38,-124 L40,-86 L22,-80 L24,-120 L20,-152 Z" '
+                f'fill="{dark}"/>'
+                # the undercut — the shadow line that says "this is resting, not attached"
+                f'<path d="M-34,-88 L-14,-78 L14,-78 L40,-86 L40,-80 C 14,-70 -12,-70 -34,-80 Z" '
+                f'fill="{dark}"/>'
+                f'<g fill="{dark}" opacity="0.2">'
+                f'<path d="M-32,-112 L38,-112 L38,-104 L-32,-104 Z"/>'
+                f'<path d="M-28,-140 L34,-140 L34,-133 L-28,-133 Z"/></g></g>')
+
+    def window_fin(x, base, w, h, lit='#dd8742', mid='#bf6430', dark='#8d441f'):
+        """A fin with a window punched through it — the stage before an arch, and half of
+        Arches is at this stage. Sky showing through rock is what sells the place."""
+        return (f'<g><path d="M{x-w},{base} L{x-w*0.78},{base-h*0.72} L{x-w*0.5},{base-h} '
+                f'L{x+w*0.12},{base-h*0.94} L{x+w*0.54},{base-h*0.66} L{x+w},{base} Z" fill="{mid}"/>'
+                f'<path d="M{x-w},{base} L{x-w*0.78},{base-h*0.72} L{x-w*0.5},{base-h} '
+                f'L{x-w*0.3},{base-h*0.97} L{x-w*0.6},{base-h*0.68} L{x-w*0.72},{base} Z" fill="{lit}"/>'
+                f'<path d="M{x+w*0.12},{base-h*0.94} L{x+w*0.54},{base-h*0.66} L{x+w},{base} '
+                f'L{x+w*0.66},{base} L{x+w*0.36},{base-h*0.62} Z" fill="{dark}"/>'
+                # the hole. It is cut by drawing the sky colour back in.
+                f'<path d="M{x-w*0.3},{base} C {x-w*0.3},{base-h*0.6} {x-w*0.06},{base-h*0.74} '
+                f'{x+w*0.1},{base-h*0.72} C {x+w*0.26},{base-h*0.7} {x+w*0.32},{base-h*0.5} '
+                f'{x+w*0.32},{base} Z" fill="#8fc0dd"/>'
+                f'<path d="M{x-w*0.3},{base} C {x-w*0.3},{base-h*0.6} {x-w*0.06},{base-h*0.74} '
+                f'{x+w*0.1},{base-h*0.72} L{x+w*0.08},{base-h*0.64} '
+                f'C {x-w*0.04},{base-h*0.66} {x-w*0.22},{base-h*0.54} {x-w*0.22},{base} Z" '
+                f'fill="{dark}"/></g>')
+
+    def hoodoo(x, base, h, s=1.0, lit='#e08c46', mid='#c2662e', dark='#8f451f'):
+        """A stubby capped spire. Cheap, and three of them at different heights turn a
+        skyline from a shape into a place."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'<path d="M{-h*0.3:.0f},0 L{-h*0.22:.0f},{-h*0.6:.0f} '
+                f'L{-h*0.26:.0f},{-h*0.84:.0f} L{h*0.26:.0f},{-h*0.84:.0f} '
+                f'L{h*0.22:.0f},{-h*0.6:.0f} L{h*0.3:.0f},0 Z" fill="{mid}"/>'
+                f'<path d="M{-h*0.3:.0f},0 L{-h*0.22:.0f},{-h*0.6:.0f} '
+                f'L{-h*0.26:.0f},{-h*0.84:.0f} L{-h*0.06:.0f},{-h*0.84:.0f} '
+                f'L{-h*0.04:.0f},{-h*0.58:.0f} L{-h*0.1:.0f},0 Z" fill="{lit}"/>'
+                f'<path d="M{-h*0.34:.0f},{-h*0.82:.0f} L{-h*0.28:.0f},{-h*0.98:.0f} '
+                f'L{h*0.28:.0f},{-h*0.98:.0f} L{h*0.34:.0f},{-h*0.82:.0f} Z" fill="{dark}"/>'
+                f'</g>')
+
+    def scatter(pts, a='#b0592c', b='#d2793e', c='#883f1e'):
+        """Loose blocks. Cheap way to fill dead stone with something to look at."""
+        return ''.join(f'<g transform="translate({x},{y}) scale({s})">'
+                       f'{shadow(0, 3, 22, 5, 0.2)}'
+                       f'<polygon points="-20,4 -16,-11 -4,-19 10,-17 19,-6 21,4" fill="{a}"/>'
+                       f'<polygon points="-4,-19 10,-17 19,-6 1,-4 -7,-11" fill="{b}"/>'
+                       f'<polygon points="-20,4 -16,-11 -7,-11 -4,3" fill="{c}"/></g>'
+                       for x, y, s in pts)
+
+    # a broken escarpment right across the middle distance, heights all different
+    escarp = ('    <g id="escarpment">'
+              # the haze-blued back row
+              + tower(96, 302, 74, 20, '#c98a62', '#b0714c', '#8f5a3c')
+              + tower(148, 302, 46, 15, '#c98a62', '#b0714c', '#8f5a3c')
+              + fin(300, 304, 120, 40, '#c98a62', '#ac6d49', '#8d5739')
+              + fin(520, 304, 90, 28, '#c98a62', '#ac6d49', '#8d5739')
+              + tower(760, 302, 58, 16, '#c98a62', '#b0714c', '#8f5a3c')
+              + window_fin(880, 304, 74, 52, '#c68764', '#ab6c4a', '#8b563a')
+              + ''.join(hoodoo(x, 304, h, sc, '#c98a62', '#b0714c', '#8f5a3c')
+                        for x, h, sc in [(206, 40, 0.8), (222, 28, 0.7), (466, 46, 0.85),
+                                         (600, 30, 0.7), (830, 36, 0.75)])
+              # the front row, full colour
+              + fin(60, 316, 150, 62)
+              + tower(232, 318, 116, 26)
+              + tower(268, 318, 74, 17)
+              + fin(400, 320, 130, 52)
+              + window_fin(516, 318, 66, 44)
+              + fin(640, 316, 110, 38)
+              + tower(742, 318, 92, 21)
+              + tower(776, 316, 54, 13)
+              + fin(860, 322, 120, 44)
+              + ''.join(hoodoo(x, 320, h, sc)
+                        for x, h, sc in [(126, 52, 1.0), (144, 34, 0.8), (350, 44, 0.9),
+                                         (588, 38, 0.85), (706, 30, 0.75), (916, 46, 0.95)])
+              + '</g>')
+
+    # ------------------------------ THE WALL — runs off the top; you never see its top ----
+    def wall():
+        cols = []
+        x = 960
+        while x < 1310:
+            w = 16 + rnd() * 34
+            t = rnd()
+            fill = ('#b8602c' if t < 0.3 else '#cf7538' if t < 0.58 else
+                    '#a55427' if t < 0.8 else '#dd8b48')
+            lean = (x - 960) * 0.05
+            base = 322 + (x - 960) * 0.11 + rnd() * 16
+            cols.append(f'<polygon points="{x:.0f},-20 {x+w:.0f},-20 '
+                        f'{x+w*0.88+lean:.0f},{base:.0f} {x+lean:.0f},{base:.0f}" fill="{fill}"/>')
+            x += w * 0.9
+        streaks = []
+        x = 968
+        while x < 1300:
+            w = 5 + rnd() * 15
+            h = 110 + rnd() * 190
+            streaks.append(f'<path d="M{x:.0f},-10 L{x+w:.0f},-10 L{x+w*0.55:.0f},{h:.0f} '
+                           f'L{x+w*0.14:.0f},{h*0.92:.0f} Z"/>')
+            x += 26 + rnd() * 56
+        # broken left profile: the wall does not end in a ruled line
+        edge = ('<polygon points="940,-20 968,-20 962,60 972,140 958,214 968,300 950,346" '
+                'fill="#8d4522"/>')
+        talus = ('<path d="M930,352 C 1000,318 1090,300 1180,294 C 1240,290 1280,290 1300,292 '
+                 'L1300,368 Z" fill="#a04e26"/>'
+                 '<path d="M930,352 C 1000,318 1090,300 1180,294 C 1096,308 1010,330 942,358 Z" '
+                 'fill="#c97038"/>')
+        return ('    <g id="wall">'
+                '<polygon points="948,-20 1300,-20 1300,376 934,344" fill="#bb6330"/>'
+                + f'<g>{"".join(cols)}</g>'
+                + f'<g fill="#8a4322" opacity="0.2">{"".join(streaks)}</g>'
+                + edge
+                # horizontal ledges stepping across the face — an alcove drawn as a lens
+                # just reads as a floating eye; a ledge reads as rock because it spans
+                + '<g fill="#8a4322" opacity="0.22">'
+                + ''.join('<path d="M%d,%d L1300,%d L1300,%d L%d,%d Z"/>'
+                          % (940 + i * 10, y, y - 14, y + 12, 940 + i * 10, y + 22)
+                          for i, y in enumerate((96, 178, 262)))
+                + '</g>'
+                + talus + '</g>')
+
+    # ------------------------------------------------------ slickrock, not a field ----
+    def swell(cx, base, w, h, lit, mid, dark, sk=0.0):
+        """One bare slickrock swell: a lopsided dome, lit on the upper left, shadowed on
+        the right flank, with two faint bedding lines following its curve. Nested rings
+        turned this into a bullseye — a swell is a single rock, and depth comes from
+        overlapping several at different sizes, not from banding one."""
+        lx = cx + w * sk
+        crown_x, crown_y = lx + w * 0.04, base - h * 1.12
+        return (
+            f'<path d="M{cx-w:.0f},{base:.0f} C {cx-w*0.72:.0f},{base-h:.0f} '
+            f'{lx-w*0.26:.0f},{base-h*1.14:.0f} {crown_x:.0f},{crown_y:.0f} '
+            f'C {lx+w*0.42:.0f},{base-h*1.1:.0f} {cx+w*0.8:.0f},{base-h*0.56:.0f} '
+            f'{cx+w:.0f},{base:.0f} Z" fill="{mid}"/>'
+            f'<path d="M{cx-w:.0f},{base:.0f} C {cx-w*0.72:.0f},{base-h:.0f} '
+            f'{lx-w*0.26:.0f},{base-h*1.14:.0f} {crown_x:.0f},{crown_y:.0f} '
+            f'L{crown_x:.0f},{crown_y+h*0.1:.0f} C {lx-w*0.22:.0f},{base-h*1.02:.0f} '
+            f'{cx-w*0.64:.0f},{base-h*0.88:.0f} {cx-w*0.84:.0f},{base:.0f} Z" fill="{lit}"/>'
+            f'<path d="M{crown_x:.0f},{crown_y:.0f} C {lx+w*0.42:.0f},{base-h*1.1:.0f} '
+            f'{cx+w*0.8:.0f},{base-h*0.56:.0f} {cx+w:.0f},{base:.0f} '
+            f'L{cx+w*0.74:.0f},{base:.0f} C {cx+w*0.62:.0f},{base-h*0.52:.0f} '
+            f'{lx+w*0.34:.0f},{base-h*0.94:.0f} {crown_x:.0f},{crown_y+h*0.08:.0f} Z" fill="{dark}"/>'
+            + f'<g stroke="{dark}" fill="none" opacity="0.26">'
+            + ''.join(f'<path stroke-width="{max(2, h*0.045):.0f}" '
+                      f'd="M{cx-w*0.8:.0f},{base-h*(0.22+o):.0f} '
+                      f'C {cx-w*0.42:.0f},{base-h*(0.8+o):.0f} '
+                      f'{lx+w*0.12:.0f},{base-h*(0.86+o):.0f} '
+                      f'{cx+w*0.66:.0f},{base-h*(0.3+o):.0f}"/>' for o in (0.0, 0.2))
+            + '</g>')
+
+    def highway():
+        """The road at the foot of the wall — Highway 128 in the reference photo. It is the
+        single cheapest way to say how big the wall is: a two-lane road reduced to a thread
+        under it does the work that no amount of rock detail can."""
+        cl = []
+        n = 22
+        for i in range(n + 1):
+            t = i / n
+            cl.append((896 + 392 * t, 340 + 46 * (t ** 1.8), 2.6 + 9.5 * (t ** 1.7)))
+        up = ' '.join(f'{x:.0f},{y - w:.0f}' for x, y, w in cl)
+        dn = ' '.join(f'{x:.0f},{y + w:.0f}' for x, y, w in reversed(cl))
+        centre = ' '.join(f'{x:.0f},{y:.0f}' for x, y, w in cl)
+        # cut-and-fill shelf the road is benched onto
+        shelf_up = ' '.join(f'{x:.0f},{y - w * 2.4:.0f}' for x, y, w in cl)
+        shelf_dn = ' '.join(f'{x:.0f},{y + w * 3.2:.0f}' for x, y, w in reversed(cl))
+        posts = ''.join(f'<rect x="{x:.0f}" y="{y + w * 0.6:.0f}" width="2.4" '
+                        f'height="{4 + w * 0.5:.1f}" fill="#e6e6e0"/>'
+                        for x, y, w in cl[3::2])
+        return ('    <g id="highway-128">'
+                f'<polygon points="{shelf_up} {shelf_dn}" fill="#a2542a"/>'
+                f'<polygon points="{up} {dn}" fill="#5c534c"/>'
+                f'<polyline points="{centre}" fill="none" stroke="#e8d27a" '
+                'stroke-width="1.6" stroke-dasharray="9 11" opacity="0.85"/>'
+                f'<g opacity="0.8">{posts}</g>'
+                # a shoulder of rock swallowing the far end, so the road goes somewhere
+                '<path d="M872,318 C 906,326 934,344 946,368 C 950,382 944,392 928,392 '
+                'L862,392 C 852,368 856,338 872,318 Z" fill="#b45d2c"/>'
+                '<path d="M872,318 C 906,326 934,344 946,368 C 926,352 898,338 866,334 Z" '
+                'fill="#d17c3f"/>'
+                # one car, tiny, which is the whole point of drawing the road at all
+                '<g transform="translate(1128,375) scale(0.14)">'
+                '<rect x="-30" y="-16" width="60" height="15" rx="5" fill="#dfe4e8"/>'
+                '<path d="M-17,-16 L-11,-31 L14,-31 L21,-16 Z" fill="#eef2f5"/>'
+                '<g fill="#2b2f34"><circle cx="-16" cy="0" r="7"/><circle cx="18" cy="0" r="7"/></g>'
+                '</g></g>\n')
+
+    ground_l = ('    <rect x="0" y="306" width="1280" height="414" fill="url(#sand)"/>\n'
+                # bench one — far, small swells
+                '    <g id="slick-far">'
+                + swell(90, 400, 150, 46, '#cf7738', '#c26a32', '#ab5a2c', -0.18)
+                + swell(260, 404, 190, 34, '#cd7436', '#c06831', '#a95829', 0.22)
+                + swell(560, 398, 130, 56, '#d17a3a', '#c46c33', '#ac5b2c', 0.1)
+                + swell(760, 406, 220, 40, '#cd7436', '#c06831', '#a95829', -0.26)
+                + swell(1010, 424, 120, 32, '#d17a3a', '#c46c33', '#ac5b2c', 0.16)
+                + '</g>\n'
+                + highway()
+                # the drop to the next bench — a real edge with shadow beneath it
+                + '    <g id="ledge-1">'
+                '<path d="M-20,452 C 180,438 380,446 560,438 C 760,430 980,442 1300,432 '
+                'L1300,470 C 980,480 760,468 560,476 C 380,484 180,476 -20,490 Z" fill="#8f4520"/>'
+                '<path d="M-20,452 C 180,438 380,446 560,438 C 760,430 980,442 1300,432 '
+                'L1300,442 C 980,452 760,440 560,448 C 380,456 180,448 -20,462 Z" fill="#eda059"/>'
+                '</g>\n'
+                # bench two
+                '    <g id="slick-mid">'
+                + swell(180, 560, 220, 60, '#d67f3d', '#c96f34', '#b0602d', 0.24)
+                + swell(460, 566, 160, 40, '#d37c3b', '#c66c33', '#ad5d2c', -0.2)
+                + swell(760, 558, 250, 72, '#d8823f', '#cb7135', '#b0602d', 0.12)
+                + swell(1090, 564, 190, 48, '#d37c3b', '#c66c33', '#ad5d2c', -0.14)
+                + '</g>\n'
+                # the second drop
+                '    <g id="ledge-2">'
+                '<path d="M-20,606 C 220,590 420,600 640,592 C 880,584 1080,598 1300,586 '
+                'L1300,632 C 1080,644 880,630 640,638 C 420,646 220,636 -20,652 Z" fill="#8a411e"/>'
+                '<path d="M-20,606 C 220,590 420,600 640,592 C 880,584 1080,598 1300,586 '
+                'L1300,598 C 1080,610 880,596 640,604 C 420,612 220,602 -20,618 Z" fill="#f0a55d"/>'
+                '</g>\n'
+                # bench three — foreground stone, biggest swells of all
+                '    <g id="slick-near">'
+                + swell(120, 722, 300, 88, '#dd8843', '#cf7336', '#b4632e', 0.2)
+                + swell(520, 726, 200, 54, '#d9843f', '#cb7034', '#b1602d', -0.24)
+                + swell(950, 722, 340, 100, '#dd8843', '#cf7336', '#b4632e', -0.16)
+                + '</g>\n'
+                # blown sand caught in the low spots — the only soft ground here
+                '    <g fill="#dba167" opacity="0.55">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.17:.0f}"/>'
+                          for x, y, r in [(470, 492, 140), (860, 500, 110), (330, 660, 120),
+                                          (1160, 656, 100), (620, 706, 130)]) + '</g>\n'
+                # joints — straight-ish and roughly parallel, the way stone actually cracks
+                '    <g stroke="#93481f" stroke-width="2.6" fill="none" opacity="0.4">'
+                + ''.join(f'<path d="M{x},{y} L{x+dx},{y+dy}"/>'
+                          for x, y, dx, dy in [(40, 470, 210, 16), (300, 486, 190, 14),
+                                               (700, 464, 220, 18), (1010, 480, 200, 14),
+                                               (60, 626, 250, 20), (420, 646, 230, 18),
+                                               (880, 630, 260, 22), (120, 706, 240, 14),
+                                               (760, 714, 220, -16)])
+                + '</g>')
+
+    # --------------------------------------------------- Delicate Arch on its rim ----
+    def arch(x, y, s=1.0):
+        lit, mid, dark, deep = '#f2a355', '#dd8038', '#b25c2c', '#8a4322'
+        return (f'<g id="delicate-arch" transform="translate({x},{y}) scale({s})">'
+                f'{shadow(-18, 10, 116, 12, 0.2)}'
+                # the plinth it stands on
+                f'<path d="M-130,12 C -96,-12 -40,-22 20,-20 C 82,-18 128,-4 152,12 Z" fill="{mid}"/>'
+                f'<path d="M-130,12 C -96,-12 -40,-22 20,-20 C -24,-10 -78,2 -130,12 Z" fill="{lit}"/>'
+                f'<path d="M98,-16 C 122,-12 142,-4 152,12 L110,12 Z" fill="{deep}"/>'
+                # left leg — thick at the foot, thin at the shoulder
+                f'<path d="M-84,0 C -80,-46 -74,-96 -60,-138 C -46,-172 -20,-186 12,-188 '
+                f'C 44,-190 72,-174 86,-142 C 98,-112 102,-58 104,0 '
+                f'L58,0 C 56,-52 52,-100 42,-126 C 32,-148 12,-156 -8,-150 '
+                f'C -26,-144 -36,-122 -40,-90 C -44,-56 -44,-26 -44,0 Z" fill="{mid}"/>'
+                f'<path d="M-84,0 C -80,-46 -74,-96 -60,-138 C -46,-172 -20,-186 12,-188 '
+                f'L10,-176 C -18,-172 -38,-156 -48,-124 C -56,-94 -60,-46 -62,0 Z" fill="{lit}"/>'
+                f'<path d="M86,-142 C 98,-112 102,-58 104,0 L88,0 C 86,-56 82,-108 72,-136 Z" '
+                f'fill="{deep}"/>'
+                f'<path d="M58,0 C 56,-52 52,-100 42,-126 L52,-122 C 62,-94 68,-48 70,0 Z" '
+                f'fill="{lit}" opacity="0.4"/>'
+                # only the faintest bedding — heavy banding turned this into a barcode
+                + f'<g fill="{dark}" opacity="0.16">'
+                f'<path d="M-82,-40 C -60,-46 -54,-46 -46,-46 L-46,-38 C -56,-38 -62,-38 -82,-32 Z"/>'
+                f'<path d="M-76,-92 C -60,-98 -54,-98 -48,-98 L-49,-90 C -56,-90 -62,-90 -78,-84 Z"/>'
+                f'<path d="M60,-52 L102,-52 L102,-44 L60,-44 Z"/>'
+                f'<path d="M56,-98 L98,-98 L98,-90 L56,-90 Z"/>'
+                f'<path d="M-48,-152 C -12,-180 44,-176 78,-144 L72,-136 '
+                f'C 42,-166 -10,-168 -44,-144 Z"/></g>'
+                # a person under it, for scale — the reason anyone photographs this arch
+                + f'<g transform="translate(4,6) scale(0.5)">'
+                f'<g stroke="#3f2a20" stroke-width="5" stroke-linecap="round" fill="none">'
+                f'<path d="M-3,-15 L-5,-1 M3,-15 L6,-1"/><path d="M-6,-30 L-14,-16 M6,-30 L14,-16"/></g>'
+                f'<rect x="-7" y="-33" width="14" height="20" rx="6" fill="#3f2a20"/>'
+                f'<circle cx="0" cy="-40" r="6.5" fill="#3f2a20"/></g></g>')
+
+    arch_rim = ('    <g id="arch-rim">'
+                # the slickrock bowl the arch sits on, lifted above the bench line
+                '<path d="M40,336 C 110,300 200,282 300,280 C 402,278 486,296 546,330 '
+                'L560,352 L28,352 Z" fill="#bb6430"/>'
+                '<path d="M40,336 C 110,300 200,282 300,280 C 402,278 486,296 546,330 '
+                'L536,338 C 480,308 400,290 300,292 C 200,294 112,312 46,344 Z" fill="#e8994e"/>'
+                '<g stroke="#8f4520" stroke-width="3" fill="none" opacity="0.3">'
+                '<path d="M62,332 C 140,300 240,288 340,290"/>'
+                '<path d="M84,346 C 170,314 264,302 380,306"/></g></g>')
+
+    # ---------------------------------------------------------------- props ----
+    def juniper(x, y, s=1.0, a='#5e6d4c', b='#6d7c58', trunk='#8a6b52', dead='#c2ab8c'):
+        """Utah juniper: shaggy, grey-green, low and wide, with a dead silver limb.
+        Nothing here looks like a lollipop tree."""
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 30, 6, 0.2)}'
+                f'<path d="M-5,4 C -8,-8 -14,-14 -20,-22 L-8,-18 C -5,-26 -3,-30 0,-38 '
+                f'C 3,-30 6,-26 11,-18 L24,-24 C 15,-14 7,-8 5,4 Z" fill="{trunk}"/>'
+                f'<path d="M7,-20 C 20,-30 28,-40 31,-52" stroke="{dead}" stroke-width="3.2" '
+                f'fill="none" stroke-linecap="round"/>'
+                f'<path d="M-14,-24 C -24,-32 -30,-40 -32,-48" stroke="{dead}" stroke-width="2.4" '
+                f'fill="none" stroke-linecap="round"/>'
+                # canopy: a ragged, notched, wider-than-tall mass. Junipers look chewed up
+                # — a smooth round blob is a broccoli tree, and broccoli does not grow here.
+                f'<path d="M-38,-28 L-31,-40 L-37,-45 L-25,-45 L-27,-58 L-15,-49 '
+                f'L-13,-63 L-3,-51 L3,-66 L10,-52 L18,-61 L21,-47 L31,-52 L28,-41 '
+                f'L39,-38 L30,-31 L36,-25 L20,-23 L4,-26 L-14,-23 L-30,-25 Z" fill="{a}"/>'
+                f'<path d="M-26,-37 L-20,-46 L-16,-37 L-8,-49 L-2,-37 L2,-47 L6,-35 '
+                f'L-4,-31 L-18,-31 Z" fill="{b}"/>'
+                f'<path d="M14,-45 L20,-53 L24,-43 L31,-47 L27,-35 L14,-35 Z" fill="{b}"/>'
+                f'</g>')
+
+    def blackbrush(x, y, s=1.0, a='#7d8355', b='#929868'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 18, 4, 0.16)}'
+                f'<ellipse cx="-10" cy="-5" rx="11" ry="6" fill="{a}"/>'
+                f'<ellipse cx="9" cy="-4" rx="12" ry="7" fill="{a}"/>'
+                f'<ellipse cx="-2" cy="-10" rx="14" ry="7" fill="{b}"/>'
+                f'<ellipse cx="6" cy="-15" rx="8" ry="4" fill="{b}"/></g>')
+
+    def pricklypear(x, y, s=1.0, col='#5f8f52', dark='#4d7743'):
+        pads = [(-14, -12, 12, 15, -20), (13, -15, 11, 14, 18), (-3, -28, 10, 13, -6),
+                (14, -34, 8, 11, 24), (-18, -31, 7, 10, -28)]
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 24, 5)}'
+                + ''.join(f'<g transform="translate({px},{py}) rotate({r})">'
+                          f'<ellipse cx="0" cy="0" rx="{rx}" ry="{ry}" fill="{col}"/>'
+                          f'<ellipse cx="{-rx*0.3:.0f}" cy="0" rx="{rx*0.5:.0f}" ry="{ry*0.6:.0f}" '
+                          f'fill="{dark}" opacity="0.45"/></g>' for px, py, rx, ry, r in pads)
+                + f'<g fill="#e8a63c"><circle cx="2" cy="-40" r="4"/><circle cx="-14" cy="-40" r="3.4"/>'
+                f'</g></g>')
+
+    def rock(x, y, s=1.0, a='#b0592c', b='#d2793e', c='#883f1e'):
+        """A fallen block. Scale it wildly — house-sized down to knee-high."""
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 6, 48, 8, 0.24)}'
+                f'<polygon points="-46,8 -40,-24 -18,-44 14,-42 40,-22 48,8" fill="{a}"/>'
+                f'<polygon points="-18,-44 14,-42 40,-22 4,-16 -20,-26" fill="{b}"/>'
+                f'<polygon points="-46,8 -40,-24 -20,-26 -12,6" fill="{c}"/>'
+                f'<polygon points="-18,-44 -20,-26 4,-16 14,-42" fill="{b}" opacity="0.45"/>'
+                f'<polygon points="4,-16 40,-22 48,8 24,6" fill="{a}" opacity="0.55"/>'
+                f'<g stroke="{c}" stroke-width="2.4" opacity="0.4" fill="none">'
+                f'<path d="M-30,-4 L30,0 M-34,6 L26,10 M-24,-24 L-14,4"/></g></g>')
+
+    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0):
+        return (f'<g transform="translate({x},{y}) rotate({rot}) scale({s})">'
+                + (shadow(0, 7, 58, 8, 0.26) if not rot else '')
+                + f'<rect x="-50" y="-30" width="100" height="20" rx="4" fill="{body}"/>'
+                f'<path d="M-22,-30 L-16,-50 L28,-50 L36,-30 Z" fill="{body}"/>'
+                f'<path d="M-14,-32 L-10,-46 L6,-46 L6,-32 Z" fill="#cfe6f5"/>'
+                f'<path d="M10,-32 L10,-46 L24,-46 L31,-32 Z" fill="#cfe6f5"/>'
+                f'<g stroke="{top}" stroke-width="3" fill="none">'
+                f'<path d="M-18,-50 L-18,-58 L32,-58 L38,-50"/><path d="M4,-58 L4,-50"/></g>'
+                f'<rect x="-52" y="-22" width="104" height="5" rx="2" fill="#2a2a30"/>'
+                f'<g fill="#22262b"><circle cx="-30" cy="-6" r="14"/><circle cx="32" cy="-6" r="14"/></g>'
+                f'<g fill="#8d949c"><circle cx="-30" cy="-6" r="6"/><circle cx="32" cy="-6" r="6"/></g>'
+                f'<g fill="#f2d06a"><rect x="-54" y="-28" width="7" height="6" rx="2"/></g>'
+                f'<g fill="#c0392b"><rect x="47" y="-28" width="6" height="5" rx="2"/></g></g>')
+
+    def raven(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})" fill="#22222a">'
+                f'<path d="M-22,0 q11,-9 22,-2 q11,-7 22,2 q-11,5 -22,2 q-11,3 -22,-2 Z"/>'
+                f'<circle cx="0" cy="-2" r="2.6"/></g>')
+
+    # Plants are sparse and clustered where water collects — never an even scatter.
+    back = ('    ' + balanced(792, 442, 0.82, '#f2a75e', '#d67c3c', '#8a4019')
+            + rock(1064, 424, 0.66) + rock(146, 418, 0.5)
+            + scatter([(232, 428, 0.5), (300, 422, 0.36), (498, 430, 0.44),
+                       (846, 434, 0.4), (940, 428, 0.46), (1108, 438, 0.52),
+                       (1236, 424, 0.38), (52, 434, 0.42)])
+            + ''.join(hoodoo(x, y, h, sc) for x, y, h, sc in
+                      [(190, 424, 34, 0.9), (474, 428, 26, 0.75), (1152, 432, 30, 0.85)])
+            + ''.join(juniper(x, y, s) for x, y, s in
+                      [(66, 424, 0.62), (98, 430, 0.44), (352, 428, 0.5),
+                       (386, 424, 0.66), (700, 430, 0.48), (742, 426, 0.58),
+                       (1176, 436, 0.6)])
+            + ''.join(blackbrush(x, y, s) for x, y, s in
+                      [(130, 430, 0.5), (176, 424, 0.4), (330, 432, 0.46), (420, 428, 0.4),
+                       (664, 432, 0.44), (776, 428, 0.5), (830, 434, 0.42),
+                       (1140, 440, 0.5), (1216, 434, 0.44), (1012, 436, 0.4)])
+            + jeep(880, 424, 0.4, '#c0392b')
+            + ''.join(raven(x, y, s) for x, y, s in
+                      [(392, 168, 0.68), (452, 196, 0.48), (330, 210, 0.4)]))
+
+    # The jeep road. Moab is a 4WD town — a red dirt track squeezing past a fallen block
+    # bigger than a house is the most Moab thing in the frame, and it gives the block
+    # something to be bigger *than*. Built as a real perspective ribbon: a constant-width
+    # band reads as a painted stripe, not a road coming towards you.
+    def _trail():
+        cl = []
+        n = 24
+        for i in range(n + 1):
+            t = i / n
+            cl.append((-20 + 420 * t, 592 + 134 * (t ** 2.2), 9 + 41 * (t ** 2.2)))
+        left = ' '.join(f'{x - w:.0f},{y:.0f}' for x, y, w in cl)
+        right = ' '.join(f'{x + w:.0f},{y:.0f}' for x, y, w in reversed(cl))
+        inner = ' '.join(f'{x - w * 0.62:.0f},{y:.0f}' for x, y, w in cl)
+        inner_r = ' '.join(f'{x + w * 0.62:.0f},{y:.0f}' for x, y, w in reversed(cl))
+        berm_l = ' '.join(f'{x - w * 1.5:.0f},{y + 5:.0f}' for x, y, w in cl)
+        berm_r = ' '.join(f'{x + w * 1.5:.0f},{y + 5:.0f}' for x, y, w in reversed(cl))
+        rut_a = ' '.join(f'{x - w * 0.4:.0f},{y:.0f}' for x, y, w in cl)
+        rut_b = ' '.join(f'{x + w * 0.34:.0f},{y:.0f}' for x, y, w in cl)
+        return (f'<polygon points="{berm_l} {berm_r}" fill="#8e4520"/>'
+                f'<polygon points="{left} {right}" fill="#d99a62"/>'
+                f'<polygon points="{inner} {inner_r}" fill="#efc characterized"/>'.replace(' characterized', '093')
+                + f'<g stroke="#93481f" stroke-width="4" fill="none" opacity="0.5">'
+                f'<polyline points="{rut_a}"/><polyline points="{rut_b}"/></g>')
+
+    jeep_road = ('<g id="jeep-road">' + _trail()
+                 + '<g fill="#e8b482" opacity="0.5">'
+                 + ''.join('<ellipse cx="%d" cy="%d" rx="%d" ry="%d"/>' % (x, y, r, max(2, r // 3))
+                           for x, y, r in [(66, 598, 18), (168, 606, 13), (250, 626, 17),
+                                           (318, 664, 12), (372, 702, 16)])
+                 + '</g></g>')
+
+    front = ('    ' + jeep_road
+             # the scale ladder, biggest first: a house-sized block against knee-high brush
+             + rock(178, 706, 2.4)
+             # one jeep up on the block, tilted to the rock's own slope — this is what
+             # people actually come to Moab to do, and it gives the block a use
+             + '<ellipse cx="188" cy="612" rx="31" ry="5" fill="#000" opacity="0.2"/>'
+             + jeep(186, 606, 0.56, '#c0392b', '#2f2f36', 17)
+             + rock(1104, 700, 1.8)
+             + rock(292, 592, 1.15) + rock(880, 704, 1.35)
+             + rock(384, 646, 0.8) + rock(842, 668, 0.62) + rock(1252, 612, 0.46)
+             + scatter([(96, 600, 0.9), (466, 706, 1.2), (438, 632, 0.7), (486, 606, 0.6),
+                        (790, 660, 0.85), (800, 718, 1.15), (930, 620, 0.7),
+                        (1010, 676, 1.0), (1178, 640, 0.8), (1256, 706, 1.3),
+                        (36, 662, 1.0), (222, 634, 0.6)])
+             + juniper(76, 640, 1.7) + juniper(1224, 686, 1.5)
+             + juniper(300, 592, 1.05) + juniper(340, 600, 0.8)
+             + juniper(966, 604, 1.1) + juniper(1060, 596, 0.85)
+             + jeep(312, 678, 0.55, '#3f7d4a')
+             + ''.join(pricklypear(x, y, s) for x, y, s in
+                       [(140, 594, 1.15), (446, 704, 1.3), (1146, 648, 1.1), (52, 704, 1.05),
+                        (486, 694, 0.9)])
+             + ''.join(blackbrush(x, y, s) for x, y, s in
+                       [(250, 662, 1.1), (286, 672, 0.8), (404, 714, 1.2), (390, 600, 0.9),
+                        (806, 716, 1.15), (1024, 704, 1.1), (1180, 596, 0.9),
+                        (108, 664, 1.0), (930, 650, 0.85), (1206, 660, 0.7)])
+             + raven(1148, 540, 0.9))
+
+    scene('moab', 'MOAB — the slickrock bench under Delicate Arch, La Sals behind', {
+        'sky': sky_l,
+        'far': lasals + '\n' + escarp + '\n' + arch_rim + '\n    ' + arch(292, 288, 0.74)
+               + '\n' + wall(),
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#8f4326" opacity="0.4"><rect x="0" y="710" width="1280" height="4"/></g>',
+        'roadkw': dict(surface='#7a6a60', surface2='#63544c', shoulder='#d8a068', dash='#ffe066'),
+        'trackkw': dict(ballast='#a8724a', ballast_hi='#bb8455', tie='#5f3a22', rail='#d3d7dc'),
+    }, d)
+
+def nashville():
+    """NASHVILLE — Lower Broadway looking west, late afternoon. The viewpoint matters:
+    from the river end of Broadway you look uphill at a solid two-block wall of brick
+    honky tonks with the downtown towers stacked up behind them, and the AT&T building's
+    twin spires over the top. The neon blades are the signature, but the thing that makes
+    it Broadway and not any old main street is that the signs hang off *ordinary Victorian
+    commercial brick* — three storeys, arched upper windows, heavy bracketed cornices."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d84c2"/><stop offset="0.42" stop-color="#78b0d6"/>
+      <stop offset="0.76" stop-color="#c8d8dc"/><stop offset="1" stop-color="#f2cf9c"/>
+    </linearGradient>
+    <linearGradient id="asphalt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a5b60"/><stop offset="1" stop-color="#46474c"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5f7f9e"/><stop offset="1" stop-color="#8fb2c8"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff0c0" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#ffc673" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#ff9d3c" stop-opacity="0"/>
+    </radialGradient>''')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="300" fill="url(#skyg)"/>\n'
+             '    <circle cx="196" cy="252" r="220" fill="url(#sung)"/>\n'
+             '    <g fill="#ffffff" opacity="0.5">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{w}" ry="{w*0.11:.0f}"/>'
+                       for x, y, w in [(220, 44, 130), (560, 30, 96), (880, 54, 118),
+                                       (360, 88, 100), (1080, 96, 86), (140, 122, 76)])
+             + '</g>\n'
+             '    <g fill="#f6d9a8" opacity="0.32">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{w}" ry="{w*0.055:.0f}"/>'
+                       for x, y, w in [(420, 178, 130), (520, 186, 90), (900, 198, 116),
+                                       (820, 206, 78), (180, 202, 96), (1140, 190, 84)])
+             + '</g>')
+
+    # ------------------------------------------------------------- skyline ----
+    def tower(x, w, top, body='#7d8794', lit='#98a3ae', dark='#606a76', win='#c8d8e4',
+              rows=None, cap=None):
+        base = 306
+        h = base - top
+        rows = rows or int(h / 22)
+        cols = max(2, int(w / 20))
+        wins = ''.join(
+            f'<rect x="{x + 6 + c * (w - 12) / cols:.0f}" y="{top + 14 + r * (h - 20) / rows:.0f}" '
+            f'width="{(w - 12) / cols * 0.55:.0f}" height="{(h - 20) / rows * 0.45:.0f}" '
+            f'fill="{win}" opacity="{0.3 + 0.5 * ((c + r) % 3) / 2:.2f}"/>'
+            for r in range(rows) for c in range(cols))
+        return (f'<g><rect x="{x}" y="{top}" width="{w}" height="{h}" fill="{body}"/>'
+                f'<rect x="{x}" y="{top}" width="{w * 0.3:.0f}" height="{h}" fill="{lit}"/>'
+                f'<rect x="{x + w * 0.78:.0f}" y="{top}" width="{w * 0.22:.0f}" height="{h}" '
+                f'fill="{dark}"/>{wins}{cap or ""}</g>')
+
+    def batman(x, base=306):
+        """The AT&T Building — 'the Batman building'. Two needle spires off a stepped
+        blue-glass tower. It is the one silhouette everybody in Nashville knows."""
+        return (f'<g id="batman">'
+                # shoulders
+                f'<rect x="{x - 74}" y="196" width="34" height="{base - 196}" fill="#5c7285"/>'
+                f'<rect x="{x + 40}" y="196" width="34" height="{base - 196}" fill="#4e6274"/>'
+                f'<rect x="{x - 46}" y="164" width="30" height="{base - 164}" fill="#67809a"/>'
+                f'<rect x="{x + 16}" y="164" width="30" height="{base - 164}" fill="#5a7186"/>'
+                # core
+                f'<rect x="{x - 18}" y="150" width="36" height="{base - 150}" fill="url(#glass)"/>'
+                # the ears
+                f'<polygon points="{x - 44},164 {x - 34},92 {x - 24},164" fill="#8fa8bc"/>'
+                f'<polygon points="{x + 24},164 {x + 34},92 {x + 44},164" fill="#7b94a8"/>'
+                f'<polygon points="{x - 38},128 {x - 34},92 {x - 30},128" fill="#c2d6e4"/>'
+                f'<polygon points="{x + 30},128 {x + 34},92 {x + 38},128" fill="#a8bfd0"/>'
+                + '<g fill="#cfe2ee" opacity="0.5">'
+                + ''.join(f'<rect x="{x - 70}" y="{y}" width="140" height="3"/>'
+                          for y in range(206, base - 10, 16))
+                + '</g></g>')
+
+    skyline = ('    <g id="skyline">'
+               # haze rank
+               + ''.join(tower(x, w, t, '#93a3b0', '#a4b3bf', '#8291a0', '#cddbe6')
+                         for x, w, t in [(30, 54, 238), (110, 40, 216), (996, 62, 224),
+                                         (1110, 46, 206), (1190, 60, 232)])
+               # mid rank
+               + ''.join(tower(x, w, t) for x, w, t in
+                         [(176, 62, 186), (256, 44, 214), (598, 54, 200), (676, 40, 176),
+                          (742, 58, 208), (900, 48, 190), (1058, 52, 172)])
+               + tower(824, 66, 148, '#6f7c89', '#8a95a1', '#57626d', '#d2e0ea',
+                       cap='<polygon points="824,148 890,148 866,120 848,120" fill="#8a95a1"/>')
+               # a brick 1920s block, because downtown Nashville is not all glass
+               + tower(320, 58, 206, '#9a6a58', '#ae7c68', '#7d5245', '#e6cdb4')
+               + tower(956, 40, 214, '#8f6353', '#a37461', '#734a3f', '#e6cdb4')
+               + batman(468)
+               + '</g>')
+
+    # -------------------------------------------------------- the Broadway wall ----
+    BRICK = [('#9c4a3c', '#b25a4a', '#7a382d'), ('#a8543f', '#bf664f', '#83402f'),
+             ('#8e5a48', '#a56d59', '#6f4436'), ('#b8705a', '#cd856e', '#8f5442'),
+             ('#a45c52', '#bb7065', '#82443c'), ('#c08a5e', '#d69f71', '#996a46')]
+    AWN = ['#c0392b', '#2f6f4f', '#2a5a8c', '#8e4a9e', '#c9762a']
+    NEON = [('#ff4d5a', '#ffd166'), ('#39d0e8', '#ffe066'), ('#ffb020', '#ff5470'),
+            ('#8ee36b', '#ffd166'), ('#ff7ac0', '#7ad4ff')]
+
+    def blade(x, top, h, w, tube, glow, kind='bar', word=None):
+        """A vertical projecting neon sign. Broadway's are mounted on a bracket arm and
+        hang clear of the facade, which is what makes the block read as Nashville rather
+        than as a generic old high street."""
+        parts = [f'<rect x="{x - 3}" y="{top + 4}" width="{w * 0.5:.0f}" height="4" fill="#3a3238"/>']
+        if kind == 'guitar':
+            cy = top + h * 0.70
+            bw, bh = w * 0.58, h * 0.30
+            def body(k):
+                W, H = bw * k, bh * k
+                return (f'M{x},{cy - H:.1f} '
+                        f'C {x - W * 0.74:.1f},{cy - H:.1f} {x - W * 0.8:.1f},{cy - H * 0.42:.1f} '
+                        f'{x - W * 0.7:.1f},{cy - H * 0.08:.1f} '
+                        f'C {x - W:.1f},{cy + H * 0.3:.1f} {x - W * 0.72:.1f},{cy + H:.1f} '
+                        f'{x},{cy + H:.1f} '
+                        f'C {x + W * 0.72:.1f},{cy + H:.1f} {x + W:.1f},{cy + H * 0.3:.1f} '
+                        f'{x + W * 0.7:.1f},{cy - H * 0.08:.1f} '
+                        f'C {x + W * 0.8:.1f},{cy - H * 0.42:.1f} {x + W * 0.74:.1f},{cy - H:.1f} '
+                        f'{x},{cy - H:.1f} Z')
+            # headstock and neck
+            parts.append(f'<rect x="{x - w * 0.19:.0f}" y="{top}" width="{w * 0.38:.0f}" '
+                         f'height="{h * 0.11:.0f}" rx="3" fill="#3a3238"/>')
+            parts.append(f'<rect x="{x - w * 0.1:.0f}" y="{top + h * 0.1:.0f}" '
+                         f'width="{w * 0.2:.0f}" height="{h * 0.32:.0f}" fill="#3a3238"/>')
+            parts.append(f'<rect x="{x - w * 0.045:.0f}" y="{top + h * 0.11:.0f}" '
+                         f'width="{w * 0.09:.0f}" height="{h * 0.3:.0f}" fill="{glow}"/>')
+            parts.append('<g fill="#ffe9b0">'
+                         + ''.join(f'<circle cx="{x - w * 0.13:.0f}" cy="{top + 5 + k * 6}" r="1.7"/>'
+                                   f'<circle cx="{x + w * 0.13:.0f}" cy="{top + 5 + k * 6}" r="1.7"/>'
+                                   for k in range(2)) + '</g>')
+            # body: waisted, lower bout bigger than upper — a figure-8 of equal circles
+            # reads as a snowman, which is what the first attempt drew
+            parts.append(f'<path d="{body(1.0)}" fill="#3a3238"/>')
+            parts.append(f'<path d="{body(0.78)}" fill="{tube}"/>')
+            parts.append(f'<circle cx="{x}" cy="{cy + bh * 0.22:.0f}" r="{bw * 0.19:.0f}" fill="#2a242a"/>')
+            parts.append(f'<rect x="{x - 1.2:.1f}" y="{cy - bh * 0.5:.0f}" width="2.4" '
+                         f'height="{bh * 0.66:.0f}" fill="#2a242a" opacity="0.7"/>')
+        elif kind == 'boot':
+            parts.append(f'<path d="M{x - w * 0.3:.0f},{top} L{x + w * 0.3:.0f},{top} '
+                         f'L{x + w * 0.34:.0f},{top + h * 0.66:.0f} L{x + w * 0.7:.0f},{top + h * 0.8:.0f} '
+                         f'L{x + w * 0.72:.0f},{top + h:.0f} L{x - w * 0.32:.0f},{top + h:.0f} Z" '
+                         f'fill="#3a3238"/>')
+            parts.append(f'<path d="M{x - w * 0.18:.0f},{top + 8:.0f} L{x + w * 0.18:.0f},{top + 8:.0f} '
+                         f'L{x + w * 0.2:.0f},{top + h * 0.7:.0f} L{x + w * 0.56:.0f},{top + h * 0.82:.0f} '
+                         f'L{x + w * 0.57:.0f},{top + h - 7:.0f} L{x - w * 0.2:.0f},{top + h - 7:.0f} Z" '
+                         f'fill="{tube}" opacity="0.9"/>')
+        else:
+            parts.append(f'<rect x="{x - w / 2:.0f}" y="{top}" width="{w}" height="{h}" rx="3" '
+                         f'fill="#3a3238"/>')
+            parts.append(f'<rect x="{x - w / 2 + 3:.0f}" y="{top + 3}" width="{w - 6}" '
+                         f'height="{h - 6}" rx="2" fill="none" stroke="{tube}" stroke-width="2.4"/>')
+            n = max(2, int(h / 15))
+            parts.append('<g fill="%s">' % glow
+                         + ''.join(f'<rect x="{x - 3}" y="{top + 9 + i * (h - 16) / n:.0f}" '
+                                   f'width="6" height="{(h - 16) / n * 0.5:.0f}" rx="1"/>'
+                                   for i in range(n)) + '</g>')
+            # chase bulbs down both edges
+            parts.append('<g fill="#ffe9b0">'
+                         + ''.join(f'<circle cx="{x - w / 2 + 2:.0f}" cy="{top + 8 + i * 11}" r="1.6"/>'
+                                   f'<circle cx="{x + w / 2 - 2:.0f}" cy="{top + 8 + i * 11}" r="1.6"/>'
+                                   for i in range(int((h - 12) / 11))) + '</g>')
+        return ''.join(parts)
+
+    def honky(x, w, h, i, blade_kind='bar', side=1):
+        """One Broadway building. Three things every time: a bracketed cornice, arched
+        upper windows, and a dark storefront under an awning."""
+        base = 374
+        top = base - h
+        body, lit, dark = BRICK[i % len(BRICK)]
+        awn = AWN[i % len(AWN)]
+        tube, glow = NEON[i % len(NEON)]
+        g = [f'<rect x="{x}" y="{top}" width="{w}" height="{h}" fill="{body}"/>',
+             f'<rect x="{x}" y="{top}" width="{w * 0.16:.0f}" height="{h}" fill="{lit}" opacity="0.5"/>',
+             f'<rect x="{x + w * 0.86:.0f}" y="{top}" width="{w * 0.14:.0f}" height="{h}" '
+             f'fill="{dark}" opacity="0.55"/>']
+        # brick courses
+        g.append(f'<g fill="{dark}" opacity="0.16">'
+                 + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2"/>'
+                           for y in range(top + 8, base - 60, 9)) + '</g>')
+        # cornice: a slab on brackets
+        g.append(f'<rect x="{x - 4}" y="{top - 9}" width="{w + 8}" height="10" fill="{lit}"/>')
+        g.append(f'<rect x="{x - 4}" y="{top - 11}" width="{w + 8}" height="4" fill="#e4d3bd"/>')
+        g.append(f'<g fill="{dark}">'
+                 + ''.join(f'<rect x="{x + 5 + k * (w - 12) / max(2, int(w / 18)):.0f}" y="{top + 1}" '
+                           f'width="5" height="9"/>' for k in range(max(2, int(w / 18)) + 1))
+                 + '</g>')
+        # upper-floor windows, arched
+        floors = 2 if h < 108 else 3
+        per = max(2, int(w / 26))
+        ww = (w - 14) / per * 0.62
+        for f_i in range(floors):
+            wy = top + 20 + f_i * ((h - 76) / floors)
+            wh = (h - 76) / floors * 0.62
+            for c in range(per):
+                wx = x + 8 + c * (w - 14) / per
+                g.append(f'<path d="M{wx:.0f},{wy + wh:.0f} L{wx:.0f},{wy + ww * 0.5:.0f} '
+                         f'A{ww * 0.5:.0f},{ww * 0.5:.0f} 0 0 1 {wx + ww:.0f},{wy + ww * 0.5:.0f} '
+                         f'L{wx + ww:.0f},{wy + wh:.0f} Z" fill="#2f3a44"/>')
+                g.append(f'<path d="M{wx + 1.5:.0f},{wy + wh - 2:.0f} L{wx + 1.5:.0f},{wy + ww * 0.55:.0f} '
+                         f'A{ww * 0.4:.0f},{ww * 0.4:.0f} 0 0 1 {wx + ww * 0.5:.0f},{wy + ww * 0.16:.0f} '
+                         f'L{wx + ww * 0.5:.0f},{wy + wh - 2:.0f} Z" fill="#6d8496" opacity="0.7"/>')
+                g.append(f'<rect x="{wx - 2:.0f}" y="{wy + wh:.0f}" width="{ww + 4:.0f}" height="3" '
+                         f'fill="#e4d3bd"/>')
+        # ground floor: dark shopfront, awning, door
+        sf = base - 52
+        g.append(f'<rect x="{x + 3}" y="{sf}" width="{w - 6}" height="52" fill="#2b2229"/>')
+        # plate glass, lit warm from inside — a dark band reads as a shut shop
+        g.append(f'<rect x="{x + 7}" y="{sf + 8}" width="{w * 0.40:.0f}" height="30" rx="1" '
+                 f'fill="#e8b45c"/>')
+        g.append(f'<rect x="{x + 7}" y="{sf + 8}" width="{w * 0.40:.0f}" height="9" fill="#f2cf8a"/>')
+        g.append(f'<g fill="#8a5a2c" opacity="0.55">'
+                 + ''.join(f'<rect x="{x + 12 + k * 13}" y="{sf + 18}" width="4" height="20"/>'
+                           for k in range(int(w * 0.40 / 13))) + '</g>')
+        g.append(f'<rect x="{x + w * 0.52:.0f}" y="{sf + 8}" width="{w * 0.22:.0f}" height="30" rx="1" '
+                 f'fill="#d9a04e" opacity="0.85"/>')
+        # the door, with light spilling out of it
+        g.append(f'<rect x="{x + w - 27:.0f}" y="{sf + 6}" width="19" height="46" rx="2" fill="#5d3a24"/>')
+        g.append(f'<rect x="{x + w - 24:.0f}" y="{sf + 10}" width="13" height="26" fill="#ffd98f"/>')
+        # a lit marquee band over the shopfront
+        g.append(f'<rect x="{x + 6}" y="{sf - 14}" width="{w - 12}" height="12" rx="2" fill="#241d24"/>')
+        g.append(f'<g fill="{glow}" opacity="0.95">'
+                 + ''.join(f'<rect x="{x + 11 + k * 9}" y="{sf - 10}" width="6" height="4" rx="1"/>'
+                           for k in range(int((w - 22) / 9))) + '</g>')
+        g.append('<g fill="#ffe9b0">'
+                 + ''.join(f'<circle cx="{x + 10 + k * 11}" cy="{sf - 15}" r="1.8"/>'
+                           for k in range(int((w - 18) / 11))) + '</g>')
+        # awning, striped
+        aw = w - 10
+        g.append(f'<path d="M{x + 5},{sf - 2} L{x + 5 + aw:.0f},{sf - 2} '
+                 f'L{x + 3 + aw:.0f},{sf + 15} L{x + 7},{sf + 15} Z" fill="{awn}"/>')
+        g.append('<g fill="#f2ece2" opacity="0.85">'
+                 + ''.join(f'<path d="M{x + 8 + k * 22},{sf - 2} L{x + 17 + k * 22},{sf - 2} '
+                           f'L{x + 15 + k * 22},{sf + 15} L{x + 6 + k * 22},{sf + 15} Z"/>'
+                           for k in range(int(aw / 22))) + '</g>')
+        g.append(f'<rect x="{x + 4}" y="{sf - 5}" width="{aw + 2:.0f}" height="4" rx="2" fill="#2b2229"/>')
+        # the blade sign, hung off the street-facing edge
+        bx = x + (w * 0.78 if side > 0 else w * 0.22)
+        g.append(f'<rect x="{bx - 27:.0f}" y="{top + 10}" width="54" height="19" rx="3" '
+                 f'fill="#241d24"/>')
+        g.append(f'<rect x="{bx - 23:.0f}" y="{top + 14}" width="46" height="11" rx="2" '
+                 f'fill="none" stroke="{glow}" stroke-width="2.2"/>')
+        g.append('<g fill="%s" opacity="0.9">' % tube
+                 + ''.join(f'<rect x="{bx - 18 + k * 8:.0f}" y="{top + 17}" width="5" height="5"/>'
+                           for k in range(5)) + '</g>')
+        g.append(blade(bx, top + 32, max(62, min(122, h - 96)), 30, tube, glow, blade_kind))
+        # a flag on a pole, which every one of these buildings actually has
+        if i % 2 == 0:
+            fx = x + (w * 0.26 if side > 0 else w * 0.74)
+            g.append(f'<g transform="translate({fx:.0f},{base - 74}) rotate(-26)">'
+                     f'<rect x="0" y="-1" width="22" height="2" fill="#4a4048"/>'
+                     f'<rect x="4" y="-8" width="16" height="14" fill="#b8323c"/>'
+                     f'<rect x="4" y="-8" width="7.5" height="7" fill="#2b4a8c"/>'
+                     f'<g fill="#f2ece2">'
+                     + ''.join(f'<rect x="4" y="{-8 + k * 2.8:.1f}" width="16" height="1.3"/>'
+                               for k in (1, 2, 3, 4)) + '</g></g>')
+        return ''.join(g)
+
+    LEFT = [(-30, 124, 132, 0, 'bar'), (98, 96, 168, 1, 'guitar'), (194, 132, 190, 2, 'bar'),
+            (330, 100, 152, 3, 'boot'), (396, 96, 150, 4, 'bar')]
+    RIGHT = [(788, 108, 168, 5, 'bar'), (840, 98, 172, 2, 'guitar'), (940, 136, 186, 0, 'bar'),
+             (1080, 104, 158, 3, 'boot'), (1188, 122, 128, 1, 'bar')]
+
+    # the block that closes the far end of the street, small and hazy
+    # What you actually see at the bottom of Broadway is the river, and both bridges
+    # across it: the white pedestrian truss and the orange arch beyond. Putting them in
+    # the gap keeps the vista honest and gives the street somewhere to go.
+    far_block = ('<g id="river-vista">'
+                 # East Nashville on the far bank, low and hazy
+                 '<rect x="480" y="300" width="320" height="22" fill="#9c8f8c" opacity="0.6"/>'
+                 + '<g fill="#8a7d7c" opacity="0.7">'
+                 + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{322 - y}"/>'
+                           for x, y, w in [(488, 306, 26), (520, 300, 20), (546, 310, 24),
+                                           (592, 304, 22), (620, 312, 26), (668, 302, 20),
+                                           (694, 310, 28), (736, 306, 22), (764, 312, 26)])
+                 + '</g>'
+                 + '<g fill="#5c7f4c" opacity="0.75">'
+                 + ''.join(f'<ellipse cx="{x}" cy="321" rx="{r}" ry="{r * 0.5:.0f}"/>'
+                           for x, r in [(500, 13), (536, 10), (578, 12), (614, 9),
+                                        (654, 11), (700, 13), (748, 10), (782, 12)])
+                 + '</g>'
+                 # the river FIRST — drawing it after the bridges left them floating
+                 '<rect x="480" y="324" width="320" height="42" fill="#5a7f96"/>'
+                 '<rect x="480" y="324" width="320" height="4" fill="#6e93a8"/>'
+                 + '<g fill="#8fb2c4" opacity="0.5">'
+                 + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2" rx="1"/>'
+                           for x, y, w in [(500, 344, 36), (600, 350, 28), (700, 342, 40),
+                                           (520, 360, 30), (740, 360, 26)])
+                 + '</g>'
+                 # the orange arch bridge, upstream and higher
+                 '<g id="arch-bridge">'
+                 + '<g fill="#8a8074">'
+                 + ''.join(f'<rect x="{x}" y="334" width="6" height="12"/>' for x in (534, 640, 744))
+                 + '</g>'
+                 '<rect x="480" y="330" width="320" height="4.5" fill="#9a9086"/>'
+                 '<path d="M492,331 C 560,302 720,302 788,331" fill="none" stroke="#d9552c" '
+                 'stroke-width="5"/>'
+                 '<path d="M492,329.4 C 560,300.4 720,300.4 788,329.4" fill="none" '
+                 'stroke="#ee7a44" stroke-width="1.8"/>'
+                 + '<g stroke="#c04a26" stroke-width="1.1">'
+                 + ''.join(f'<path d="M{x},{330 - (1 - ((x - 640) / 148.0) ** 2) * 25:.1f} '
+                           f'L{x},330"/>' for x in range(508, 780, 17))
+                 + '</g></g>'
+                 # the white pedestrian truss bridge, nearer and lower
+                 '<g id="ped-bridge">'
+                 + '<g fill="#b8b2a6">'
+                 + ''.join(f'<rect x="{x}" y="356" width="7" height="12"/>' for x in (516, 620, 724))
+                 + '</g>'
+                 '<rect x="480" y="352" width="320" height="5" fill="#ddd8cc"/>'
+                 '<rect x="480" y="357" width="320" height="2.5" fill="#a8a296"/>'
+                 + '<g stroke="#dcd8cc" stroke-width="1.3" fill="none" opacity="0.9">'
+                 + ''.join(f'<path d="M{x},352 L{x + 13},341 L{x + 26},352"/>'
+                           f'<path d="M{x + 13},341 L{x + 13},352"/>' for x in range(480, 800, 26))
+                 + '<path d="M480,341 L800,341"/></g></g>'
+                 # the near bank, where Broadway meets the water
+                 '<rect x="480" y="364" width="320" height="12" fill="#6f7a52"/>'
+                 '<rect x="480" y="364" width="320" height="4" fill="#82905f"/>'
+                 '</g>')
+
+    BLOCK = ('    <g id="broadway">' + far_block
+             + ''.join(honky(x, w, h, i, k, -1) for x, w, h, i, k in LEFT)
+             + ''.join(honky(x, w, h, i, k, 1) for x, w, h, i, k in RIGHT)
+             + '</g>')
+
+    # ------------------------------------------------------------- the street ----
+    street = ('    <rect x="0" y="300" width="1280" height="420" fill="url(#asphalt)"/>\n'
+              # the street receding between the two blocks, so the gap is not raw asphalt
+              '    <polygon points="556,404 724,404 706,336 574,336" fill="#57585d"/>\n'
+              '    <g fill="#e8e2c9" opacity="0.3">'
+              + ''.join(f'<polygon points="{638 - w},{y} {642 + w},{y} {641 + w * 0.9:.0f},{y + hh} '
+                        f'{639 - w * 0.9:.0f},{y + hh}"/>'
+                        for w, y, hh in [(2, 326, 4), (3, 338, 5), (4, 352, 6), (5, 366, 7)])
+              + '</g>\n'
+              # THE BLOCK — drawn here, after the road surface, or the asphalt buries it
+              + BLOCK + '\n'
+              # sidewalk in front of the block
+              '    <g fill="#b9b5ae"><rect x="0" y="374" width="1280" height="28"/></g>\n'
+              '    <g fill="#cbc7c0"><rect x="0" y="374" width="1280" height="4"/></g>\n'
+              '    <g fill="#a29e98" opacity="0.7">'
+              + ''.join(f'<rect x="{x}" y="378" width="2.5" height="24"/>' for x in range(0, 1280, 38))
+              + '</g>\n'
+              '    <g fill="#6f6b66"><rect x="0" y="402" width="1280" height="4"/></g>\n'
+              # the traffic lane, with a centre line, between kerb and crossing
+              '    <g fill="#e8e2c9" opacity="0.4">'
+              + ''.join(f'<rect x="{x}" y="426" width="28" height="3"/>' for x in range(0, 1280, 64))
+              + '</g>\n'
+              # a second sidewalk this side of the tracks, where we are standing
+              '    <g fill="#b9b5ae"><rect x="0" y="560" width="1280" height="46"/></g>\n'
+              '    <g fill="#cbc7c0"><rect x="0" y="560" width="1280" height="5"/></g>\n'
+              '    <g fill="#a29e98" opacity="0.7">'
+              + ''.join(f'<rect x="{x}" y="566" width="3" height="40"/>' for x in range(16, 1280, 44))
+              + '</g>\n'
+              '    <g fill="#adaaa4"><rect x="0" y="560" width="1280" height="160"/></g>\n'
+              '    <g fill="#cbc7c0"><rect x="0" y="560" width="1280" height="5"/></g>\n'
+              '    <g fill="#a29e98" opacity="0.55">'
+              + ''.join(f'<rect x="{x}" y="566" width="3" height="154"/>' for x in range(20, 1280, 74))
+              + ''.join(f'<rect x="0" y="{y}" width="1280" height="3"/>' for y in (626, 686))
+              + '</g>\n'
+              # warm low sun raking across the asphalt
+              '    <g fill="#e0b073" opacity="0.16">'
+              '<polygon points="0,300 1280,300 1280,340 0,368"/>'
+              '<polygon points="0,612 1280,612 1280,700 0,720"/></g>')
+
+    # ---------------------------------------------------------------- props ----
+    def lamp(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-4" y="-96" width="8" height="96" fill="#2f2b33"/>'
+                f'<rect x="-9" y="-4" width="18" height="6" rx="2" fill="#2f2b33"/>'
+                f'<rect x="-16" y="-100" width="32" height="6" rx="3" fill="#2f2b33"/>'
+                f'<g fill="#2f2b33"><circle cx="-16" cy="-108" r="9"/><circle cx="16" cy="-108" r="9"/>'
+                f'<circle cx="0" cy="-116" r="10"/></g>'
+                f'<g fill="#ffeec2"><circle cx="-16" cy="-108" r="6.5"/><circle cx="16" cy="-108" r="6.5"/>'
+                f'<circle cx="0" cy="-116" r="7.5"/></g></g>')
+
+    def barricade(x, y, n, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})" fill="#9aa0a8">'
+                + ''.join(f'<g transform="translate({k * 58},0)">'
+                          f'<rect x="0" y="-30" width="54" height="3.5" rx="1.5"/>'
+                          f'<rect x="0" y="-18" width="54" height="3.5" rx="1.5"/>'
+                          f'<rect x="0" y="-34" width="3.5" height="34"/>'
+                          f'<rect x="50" y="-34" width="3.5" height="34"/>'
+                          f'<rect x="-4" y="-2" width="16" height="3" rx="1.5"/>'
+                          f'<rect x="42" y="-2" width="16" height="3" rx="1.5"/></g>' for k in range(n))
+                + '</g>')
+
+    def person(x, y, s=1.0, shirt='#3f6ea8', trouser='#2f3440', skin='#c98d63', hat=None):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{trouser}"><rect x="-6" y="-22" width="5" height="22" rx="2"/>'
+                f'<rect x="1" y="-22" width="5" height="22" rx="2"/></g>'
+                f'<rect x="-8" y="-42" width="16" height="22" rx="5" fill="{shirt}"/>'
+                f'<rect x="-11" y="-40" width="4" height="17" rx="2" fill="{shirt}"/>'
+                f'<rect x="7" y="-40" width="4" height="17" rx="2" fill="{shirt}"/>'
+                f'<circle cx="0" cy="-49" r="7" fill="{skin}"/>'
+                + (f'<path d="M-11,-52 L11,-52 L9,-56 L-9,-56 Z" fill="{hat}"/>'
+                   f'<ellipse cx="0" cy="-52" rx="13" ry="2.6" fill="{hat}"/>' if hat else
+                   f'<path d="M-7,-52 C -7,-58 7,-58 7,-52 Z" fill="#4a3a2e"/>')
+                + '</g>')
+
+    def busker(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 16, 4, 0.18)}'
+                f'<g fill="#2f3440"><rect x="-7" y="-24" width="6" height="24" rx="2"/>'
+                f'<rect x="2" y="-24" width="6" height="24" rx="2"/></g>'
+                f'<rect x="-10" y="-48" width="20" height="26" rx="6" fill="#b8442f"/>'
+                f'<circle cx="0" cy="-56" r="8" fill="#c98d63"/>'
+                f'<path d="M-14,-60 L14,-60 L11,-65 L-11,-65 Z" fill="#6b4a2e"/>'
+                f'<ellipse cx="0" cy="-60" rx="17" ry="3" fill="#6b4a2e"/>'
+                # the guitar
+                f'<g transform="translate(4,-32) rotate(-18)">'
+                f'<ellipse cx="0" cy="0" rx="13" ry="10" fill="#d99a4e"/>'
+                f'<ellipse cx="-6" cy="0" rx="9" ry="7.5" fill="#e8b269"/>'
+                f'<circle cx="2" cy="0" r="3.4" fill="#6b4a2e"/>'
+                f'<rect x="10" y="-2" width="22" height="4" rx="1" fill="#5d3a24"/>'
+                f'<rect x="30" y="-4" width="7" height="8" rx="2" fill="#3f2a1c"/></g>'
+                f'<g fill="#e8d6b8"><rect x="-11" y="-44" width="8" height="4" rx="2"/></g></g>')
+
+    def street_tree(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 26, 5, 0.2)}'
+                f'<rect x="-24" y="-10" width="48" height="10" rx="2" fill="#5f5348"/>'
+                f'<rect x="-24" y="-13" width="48" height="4" rx="2" fill="#75655a"/>'
+                f'<rect x="-3" y="-46" width="6" height="36" fill="#5d4234"/>'
+                f'<circle cx="0" cy="-62" r="21" fill="#4a7a42"/>'
+                f'<circle cx="-13" cy="-52" r="14" fill="#3f6b39"/>'
+                f'<circle cx="14" cy="-54" r="13" fill="#3f6b39"/>'
+                f'<circle cx="-5" cy="-74" r="13" fill="#5c9050"/>'
+                f'<circle cx="9" cy="-70" r="11" fill="#5c9050"/></g>')
+
+    def stage(x, y, sc=1.0):
+        """An outdoor stage with a band on it. Nashville has live music on the street at
+        two in the afternoon; a scene of it without a band playing is missing the point."""
+        def player(px, py, shirt, kind):
+            g = [f'<g fill="#2f3440"><rect x="{px - 5}" y="{py - 20}" width="4.5" height="20" rx="2"/>'
+                 f'<rect x="{px + 1}" y="{py - 20}" width="4.5" height="20" rx="2"/></g>',
+                 f'<rect x="{px - 7}" y="{py - 38}" width="14" height="20" rx="5" fill="{shirt}"/>',
+                 f'<circle cx="{px}" cy="{py - 44}" r="6" fill="#c98d63"/>',
+                 f'<path d="M{px - 11},{py - 47} L{px + 11},{py - 47} L{px + 9},{py - 51} '
+                 f'L{px - 9},{py - 51} Z" fill="#5d4234"/>'
+                 f'<ellipse cx="{px}" cy="{py - 47}" rx="13" ry="2.4" fill="#5d4234"/>']
+            if kind == 'guitar':
+                g.append(f'<g transform="translate({px + 4},{py - 26}) rotate(-16)">'
+                         f'<ellipse cx="0" cy="0" rx="10" ry="8" fill="#d99a4e"/>'
+                         f'<ellipse cx="-4" cy="0" rx="7" ry="6" fill="#e8b269"/>'
+                         f'<circle cx="1" cy="0" r="2.6" fill="#6b4a2e"/>'
+                         f'<rect x="8" y="-1.6" width="17" height="3.2" rx="1" fill="#5d3a24"/>'
+                         f'<rect x="23" y="-3" width="6" height="6" rx="2" fill="#3f2a1c"/></g>')
+            elif kind == 'bass':
+                g.append(f'<g transform="translate({px - 10},{py - 20})">'
+                         f'<ellipse cx="0" cy="0" rx="8" ry="11" fill="#b0763a"/>'
+                         f'<ellipse cx="0" cy="-1" rx="6" ry="8" fill="#c98d4e"/>'
+                         f'<rect x="-1.6" y="-30" width="3.2" height="20" fill="#5d3a24"/>'
+                         f'<rect x="-3.4" y="-35" width="7" height="7" rx="2" fill="#3f2a1c"/></g>')
+            elif kind == 'fiddle':
+                g.append(f'<g transform="translate({px + 6},{py - 32}) rotate(-32)">'
+                         f'<ellipse cx="0" cy="0" rx="6" ry="9" fill="#a8632c"/>'
+                         f'<rect x="-1.6" y="-20" width="3.2" height="12" fill="#5d3a24"/>'
+                         f'<path d="M-12,4 L14,-6" stroke="#e2d8c0" stroke-width="1.6"/></g>')
+            return ''.join(g)
+
+        return (f'<g id="stage" transform="translate({x},{y}) scale({sc})">'
+                f'{shadow(0, 4, 108, 10, 0.22)}'
+                # deck
+                f'<rect x="-104" y="-34" width="208" height="34" fill="#3a3238"/>'
+                f'<rect x="-104" y="-38" width="208" height="6" rx="2" fill="#6b5344"/>'
+                f'<g fill="#2b242a" opacity="0.6">'
+                + ''.join(f'<rect x="{-100 + k * 26}" y="-32" width="4" height="30"/>'
+                          for k in range(8)) + '</g>'
+                # back wall with a banner
+                f'<rect x="-92" y="-118" width="184" height="82" fill="#241d24"/>'
+                f'<rect x="-76" y="-108" width="152" height="42" rx="4" fill="#8f2f3c"/>'
+                f'<rect x="-70" y="-102" width="140" height="30" rx="3" fill="none" '
+                f'stroke="#f2cf8a" stroke-width="2.4"/>'
+                f'<g transform="translate(0,-87) scale(0.62)">'
+                f'<ellipse cx="0" cy="0" rx="13" ry="10" fill="#f2cf8a"/>'
+                f'<circle cx="2" cy="0" r="3.4" fill="#8f2f3c"/>'
+                f'<rect x="10" y="-2" width="24" height="4" rx="1" fill="#f2cf8a"/>'
+                f'<rect x="-38" y="-2" width="24" height="4" rx="1" fill="#f2cf8a"/></g>'
+                # roof canopy on a truss
+                f'<path d="M-116,-124 L116,-124 L104,-140 L-104,-140 Z" fill="#2b242a"/>'
+                f'<rect x="-118" y="-126" width="236" height="6" rx="3" fill="#3f3740"/>'
+                f'<g stroke="#4a4048" stroke-width="2.4" fill="none">'
+                + ''.join(f'<path d="M{-104 + k * 29},-140 L{-92 + k * 29},-126"/>'
+                          f'<path d="M{-92 + k * 29},-140 L{-104 + k * 29},-126"/>' for k in range(8))
+                + '</g>'
+                f'<rect x="-98" y="-124" width="6" height="88" fill="#3f3740"/>'
+                f'<rect x="92" y="-124" width="6" height="88" fill="#3f3740"/>'
+                # stage lights hanging off the truss, throwing warm cones
+                + '<g>'
+                + ''.join(f'<rect x="{-84 + k * 34}" y="-122" width="10" height="9" rx="2" '
+                          f'fill="#4a4048"/>'
+                          f'<circle cx="{-79 + k * 34}" cy="-112" r="5" fill="#ffe6a8"/>'
+                          f'<path d="M{-86 + k * 34},-110 L{-72 + k * 34},-110 '
+                          f'L{-62 + k * 34},-40 L{-96 + k * 34},-40 Z" fill="#ffe6a8" '
+                          f'opacity="0.13"/>' for k in range(6)) + '</g>'
+                # PA stacks
+                + ''.join(f'<g transform="translate({sx},-36)">'
+                          f'<rect x="-15" y="-64" width="30" height="64" rx="3" fill="#1f1a20"/>'
+                          f'<g fill="#3a3238"><circle cx="0" cy="-48" r="9"/>'
+                          f'<circle cx="0" cy="-24" r="11"/></g>'
+                          f'<g fill="#575059"><circle cx="0" cy="-48" r="4"/>'
+                          f'<circle cx="0" cy="-24" r="5"/></g></g>' for sx in (-84, 84))
+                # the band
+                + player(-32, -36, '#c0392b', 'guitar')
+                + player(26, -36, '#2f6f9e', 'bass')
+                + player(62, -36, '#4f9d6a', 'fiddle')
+                # a couple of people watching, on the ground in front
+                + f'<g transform="translate(-118,4)">'
+                f'<g fill="#2f3440"><rect x="-5" y="-20" width="4.5" height="20" rx="2"/>'
+                f'<rect x="1" y="-20" width="4.5" height="20" rx="2"/></g>'
+                f'<rect x="-7" y="-38" width="14" height="20" rx="5" fill="#e8d24a"/>'
+                f'<circle cx="0" cy="-44" r="6" fill="#8a5a3c"/></g>'
+                + f'<g transform="translate(134,6)">'
+                f'<g fill="#4a4a52"><rect x="-5" y="-20" width="4.5" height="20" rx="2"/>'
+                f'<rect x="1" y="-20" width="4.5" height="20" rx="2"/></g>'
+                f'<rect x="-7" y="-38" width="14" height="20" rx="5" fill="#7a4f9e"/>'
+                f'<circle cx="0" cy="-44" r="6" fill="#c98d63"/>'
+                f'<path d="M-11,-47 L11,-47 L9,-51 L-9,-51 Z" fill="#5d4234"/>'
+                f'<ellipse cx="0" cy="-47" rx="13" ry="2.4" fill="#5d4234"/></g>'
+                + '</g>')
+
+    def car(x, y, s=1.0, body='#2f5f9e'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 6, 60, 8, 0.24)}'
+                f'<rect x="-54" y="-30" width="108" height="24" rx="8" fill="{body}"/>'
+                f'<path d="M-30,-30 L-20,-52 L24,-52 L36,-30 Z" fill="{body}"/>'
+                f'<path d="M-26,-32 L-17,-48 L0,-48 L0,-32 Z" fill="#cfe4f2"/>'
+                f'<path d="M4,-32 L4,-48 L22,-48 L31,-32 Z" fill="#cfe4f2"/>'
+                f'<g fill="#1b1f25"><circle cx="-32" cy="-4" r="11"/><circle cx="32" cy="-4" r="11"/></g>'
+                f'<g fill="#9aa2ab"><circle cx="-32" cy="-4" r="4.5"/><circle cx="32" cy="-4" r="4.5"/></g>'
+                f'<rect x="-56" y="-24" width="8" height="6" rx="2" fill="#f6e0a0"/>'
+                f'<rect x="48" y="-24" width="8" height="6" rx="2" fill="#c0392b"/></g>')
+
+    back = ('    ' + ''.join(lamp(x, 402, 0.42) for x in (56, 268, 466, 812, 1010, 1224))
+            + barricade(24, 402, 3, 0.6) + barricade(304, 402, 3, 0.6)
+            + barricade(768, 402, 3, 0.6) + barricade(1064, 402, 3, 0.6)
+            + ''.join(street_tree(x, 402, 0.44) for x in (172, 386, 496, 800, 926, 1146))
+            + car(150, 446, 0.44, '#2f5f9e') + car(392, 446, 0.44, '#e8b02a')
+            + car(880, 446, 0.44, '#f2f2ec') + car(1130, 446, 0.44, '#b8342c')
+            + ''.join(person(x, 400, s, sh, tr, sk, hat) for x, s, sh, tr, sk, hat in
+                      [(96, 0.5, '#e8d24a', '#2f3440', '#c98d63', None),
+                       (128, 0.46, '#3f6ea8', '#4a4a52', '#8a5a3c', '#4a3a2e'),
+                       (236, 0.52, '#c0392b', '#2f3440', '#c98d63', None),
+                       (262, 0.48, '#4f9d6a', '#37414f', '#e0b58c', '#6b4a2e'),
+                       (392, 0.5, '#7a4f9e', '#2f3440', '#8a5a3c', None),
+                       (498, 0.46, '#e07a2a', '#3a3f4a', '#c98d63', '#6b4a2e'),
+                       (786, 0.5, '#2f8fa8', '#2f3440', '#e0b58c', None),
+                       (876, 0.48, '#d9455e', '#4a4a52', '#8a5a3c', '#4a3a2e'),
+                       (1128, 0.52, '#3f6ea8', '#2f3440', '#c98d63', None),
+                       (1160, 0.46, '#e8d24a', '#37414f', '#e0b58c', '#6b4a2e')]))
+
+    front = ('    ' + lamp(1200, 606, 0.78)
+             + busker(978, 610, 1.05)
+             + person(1058, 610, 0.86, '#3f6ea8', '#2f3440', '#c98d63', '#6b4a2e')
+             + person(1094, 604, 0.78, '#d9455e', '#4a4a52', '#e0b58c', None)
+             + person(206, 608, 0.9, '#4f9d6a', '#2f3440', '#8a5a3c', '#6b4a2e')
+             + person(174, 604, 0.8, '#e8d24a', '#37414f', '#c98d63', None)
+             # planters, which are all over Broadway and stop the kerb reading as empty
+             + ''.join(f'<g transform="translate({x},606) scale({s})">'
+                       f'{shadow(0, 4, 30, 6, 0.2)}'
+                       f'<path d="M-26,0 L-22,-26 L22,-26 L26,0 Z" fill="#7a5344"/>'
+                       f'<rect x="-24" y="-30" width="48" height="6" rx="2" fill="#8d6252"/>'
+                       f'<g fill="#3f7a4a"><ellipse cx="-10" cy="-34" rx="14" ry="9"/>'
+                       f'<ellipse cx="10" cy="-36" rx="13" ry="9"/>'
+                       f'<ellipse cx="0" cy="-42" rx="12" ry="8"/></g>'
+                       f'<g fill="#e8d24a"><circle cx="-14" cy="-38" r="3"/><circle cx="8" cy="-42" r="3"/>'
+                       f'<circle cx="14" cy="-32" r="2.6"/></g></g>'
+                       for x, s in [(430, 0.95), (856, 1.0), (1256, 0.9)])
+             + barricade(806, 606, 2, 0.95)
+             + ''.join(street_tree(x, 626, sc) for x, sc in
+                       [(492, 0.85), (782, 0.85), (1152, 0.95)])
+             + stage(250, 698, 1.06)
+             # a hot chicken cart, because that is what is actually parked on this street
+             + '<g transform="translate(872,668) scale(0.9)">'
+             + shadow(0, 4, 44, 7, 0.22)
+             + '<rect x="-38" y="-44" width="76" height="42" rx="4" fill="#c0392b"/>'
+             + '<rect x="-38" y="-44" width="76" height="10" rx="4" fill="#a5302a"/>'
+             + '<rect x="-30" y="-30" width="60" height="18" rx="2" fill="#f2e4cc"/>'
+             + '<g fill="#c0392b"><rect x="-24" y="-25" width="48" height="4" rx="2"/>'
+               '<rect x="-16" y="-18" width="32" height="4" rx="2"/></g>'
+             + '<path d="M-46,-46 L46,-46 L40,-58 L-40,-58 Z" fill="#e8b02a"/>'
+             + '<g fill="#f2ece2"><path d="M-40,-46 L-28,-46 L-24,-58 L-36,-58 Z"/>'
+               '<path d="M-16,-46 L-4,-46 L-2,-58 L-14,-58 Z"/>'
+               '<path d="M8,-46 L20,-46 L20,-58 L8,-58 Z"/>'
+               '<path d="M32,-46 L40,-46 L38,-58 L28,-58 Z"/></g>'
+             + '<g fill="#2a2f36"><circle cx="-22" cy="-2" r="9"/><circle cx="22" cy="-2" r="9"/></g>'
+             + '<g fill="#8d949c"><circle cx="-22" cy="-2" r="3.5"/><circle cx="22" cy="-2" r="3.5"/></g>'
+             + '</g>'
+             + person(818, 672, 0.82, '#3f6ea8', '#2f3440', '#c98d63', None)
+             + person(940, 674, 0.86, '#e07a2a', '#37414f', '#8a5a3c', '#6b4a2e')
+             + person(1088, 664, 0.84, '#7a4f9e', '#2f3440', '#e0b58c', None)
+             + person(404, 700, 0.88, '#2f8fa8', '#4a4a52', '#c98d63', '#4a3a2e')
+             # a bench, so the plaza has somewhere to sit
+             + ''.join(f'<g transform="translate({bx},672) scale(0.9)">'
+                       f'{shadow(0, 3, 40, 6, 0.2)}'
+                       f'<rect x="-38" y="-14" width="76" height="6" rx="2" fill="#7a5344"/>'
+                       f'<rect x="-38" y="-24" width="76" height="6" rx="2" fill="#8d6252"/>'
+                       f'<rect x="-34" y="-14" width="6" height="14" fill="#3f3a40"/>'
+                       f'<rect x="28" y="-14" width="6" height="14" fill="#3f3a40"/></g>'
+                       for bx in (500, 862)))
+
+    scene('nashville', 'NASHVILLE — Lower Broadway, honky tonk neon, late afternoon', {
+        'sky': sky_l,
+        'far': skyline,
+        'ground': street,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#3a3438" opacity="0.35"><rect x="0" y="712" width="1280" height="8"/></g>',
+        'roadkw': dict(surface='#4e4f54', surface2='#3f4045', shoulder='#b9b5ae', dash='#f0d878'),
+        'trackkw': dict(ballast='#6b6660', ballast_hi='#7d7871', tie='#4a3a2e', rail='#d3d7dc'),
+    }, d)
+
+
+def boston():
+    """BOSTON — the Charles from the Cambridge bank, looking at Back Bay in early autumn,
+    with the road crossing on the bridge. Naming the viewpoint solved the composition:
+    Boston is a *low brick city under a few tall things*, and you only see that from across
+    the water. The Hancock's blue-green slab, the Prudential's mast and the State House
+    dome sit above an unbroken wall of bow-fronted row houses, and the Esplanade's gold
+    trees run along their feet. The Green Line is the train, so it isn't drawn here."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f7cc0"/><stop offset="0.44" stop-color="#74aed6"/>
+      <stop offset="0.8" stop-color="#bcd8e4"/><stop offset="1" stop-color="#f0dcc0"/>
+    </linearGradient>
+    <linearGradient id="charles" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f6f96"/><stop offset="0.5" stop-color="#4f83a8"/>
+      <stop offset="1" stop-color="#6b9cbc"/>
+    </linearGradient>
+    <linearGradient id="grassg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5f8a48"/><stop offset="1" stop-color="#4a7038"/>
+    </linearGradient>
+    <linearGradient id="hancock" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6f9ba8"/><stop offset="0.55" stop-color="#4a7482"/>
+      <stop offset="1" stop-color="#39606d"/>
+    </linearGradient>
+    <radialGradient id="sung" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff2cf" stop-opacity="0.5"/>
+      <stop offset="0.6" stop-color="#ffd58c" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffb45c" stop-opacity="0"/>
+    </radialGradient>''')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             '    <circle cx="1050" cy="120" r="230" fill="url(#sung)"/>\n'
+             '    <g fill="#ffffff" opacity="0.55">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{w}" ry="{w*0.1:.0f}"/>'
+                       for x, y, w in [(180, 38, 130), (520, 26, 100), (830, 48, 120),
+                                       (320, 82, 104), (660, 92, 84), (1080, 66, 90),
+                                       (140, 120, 70)]) + '</g>')
+
+    # -------------------------------------------------------------- skyline ----
+    BASE = 288
+
+    def slab(x, w, top, a, b, c, win='#c6dae6', step=18):
+        h = BASE - top
+        return (f'<g><rect x="{x}" y="{top}" width="{w}" height="{h}" fill="{b}"/>'
+                f'<rect x="{x}" y="{top}" width="{w * 0.34:.0f}" height="{h}" fill="{a}"/>'
+                f'<rect x="{x + w * 0.8:.0f}" y="{top}" width="{w * 0.2:.0f}" height="{h}" fill="{c}"/>'
+                + f'<g fill="{win}" opacity="0.34">'
+                + ''.join(f'<rect x="{x + 3}" y="{y}" width="{w - 6}" height="3"/>'
+                          for y in range(top + 10, BASE - 4, step)) + '</g></g>')
+
+    def dome(x, y, s=1.0):
+        """The State House. Gold leaf, and nothing else in Boston is that colour."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-52" y="-30" width="104" height="30" fill="#c8b49c"/>'
+                f'<rect x="-52" y="-34" width="104" height="6" fill="#ded0bc"/>'
+                f'<g fill="#8f7f6c" opacity="0.6">'
+                + ''.join(f'<rect x="{-44 + k * 15}" y="-26" width="6" height="20"/>' for k in range(6))
+                + '</g>'
+                f'<rect x="-26" y="-46" width="52" height="14" fill="#d6c6b0"/>'
+                f'<path d="M-24,-46 C -24,-76 24,-76 24,-46 Z" fill="#e0a92c"/>'
+                f'<path d="M-24,-46 C -24,-76 0,-78 0,-78 L0,-46 Z" fill="#f2c451"/>'
+                f'<rect x="-5" y="-88" width="10" height="12" rx="3" fill="#e0a92c"/>'
+                f'<rect x="-1.6" y="-98" width="3.2" height="12" fill="#e0a92c"/></g>')
+
+    def spire(x, base, h, body='#d8d2c6', roof='#7a8c8a'):
+        return (f'<g><rect x="{x - 11}" y="{base - h * 0.6:.0f}" width="22" '
+                f'height="{h * 0.6:.0f}" fill="{body}"/>'
+                f'<rect x="{x - 8}" y="{base - h * 0.78:.0f}" width="16" '
+                f'height="{h * 0.2:.0f}" fill="{body}"/>'
+                f'<polygon points="{x - 11},{base - h * 0.78:.0f} {x + 11},{base - h * 0.78:.0f} '
+                f'{x},{base - h:.0f}" fill="{roof}"/>'
+                f'<g fill="#5f6f70"><rect x="{x - 5}" y="{base - h * 0.74:.0f}" width="10" '
+                f'height="{h * 0.14:.0f}" rx="4"/></g></g>')
+
+    skyline = ('    <g id="skyline">'
+               # hazy back rank
+               + ''.join(slab(x, w, t, '#a9bcc8', '#98adbb', '#8397a6', '#cbdde8', 22)
+                         for x, w, t in [(60, 48, 214), (150, 36, 232), (300, 44, 220),
+                                         (880, 40, 226), (1150, 52, 218), (1230, 40, 236)])
+               # the middle city
+               + ''.join(slab(x, w, t, '#9a9084', '#877d72', '#6e665d', '#e0d4c0', 16)
+                         for x, w, t in [(206, 54, 196), (368, 46, 208), (600, 50, 190),
+                                         (676, 38, 214), (840, 44, 200), (1064, 48, 186)])
+               # 1920s setback towers, which Boston has a lot of
+               + '<g><rect x="740" y="176" width="58" height="112" fill="#8d8074"/>'
+               '<rect x="740" y="176" width="20" height="112" fill="#a2958a"/>'
+               '<rect x="752" y="152" width="34" height="28" fill="#8d8074"/>'
+               '<polygon points="752,152 786,152 769,124" fill="#6b7c74"/>'
+               '<g fill="#e0d4c0" opacity="0.3">'
+               + ''.join(f'<rect x="744" y="{y}" width="50" height="3"/>' for y in range(186, 284, 15))
+               + '</g></g>'
+               # the Prudential: broad, grey, with the mast
+               + '<g><rect x="902" y="116" width="80" height="172" fill="#8b939a"/>'
+               '<rect x="902" y="116" width="26" height="172" fill="#a3aab0"/>'
+               '<rect x="964" y="116" width="18" height="172" fill="#737b83"/>'
+               '<rect x="902" y="116" width="80" height="8" fill="#b6bcc2"/>'
+               '<rect x="938" y="70" width="6" height="48" fill="#6f777e"/>'
+               '<g fill="#cfd8de" opacity="0.4">'
+               + ''.join(f'<rect x="906" y="{y}" width="72" height="4"/>' for y in range(128, 286, 13))
+               + '</g></g>'
+               # the Hancock: a thin blue-green glass slab with a notch down one face
+               + '<g id="hancock-tower">'
+               '<rect x="466" y="86" width="76" height="202" fill="url(#hancock)"/>'
+               '<rect x="466" y="86" width="76" height="6" fill="#8fb4bf"/>'
+               '<rect x="518" y="86" width="5" height="202" fill="#2e5460"/>'
+               '<g fill="#a8ccd6" opacity="0.28">'
+               + ''.join(f'<rect x="468" y="{y}" width="72" height="3"/>' for y in range(96, 286, 11))
+               + '</g>'
+               '<rect x="466" y="86" width="16" height="202" fill="#7fa8b4" opacity="0.6"/></g>'
+               + spire(646, BASE, 118)
+               + spire(1006, BASE, 74, '#cfc8bc', '#6f8180')
+               + dome(178, BASE - 4, 1.35)
+               + '</g>')
+
+    # ---------------------------------------------- the Back Bay wall of brick ----
+    ROW = [('#8f4a3c', '#a45a49', '#6f3629'), ('#a3564a', '#b96b5c', '#7d3d32'),
+           ('#7d4a44', '#956058', '#5f3630'), ('#b06b52', '#c58066', '#8a4f3c'),
+           ('#8a5544', '#a06a58', '#683d30'), ('#98604e', '#ae7563', '#744538')]
+
+    def rowhouse(x, w, h, i, bow=True):
+        """A Back Bay row house: bow front, mansard roof, tall windows, a stoop. They are
+        never detached — the wall is continuous, which is the whole character of the place."""
+        base = 292
+        top = base - h
+        body, lit, dark = ROW[i % len(ROW)]
+        g = [f'<rect x="{x}" y="{top}" width="{w}" height="{h}" fill="{body}"/>']
+        if bow:
+            g.append(f'<path d="M{x + w * 0.18:.0f},{top} L{x + w * 0.82:.0f},{top} '
+                     f'L{x + w * 0.82:.0f},{base} L{x + w * 0.18:.0f},{base} Z" fill="{lit}"/>')
+            g.append(f'<path d="M{x + w * 0.18:.0f},{top} C {x + w * 0.06:.0f},{top + 6} '
+                     f'{x + w * 0.06:.0f},{base - 6} {x + w * 0.18:.0f},{base} Z" fill="{dark}"/>')
+            g.append(f'<path d="M{x + w * 0.82:.0f},{top} C {x + w * 0.94:.0f},{top + 6} '
+                     f'{x + w * 0.94:.0f},{base - 6} {x + w * 0.82:.0f},{base} Z" fill="{dark}"/>')
+        # mansard roof with dormers
+        g.append(f'<path d="M{x - 2},{top} L{x + w + 2:.0f},{top} L{x + w - 3:.0f},{top - 16} '
+                 f'L{x + 3},{top - 16} Z" fill="#4a4a52"/>')
+        g.append(f'<rect x="{x - 3}" y="{top - 3}" width="{w + 6}" height="5" fill="#e2d8c8"/>')
+        for k in range(max(1, int(w / 26))):
+            dx = x + 8 + k * (w - 12) / max(1, int(w / 26))
+            g.append(f'<rect x="{dx:.0f}" y="{top - 14}" width="11" height="12" fill="#4a4a52"/>')
+            g.append(f'<rect x="{dx + 2:.0f}" y="{top - 11}" width="7" height="8" fill="#cfe0ea"/>')
+        # chimneys, because a Boston roofline without them is a warehouse
+        g.append(f'<rect x="{x + w * 0.12:.0f}" y="{top - 30}" width="9" height="16" fill="{dark}"/>')
+        if w > 60:
+            g.append(f'<rect x="{x + w * 0.74:.0f}" y="{top - 26}" width="8" height="12" fill="{dark}"/>')
+        # tall sash windows, two or three per floor, black shutters
+        floors = max(2, int((h - 18) / 26))
+        per = max(2, int(w / 22))
+        for f_i in range(floors):
+            wy = top + 8 + f_i * ((h - 20) / floors)
+            wh = (h - 20) / floors * 0.62
+            for c in range(per):
+                wx = x + 6 + c * (w - 10) / per
+                ww = (w - 10) / per * 0.5
+                g.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{ww:.0f}" height="{wh:.0f}" '
+                         f'fill="#2f3a44"/>')
+                g.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{ww * 0.45:.0f}" '
+                         f'height="{wh:.0f}" fill="#7d95a6" opacity="0.65"/>')
+                g.append(f'<rect x="{wx - 1.5:.1f}" y="{wy + wh:.0f}" width="{ww + 3:.0f}" '
+                         f'height="2.5" fill="#e2d8c8"/>')
+        return ''.join(g)
+
+    backbay = ('    <g id="back-bay">'
+               # a hazy rank behind, so the wall has depth
+               + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{292 - y}" '
+                         f'fill="#7d6a68" opacity="0.6"/>'
+                         for x, y, w in [(20, 236, 90), (130, 244, 70), (250, 232, 80),
+                                         (400, 240, 76), (560, 234, 88), (700, 244, 72),
+                                         (830, 236, 84), (980, 242, 78), (1120, 234, 92),
+                                         (1230, 244, 70)])
+               + ''.join(rowhouse(x, w, h, i, bow)
+                         for x, w, h, i, bow in
+                         [(-20, 64, 50, 0, True), (44, 52, 44, 1, False), (96, 70, 54, 2, True),
+                          (166, 56, 46, 3, False), (222, 66, 56, 4, True), (288, 50, 44, 5, False),
+                          (338, 72, 52, 1, True), (410, 54, 46, 2, False), (464, 68, 58, 3, True),
+                          (532, 52, 44, 0, False), (584, 70, 50, 4, True), (654, 56, 54, 5, False),
+                          (710, 66, 46, 2, True), (776, 52, 52, 3, False), (828, 74, 56, 0, True),
+                          (902, 54, 44, 1, False), (956, 68, 54, 4, True), (1024, 56, 48, 5, False),
+                          (1080, 72, 58, 2, True), (1152, 52, 44, 3, False),
+                          (1204, 68, 52, 0, True), (1272, 56, 46, 1, False)])
+               # a church campanile and one taller apartment block, because an unbroken
+               # cornice line for 1280px reads as a wall rather than a neighbourhood
+               + '<g id="campanile">'
+               '<rect x="352" y="180" width="40" height="112" fill="#a3968a"/>'
+               '<rect x="352" y="180" width="14" height="112" fill="#b8aa9c"/>'
+               '<rect x="348" y="176" width="48" height="8" fill="#cabcae"/>'
+               '<g fill="#4a4a52"><rect x="360" y="196" width="9" height="18" rx="4"/>'
+               '<rect x="375" y="196" width="9" height="18" rx="4"/></g>'
+               '<polygon points="348,176 396,176 372,146" fill="#6f8180"/>'
+               '<rect x="370" y="132" width="4" height="16" fill="#6f8180"/></g>'
+               '<g id="tall-block">'
+               '<rect x="1096" y="196" width="66" height="96" fill="#8f4a3c"/>'
+               '<rect x="1096" y="196" width="20" height="96" fill="#a45a49"/>'
+               '<rect x="1092" y="192" width="74" height="7" fill="#e2d8c8"/>'
+               + '<g fill="#2f3a44">'
+               + ''.join(f'<rect x="{1104 + c * 18}" y="{206 + r * 22}" width="10" height="14"/>'
+                         for r in range(4) for c in range(3)) + '</g></g>'
+               + '</g>')
+
+    # -------------------------------------------- the Esplanade along the far bank ----
+    def maple(x, y, s=1.0, a='#c8762c', b='#e0983c', c='#a85a24', trunk='#5d4234'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-3,2 L-2,-16 L-8,-26 L-1,-22 L0,-34 L2,-22 L9,-28 L2,-16 L3,2 Z" '
+                f'fill="{trunk}"/>'
+                f'<circle cx="0" cy="-44" r="20" fill="{a}"/>'
+                f'<circle cx="-14" cy="-34" r="14" fill="{c}"/>'
+                f'<circle cx="14" cy="-36" r="13" fill="{c}"/>'
+                f'<circle cx="-6" cy="-54" r="13" fill="{b}"/>'
+                f'<circle cx="9" cy="-50" r="11" fill="{b}"/></g>')
+
+    def elm(x, y, s=1.0, a='#4a7a42', b='#5c9050', trunk='#5d4234'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-3,2 L-2,-18 L-9,-30 L-1,-24 L0,-38 L2,-24 L10,-32 L2,-18 L3,2 Z" '
+                f'fill="{trunk}"/>'
+                f'<ellipse cx="0" cy="-48" rx="24" ry="18" fill="{a}"/>'
+                f'<ellipse cx="-9" cy="-54" rx="14" ry="10" fill="{b}"/>'
+                f'<ellipse cx="11" cy="-44" rx="12" ry="9" fill="{b}"/></g>')
+
+    esplanade = ('    <g id="esplanade">'
+                 '<rect x="0" y="286" width="1280" height="26" fill="#4e7340"/>'
+                 '<rect x="0" y="286" width="1280" height="5" fill="#628947"/>'
+                 '<rect x="0" y="306" width="1280" height="6" fill="#8f8a80"/>'
+                 # the Hatch Shell — a half dome on the lawn, and unmistakable once you know it
+                 '<g transform="translate(742,304)">'
+                 '<path d="M-40,0 C -40,-32 40,-32 40,0 Z" fill="#d8cfc0"/>'
+                 '<path d="M-40,0 C -40,-32 0,-34 0,-34 L0,0 Z" fill="#e8e0d2"/>'
+                 '<g stroke="#b0a692" stroke-width="1.4" fill="none">'
+                 '<path d="M-30,0 C -30,-22 -14,-30 0,-31"/><path d="M-16,0 C -16,-26 -6,-32 0,-32"/>'
+                 '<path d="M16,0 C 16,-26 6,-32 0,-32"/><path d="M30,0 C 30,-22 14,-30 0,-31"/></g>'
+                 '<rect x="-46" y="-2" width="92" height="4" fill="#c2b8a6"/></g>'
+                 + ''.join(maple(x, 304, s) for x, s in
+                           [(40, 0.5), (120, 0.44), (232, 0.52), (330, 0.46), (470, 0.5),
+                            (560, 0.44), (664, 0.48), (860, 0.5), (960, 0.44), (1076, 0.52),
+                            (1180, 0.46), (1256, 0.5)])
+                 + ''.join(elm(x, 304, s) for x, s in
+                           [(80, 0.44), (180, 0.5), (286, 0.42), (400, 0.48), (516, 0.44),
+                            (612, 0.5), (818, 0.44), (912, 0.48), (1024, 0.42), (1128, 0.5)])
+                 + '</g>')
+
+    # ------------------------------------------------------------ the Charles ----
+    water_l = ('    <rect x="0" y="310" width="1280" height="88" fill="url(#charles)"/>\n'
+               '    <g fill="#8fb8cf" opacity="0.5">'
+               + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2.5" rx="1.2"/>'
+                         for x, y, w in [(60, 320, 90), (300, 328, 70), (520, 316, 110),
+                                         (760, 334, 80), (980, 322, 96), (1160, 340, 70),
+                                         (140, 352, 120), (420, 360, 90), (700, 356, 104),
+                                         (900, 372, 86), (1100, 366, 110), (30, 380, 96),
+                                         (560, 384, 74), (820, 390, 90)]) + '</g>\n'
+               # reflection of the city, only under the tall things
+               '    <g fill="#3a6178" opacity="0.35">'
+               '<rect x="470" y="310" width="66" height="42"/>'
+               '<rect x="906" y="310" width="72" height="34"/>'
+               '<rect x="740" y="310" width="58" height="28"/></g>\n'
+               # sailboats — small, and there are always dozens
+               + '    <g>' + ''.join(
+                   f'<g transform="translate({x},{y}) scale({s})">'
+                   f'<path d="M0,0 L0,-26 L15,-2 Z" fill="#f4f4ee"/>'
+                   f'<path d="M-2,-24 L-11,-2 L-2,-2 Z" fill="#e2e6e6"/>'
+                   f'<path d="M-15,0 L17,0 L13,5 L-11,5 Z" fill="#2f4a5c"/></g>'
+                   for x, y, s in [(148, 352, 0.86), (238, 336, 0.7), (392, 366, 0.94),
+                                   (628, 344, 0.74), (866, 358, 0.9), (1042, 338, 0.68),
+                                   (1190, 372, 1.0), (80, 386, 1.05), (960, 388, 1.0),
+                                   (466, 330, 0.6), (1108, 352, 0.82), (742, 378, 1.0),
+                                   (206, 368, 0.9), (1266, 336, 0.66)])
+               + '</g>\n'
+               # a rowing eight, which is the other thing always on this water
+               '    <g transform="translate(300,392) scale(0.9)">'
+               '<path d="M-64,0 C -40,-5 40,-5 64,0 C 40,4 -40,4 -64,0 Z" fill="#e8e4d8"/>'
+               '<g fill="#2f3a44">'
+               + ''.join(f'<rect x="{-46 + k * 16}" y="-4" width="4" height="5" rx="1.5"/>'
+                         for k in range(7)) + '</g>'
+               '<g stroke="#c8b48c" stroke-width="1.8">'
+               + ''.join(f'<path d="M{-46 + k * 16},-1 L{-56 + k * 16},9"/>' for k in range(7))
+               + '</g></g>')
+
+    # -------------------------------------------------- the bridge carrying the road ----
+    def bridge():
+        """The road crosses the Charles here, so it has to cross on something. Getting the
+        edge maths backwards the first time put the parapet posts out in open water, which
+        is a good reminder to derive both rails from the same function."""
+        TOPY, BOTY, SPAN = 310, 432, 720
+        def edge_l(y):
+            return 594 - (y - TOPY) * (164.0 / (SPAN - TOPY))
+        def edge_r(y):
+            return 686 + (y - TOPY) * (164.0 / (SPAN - TOPY))
+        posts = []
+        for y in (318, 334, 354, 378, 406, 428):
+            t = (y - TOPY) / float(SPAN - TOPY)
+            pw, ph = 2.5 + 4 * t, 14 + 26 * t
+            posts.append(f'<rect x="{edge_l(y) - pw:.1f}" y="{y - ph:.0f}" width="{pw:.1f}" '
+                         f'height="{ph:.0f}"/>')
+            posts.append(f'<rect x="{edge_r(y):.1f}" y="{y - ph:.0f}" width="{pw:.1f}" '
+                         f'height="{ph:.0f}"/>')
+        rail = (f'<polygon points="{edge_l(TOPY):.0f},{TOPY - 14} {edge_r(TOPY):.0f},{TOPY - 14} '
+                f'{edge_r(TOPY):.0f},{TOPY - 9} {edge_l(TOPY):.0f},{TOPY - 9}"/>'
+                f'<polygon points="{edge_l(TOPY):.0f},{TOPY - 14} {edge_l(TOPY):.0f},{TOPY - 9} '
+                f'{edge_l(BOTY):.0f},{BOTY - 22} {edge_l(BOTY):.0f},{BOTY - 30}"/>'
+                f'<polygon points="{edge_r(TOPY):.0f},{TOPY - 14} {edge_r(TOPY):.0f},{TOPY - 9} '
+                f'{edge_r(BOTY):.0f},{BOTY - 22} {edge_r(BOTY):.0f},{BOTY - 30}"/>')
+        return ('    <g id="bridge">'
+                # the shadow the deck throws on the water
+                f'<polygon points="{edge_l(398) - 16:.0f},398 {edge_r(398) + 16:.0f},398 '
+                f'{edge_r(TOPY) + 8:.0f},{TOPY} {edge_l(TOPY) - 8:.0f},{TOPY}" '
+                'fill="#2f5169" opacity="0.34"/>'
+                # granite piers, biggest nearest
+                + '<g>'
+                + ''.join(f'<polygon points="{640 - w},{y + hh} {640 - w * 0.76:.0f},{y} '
+                          f'{640 + w * 0.76:.0f},{y} {640 + w},{y + hh}" fill="#8f8a80"/>'
+                          f'<polygon points="{640 - w},{y + hh} {640 - w * 0.76:.0f},{y} '
+                          f'{640 - w * 0.22:.0f},{y} {640 - w * 0.34:.0f},{y + hh}" fill="#a8a296"/>'
+                          for w, y, hh in [(15, 320, 18), (24, 344, 24), (36, 378, 30)])
+                + '</g>'
+                # deck
+                + f'<polygon points="{edge_l(BOTY):.0f},{BOTY} {edge_r(BOTY):.0f},{BOTY} '
+                f'{edge_r(TOPY):.0f},{TOPY} {edge_l(TOPY):.0f},{TOPY}" fill="#a5a094"/>'
+                # raised footways, with a shadow line where they meet the carriageway
+                + f'<polygon points="{edge_l(BOTY):.0f},{BOTY} {edge_l(BOTY) + 56:.0f},{BOTY} '
+                f'{edge_l(TOPY) + 22:.0f},{TOPY} {edge_l(TOPY):.0f},{TOPY}" fill="#bdb7aa"/>'
+                + f'<polygon points="{edge_r(BOTY) - 56:.0f},{BOTY} {edge_r(BOTY):.0f},{BOTY} '
+                f'{edge_r(TOPY):.0f},{TOPY} {edge_r(TOPY) - 22:.0f},{TOPY}" fill="#b0aa9d"/>'
+                + f'<polygon points="{edge_l(BOTY) + 56:.0f},{BOTY} {edge_l(BOTY) + 66:.0f},{BOTY} '
+                f'{edge_l(TOPY) + 26:.0f},{TOPY} {edge_l(TOPY) + 22:.0f},{TOPY}" fill="#8a8579"/>'
+                + f'<polygon points="{edge_r(BOTY) - 66:.0f},{BOTY} {edge_r(BOTY) - 56:.0f},{BOTY} '
+                f'{edge_r(TOPY) - 22:.0f},{TOPY} {edge_r(TOPY) - 26:.0f},{TOPY}" fill="#8a8579"/>'
+                + f'<polygon points="{edge_l(BOTY) - 10:.0f},{BOTY + 14} '
+                f'{edge_r(BOTY) + 10:.0f},{BOTY + 14} {edge_r(BOTY):.0f},{BOTY - 6} '
+                f'{edge_l(BOTY):.0f},{BOTY - 6}" fill="#8f8a80"/>'
+                + f'<polygon points="{edge_l(BOTY) - 10:.0f},{BOTY + 14} '
+                f'{edge_r(BOTY) + 10:.0f},{BOTY + 14} {edge_r(BOTY) + 10:.0f},{BOTY + 9} '
+                f'{edge_l(BOTY) - 10:.0f},{BOTY + 9}" fill="#6f6a62"/>'
+                + f'<g fill="#3f3f46">{"".join(posts)}{rail}</g>'
+                + '</g>')
+
+    # ------------------------------------------------------ the Cambridge bank ----
+    ground_l = ('    <rect x="0" y="398" width="1280" height="322" fill="url(#grassg)"/>\n'
+                # the sea wall and its shadow on the water
+                '    <g><rect x="0" y="392" width="1280" height="10" fill="#9a958b"/>'
+                '<rect x="0" y="392" width="1280" height="3" fill="#b6b0a4"/>'
+                '<rect x="0" y="402" width="1280" height="4" fill="#3f5f38" opacity="0.5"/></g>\n'
+                # the riverside path
+                '    <g><rect x="0" y="424" width="1280" height="20" fill="#c2b49a"/>'
+                '<rect x="0" y="424" width="1280" height="3" fill="#d4c7ae"/>'
+                '<rect x="0" y="444" width="1280" height="3" fill="#8f8467"/></g>\n'
+                # a second path this side of the tracks, where we are standing
+                '    <g><rect x="0" y="600" width="1280" height="30" fill="#c2b49a"/>'
+                '<rect x="0" y="600" width="1280" height="4" fill="#d4c7ae"/>'
+                '<rect x="0" y="630" width="1280" height="4" fill="#8f8467"/></g>\n'
+                # fallen leaves scattered on the grass
+                '    <g>'
+                + ''.join(f'<ellipse cx="{(i * 137) % 1280}" cy="{560 + (i * 53) % 150}" '
+                          f'rx="{3 + i % 3}" ry="{2 + i % 2}" '
+                          f'fill="{["#c8762c", "#e0983c", "#a85a24", "#d9a94c"][i % 4]}" '
+                          f'opacity="0.8"/>' for i in range(64))
+                + '</g>\n'
+                '    <g fill="#3f5f38" opacity="0.18">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.16:.0f}"/>'
+                          for x, y, r in [(200, 500, 150), (700, 520, 130), (1100, 496, 140),
+                                          (400, 660, 160), (950, 676, 150)]) + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def gaslamp(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-3" y="-78" width="6" height="78" fill="#2b2b30"/>'
+                f'<rect x="-8" y="-4" width="16" height="6" rx="2" fill="#2b2b30"/>'
+                f'<path d="M-8,-80 L8,-80 L5,-98 L-5,-98 Z" fill="#2b2b30"/>'
+                f'<path d="M-6,-82 L6,-82 L4,-96 L-4,-96 Z" fill="#ffedbe"/>'
+                f'<path d="M-9,-98 L9,-98 L0,-108 Z" fill="#2b2b30"/>'
+                f'<circle cx="0" cy="-110" r="2.6" fill="#2b2b30"/></g>')
+
+    def railing(x, y, n, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})" fill="#2b2b30">'
+                f'<rect x="0" y="-34" width="{n * 16 + 4}" height="3.5" rx="1.5"/>'
+                f'<rect x="0" y="-6" width="{n * 16 + 4}" height="3" rx="1.5"/>'
+                + ''.join(f'<rect x="{2 + k * 16}" y="-38" width="3" height="38"/>'
+                          f'<circle cx="{3.5 + k * 16}" cy="-40" r="2.6"/>' for k in range(n + 1))
+                + '</g>')
+
+    def person(x, y, s=1.0, coat='#3f5f8c', trouser='#2f3440', skin='#c98d63', hat=None):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{trouser}"><rect x="-6" y="-22" width="5" height="22" rx="2"/>'
+                f'<rect x="1" y="-22" width="5" height="22" rx="2"/></g>'
+                f'<rect x="-8" y="-42" width="16" height="23" rx="5" fill="{coat}"/>'
+                f'<rect x="-11" y="-40" width="4" height="18" rx="2" fill="{coat}"/>'
+                f'<rect x="7" y="-40" width="4" height="18" rx="2" fill="{coat}"/>'
+                f'<circle cx="0" cy="-49" r="7" fill="{skin}"/>'
+                + (f'<path d="M-8,-52 C -8,-59 8,-59 8,-52 Z" fill="{hat}"/>'
+                   f'<rect x="-9" y="-53" width="18" height="2.6" rx="1.3" fill="{hat}"/>' if hat else
+                   f'<path d="M-7,-52 C -7,-58 7,-58 7,-52 Z" fill="#4a3a2e"/>')
+                + '</g>')
+
+    def dog(x, y, s=1.0, col='#6b4a34'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 14, 3, 0.16)}'
+                f'<ellipse cx="0" cy="-12" rx="14" ry="8" fill="{col}"/>'
+                f'<g fill="{col}"><rect x="-10" y="-8" width="4" height="9" rx="2"/>'
+                f'<rect x="-2" y="-8" width="4" height="9" rx="2"/>'
+                f'<rect x="7" y="-8" width="4" height="9" rx="2"/></g>'
+                f'<circle cx="14" cy="-18" r="7" fill="{col}"/>'
+                f'<path d="M10,-24 L12,-32 L17,-25 Z" fill="{col}"/>'
+                f'<path d="M-13,-16 C -20,-22 -20,-28 -15,-28" stroke="{col}" stroke-width="3.4" '
+                f'fill="none" stroke-linecap="round"/>'
+                f'<circle cx="20" cy="-17" r="2" fill="#2b2b30"/></g>')
+
+    def bench(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 40, 6, 0.2)}'
+                f'<rect x="-38" y="-14" width="76" height="6" rx="2" fill="#6b4a34"/>'
+                f'<rect x="-38" y="-24" width="76" height="6" rx="2" fill="#7d5940"/>'
+                f'<rect x="-38" y="-34" width="76" height="6" rx="2" fill="#6b4a34"/>'
+                f'<rect x="-34" y="-14" width="5" height="14" fill="#2b2b30"/>'
+                f'<rect x="29" y="-14" width="5" height="14" fill="#2b2b30"/></g>')
+
+    def swan(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="0" cy="0" rx="13" ry="7" fill="#f4f4ee"/>'
+                f'<path d="M6,-4 C 12,-10 12,-18 7,-20 C 4,-21 2,-19 3,-17 C 7,-15 7,-9 2,-4 Z" '
+                f'fill="#f4f4ee"/>'
+                f'<path d="M3,-19 L-2,-20 L3,-17 Z" fill="#e08a2c"/>'
+                f'<circle cx="5.5" cy="-18.5" r="1" fill="#2b2b30"/></g>')
+
+    back = ('    ' + ''.join(gaslamp(x, 444, 0.5) for x in (66, 296, 470, 830, 1010, 1226))
+            + railing(0, 424, 12, 0.5) + railing(212, 424, 10, 0.5)
+            + railing(742, 424, 12, 0.5) + railing(1010, 424, 12, 0.5)
+            + ''.join(maple(x, 430, s) for x, s in [(150, 0.72), (392, 0.66), (886, 0.7), (1136, 0.64)])
+            + ''.join(elm(x, 430, s) for x, s in [(250, 0.66), (500, 0.7), (960, 0.64), (1226, 0.72)])
+            + ''.join(person(x, 438, s, c, t, sk, h) for x, s, c, t, sk, h in
+                      [(108, 0.5, '#b8442f', '#2f3440', '#c98d63', None),
+                       (208, 0.46, '#3f5f8c', '#4a4a52', '#8a5a3c', '#2f3440'),
+                       (330, 0.5, '#4f8a6a', '#2f3440', '#e0b58c', None),
+                       (556, 0.46, '#e0983c', '#37414f', '#c98d63', None),
+                       (800, 0.5, '#7a4f9e', '#2f3440', '#8a5a3c', '#2f3440'),
+                       (1064, 0.48, '#c8762c', '#4a4a52', '#e0b58c', None)])
+            + swan(96, 396, 0.6) + swan(126, 392, 0.5) + swan(1174, 394, 0.55)
+            + swan(430, 394, 0.52) + swan(458, 390, 0.44) + swan(908, 396, 0.58)
+            # a little launch pottering across, which this river always has
+            + '<g transform="translate(1010,364) scale(0.8)">'
+              '<path d="M-22,0 L22,0 L17,7 L-17,7 Z" fill="#e8e4d8"/>'
+              '<rect x="-9" y="-9" width="18" height="9" rx="2" fill="#f4f4ee"/>'
+              '<rect x="-1.2" y="-19" width="2.4" height="11" fill="#6f6a62"/>'
+              '<path d="M-24,7 C -10,11 10,11 24,7" stroke="#8fb8cf" stroke-width="2" fill="none" opacity="0.7"/></g>')
+
+    front = ('    '
+             # a big maple leaning in from each side, which frames the whole view
+             + maple(70, 660, 2.1) + maple(1214, 676, 2.3)
+             + elm(300, 604, 1.35) + maple(1010, 610, 1.5) + elm(884, 596, 1.15)
+             + gaslamp(180, 632, 1.05) + gaslamp(1120, 632, 1.05)
+             + railing(0, 632, 9, 0.95) + railing(796, 632, 12, 0.95)
+             + bench(412, 636, 0.95) + bench(1006, 640, 1.0)
+             + person(452, 634, 0.86, '#b8442f', '#2f3440', '#c98d63', '#2f3440')
+             + person(486, 628, 0.78, '#3f5f8c', '#4a4a52', '#e0b58c', None)
+             + person(244, 664, 0.92, '#4f8a6a', '#2f3440', '#8a5a3c', None)
+             + dog(292, 668, 0.9)
+             + person(956, 636, 0.84, '#e0983c', '#37414f', '#c98d63', None)
+             + person(824, 668, 0.9, '#7a4f9e', '#2f3440', '#e0b58c', '#2f3440')
+             # leaf piles under the big trees
+             + ''.join(f'<g fill="{c}" opacity="0.85">'
+                       f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.28:.0f}"/></g>'
+                       for x, y, r, c in [(118, 692, 46, '#c8762c'), (150, 700, 34, '#e0983c'),
+                                          (1180, 706, 52, '#c8762c'), (1140, 714, 36, '#a85a24'),
+                                          (330, 700, 30, '#d9a94c'), (930, 706, 34, '#c8762c')]))
+
+    scene('boston', 'BOSTON — Back Bay across the Charles from Cambridge, early autumn', {
+        'sky': sky_l,
+        'far': skyline + '\n' + backbay + '\n' + esplanade,
+        'ground': ground_l,
+        'water': water_l + '\n' + bridge(),
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#3f5f38" opacity="0.3"><rect x="0" y="712" width="1280" height="8"/></g>',
+        'roadkw': dict(surface='#5f5a54', surface2='#4d4842', shoulder='#b6b0a4', dash='#f0e3a8'),
+        'trackkw': dict(ballast='#8a8378', ballast_hi='#9c958a', tie='#4a3a2e', rail='#d3d7dc'),
+    }, d)
+
+
 # -------------------------------------------------------------------- run ----
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral()
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

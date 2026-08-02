@@ -124,6 +124,27 @@ A scene reads as a *specific place* when it carries these five, and reads generi
 4. **A water or terrain feature** that ties the composition together — Clear Creek links the mountains to the foreground pond; the bay, the lake, the bayou play the same role elsewhere.
 5. **A regional/seasonal cue** — fall aspen gold, desert heat haze, coastal fog, snow.
 
+**Truth about the place beats variety across the set.** These two pull against each other,
+and when they do, **truth wins**. Never strip something authentic out of a place because
+another place already has it. Savannah has live oaks dripping with Spanish moss and so does
+New Orleans — that is a fact about the American South, not a mistake to design around. Both
+get their moss. Pennsylvania has a big red barn and so does Wisconsin; both get their barn.
+
+Distinctiveness is bought with **the hero, the palette, the light and the composition** — not
+by withholding true things:
+
+| Lever | Example |
+|---|---|
+| Different hero | Savannah's fountain under the oaks vs New Orleans' cathedral and river |
+| Different palette | Savannah's spring green and white vs NOLA's sunset gold |
+| Different light | Nashville late afternoon, Austin sunset, Las Vegas full night |
+| Different composition | Florida's rocket vertical on the pad vs Houston's hardware parked flat on grass |
+| Different ground | LA's dry sand vs Delaware's boardwalk vs Maine's wet granite |
+
+If after all that two scenes still read alike, the answer is to strengthen the hero of each —
+not to take the moss off the oaks. A child who sees a live oak in two Southern states has
+learned something correct about the South.
+
 **Be true to what the place actually is — especially the GROUND.** The single biggest
 mistake is dropping every location onto the same green lawn. Ground cover is half of what
 makes a place read correctly:
@@ -147,7 +168,10 @@ recognition than any single landmark.
 - [ ] Shared geometry unchanged (horizon, road, track, gate positions)
 - [ ] Layer order matches §2, with the train slot after `#gate-far`
 - [ ] **Track band `y = 450–516` is clear of all props**
-- [ ] Nothing overlaps the road corridor
+- [ ] Nothing overlaps the road corridor — **run `python3 tools/check-scenes.py`**, which
+      computes the carriageway width at each prop's own `y` and flags anything standing in it.
+      Eyeballing this fails: the road narrows with distance, so a bench that looks clear at the
+      top of the frame is in the middle of the lane at the bottom.
 - [ ] Signature landmark present and prominent
 - [ ] Region-correct rock/ground colours
 - [ ] Grounding shadows on every prop
@@ -163,29 +187,6 @@ recognition than any single landmark.
       LA needed towels and sunbathers. Ordinary things, densely placed — not more landmarks.
 - [ ] Renders correctly (screenshot it — see §6)
 - [ ] Well-formed XML
-
-### Optional: a scenery train that moves
-
-Background trains can run without any engine change. Tag the group `cc-scenery-train`
-and tell it where its rail is; `scene.js` picks it up on mount and drives it in the main
-loop. Colorado's Georgetown Loop trestle is the worked example.
-
-| Attribute | Meaning |
-|---|---|
-| `data-rail` | `x0,y0 cx,cy x1,y1` — a **quadratic Bezier**, normally the same curve as the rail you drew. The train follows it, so it stays on a curved deck instead of sliding flat across it. |
-| `data-run` | `min max` in Bezier `t` (default `0 1`). |
-| `data-fade` | how much of each end is spent fading in/out, in `t` (default `0.1`). |
-| `data-lift` | y offset from the rail to the group's origin (negative = above). |
-| `data-secs` / `data-pause` | seconds to run, then seconds hidden before the next one. |
-
-**`data-run` is the one that bites.** The train has length, and your trestle is drawn *in
-front of* the slopes, so nothing occludes it — run it the full `0 1` and the rear wagon
-hangs in mid-air off the end of the bridge. Work out the range from the group's own extent:
-Colorado's spans `x=-40..+32` about its origin, its deck runs `x=244..394`, and on its rail
-`x = 250 + 138t`, giving `0.25 0.81`.
-
-Use a **class, not an id** — `tools/inline-assets.py` namespaces ids per scene (only the
-handful in `KEEP_IDS` survive), and classes are left alone.
 
 ---
 
@@ -235,6 +236,27 @@ Iterate: render → review → adjust → re-render. Colorado took eight passes.
 | Only one crossing gate | Two gates, cars from both directions |
 | A canyon reads as a striped wall | Stack **promontories** — near, dark and jutting in from both sides; middle; far — so the eye reads a void between them. Horizontal strata alone always flatten. |
 | A city block looks like scattered houses | Make it a continuous **wall** of buildings with a taller rank glimpsed behind it. Cities have no gaps at street level. |
+| A scene reads generic no matter what you add | **Name the viewpoint.** Not "Alaska" — *the Alaska Range from the Susitna flats near Talkeetna*. Every scene that works in this set is a specific place seen from a specific spot. Without one you end up assembling a bag of regional objects instead of drawing somewhere, and no amount of extra detail fixes it. |
+| A desert reads as a green field with rocks on it | The desert's ground **is** the subject. Draw bare stone — overlapping lopsided swells, each lit on one shoulder and shadowed on the other, at four or five different sizes — and let plants be the exception dotted into it. An even scatter of trees on flat orange is savanna, not slickrock. |
+| Rock banding turns into a bullseye | Don't build a rock from nested outlines of itself. One shape, one lit face, one shadowed face, and at most two faint bedding lines *following* the curve. Concentric rings read as a target every time — Moab's first pass was five of them per swell. |
+| A desert tree looks like broccoli | Junipers and piñons are ragged: notch the canopy outline, make it wider than tall, drop the green towards grey, and hang one dead silver limb off the side. A smooth round canopy on a straight trunk is a park tree wherever you put it. |
+| An enormous cliff needs a recess | Use a **ledge that spans the whole face**, not an oval alcove. A closed lens shape floating on a wall reads as a painted eye; a horizontal step reads as rock because it crosses the fluting. |
+| A street-level building disappears | In a city scene the ground layer's asphalt starts at the **horizon**, so anything put in `mid` gets buried by it. Street-level buildings belong in the same layer as the street, drawn straight after the road surface. Cost me a full render on Nashville. |
+| Cars end up parked on the pavement | Leave a **traffic lane**. If the building line sits hard against the track band there is nowhere for a car to be, and every prop drifts onto the footway. Push the block up thirty pixels and the street reads instantly. |
+| A projecting sign reads as a coloured pill | Size the **sign** first and the building second. A neon blade squeezed into a short façade came out 24px tall and read as a lozenge; the fix was taller buildings, not a cleverer sign. |
+| A drawn guitar reads as a snowman | Two equal circles stacked is a snowman. The lower bout must be clearly bigger than the upper and the waist only shallow — the same rule as any waisted shape. |
+| The road runs straight into water | Then it has to cross on something. Give it a deck, footways, piers and a parapet — and derive **both** rails from one function of y. Getting the sign backwards on one of them put a row of posts out in the open river. |
+| A bridge dissolves into the frame | A bridge has to **land**. End the deck at the bank with an abutment rather than running it to the bottom edge; otherwise it reads as a grey ribbon painted on the water. |
+| A low brick city loses its towers | Boston, Philadelphia, Baltimore. The continuous row-house wall will eat the skyline if you let it — keep the wall genuinely low and let the two or three tall things be genuinely tall. Half the character of these places is that contrast. |
+| A vast place feels small and cosy | Two causes, both mine on Alaska. **A white peak sitting straight on the waterline reads as a nearby hill** — you need a band of dark foothills between it and the viewer to buy the distance. And **a continuous hedge of trees kills scale**: taiga is patchy, so leave wide open gaps and let the land breathe. |
+| One mountain does not say "mountains" | Where a place is *made* of ranges — Alaska, Montana, the Cascades — stack three or four ridgelines at different values, each jagged and irregular. A single peak, however big, reads as a landmark; overlapping ranges read as a country. |
+| An autumn scene only has colour on the ground | Autumn is in the **canopy**. Give the deciduous trees the gold — birch, cottonwood, aspen — and leave the conifers dark green. The contrast between gold crowns and black-green spruce is what reads as a northern autumn; orange ground under green trees reads as nothing. |
+| A swarm/flock reads as smoke or a smudge | Put it **against the bright part of the sky**, never over a dark silhouette, and build it from a dense *core* plus a loose *halo* in several opacity bands. Austin's bats only worked once the plume was moved off the skyline and over the sunset. |
+| Two white things overlap and read as one blob | Give the nearer one a **dark underside**. The shuttle vanished into the 747 until its black belly tiles went in — one dark edge did what no amount of outlining could. |
+| A prop parks on top of the hero | Draw order inside a layer is depth. Emit the car park, treeline and background clutter **before** the hero, or a parked car ends up sitting on the wing. |
+| Every light in a night scene has a big halo, and the picture turns to soup | Glow radii want to be **roughly the size of the fixture**, not five times it. Three stacked haloes at ~1.5× / 1.0× / 0.55× the source radius, with the outer one under 5% opacity. Vegas was unreadable until the haloes came down by two-thirds. |
+| Reflections on a wet road read as light shafts | Start the smear **below its own light source**, not at the horizon, and keep it short. A reflection that runs the full height of the frame stops looking like the ground and starts looking like a beam. |
+| A dusk or night scene looks like daylight turned down | Everything in shadow goes **dark and blue**, and the only saturated colour comes from actual light sources — bulbs, windows, neon, the sun. Warm pooled glows around each light source are what sell it. |
 
 ---
 
@@ -250,8 +272,17 @@ Iterate: render → review → adjust → re-render. Colorado took eight passes.
 | New York City | NY | ✅ Brooklyn Bridge, full skyline, a solid block of brownstones and walk-ups |
 | Seattle | WA | ✅ Space Needle, Mount Rainier, ferry, drizzle |
 | New Orleans | LA | ✅ French Quarter balconies, streetcar, live oaks |
+| Austin | TX | ✅ A million bats off the Congress Avenue Bridge at sunset, the Capitol dome |
+| Houston | TX | ✅ The shuttle Independence riding a 747, a Saturn V on its side, hazy Gulf summer |
+| Cape Canaveral | FL | ✅ A rocket off Pad 39, the VAB, saltmarsh, lagoon and a gator |
+| Oʻahu | HI | ✅ Diamond Head over the Waikīkī reef, outriggers, the Duke, hula |
+| Denali | AK | ✅ The Alaska Range from the Susitna flats, aurora over a spruce valley |
+| Las Vegas | NV | ✅ The Strip after dark — hot neon on wet asphalt |
+| Moab | UT | ✅ Delicate Arch from the slickrock, the La Sals behind, Highway 128 under the wall |
+| Nashville | TN | ✅ Lower Broadway, honky tonk neon on Victorian brick, late afternoon |
+| Boston | MA | ✅ Back Bay across the Charles from Cambridge, early autumn |
 
-**All eight built.** Seven are generated by `tools/gen-scenes.py`, which owns the shared
+**Seventeen built.** Sixteen are generated by `tools/gen-scenes.py`, which owns the shared
 furniture (road, track, both gates) so geometry can't drift and a gate can't go missing;
 each scene supplies only its artwork, slotted into the correct depth layers. Colorado stays
 hand-authored as the reference. Verify with `tools/build-scene-gallery.py`, which renders

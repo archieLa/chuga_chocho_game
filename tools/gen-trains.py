@@ -535,10 +535,222 @@ def container():
          'DOUBLE-STACK CONTAINER WELL CAR', L, L / 2, 'wagon', 'Container (double stack)')
 
 
+def cane_tank():
+    """Hawaiian sugar-cane plantation tank engine. Narrow-gauge, saddle tank over the
+    boiler, big balloon spark-arrestor stack (cane trash burns and throws sparks — the
+    stack is a fire precaution, not decoration), open-backed cab, and a wooden pilot.
+    Deliberately small: it should look like it would fit in the diesel's cab."""
+    L = 250; h = L / 2
+    b = [shadow(-h - 6, h + 20)]
+    # frame and running board
+    b.append(f'<rect x="{-h+4}" y="-46" width="{L+8}" height="12" rx="3" fill="#2f2a26"/>')
+    b.append(f'<rect x="{-h+4}" y="-50" width="{L+8}" height="5" rx="2" fill="#6b5c48"/>')
+    # boiler
+    b.append(f'<rect x="{-h+52}" y="-104" width="{L-70}" height="52" rx="14" fill="#2b3830"/>')
+    b.append(f'<rect x="{-h+52}" y="-104" width="{L-70}" height="12" rx="6" fill="#35463b"/>')
+    # smokebox at the front, with its door
+    b.append(f'<rect x="{h-46}" y="-108" width="42" height="60" rx="10" fill="#1f2823"/>')
+    b.append(f'<circle cx="{h-24}" cy="-78" r="19" fill="#2b3830"/>')
+    b.append(f'<circle cx="{h-24}" cy="-78" r="15" fill="#1a221e"/>')
+    b.append(f'<g class="cc-brass" fill="#d4a943"><circle cx="{h-24}" cy="-78" r="4.5"/>'
+             f'<rect x="{h-26}" y="-96" width="4" height="36" rx="2"/></g>')
+    # the saddle tank sitting over the boiler
+    b.append(f'<rect class="cc-loco" x="{-h+46}" y="-126" width="{L-92}" height="46" rx="12" '
+             f'fill="#2f6b45"/>')
+    b.append(f'<rect x="{-h+46}" y="-126" width="{L-92}" height="12" rx="6" fill="#3a7f53"/>')
+    b.append(f'<g class="cc-brass" fill="#d4a943">'
+             f'<rect x="{-h+50}" y="-92" width="{L-100}" height="3"/>'
+             f'<rect x="{-h+50}" y="-120" width="{L-100}" height="2.5"/></g>')
+    # the balloon stack — the single most recognisable thing on a cane engine
+    b.append(f'<rect x="{h-33}" y="-134" width="12" height="30" fill="#1f2823"/>')
+    # the balloon: bulges out and back in. A straight cone with a cap is a factory
+    # chimney; the bulge is the spark arrestor, and it is the whole silhouette.
+    b.append(f'<path d="M{h-33},-132 C {h-56},-152 {h-58},-176 {h-42},-186 '
+             f'L{h-12},-186 C {h+4},-176 {h+2},-152 {h-21},-132 Z" fill="#1f2823"/>')
+    b.append(f'<path d="M{h-33},-132 C {h-56},-152 {h-58},-176 {h-42},-186 '
+             f'L{h-33},-186 C {h-46},-174 {h-44},-152 {h-27},-132 Z" fill="#2b3830"/>')
+    b.append(f'<rect x="{h-45}" y="-192" width="36" height="8" rx="3" fill="#2b3830"/>')
+    b.append(f'<rect class="cc-brass" x="{h-45}" y="-196" width="36" height="5" rx="2" fill="#d4a943"/>')
+    # steam dome, sand dome, whistle, bell
+    b.append(f'<path d="M{-h+96},-126 C {-h+96},-146 {-h+128},-146 {-h+128},-126 Z" fill="#2b3830"/>')
+    b.append(f'<rect class="cc-brass" x="{-h+100}" y="-150" width="24" height="7" rx="3" fill="#d4a943"/>')
+    b.append(f'<g class="cc-brass" fill="#d4a943">'
+             f'<rect x="{h-64}" y="-146" width="7" height="20" rx="3"/>'
+             f'<path d="M{-h+140},-126 L{-h+156},-126 L{-h+152},-142 L{-h+144},-142 Z"/>'
+             '</g>')
+    b.append(f'<g class="cc-brass" fill="#d4a943">'
+             f'<rect x="{-h+140}" y="-152" width="4" height="14" rx="2"/>'
+             f'<rect x="{-h+156}" y="-152" width="4" height="14" rx="2"/>'
+             f'<rect x="{-h+138}" y="-155" width="24" height="4" rx="2"/>'
+             f'<path d="M{-h+142},-138 C {-h+142},-152 {-h+158},-152 {-h+158},-138 Z"/>'
+             f'<rect x="{-h+140}" y="-139" width="20" height="4" rx="2"/></g>')
+    # cab, open at the back the way plantation cabs are
+    b.append(f'<rect class="cc-loco" x="{-h+4}" y="-140" width="62" height="92" rx="5" fill="#2f6b45"/>')
+    b.append(f'<rect x="{-h+4}" y="-140" width="62" height="12" rx="5" fill="#3a7f53"/>')
+    b.append(f'<rect x="{-h+14}" y="-128" width="24" height="28" rx="3" fill="#dff0f6"/>')
+    b.append(f'<rect x="{-h+14}" y="-128" width="24" height="11" rx="3" fill="#eef8fc"/>')
+    b.append(f'<rect x="{-h+4}" y="-96" width="62" height="30" fill="#1f2823" opacity="0.35"/>')
+    b.append(f'<rect class="cc-roof" x="{-h-6}" y="-152" width="88" height="14" rx="5" fill="#8f3b32"/>')
+    b.append(f'<rect class="cc-roof" x="{-h-6}" y="-152" width="88" height="5" rx="3" fill="#a34a3f"/>')
+    # headlamp on the smokebox front
+    b.append(f'<rect x="{h-14}" y="-124" width="22" height="20" rx="4" fill="#2b3830"/>')
+    b.append(f'<circle cx="{h-3}" cy="-114" r="7" fill="#fff3c4"/>')
+    # wooden pilot / cowcatcher
+    b.append(f'<rect x="{h-2}" y="-50" width="16" height="14" rx="3" fill="#4f4438"/>')
+    b.append(f'<path d="M{h+12},-48 L{h+34},-14 L{h+2},-14 L{h+2},-48 Z" fill="#6b5c48"/>')
+    b.append(f'<path d="M{h+12},-48 L{h+34},-14 L{h+26},-14 L{h+6},-48 Z" fill="#8d7a5f"/>')
+    b.append(f'<g stroke="#4f4438" stroke-width="2.2">'
+             f'<line x1="{h+10}" y1="-40" x2="{h+10}" y2="-16"/>'
+             f'<line x1="{h+18}" y1="-30" x2="{h+18}" y2="-16"/>'
+             f'<line x1="{h+26}" y1="-22" x2="{h+26}" y2="-16"/></g>')
+    # running gear: two drivers and a trailing wheel. No side rod on purpose — the
+    # gallery's rod animation is pinned to the big steam loco's exact geometry, and a
+    # rod that visibly does not move is worse than no rod at all.
+    b.append(wheel(-h + 96, 22) + wheel(-h + 152, 22) + wheel(-h + 34, 13))
+    b.append(f'<rect x="{-h+72}" y="-30" width="104" height="7" rx="3" fill="#2f343c"/>')
+    b.append(coupler(-h - 2))
+    emit('cane-tank', '-140 -205 300 225', '  ' + ''.join(b),
+         'HAWAIIAN SUGAR-CANE PLANTATION TANK ENGINE', L, L / 2, 'engine',
+         'Cane plantation tank engine')
+
+
+def cane_car():
+    """Open cane car: a low flat wagon with stake sides, piled with cut cane. These ran
+    in strings of a dozen from the fields down to the mill."""
+    L = 210; h = L / 2
+    b = [shadow(-h, h)]
+    # deck
+    b.append(f'<rect x="{-h+4}" y="-58" width="{L-8}" height="14" rx="3" fill="#6b5c48"/>')
+    b.append(f'<rect x="{-h+4}" y="-58" width="{L-8}" height="4" rx="2" fill="#8d7a5f"/>')
+    # stake sides
+    b.append('<g fill="#4f4438">' + ''.join(
+        f'<rect x="{-h+12+i*24}" y="-108" width="7" height="52" rx="2"/>' for i in range(8)) + '</g>')
+    b.append(f'<g fill="#5c5041"><rect x="{-h+8}" y="-104" width="{L-16}" height="5" rx="2"/>'
+             f'<rect x="{-h+8}" y="-78" width="{L-16}" height="5" rx="2"/></g>')
+    # the load: cut cane, stacked lengthways and spilling over the top
+    b.append(f'<rect class="cc-wagon" x="{-h+10}" y="-98" width="{L-20}" height="42" rx="4" '
+             f'fill="#9caf4e"/>')
+    b.append('<g stroke="#b8c96a" stroke-width="2.6" stroke-linecap="round">' + ''.join(
+        f'<line x1="{-h+16}" y1="{-94+i*7}" x2="{h-16}" y2="{-92+i*7}"/>' for i in range(6)) + '</g>')
+    b.append('<g stroke="#7d8f3c" stroke-width="1.8" stroke-linecap="round">' + ''.join(
+        f'<line x1="{-h+16}" y1="{-90+i*7}" x2="{h-16}" y2="{-88+i*7}"/>' for i in range(5)) + '</g>')
+    b.append(f'<path d="M{-h+14},-98 C {-h+60},-116 {h-60},-116 {h-14},-98 Z" fill="#a8bb58"/>')
+    b.append('<g stroke="#c2d276" stroke-width="2.2" stroke-linecap="round">' + ''.join(
+        f'<line x1="{-h+22+i*26}" y1="-100" x2="{-h+46+i*26}" y2="-112"/>' for i in range(6)) + '</g>')
+    # a few loose stalks poking out the end, because a full car never looks tidy
+    b.append('<g stroke="#b8c96a" stroke-width="2.4" stroke-linecap="round">'
+             f'<line x1="{h-20}" y1="-96" x2="{h+16}" y2="-104"/>'
+             f'<line x1="{h-20}" y1="-88" x2="{h+12}" y2="-92"/></g>')
+    b.append(underframe(L, h - 44, y=-44, h=9))
+    b.append(truck(-h + 44, r=13, n=2, spacing=34) + truck(h - 44, r=13, n=2, spacing=34))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-cane', '-125 -135 250 150', '  ' + ''.join(b),
+         'OPEN SUGAR-CANE CAR', L, L / 2, 'wagon', 'Cane car (open)')
+
+
+def monorail():
+    """Las Vegas Strip monorail: a straddle-beam car, so it has no visible wheels — the
+    running gear rides inside the beam. Drawn with a deep skirt down to the rail line and
+    small guide wheels showing under it, which is what a straddle monorail looks like from
+    the side. Rounded nose, one continuous window band, roof air-conditioning pods."""
+    L = 430; h = L / 2
+    b = [shadow(-h - 4, h + 8)]
+    # deep skirt down to the running line, standing in for the beam
+    b.append(f'<rect x="{-h+6}" y="-56" width="{L-12}" height="46" rx="6" fill="#39414c"/>')
+    b.append(f'<rect x="{-h+6}" y="-56" width="{L-12}" height="8" rx="4" fill="#4a5460"/>')
+    b.append('<g fill="#252b33">' + ''.join(
+        f'<rect x="{-h+30+i*54}" y="-30" width="34" height="16" rx="4"/>' for i in range(7)) + '</g>')
+    # guide wheels peeping out below the skirt
+    b.append(''.join(wheel(x, 9, hub='#9aa2ab') for x in (-h + 66, -h + 106, h - 106, h - 66)))
+    # body, with a rounded nose at the front
+    b.append(f'<path class="cc-loco" d="M{-h+8},-140 L{h-52},-140 '
+             f'C {h-14},-140 {h+4},-124 {h+4},-100 L{h+4},-52 L{-h+8},-52 Z" fill="#f2f4f6"/>')
+    b.append(f'<path d="M{-h+8},-140 L{h-52},-140 C {h-14},-140 {h+4},-124 {h+4},-100 '
+             f'L{h+4},-128 C {h-10},-146 {h-40},-148 {h-56},-148 L{-h+8},-148 Z" fill="#ffffff"/>')
+    # the livery band — this is where the recolour lands
+    b.append(f'<rect class="cc-trim" x="{-h+8}" y="-76" width="{L-4}" height="17" fill="#c0392b"/>')
+    b.append(f'<rect x="{-h+8}" y="-59" width="{L-4}" height="3.5" fill="#8f2a20"/>')
+    # door seams, drawn UNDER the window band so they don't cross the glass
+    b.append('<g fill="#d2d7dd">' + ''.join(
+        f'<rect x="{-h+52+i*104}" y="-138" width="2.5" height="82"/>'
+        f'<rect x="{-h+86+i*104}" y="-138" width="2.5" height="82"/>' for i in range(4)) + '</g>')
+    b.append('<g fill="#a3302a">' + ''.join(
+        f'<rect x="{-h+52+i*104}" y="-76" width="2.5" height="17"/>'
+        f'<rect x="{-h+86+i*104}" y="-76" width="2.5" height="17"/>' for i in range(4)) + '</g>')
+    # one continuous window band, dark and glassy
+    b.append(f'<path d="M{-h+22},-130 L{h-56},-130 C {h-26},-130 {h-8},-116 {h-8},-98 '
+             f'L{h-8},-86 L{-h+22},-86 Z" fill="#2b3a46"/>')
+    b.append(windows(-h + 26, h - 34, -126, -90, 7, gap=9, rx=4,
+                     fill='#8fc4dd', top='#c2e2f0'))
+    # the driver's screen at the nose, taller than the saloon glass
+    b.append(f'<path d="M{h-46},-128 C {h-20},-128 {h-2},-114 {h-2},-96 L{h-2},-88 '
+             f'L{h-46},-88 Z" fill="#a8d4e8"/>')
+    b.append(f'<path d="M{h-46},-128 C {h-20},-128 {h-2},-114 {h-2},-96 '
+             f'L{h-14},-98 C {h-18},-114 {h-30},-124 {h-46},-124 Z" fill="#d2ecf6"/>')
+    # roof: air-conditioning pods and a cable duct
+    b.append(f'<rect class="cc-roof" x="{-h+14}" y="-152" width="{L-70}" height="12" rx="5" '
+             f'fill="#c8ced6"/>')
+    b.append('<g fill="#aeb6c0">' + ''.join(
+        f'<rect x="{-h+40+i*86}" y="-164" width="58" height="14" rx="5"/>' for i in range(4)) + '</g>')
+    b.append('<g fill="#8f98a3">' + ''.join(
+        f'<rect x="{-h+48+i*86}" y="-160" width="42" height="4" rx="2"/>' for i in range(4)) + '</g>')
+    # headlamps in the nose
+    b.append(f'<g fill="#fff3c4"><rect x="{h-16}" y="-70" width="16" height="8" rx="3"/></g>')
+    b.append(f'<g fill="#f2c230" opacity="0.9"><rect x="{h-16}" y="-84" width="9" height="6" rx="2"/></g>')
+    # doors — a monorail is all doors, they board fast
+    # door seams — as thin frame lines, not translucent panels. Panels drawn over the
+    # window band read as smudges on the glass.
+    # articulation bellows at the rear, where the next car couples
+    b.append(f'<rect x="{-h-6}" y="-136" width="18" height="80" rx="3" fill="#2f353d"/>')
+    b.append('<g fill="#454d57">' + ''.join(
+        f'<rect x="{-h-4}" y="{-132+i*14}" width="14" height="6" rx="2"/>' for i in range(6)) + '</g>')
+    emit('monorail', '-230 -190 470 205', '  ' + ''.join(b),
+         'LAS VEGAS STRIP MONORAIL (straddle-beam driving car)', L, L / 2, 'engine',
+         'Monorail (Las Vegas)')
+
+
+def monorail_car():
+    """The middle car of the monorail set: same body, bellows at both ends, no cab."""
+    L = 400; h = L / 2
+    b = [shadow(-h - 4, h + 4)]
+    b.append(f'<rect x="{-h+6}" y="-56" width="{L-12}" height="46" rx="6" fill="#39414c"/>')
+    b.append(f'<rect x="{-h+6}" y="-56" width="{L-12}" height="8" rx="4" fill="#4a5460"/>')
+    b.append('<g fill="#252b33">' + ''.join(
+        f'<rect x="{-h+28+i*54}" y="-30" width="34" height="16" rx="4"/>' for i in range(6)) + '</g>')
+    b.append(''.join(wheel(x, 9, hub='#9aa2ab') for x in (-h + 62, -h + 102, h - 102, h - 62)))
+    b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-140" width="{L-16}" height="88" rx="8" '
+             f'fill="#f2f4f6"/>')
+    b.append(f'<rect x="{-h+8}" y="-148" width="{L-16}" height="14" rx="7" fill="#ffffff"/>')
+    b.append(f'<rect class="cc-trim" x="{-h+8}" y="-76" width="{L-16}" height="17" fill="#c0392b"/>')
+    b.append(f'<rect x="{-h+8}" y="-59" width="{L-16}" height="3.5" fill="#8f2a20"/>')
+    b.append('<g fill="#d2d7dd">' + ''.join(
+        f'<rect x="{-h+48+i*100}" y="-138" width="2.5" height="82"/>'
+        f'<rect x="{-h+82+i*100}" y="-138" width="2.5" height="82"/>' for i in range(4)) + '</g>')
+    b.append('<g fill="#a3302a">' + ''.join(
+        f'<rect x="{-h+48+i*100}" y="-76" width="2.5" height="17"/>'
+        f'<rect x="{-h+82+i*100}" y="-76" width="2.5" height="17"/>' for i in range(4)) + '</g>')
+    b.append(f'<rect x="{-h+22}" y="-130" width="{L-44}" height="44" rx="5" fill="#2b3a46"/>')
+    b.append(windows(-h + 26, h - 26, -126, -90, 7, gap=9, rx=4,
+                     fill='#8fc4dd', top='#c2e2f0'))
+    b.append(f'<rect class="cc-roof" x="{-h+14}" y="-152" width="{L-28}" height="12" rx="5" '
+             f'fill="#c8ced6"/>')
+    b.append('<g fill="#aeb6c0">' + ''.join(
+        f'<rect x="{-h+38+i*86}" y="-164" width="58" height="14" rx="5"/>' for i in range(4)) + '</g>')
+    b.append('<g fill="#8f98a3">' + ''.join(
+        f'<rect x="{-h+46+i*86}" y="-160" width="42" height="4" rx="2"/>' for i in range(4)) + '</g>')
+    for s in (-1, 1):
+        x = s * (h + 6) - (18 if s > 0 else 0)
+        b.append(f'<rect x="{x - (0 if s > 0 else 12):.0f}" y="-136" width="18" height="80" rx="3" '
+                 f'fill="#2f353d"/>')
+    emit('wagon-monorail', '-215 -190 440 205', '  ' + ''.join(b),
+         'LAS VEGAS MONORAIL (intermediate car)', L, L / 2, 'wagon', 'Monorail car')
+
+
 # ------------------------------------------------------------------- run ----
 diesel(); electric_hs(); commuter(); streetcar(); cable_car()
+cane_tank(); monorail()
 coach_old(); caboose(); coach_modern(); hs_coach()
-boxcar(); tanker(); hopper(); container()
+boxcar(); tanker(); hopper(); container(); cane_car(); monorail_car()
 
 # steam is hand-authored; record it in the manifest so consists can use it
 VEHICLES['steam'] = dict(file='steam.svg', kind='engine', label='Steam locomotive (coal)',

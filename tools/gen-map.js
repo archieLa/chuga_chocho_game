@@ -42,6 +42,12 @@ const SUPPORTED = {
   'Louisiana': ['New Orleans'],
   'Texas': ['Austin', 'Houston'],
   'Florida': ['Cape Canaveral'],
+  'Hawaii': ['Oahu'],
+  'Alaska': ['Denali'],
+  'Nevada': ['Las Vegas'],
+  'Utah': ['Moab'],
+  'Tennessee': ['Nashville'],
+  'Massachusetts': ['Boston'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is
