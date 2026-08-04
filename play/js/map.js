@@ -79,6 +79,10 @@
       const hit = (e) => {
         const el = e.target.closest && e.target.closest('.state');
         if (!el) return;
+        // The crowded north-east is one card rather than nine specks — see the
+        // note in gen-map.js. It opens a chooser instead of picking a state.
+        const zone = el.getAttribute('data-zone');
+        if (zone && el.classList.contains('ne-zone')) { this.pickZone(zone); return; }
         const name = el.getAttribute('data-name');
         if (el.classList.contains('state--supported')) this.pickState(name);
         else this.nameState(el, name);
@@ -111,6 +115,35 @@
       this.overlay.querySelectorAll('.state--picked').forEach(e => e.classList.remove('state--picked'));
       const box = this.overlay.querySelector('.map-cities');
       box.innerHTML = '';                 // back to "nothing chosen": the pulse is the cue
+    },
+
+    /* The crowded north-east. Those states are unhittable at national scale —
+       Washington DC is 3x4px, and its label chip comes out 26x15px on a phone
+       because the targets live in map units and shrink with the map. So the whole
+       column is one card, and pressing it lists the playable ones as full-size
+       buttons in the row the cities already use. From there it is the ordinary
+       flow: pick a state, then pick a place. */
+    pickZone(zone) {
+      const svg = this.overlay.querySelector('#us-map');
+      const inZone = [].slice.call(svg.querySelectorAll('[data-zone="' + zone + '"].state--supported'))
+        .filter(el => !el.classList.contains('state-hit') && !el.classList.contains('ne-zone'))
+        .map(el => el.getAttribute('data-name'));
+      const names = inZone.filter((n, i) => inZone.indexOf(n) === i);
+      if (!names.length) return;
+      // One playable state in there? Skip the chooser — an extra tap that only
+      // ever has one answer is just a door to open.
+      if (names.length === 1) { this.pickState(names[0]); return; }
+
+      CC.audio.blip();
+      this.clearChoice();
+      const box = this.overlay.querySelector('.map-cities');
+      names.forEach(n => {
+        const b = document.createElement('button');
+        b.className = 'city-btn';
+        b.textContent = n;
+        b.addEventListener('click', () => this.pickState(n));
+        box.appendChild(b);
+      });
     },
 
     /* The map only shows two-letter abbreviations. Tapping a state reveals its

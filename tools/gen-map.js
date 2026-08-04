@@ -149,11 +149,31 @@ fc.features
         hits.push(`    <rect class="state state--supported state-hit label-hit" data-name="${name}" ` +
                   `x="${COL_X - 14}" y="${ly - CHIP_H + 12}" width="${CHIP_W}" height="${CHIP_H}"/>`);
       }
+      // Mark the real shape so the picker can find every state that lives in the
+      // crowded corner without hard-coding the list twice.
+      paths[paths.length - 1] = paths[paths.length - 1]
+        .replace('<path ', '<path data-zone="northeast" ');
     } else {
       const n = NUDGE[name] || [0, 4];
       labels.push(`    <text class="${cls}" x="${r1(c[0] + n[0])}" y="${r1(c[1] + n[1])}" text-anchor="middle">${ab}</text>`);
     }
   });
+
+// ONE big target for the crowded north-east. Those nine states are specks — DC is
+// 3x4px — and even their label chips scale with the map, so on a phone they come
+// out 26x15px. No amount of nudging fixes that: the targets live in map units and
+// the map shrinks. So the whole column becomes a single card, and pressing it
+// opens a chooser of full-size buttons (map.js `pickZone`). The per-state chips
+// stay as well, so a steady hand on a big screen can still pick directly.
+const NE_X = COL_X - 18, NE_W = 78;
+const NE_Y = COL_Y0 - 32, NE_H = COL_STEP * (COLUMN.length - 1) + 52;
+const neAny = COLUMN.some(n => Object.prototype.hasOwnProperty.call(SUPPORTED, n));
+// The tap zone is wider than the card it sits under, reaching left across empty
+// Atlantic where there is nothing else to hit, so a near-miss still lands. Same
+// idea as the state halos: the picture stays tidy, the target is forgiving.
+const NE_ZX = COL_X - 56, NE_ZW = (W + RIGHT) - NE_ZX;
+const neCard = neAny ? `    <rect class="ne-card" x="${NE_X}" y="${NE_Y}" width="${NE_W}" height="${NE_H}" rx="16"/>` : '';
+const neZone = neAny ? `    <rect class="state ne-zone" data-zone="northeast" x="${NE_ZX}" y="${NE_Y - 10}" width="${NE_ZW}" height="${NE_H + 20}"/>` : '';
 
 const vb = [-PAD, -PAD, W + PAD + RIGHT, H + PAD * 2].join(' ');
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -186,6 +206,13 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
        makes its whole face tappable even though it paints nothing. It keeps
        .state-hit so the pulse rule (which excludes .state-hit) can't light it up. */
     #us-map .label-hit{ pointer-events:all; }
+    /* The crowded corner, drawn as one pressable card. It paints; the .ne-zone
+       rect over it is what actually takes the tap. */
+    #us-map .ne-card{ fill:#ffffff; opacity:.5; stroke:#7fc17a; stroke-width:2.5;
+      stroke-dasharray:7 5; pointer-events:none; }
+    /* stroke:none matters — .ne-zone carries .state for the delegated handler,
+       and .state paints a white 1px outline, which drew a ghost box on the sea. */
+    #us-map .ne-zone{ fill:none; stroke:none; pointer-events:all; cursor:pointer; }
   </style>
   <g class="states">
 ${paths.join('\n')}
@@ -193,8 +220,14 @@ ${paths.join('\n')}
   <g class="hits">
 ${hits.join('\n')}
   </g>
+  <g class="ne">
+${neCard}
+  </g>
   <g class="labels">
 ${labels.join('\n')}
+  </g>
+  <g class="zones">
+${neZone}
   </g>
 </svg>
 `;
