@@ -13,7 +13,7 @@
      stale index.html that never even requests a newly added file. BUMP THIS
      NUMBER on every deploy — it is the whole release process for a site with
      no build step. -->
-<link rel="stylesheet" href="css/styles.css?v=4">
+<link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
   <div id="wrap">
@@ -40,26 +40,48 @@
 
     <!-- Settings. The map and the train customizer build their own overlays. -->
     <div id="panel" hidden></div>
+
+    <!-- Held upright? The scenes are 16:9 storybook art, so a portrait screen crops
+         three quarters of every place away — you keep the road and the crossing,
+         which look the same everywhere, and lose everything that makes a place that
+         place. Turned sideways a phone shows MORE of a scene than a laptop does
+         (100% of the width against 90%), so this asks rather than compromises.
+         Driven by a pure CSS media query, so it appears and clears the instant the
+         device turns, with no resize handler to get out of step. -->
+    <div id="rotate" aria-hidden="true">
+      <svg class="rot-icon" viewBox="0 0 120 120" aria-hidden="true">
+        <g class="rot-dev">
+          <rect x="38" y="14" width="44" height="86" rx="9" fill="#ffffff"/>
+          <rect x="43" y="22" width="34" height="66" rx="3" fill="#2a6fd6"/>
+          <circle cx="60" cy="94" r="3.5" fill="#c9ccd1"/>
+        </g>
+        <g stroke="#ffd166" stroke-width="7" stroke-linecap="round" fill="none">
+          <path d="M22,80 a42,42 0 0 0 76,0"/>
+          <path d="M98,80 l-10,-10 M98,80 l-13,3"/>
+        </g>
+      </svg>
+      <div class="rot-text" data-i18n="rotate"></div>
+    </div>
   </div>
 
   <!-- Classic scripts (no ES modules) so the game runs by opening this file
        directly. Load order: data, then services, then systems, then the
        orchestrator. asset-data.js must come before anything that draws. -->
-  <script src="js/i18n.js?v=4"></script>
-  <script src="js/speech.js?v=4"></script>
-  <script src="js/audio.js?v=4"></script>
-  <script src="js/asset-data.js?v=4"></script>
-  <script src="js/rolling.js?v=4"></script>
-  <script src="js/trains.js?v=4"></script>
-  <script src="js/gate.js?v=4"></script>
-  <script src="js/world.js?v=4"></script>
-  <script src="js/map-data.js?v=4"></script>
-  <script src="js/map.js?v=4"></script>
-  <script src="js/scene.js?v=4"></script>
-  <script src="js/customizer.js?v=4"></script>
-  <script src="js/welcome.js?v=4"></script>
-  <script src="js/modes.js?v=4"></script>
-  <script src="js/settings.js?v=4"></script>
-  <script src="js/main.js?v=4"></script>
+  <script src="js/i18n.js?v=5"></script>
+  <script src="js/speech.js?v=5"></script>
+  <script src="js/audio.js?v=5"></script>
+  <script src="js/asset-data.js?v=5"></script>
+  <script src="js/rolling.js?v=5"></script>
+  <script src="js/trains.js?v=5"></script>
+  <script src="js/gate.js?v=5"></script>
+  <script src="js/world.js?v=5"></script>
+  <script src="js/map-data.js?v=5"></script>
+  <script src="js/map.js?v=5"></script>
+  <script src="js/scene.js?v=5"></script>
+  <script src="js/customizer.js?v=5"></script>
+  <script src="js/welcome.js?v=5"></script>
+  <script src="js/modes.js?v=5"></script>
+  <script src="js/settings.js?v=5"></script>
+  <script src="js/main.js?v=5"></script>
 </body>
 </html>

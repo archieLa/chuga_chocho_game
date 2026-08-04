@@ -26,7 +26,10 @@
             chooseTrain: 'My train', tapAState: 'Tap a coloured state',
             // The welcome screen — the front door. `allAboard` is the one big
             // green button, and it doubles as the gesture that unlocks speech.
-            allAboard: 'ALL ABOARD!', readyToRide: 'Ready for an adventure?' },
+            allAboard: 'ALL ABOARD!', readyToRide: 'Ready for an adventure?',
+            // Shown when the device is held upright. The picture does the work —
+            // this is spoken, not read.
+            rotate: 'Turn me sideways!' },
       // Spoken once when the game opens, over the map. `sayAs` is what the voice is
       // given (the brand sound respelled so this language's TTS pronounces it);
       // `text` is what a reader sees. Keep the brand sound itself untranslated.
@@ -65,7 +68,8 @@
             chooseTrain: 'Mój pociąg', tapAState: 'Dotknij kolorowego stanu',
             // "Wsiadamy" is what you actually say to a child boarding a train —
             // not a literal translation of "all aboard".
-            allAboard: 'WSIADAMY!', readyToRide: 'Gotowi na przygodę?' },
+            allAboard: 'WSIADAMY!', readyToRide: 'Gotowi na przygodę?',
+            rotate: 'Obróć mnie na bok!' },
       welcome: { text: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę… chuga chuga choo choo!',
                  sayAs: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę... czuga czuga czu czu!' },
       colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy', black:'czarny' },

@@ -87,6 +87,22 @@
     ['pointerdown', 'keydown'].forEach(ev =>
       document.addEventListener(ev, firstTouch, { once: false, passive: true }));
 
+    // The rotate prompt shows and hides itself in CSS. All this does is SAY it,
+    // because the child cannot read it — and only once the device is actually
+    // upright, so a landscape player never hears it. matchMedia rather than a
+    // resize handler, so it fires exactly when the CSS flips and cannot drift
+    // out of step with what is on screen.
+    if (window.matchMedia) {
+      const upright = window.matchMedia('(max-aspect-ratio: 115/100)');
+      const nag = (on) => { if (on) CC.speech.say(CC.i18n.t('ui.rotate'), { interrupt: true }); };
+      if (upright.addEventListener) upright.addEventListener('change', e => nag(e.matches));
+      else if (upright.addListener) upright.addListener(e => nag(e.matches));   // older Safari
+      // Say it on load too, but only after the first gesture has unlocked speech.
+      if (upright.matches) document.addEventListener('pointerdown', () => nag(upright.matches),
+                                                     { once: true, passive: true });
+      CC.on('languagechange', () => nag(upright.matches));
+    }
+
     // Look for a real crossing gate on the LAN. Silent either way: if there is
     // no device the game is simply unaffected — no spinner, no error.
     CC.gate.autoConnect().catch(() => {});

@@ -146,6 +146,15 @@ look at the PNG. Reading your own diff is not looking at it.
 - **`modes.js` is still a one-entry registry.** Free Play is the only mode; the Phase 2
   missions plug in here. `i18n.js` already carries `numbers`, `shapes` and `praise`
   dictionaries for them — `shapes` is currently unused.
+- **The game is LANDSCAPE on every device — don't "fix" the portrait prompt.** The scenes
+  are fixed 16:9 mounted with `slice`, so orientation matters and the device does not. A
+  phone on its side shows **100%** of a scene's width (more than a laptop's 90%); held
+  upright it shows 26%, and what survives is the road and the crossing, which look the same
+  everywhere. Portrait therefore shows `#rotate` rather than shrinking the art for everyone.
+  It is a pure CSS `max-aspect-ratio: 115/100` query — no resize handler — and it sits above
+  the gate buttons on purpose, `CC.gate` still running underneath. Measurements and the
+  reasoning are in `BUILD_PLAN.md` §12.1. Not yet checked on real iOS hardware: `100vh` under
+  Safari's dynamic toolbar and safe-area insets are the two things that could still bite.
 - **No automated test suite.** Verification is the `shot.py` loop above, by hand.
 - **Open decision #4 (single-file offline bundle) is still open** — see the list below.
 - **Art pipeline (open decision #2)** settled in practice, not on paper: scenes and vehicles

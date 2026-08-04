@@ -31,7 +31,18 @@ family anything. When a decision is close, pick the one that is better for the k
 ## 2. Design principles
 
 - **No losing, no pressure.** Nothing punishes a child. "Wrong" answers get a gentle, encouraging response.
-- **Big, forgiving touch targets.** Designed for small fingers on a tablet.
+- **Big, forgiving touch targets.** Designed for small fingers on a tablet. Where a target
+  cannot be big — Washington DC is a 3×4px speck on a national map — the *map* changes to
+  give it a big one, rather than the child being asked to aim better.
+- **Desktop, tablet AND phone — but landscape on all three.** The scenes are 16:9 storybook
+  art, so orientation matters and the device does not. Held sideways a phone shows **100%**
+  of a scene's width — more than a 1280×800 laptop's 90% and a tablet's 75% — so a phone is
+  one of the *best* ways to play, not a compromise. Held upright it shows 26%, and what
+  survives the crop is the road and the crossing, which look the same in every location; the
+  place itself is what gets cut. So portrait asks for two seconds of rotation instead
+  (`#rotate`, spoken and pictorial), rather than shrinking the art for everyone. Excluding
+  phones was considered and rejected: a phone is the device most families actually own, and
+  ruling it out would exclude exactly the children this is meant to be free for.
 - **Everything is spoken.** A pre-reader should be able to play by ear.
 - **The gate is always controllable.** Both on-screen buttons **and** the physical gate endpoint work in *every* mode, always, with two-way sync.
 - **Anyone can reach it.** Non-technical visitors get a friendly page and one Play button.

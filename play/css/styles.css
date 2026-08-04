@@ -73,6 +73,39 @@ body.map-open #controls{opacity:0;}
 body.welcome-open #controls .big,
 body.map-open #controls .big{pointer-events:none;}
 
+/* ---------- "turn me sideways" ----------
+   This game is LANDSCAPE on every device, because the scenes are 16:9 storybook
+   art. Held upright a phone shows 26% of a scene's width and a tablet 42% — and
+   what survives is the road and the crossing, which are identical everywhere.
+   Turned sideways a phone shows 100%, more than a 1280x800 laptop's 90%, so the
+   fix is to ask for two seconds of rotation rather than to compromise the art.
+
+   z-index sits above the gate buttons: in portrait the crossing is unreadable, so
+   there is nothing meaningful to press. CC.gate keeps running underneath — the
+   spacebar and a real gate on the LAN are unaffected — and the buttons come back
+   the instant the device turns. */
+#rotate{position:absolute;inset:0;z-index:70;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:4vh;
+  padding:6vw;text-align:center;
+  background:linear-gradient(#1b2a4a,#101a30);}
+.rot-icon{width:44vmin;max-width:280px;height:auto;display:block;}
+/* The device tips over and back, which reads as an instruction on its own. */
+.rot-dev{transform-origin:60px 60px;animation:rot-tip 2.6s ease-in-out infinite;}
+@keyframes rot-tip{
+  0%,28%{transform:rotate(0deg);}
+  55%,78%{transform:rotate(-90deg);}
+  100%{transform:rotate(0deg);}
+}
+.rot-text{font-size:6vmin;font-weight:bold;color:#ffd166;
+  text-shadow:0 3px 10px rgba(0,0,0,.5);}
+@media (prefers-reduced-motion:reduce){ .rot-dev{animation:none;transform:rotate(-90deg);} }
+
+/* Taller than it is wide (plus a little slack for near-square windows). Tablet
+   landscape is 1.33 and a phone on its side is 2.16, so both stay clear. */
+@media (max-aspect-ratio: 115/100){
+  #rotate{display:flex;}
+}
+
 /* ---------- settings ---------- */
 #panel{position:absolute;inset:0;z-index:40;background:#141f37;
   display:flex;flex-direction:column;align-items:center;color:#fff;text-align:center;}

@@ -455,3 +455,52 @@ Count & Close needs to know *which car* passed, and needs the car's colour to be
 - [ ] `carpassed` reports a nameable colour and the car counter still counts.
 - [ ] Zero console errors or warnings, `file://` and `http://`, every mode.
 - [ ] A three-year-old can still get from launch to a moving train without help.
+
+---
+
+## 12. Known issues
+
+### 12.1 Scenes cropped in portrait — RESOLVED, landscape-everywhere + rotate prompt
+
+**Status: fixed.** Kept here because the measurements are the reason for the design, and
+the next person will otherwise re-derive them.
+
+**It was never skew.** That is what it looks like, but nothing is distorted — the aspect
+ratio is preserved exactly. The scene SVG is a fixed **1280×720 (1.78)** mounted with
+`preserveAspectRatio="xMidYMid slice"`, which scales to *cover* and crops the overflow. A
+phone held upright is about **0.46**, so the art was cropped to a narrow central strip:
+
+| Viewport | Aspect | Art width visible |
+|---|---|---|
+| **844×390 phone LANDSCAPE** | 2.16 | **100%** (crops 18% of height — sky and grass) |
+| 1280×800 desktop | 1.60 | **90%** |
+| 1024×768 tablet landscape | 1.33 | **75%** |
+| 768×1024 tablet **portrait** | 0.75 | **42%** |
+| 390×844 phone portrait | 0.46 | **26%** |
+
+**The top row is the whole answer.** A phone on its side is the *best* fit of any device —
+better than a laptop — so the problem was never the phone, it was portrait, and portrait is
+bad on tablets too. The game is therefore **landscape on every device**, and portrait shows
+`#rotate`: a tipping-device picture with a spoken "Turn me sideways!", driven by a pure CSS
+`max-aspect-ratio: 115/100` media query so it appears and clears the instant the device
+turns, with no resize handler to drift out of step. Tablet landscape (1.33) and phone
+landscape (2.16) both stay clear of the threshold.
+
+`#rotate` sits above the gate buttons: in portrait the crossing is unreadable, so there is
+nothing meaningful to press. `CC.gate` keeps running underneath — spacebar and a real LAN
+gate are unaffected — and the buttons return the moment the device turns.
+
+The `#title` / `#topbar` overlap seen at phone width needed no fix: it only ever happened in
+portrait, and an existing `max-height:520px` rule already hides the title on short screens.
+
+**Why it mattered more than it sounds.** What survived the crop was the road and the
+crossing — identical in every location. Everything that makes a place *that place*
+lives out to the sides: Miami Beach in portrait lost the Atlantic, the beach, the
+lifeguard towers and most of the Deco row. The geography teaching was the first thing
+the crop took.
+
+**Still not verified on real hardware.** All of the above was reproduced by rendering at
+those viewport sizes in headless Chrome. It does **not** cover iOS Safari's own
+behaviour: the dynamic toolbar making `100vh` taller than the visible area (`#wrap` is
+`100vh`), or safe-area insets under the notch and home indicator. If a real iPhone shows
+something the table does not explain, start with those two.
