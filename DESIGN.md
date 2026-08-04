@@ -98,14 +98,24 @@ The abbreviation-then-full-name flow is deliberate: the map stays uncluttered an
 | Utah | Moab | Delicate Arch over slickrock, the La Sals behind, juniper, a jeep | diesel |
 | Tennessee | Nashville | Lower Broadway, honky-tonk neon on Victorian brick, a busker | diesel |
 | Massachusetts | Boston | Back Bay across the Charles, the Esplanade, autumn | streetcar, **green** |
+| Wyoming | Yellowstone | The Lamar Valley — Absaroka wall, a bison herd, the Lower Falls, thermal ground | steam |
+| District of Columbia | Washington | The Tidal Basin at cherry blossom, Jefferson Memorial, the Monument | commuter |
+| Florida | Miami Beach | Ocean Drive — the Deco row left, the Atlantic right | commuter |
 
-**17 destinations across 15 states.** California and Texas each have two, on exactly the rule
-above. Three of these are worth knowing about from the engine side:
+**20 destinations across 17 states.** California, Texas and Florida each have two, on exactly
+the rule above. Several are worth knowing about from the engine side:
 
 - **Austin is dusk and Las Vegas is night.** Every other scene is daylight. If a day/night
   tint, a brightness filter or ambient audio is ever added, these two are what it breaks.
 - **Hawaii and Alaska are map insets.** `geoAlbersUsa` places them below the south-west,
   outside the mainland outline, so they are a separate hit-target problem from the rest.
+- **Some states cannot be tapped where they are drawn.** At national scale DC is a 3×4px
+  speck and Massachusetts is 48×27px — against the ~44px a small finger needs. Playable
+  states get an invisible halo around their outline, and the nine crowded north-eastern ones
+  additionally make their leader line and margin label tappable, which is what actually makes
+  DC reachable (69×69px). The label column is spaced for all nine being playable at once.
+- **Miami Beach is the first asymmetric scene** — Deco row left, ocean right. If anything in
+  the engine ever mirrors or centre-crops a scene, that is where it will show.
 - **Boston carries a livery, not just an engine.** Its preset is
   `{ engine:'streetcar', bodyColour:'#2f7d4a' }` — the Green Line. `trains.applyPreset()`
   honours `bodyColour` inside the same `userSet` guard as the engine, and a location with

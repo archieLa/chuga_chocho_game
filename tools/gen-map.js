@@ -41,13 +41,15 @@ const SUPPORTED = {
   'Washington': ['Seattle'],
   'Louisiana': ['New Orleans'],
   'Texas': ['Austin', 'Houston'],
-  'Florida': ['Cape Canaveral'],
+  'Florida': ['Cape Canaveral', 'Miami Beach'],
   'Hawaii': ['Oahu'],
   'Alaska': ['Denali'],
   'Nevada': ['Las Vegas'],
   'Utah': ['Moab'],
   'Tennessee': ['Nashville'],
   'Massachusetts': ['Boston'],
+  'Wyoming': ['Yellowstone'],
+  'District of Columbia': ['Washington'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is
@@ -68,9 +70,17 @@ const ABBR = {
 // abbreviations sit in a column off the Atlantic coast with a leader line.
 const COLUMN = ['Vermont','New Hampshire','Massachusetts','Rhode Island','Connecticut',
                 'New Jersey','Delaware','Maryland','District of Columbia'];
-const RIGHT = 74;                    // extra margin for that column
+const RIGHT = 86;                    // extra margin for that column
 const COL_X = W + 26;
-const COL_Y0 = 150, COL_STEP = 21;
+// Spacing is set for ALL NINE column states being playable, not for the two that
+// are today: at the old 21px step nine tap-chips would sit shoulder to shoulder
+// with no gap, and a near-miss would land the child on the neighbouring state —
+// worse than missing, because it silently takes them somewhere they didn't pick.
+// 46 spreads the nine over y=116..484 of a 600-tall map, which is room the column
+// was never using, and leaves a real gap between targets.
+const COL_STEP = 46;
+const COL_Y0 = Math.round((H - COL_STEP * (COLUMN.length - 1)) / 2);
+const CHIP_W = 66, CHIP_H = 40;      // the invisible tap target behind each label
 
 // A few states whose centroid needs a nudge to sit nicely.
 const NUDGE = {
@@ -125,6 +135,20 @@ fc.features
       const ly = COL_Y0 + ci * COL_STEP;
       labels.push(`    <line class="leader" x1="${r1(c[0])}" y1="${r1(c[1])}" x2="${COL_X - 7}" y2="${ly - 4}"/>`);
       labels.push(`    <text class="${cls}" x="${COL_X}" y="${ly}" text-anchor="start">${ab}</text>`);
+      // A column state is a state too small to label in place, which means it is
+      // also too small to TAP in place: the District of Columbia is a 3x4px
+      // speck at national scale, ~13x13px even with the halo, against the ~44px
+      // a small finger actually needs. So its label out in the clear margin —
+      // and the whole leader line pointing at it — become tap targets as well.
+      // The child aims at the big obvious label instead of a dot they cannot
+      // see. Fixes DC and Massachusetts now, and every crowded north-eastern
+      // state the roadmap adds later.
+      if (sup) {
+        hits.push(`    <line class="state state--supported state-hit" data-name="${name}" ` +
+                  `x1="${r1(c[0])}" y1="${r1(c[1])}" x2="${COL_X - 7}" y2="${ly - 4}"/>`);
+        hits.push(`    <rect class="state state--supported state-hit label-hit" data-name="${name}" ` +
+                  `x="${COL_X - 14}" y="${ly - CHIP_H + 12}" width="${CHIP_W}" height="${CHIP_H}"/>`);
+      }
     } else {
       const n = NUDGE[name] || [0, 4];
       labels.push(`    <text class="${cls}" x="${r1(c[0] + n[0])}" y="${r1(c[1] + n[1])}" text-anchor="middle">${ab}</text>`);
@@ -158,6 +182,10 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     #us-map .state-hit:hover,
     #us-map .state-hit:focus{ fill:none; stroke:transparent; stroke-width:14;
       pointer-events:stroke; cursor:pointer; outline:none; }
+    /* The label chip is a solid target, not an outline one: pointer-events:all
+       makes its whole face tappable even though it paints nothing. It keeps
+       .state-hit so the pulse rule (which excludes .state-hit) can't light it up. */
+    #us-map .label-hit{ pointer-events:all; }
   </style>
   <g class="states">
 ${paths.join('\n')}

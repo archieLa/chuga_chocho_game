@@ -208,9 +208,158 @@ steeple, swan boats on the pond, sugar-maple autumn colour.
 
 ---
 
-## Wave 2
+## Wave 2 — 🔒 LOCKED, eight scenes · 3 built, 5 to go
 
-### Texas — San Antonio *(first in the queue)*
+Five new states (Wyoming, DC, Minnesota, Missouri, Kansas) plus three second destinations
+(Miami Beach for Florida, the Smokies for Tennessee, San Antonio for Texas). Takes the set from
+17 to **25**, and opens the Midwest and the Plains, which were completely empty.
+
+**Kansas gets both.** Kansas City and Kansas wheat country were originally competing for one
+slot, which was a false choice — they are different states and opposite scenes. Kansas City is
+the better *building* (Union Station is a railroad palace) and the wheat is the better *train*
+(a grain elevator and a long line of hoppers). Keeping both is what stops this batch from being
+eight more towns: after it, the set finally has a farm, a big empty sky and a national park
+full of animals.
+
+**Watch the city count.** With San Antonio and Kansas City in, twelve of twenty-five scenes are
+cities. Wave 3 should lean rural and wild — Glacier, Maine, the Mackinac Straits, Lancaster
+County — before we add another skyline.
+
+---
+
+### 1. Florida — Miami Beach ✅ BUILT
+**Viewpoint:** Ocean Drive looking north up the strip, late afternoon.
+**Composition is deliberately asymmetric** — the first in the set. The Art Deco hotel wall
+runs up the right-hand side; the palms of Lummus Park and the beach open out to the left, with
+a band of turquoise Atlantic beyond them. Face the hotels square-on and you lose the ocean;
+face the ocean and you lose the hotels. Looking *along* the street is the only view that has
+both, and it is the view everybody actually photographs.
+**Hero:** the Deco hotel row — streamline curves, eyebrow ledges, pastel stucco, vertical neon
+name signs, glass block.
+**Second:** the candy-striped lifeguard towers on the sand. They exist nowhere else on earth.
+**Texture:** coconut palms, a pastel convertible at the kerb, striped umbrellas, rollerbladers,
+sea grape.
+**Ground:** the promenade's wavy paving and pale sand.
+**Palette:** mint, flamingo, butter, aqua — against LA's bleached gold. Architecture-forward
+with the beach behind, where LA is sand-forward with the city behind.
+**Train:** commuter EMU (Brightline).
+
+### 2. Wyoming — Yellowstone ✅ BUILT (viewpoint changed — see note)
+**Viewpoint:** the Upper Geyser Basin at Old Faithful, mid-morning.
+**Hero:** the geyser mid-eruption — a white column against deep blue, the tallest thing in frame.
+**Second:** a bison herd out on the sinter flat, and the Old Faithful Inn's huge log gable.
+**Texture:** lodgepole pines (thin, bare-trunked, dark — nothing like a Christmas tree),
+boardwalks on stilts, steaming pools, elk at the treeline.
+**Ground:** this is the one that will go wrong without reference. It is **pale grey-white sinter
+crust**, not grass — cracked, chalky, with rust-orange and mustard bacterial mats bleeding out
+of the hot runoff channels. Draw it green and the whole scene collapses into "any national park".
+**Palette:** bone white, steam grey, rust orange, pine near-black, hard blue sky.
+**Extras:** the set has almost no animals. This scene carries that load — bison, elk, ravens.
+**Train:** steam. The plume and the geyser rhyme, and the historic gateway line was a steam road.
+**Built as the LAMAR VALLEY, not the Upper Geyser Basin.** The reference photograph supplied
+was Grand Teton — a different park thirty miles south — and the ask was for vast mountains.
+Old Faithful's basin has no big range behind it, so the scene moved to Yellowstone's own high
+country: the Absaroka wall above the Lamar Valley, golden sage flat, a large bison herd, the
+Lower Falls cut into the foothills, and the thermal ground pushed to the right-hand side well
+clear of the crossing. Grand Teton remains available as Wyoming's second destination.
+
+### 3. District of Columbia — the Tidal Basin ✅ BUILT
+**Viewpoint:** the Tidal Basin at peak cherry blossom, looking across the water.
+**Hero:** the Jefferson Memorial's white dome and colonnade across the basin.
+**Second:** the Washington Monument's obelisk rising behind the blossom on the right.
+**Texture:** cherry trees in full bloom leaning right over the water, the paved walk, paddle
+boats, joggers, the Metro's brutalist entrance canopy.
+**Ground:** the basin's seawall and gravel path.
+**Palette:** blossom pink and white against marble white and spring green — a palette nothing
+else in the set touches.
+**Note on truth:** the Capitol dome is the more famous silhouette but it is at the far east end
+of the Mall and simply is not visible from here. I would rather draw one honest view than
+assemble a landmark shelf. If the photos argue otherwise we can revisit.
+**Train:** commuter EMU (MARC / the Metro).
+
+### 4. Minnesota — Duluth
+**Viewpoint:** Canal Park, looking out through the ship canal to Lake Superior.
+**Hero:** the **Aerial Lift Bridge** — and this is why Duluth earned the slot. Its whole span
+rises straight up on two towers to let ships through. It is a second thing that goes up and
+down, in a game about a thing that goes up and down, and children will make that connection
+without being told. **The road crosses on it**, the same way Boston's road crosses the Charles.
+**Second:** a thousand-foot ore boat coming through the canal, low and impossibly long.
+**Texture:** the pierhead lighthouses, gulls, brick warehouses of Canal Park, the ore docks and
+their black trestle further up the shore, dark pines on the hillside, the city stepping up the hill.
+**Ground:** canal-side paving and cold grey-blue water.
+**Palette:** iron red, lake steel-blue, pine black-green, weathered brick.
+**Train:** diesel-electric with **hoppers** — this is the taconite ore train, and the existing
+`wagon-hopper` is exactly right.
+**Draw the bridge lowered.** Raised, it blocks the road the game needs.
+
+### 5. Tennessee — the Great Smoky Mountains at Gatlinburg
+**Viewpoint:** the top of the Gatlinburg Parkway, looking south into the mountains.
+**Hero:** the ridges — four or five layers receding into fog, each one paler and bluer than the
+last. This is the only scene in the set whose hero is *atmosphere* rather than an object, and
+the layering is the entire trick. Get it right and nothing else is needed.
+**Second:** Gatlinburg itself in the middle distance — the Space Needle observation tower, the
+SkyLift's chairs climbing the slope on their cable, chalets stacked up the hillside, pancake
+houses and candy shops on the strip.
+**Texture:** tulip poplars and rhododendron, a boulder-strewn creek (the Little Pigeon) with
+white water, a black bear, mist caught in the hollows.
+**Ground:** wet river rock and leaf litter, not lawn.
+**Palette:** blue-grey haze, deep summer green, warm town lights. Distinct from Colorado — which
+is warm tan rock and gold aspen — because this is soft, humid and blue.
+**Train:** steam (the Great Smoky Mountains Railroad).
+
+### 6. Missouri — Kansas City
+**Viewpoint:** in front of Union Station looking up at it, with the Liberty Memorial on the
+hill behind.
+**Hero:** **Union Station's façade** — three enormous arched windows in limestone, a Beaux-Arts
+railroad palace. Of everything in this game, this is the building most *about* trains, and it
+should be drawn big.
+**Second:** the Liberty Memorial tower standing on its hill directly behind, with its stone
+sphinxes.
+**Texture:** KC is the City of Fountains — put a real one in the foreground, water and all.
+Brick warehouses of the Crossroads, the 18th & Vine jazz district's signage, a barbecue joint
+with smoke, the KC Streetcar.
+**Ground:** station plaza paving and lawn terraces.
+**Palette:** warm limestone, brick red, green copper, prairie sky.
+**Train:** steam, standing at a railroad palace. The `streetcar` is the alternative if we'd
+rather show the modern city.
+
+### 7. Kansas — wheat country
+**Viewpoint:** a dirt section road in the Flint Hills in July, an hour before sunset.
+**Hero:** a concrete grain elevator standing alone on the horizon — the "prairie cathedral".
+It is visible for twenty miles and it should be the only vertical thing for miles here.
+**Second:** a red barn with a windmill beside it.
+**Texture:** ripe wheat right to the horizon, a dirt section road running dead straight, round
+hay bales, a centre-pivot irrigator, a hawk on a fence post, and — the real subject — an
+**enormous sky** with towering cumulus taking up more than half the frame.
+**Ground:** wheat stubble, pale dust, a wire fence.
+**Palette:** gold and straw, weathered barn red, elevator concrete grey, huge blue-and-white sky.
+**Why it earns its place:** the set has no farm, no agriculture and no big empty sky, and this
+is the only scene where the *sky* is the hero. Everything else has something in front of it.
+**Train:** diesel-electric with **hoppers**, and it should look *long* — a grain train is one of
+the most recognisable trains in America precisely because it never seems to end.
+
+### 8. Texas — San Antonio
+**Viewpoint:** the River Walk, one level below the street, looking along the water.
+**Hero:** the Alamo — low and wide, warm limestone with its curved parapet. Draw it *small and
+correct* rather than big: it is a modest building, and every illustration that inflates it into
+a cathedral gets it wrong.
+**Second:** the River Walk itself — and the fact that it sits **below street level** is the
+whole composition. Stone arch bridges cross overhead, cypress trees rise from the waterline,
+and there are steps down from the street.
+**Texture:** flat-bottomed tour barges, striped umbrellas over café tables, Spanish-colonial
+stucco and wrought iron, papel picado strung overhead, cypress knees at the water's edge.
+**Ground:** paved riverside walk and jade-green water, not grass. Caliche dust at the edges.
+**Palette:** cream limestone, live-oak green, river jade, big pale Texas sky.
+**Distinct from Austin and Houston by:** Austin is a sunset skyline with bats, Houston is hot
+flat mown grass with spacecraft on it. This is enclosed, shaded, low and green — a scene you
+look *along* rather than *across*.
+**Train:** diesel-electric freight (Union Pacific).
+
+---
+
+## Wave 2 (original longlist, kept for reference)
+
+### Texas — San Antonio *(parked — Texas already has two)*
 **Hero:** the Alamo, low and wide, warm limestone with its curved parapet.
 **Texture:** the River Walk one level *below* the street — cypress trees, stone arch bridges,
 striped umbrellas, a flat-bottomed tour barge. Spanish-colonial stucco, wrought iron.
@@ -237,7 +386,7 @@ cherry orchard. **Ground:** dune sand and cold blue water. **Train:** diesel.
 gold and French Quarter density. **Train:** diesel.
 *Alternative: a peach orchard on Georgia red clay — a completely different look. Say the word.*
 
-### Wyoming — Yellowstone
+### Wyoming — Yellowstone *(promoted to Wave 2 — see above for the full brief)*
 **Hero:** Old Faithful mid-eruption, a white column against dark pines.
 **Texture:** steaming geyser basin with orange-and-blue mineral terraces, lodgepole pines,
 boardwalks. **Extras:** a bison herd, elk. **Ground:** pale sinter crust and thermal runoff.

@@ -102,6 +102,36 @@
       scenery:{ theme:'river', features:['backbay','hancock','charles','esplanade','bridge'] },
       trainPreset:{ engine:'streetcar', bodyColour:'#2f7d4a' } },
 
+    { id:'yellowstone', state:'Wyoming', city:'Yellowstone',
+      say:{ en:'Yellowstone', pl:'Yellowstone' },
+      scene:'yellowstone',
+      // Viewpoint: the LAMAR VALLEY, not the Upper Geyser Basin — the Absaroka wall above a
+      // golden sage flat, the Lower Falls cut into the foothills, and the thermal ground
+      // pushed to the right, clear of the crossing. (The handoff's own §6 says this; the
+      // comment shipped with the entry described the basin version that was abandoned.)
+      // First scene with an animal population — the bison herd and elk are static art.
+      scenery:{ theme:'valley', features:['absaroka','bison','elk','lowerfalls','geyser','sinter'] },
+      trainPreset:{ engine:'steam' } },
+
+    { id:'dc', state:'District of Columbia', city:'Washington',
+      // Shown as "Washington"; spoken as "Washington D C" so the voice reads the
+      // letters instead of slurring them. See world.spoken().
+      say:{ en:'Washington', pl:'Waszyngton' },
+      sayAs:{ en:'Washington D C' },
+      scene:'washington-dc',
+      // Viewpoint: the Tidal Basin at peak cherry blossom. The Capitol is small and distant
+      // on purpose — from here that is where it actually is.
+      scenery:{ theme:'monumental', features:['jefferson','monument','capitol','cherryblossom'] },
+      trainPreset:{ engine:'commuter' } },
+
+    { id:'miami', state:'Florida', city:'Miami Beach',
+      say:{ en:'Miami Beach', pl:'Miami Beach' },
+      scene:'miami-beach',
+      // Viewpoint: Ocean Drive looking north — the set's first asymmetric composition,
+      // Deco row and palms left, beach and Atlantic right.
+      scenery:{ theme:'deco-beach', features:['artdeco','lifeguardtowers','palms','atlantic'] },
+      trainPreset:{ engine:'commuter' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
@@ -120,12 +150,18 @@
     /** The place name in the active language, plus which voice should say it.
         Names that have no Polish form stay English (Rocky Mountains, Seattle,
         Austin), and an English name read by a Polish voice is not recognisable
-        — so it is spoken by an English voice. See DESIGN.md §8. */
+        — so it is spoken by an English voice. See DESIGN.md §8.
+
+        `say` is what is SHOWN; optional `sayAs` is what the voice is given when
+        the two differ. Washington needs "Washington D C" to be read out as
+        letters rather than slurred, but nobody should have to look at that on a
+        button. Exactly the split i18n.welcome already makes with text/sayAs. */
     spoken(loc, code) {
       const lang = code || CC.i18n.code;
-      const name = (loc.say && loc.say[lang]) || loc.city || loc.state;
-      const untranslated = loc.say && loc.say.en === name && lang !== 'en';
-      return { text: name, lang: untranslated ? 'en' : lang };
+      const shown = (loc.say && loc.say[lang]) || loc.city || loc.state;
+      const text = (loc.sayAs && loc.sayAs[lang]) || shown;
+      const untranslated = loc.say && loc.say.en === shown && lang !== 'en';
+      return { text: text, lang: untranslated ? 'en' : lang };
     },
 
     select(id, opts) {
