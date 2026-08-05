@@ -53,6 +53,14 @@ CATALOGUE = [
      ['commuter', 'wagon-coach-modern', 'wagon-coach-modern']),
     ('miami-beach',  'Florida',    'Miami Beach',     'Ocean Drive, Deco pastels and the candy towers',
      ['commuter', 'wagon-coach-modern', 'wagon-coach-modern']),
+    ('duluth',       'Minnesota',  'Duluth',          'The Aerial Lift Bridge over the ship canal',
+     ['diesel', 'wagon-hopper', 'wagon-boxcar']),
+    ('kansas',       'Kansas',     'Wheat Country',   'The elevator on the siding, and all that sky',
+     ['diesel', 'wagon-hopper', 'wagon-hopper']),
+    ('kansas-city',  'Missouri',   'Kansas City',     'Union Station from the Liberty Memorial lawn',
+     ['diesel', 'wagon-coach-modern', 'wagon-coach-modern']),
+    ('smokies',      'Tennessee',  'Gatlinburg',      'The layered ridges above the Parkway',
+     ['steam', 'wagon-coach-old', 'wagon-caboose']),
 ]
 
 
@@ -75,7 +83,7 @@ def veh_inner(key):
 # Colorado) and a layer name (in every scene) — a blind id="water" rewrite renamed the
 # layer too, which silently breaks anything looking layers up by id.
 def namespace(inner, sid):
-    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean']:
+    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip']:
         # match the definition, not any element that happens to share the name
         for kind in ('linearGradient', 'radialGradient', 'pattern', 'filter', 'clipPath'):
             inner = inner.replace(f'<{kind} id="{gid}"', f'<{kind} id="{sid}-{gid}"')

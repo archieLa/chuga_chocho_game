@@ -112,9 +112,13 @@ The abbreviation-then-full-name flow is deliberate: the map stays uncluttered an
 | Wyoming | Yellowstone | The Lamar Valley — Absaroka wall, a bison herd, the Lower Falls, thermal ground | steam |
 | District of Columbia | Washington | The Tidal Basin at cherry blossom, Jefferson Memorial, the Monument | commuter |
 | Florida | Miami Beach | Ocean Drive — the Deco row left, the Atlantic right | commuter |
+| Minnesota | Duluth | The Aerial Lift Bridge over the ship canal — the road crosses *on* it | diesel |
+| Kansas | Wheat Country | Big sky, the grain elevator on the siding, round bales | diesel |
+| Missouri | Kansas City | Union Station from the Liberty Memorial lawn | diesel |
+| Tennessee | Smoky Mountains | Layered ridges above the Gatlinburg Parkway, fog in the valleys | steam |
 
-**20 destinations across 17 states.** California, Texas and Florida each have two, on exactly
-the rule above. Several are worth knowing about from the engine side:
+**24 destinations across 20 states.** California, Texas, Florida and Tennessee each have two,
+on exactly the rule above. Several are worth knowing about from the engine side:
 
 - **Austin is dusk and Las Vegas is night.** Every other scene is daylight. If a day/night
   tint, a brightness filter or ambient audio is ever added, these two are what it breaks.

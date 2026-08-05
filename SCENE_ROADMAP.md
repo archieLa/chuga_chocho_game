@@ -221,9 +221,20 @@ the better *building* (Union Station is a railroad palace) and the wheat is the 
 eight more towns: after it, the set finally has a farm, a big empty sky and a national park
 full of animals.
 
-**Watch the city count.** With San Antonio and Kansas City in, twelve of twenty-five scenes are
-cities. Wave 3 should lean rural and wild — Glacier, Maine, the Mackinac Straits, Lancaster
-County — before we add another skyline.
+**Watch the city count.** Twelve of twenty are already cities. Wave 3 should lean rural and
+wild — Glacier, Maine, the Mackinac Straits, Lancaster County — before we add another skyline.
+
+**⏸ San Antonio is parked, and the rule that parked it now governs the roadmap:**
+
+> **Breadth before depth. Every state gets one or two places before any state gets three.**
+
+Texas already has Austin and Houston, so a third Texas city waits until the map is fuller. The
+same test applies to California (SF, LA), Florida (Cape Canaveral, Miami Beach) and Tennessee
+(Nashville, Gatlinburg) — all of them are done for now. This changes Wave 3's ordering: prefer
+whichever candidate opens a **new state**, and treat second cities as tie-breakers rather than
+front-runners. The remaining four of Wave 2 all pass that test — Duluth, Kansas wheat country
+and Kansas City open Minnesota, Kansas and Missouri, and Gatlinburg is Tennessee's second in a
+wave where the other three are all new states.
 
 ---
 
@@ -338,7 +349,7 @@ is the only scene where the *sky* is the hero. Everything else has something in 
 **Train:** diesel-electric with **hoppers**, and it should look *long* — a grain train is one of
 the most recognisable trains in America precisely because it never seems to end.
 
-### 8. Texas — San Antonio
+### 8. Texas — San Antonio ⏸ PARKED
 **Viewpoint:** the River Walk, one level below the street, looking along the water.
 **Hero:** the Alamo — low and wide, warm limestone with its curved parapet. Draw it *small and
 correct* rather than big: it is a modest building, and every illustration that inflates it into
@@ -754,3 +765,47 @@ Alongside them: the cane tank engine and the monorail are new art, and Alaska's 
 diesel and Boston's Green Line trolley are recolours of what we already have.
 
 Sources: [Iconic landmark by state](https://dailypassport.com/most-iconic-landmark-every-state/) · [Heritage railroads in the United States](https://en.wikipedia.org/wiki/List_of_heritage_railroads_in_the_United_States) · [West Virginia tourist railroads](https://www.trains.com/trn/travel/attractions/west-virginia-tourist-railroads-you-must-visit/)
+
+
+---
+
+## Wave 2 progress
+
+Locked at eight; **seven built**, San Antonio parked.
+
+| Destination | State | Status |
+|---|---|---|
+| Yellowstone | Wyoming | ✅ built |
+| Washington | DC | ✅ built |
+| Miami Beach | Florida | ✅ built |
+| Duluth | Minnesota | ✅ built |
+| Wheat Country | Kansas | ✅ built |
+| Kansas City | Missouri | ✅ built |
+| Gatlinburg / Smokies | Tennessee | ✅ built |
+| San Antonio | Texas | ❌ dropped |
+
+**San Antonio is DROPPED, not parked.** Texas already has Austin and Houston. It is not in
+the queue and should not be picked back up ahead of a state with nothing.
+
+## The rule that decides what gets built next
+
+**A state with 0 locations beats a state with 1. A state with 1 beats a state with 2. No
+state gets a third until every state has at least one.**
+
+This is the only ordering rule. It overrides how good a scene would look, how famous the
+landmark is, and how much reference material is to hand.
+
+Current standing after Wave 2:
+
+- **2 locations:** Texas (Austin, Houston), Florida (Cape Canaveral, Miami Beach),
+  California (San Francisco, Los Angeles), Tennessee (Nashville, Gatlinburg)
+- **1 location:** Colorado, Illinois, Arizona, New York, Washington, Louisiana, Hawaii,
+  Alaska, Nevada, Utah, Massachusetts, Wyoming, District of Columbia, Minnesota, Kansas,
+  Missouri
+- **0 locations:** everywhere else — 28 states
+
+So the next batch comes **entirely from the 0 column**. Nothing from Texas, Florida,
+California or Tennessee is eligible, and nothing from the 1 column is either until the 0
+column is empty.
+
+The set stands at **twenty-four destinations across twenty-two states**.

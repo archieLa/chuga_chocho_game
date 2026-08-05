@@ -46,10 +46,13 @@ const SUPPORTED = {
   'Alaska': ['Denali'],
   'Nevada': ['Las Vegas'],
   'Utah': ['Moab'],
-  'Tennessee': ['Nashville'],
+  'Tennessee': ['Nashville', 'Gatlinburg'],
   'Massachusetts': ['Boston'],
   'Wyoming': ['Yellowstone'],
   'District of Columbia': ['Washington'],
+  'Minnesota': ['Duluth'],
+  'Kansas': ['Wheat Country'],
+  'Missouri': ['Kansas City'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

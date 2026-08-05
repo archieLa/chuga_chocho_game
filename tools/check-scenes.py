@@ -101,9 +101,22 @@ def check(path):
             if lo + MARGIN < x < hi - MARGIN:
                 probs.append('prop in the road: %s at (%.0f,%.0f) — carriageway is %.0f..%.0f'
                              % (layer, x, y, lo, hi))
-        # a full-width horizontal run (fence, wall, kerb) crossing the road
-        for m in re.finditer(r'fence\(|<rect x="(-?\d+)" y="(\d+)" width="(\d{3,})"', body):
-            pass
+    # --- props standing ON the railway ---
+    # The track band is y 450..516. Anything in scenery-back with its baseline inside that
+    # band is standing on the rails: the track is drawn after this layer, so the prop's feet
+    # get buried in the ballast and the building appears to sit on the line. Duluth had five
+    # brick warehouses planted here. Scenery-front is exempt — it draws in front of the
+    # track on purpose, and a prop there is nearer to the camera than the railway.
+    # The band proper is y 450..516, but the top few pixels are the far shoulder — a prop
+    # based at 450 reads as standing on the pavement BEHIND the rails, which is legitimate
+    # and several shipped scenes do it deliberately. Only flag baselines well inside.
+    TRACK_TOP, TRACK_BOT = 454, 516
+    body = layer_body(svg, 'scenery-back')
+    for m in re.finditer(r'translate\((-?[\d.]+),\s*(-?[\d.]+)\)', body):
+        x, y = float(m.group(1)), float(m.group(2))
+        if TRACK_TOP <= y <= TRACK_BOT:
+            probs.append('prop standing on the track: scenery-back at (%.0f,%.0f) — '
+                         'the track band is %d..%d' % (x, y, TRACK_TOP, TRACK_BOT))
     return probs
 
 def main():

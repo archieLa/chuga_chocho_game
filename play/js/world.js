@@ -132,6 +132,42 @@
       scenery:{ theme:'deco-beach', features:['artdeco','lifeguardtowers','palms','atlantic'] },
       trainPreset:{ engine:'commuter' } },
 
+    { id:'duluth', state:'Minnesota', city:'Duluth',
+      say:{ en:'Duluth', pl:'Duluth' },
+      scene:'duluth',
+      // Viewpoint: Canal Park looking north through the Aerial Lift Bridge. The road crosses
+      // ON the bridge — and the whole span goes up and down, which is the joke of the place.
+      scenery:{ theme:'harbour', features:['liftbridge','orefreighter','lighthouse','pines'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'kansas', state:'Kansas', city:'Wheat Country',
+      // Short enough to be the same shown and spoken — "Kansas wheat country"
+      // was a sentence fragment, not a name a three-year-old repeats back.
+      say:{ en:'Wheat Country', pl:'Pola pszenicy' },
+      scene:'kansas',
+      // Viewpoint: a section road beside the elevator siding. The SKY is the subject here —
+      // it is the only scene in the set with nothing standing in front of it.
+      scenery:{ theme:'plains', features:['grainelevator','cumulus','windmill','sunflowers'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'kansascity', state:'Missouri', city:'Kansas City',
+      say:{ en:'Kansas City', pl:'Kansas City' },
+      scene:'kansas-city',
+      // Viewpoint: Union Station seen from the Liberty Memorial lawn. Of every building in
+      // the game this is the one most about trains.
+      scenery:{ theme:'civic', features:['unionstation','libertymemorial','fountain','skyline'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'smokies', state:'Tennessee', city:'Gatlinburg',
+      // "Smoky Mountains", not "the Great Smoky Mountains" — short names are what
+      // a small child can hear once and say back.
+      say:{ en:'Smoky Mountains', pl:'Góry Dymne' },
+      scene:'smokies',
+      // Viewpoint: the Parkway at the foot of the range. The hero is atmosphere: six ridges
+      // receding, each paler than the one in front, with fog lying IN the valleys between.
+      scenery:{ theme:'appalachian', features:['ridges','spaceneedle','skylift','blackbear'] },
+      trainPreset:{ engine:'steam' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
