@@ -802,10 +802,106 @@ Current standing after Wave 2:
 - **1 location:** Colorado, Illinois, Arizona, New York, Washington, Louisiana, Hawaii,
   Alaska, Nevada, Utah, Massachusetts, Wyoming, District of Columbia, Minnesota, Kansas,
   Missouri
-- **0 locations:** everywhere else — 28 states
+- **0 locations:** everywhere else — 31 states
 
 So the next batch comes **entirely from the 0 column**. Nothing from Texas, Florida,
 California or Tennessee is eligible, and nothing from the 1 column is either until the 0
 column is empty.
 
-The set stands at **twenty-four destinations across twenty-two states**.
+The set stands at **twenty-four destinations across nineteen states plus DC**.
+
+
+---
+
+## Wave 3 — decided
+
+Three states that currently have **zero** locations. One each; nothing from a state that
+already has one.
+
+| Destination | State | Why this one |
+|---|---|---|
+| **Horseshoe Curve, Altoona** | Pennsylvania | The railway itself as the landmark — 24 scenes in and the railroad has never been the hero, only the thing running through somebody else's view |
+| **Crater Lake** | Oregon | The set's first large body of still water, and a blue nothing else uses |
+| **Bluegrass horse farm, near Lexington** | Kentucky | The first animals a child can name outside a national park |
+
+Reference-photo prompts: `REFERENCE_PROMPT_next3.md`.
+
+### Parked at the front of the queue
+
+Good scenes that are **blocked by the ordering rule**, not rejected. They become eligible only
+once every state has at least one location.
+
+| Destination | State | Note |
+|---|---|---|
+| Philadelphia — Art Museum steps | Pennsylvania | Use the steps and colonnade, **not** the Rocky statue: that sculpture dates from 1980 and is almost certainly still in copyright, which matters for a free, open-source project |
+| Portland | Oregon | Risk of reading like Seattle if Mt Hood sits behind the downtown |
+| Louisville — Big Four Bridge *or* Churchill Downs | Kentucky | The bridge would be the third bridge scene; Churchill Downs' twin spires are small at this canvas size |
+| San Antonio | Texas | **Dropped**, not parked — Texas already has two |
+
+
+---
+
+## Wave 3 — built
+
+| Destination | State | Status |
+|---|---|---|
+| Horseshoe Curve, Altoona | Pennsylvania | ✅ built |
+| Crater Lake | Oregon | ✅ built |
+| Bluegrass horse farm | Kentucky | ✅ built |
+
+All three were states with **zero** locations. The set now stands at **27 destinations
+across 22 states plus DC**, leaving **28 states** with nothing — and by the ordering rule
+the next batch comes entirely from those.
+
+### Still parked at the front of the queue
+
+Blocked by the rule, not rejected: **Philadelphia** (the Art Museum steps, not the Rocky
+statue — 1980 sculpture, almost certainly still in copyright), **Portland**, and
+**Louisville** (Big Four Bridge or Churchill Downs). Each would be a second location in a
+state that now has one.
+
+
+---
+
+## Horseshoe Curve — the aerial rebuild, and the engine question
+
+The first version drew the line in elevation from the valley floor. It was a handsome
+picture and it completely failed at its one job: you could not tell the line was bent into
+a horseshoe. It read as a sagging wire.
+
+The rebuild looks **down into the bowl**. The loop opens toward the viewer, so the tight
+bend is the farthest point and sits at the top, the two arms sweep round and come toward
+us out of frame, and everything the arms enclose — two reservoirs, the lawn, the park road
+and its car park — is the *inside* of the horseshoe. That enclosure is what makes the shape
+legible; without something clearly held inside the loop, a curve is just a line.
+
+It is hard foreshortened, because there are only about 140 px between the horizon and the
+top of the track band. The curve is a half-ellipse 726 wide and 140 deep. What sells it
+despite the squash is the curl at the ends, the four running lines fanning out as they
+near the camera, and the cars visibly rotating through 180° as they go round.
+
+### Making the game's own train run the curve
+
+Asked for, not yet done, and worth being precise about why.
+
+The engine renders the moving train along the **horizontal track band** between the two
+gates. That geometry is shared by all 27 scenes and is what the crossing, the gates and
+the endpoint logic are built on. A train that followed the curve instead would have no
+crossing to close the gates against — the whole game loop is that a train comes along
+*this* track and the child stops the road traffic. So the moving train cannot simply be
+moved onto the curve without unpicking the game.
+
+What CAN be done, cheaply and additively:
+
+- The scene now exports **`<path id="curve-path">`** — the centreline of the nearest
+  running line, in scene coordinates.
+- An engine could walk that path with `getPointAtLength()` / `getTotalLength()` and animate
+  the wrapped consist along it as **ambient background motion**, independent of the
+  gameplay train on the crossing. Rotation comes free from sampling two nearby points and
+  taking `atan2`.
+- Scale each car by depth using the same rule the art uses: `0.36 + 1.02·(y − 306) / 146`.
+- Nothing else changes. Scenes without `#curve-path` simply have no background train, so
+  the feature degrades to nothing everywhere else.
+
+That would give exactly the thing the place is famous for — a train visibly working its way
+round the bend — while the crossing keeps doing its job in the foreground.

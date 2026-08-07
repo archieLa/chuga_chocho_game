@@ -53,6 +53,9 @@ const SUPPORTED = {
   'Minnesota': ['Duluth'],
   'Kansas': ['Wheat Country'],
   'Missouri': ['Kansas City'],
+  'Pennsylvania': ['Horseshoe Curve'],
+  'Oregon': ['Crater Lake'],
+  'Kentucky': ['Bluegrass'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

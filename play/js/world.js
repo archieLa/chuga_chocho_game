@@ -168,6 +168,34 @@
       scenery:{ theme:'appalachian', features:['ridges','spaceneedle','skylift','blackbear'] },
       trainPreset:{ engine:'steam' } },
 
+    { id:'horseshoe', state:'Pennsylvania', city:'Horseshoe Curve',
+      say:{ en:'Horseshoe Curve', pl:'Zakręt Podkowa' },
+      scene:'horseshoe-curve',
+      // Viewpoint: the floor of the valley at Kittanning Point, looking up. The line runs
+      // round the bowl ABOVE eye level, so it reads as a long sagging arch and the road
+      // passes underneath it. The only scene in the set where the railway is the landmark.
+      scenery:{ theme:'appalachian-rail', features:['thecurve','reservoir','signals','hardwood'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'craterlake', state:'Oregon', city:'Crater Lake',
+      say:{ en:'Crater Lake', pl:'Jezioro Kraterowe' },
+      scene:'crater-lake',
+      // Viewpoint: Rim Drive. Asymmetric on purpose — the caldera opens left and the rim
+      // climbs right, so the road has somewhere to go instead of running into the water.
+      scenery:{ theme:'caldera', features:['wizardisland','calderawall','whitebark','rimlodge'] },
+      trainPreset:{ engine:'commuter' } },
+
+    { id:'bluegrass', state:'Kentucky', city:'Bluegrass',
+      // Short name, shown and spoken the same — same call as Wheat Country and
+      // Smoky Mountains. "the Kentucky bluegrass" is a sentence, not a label,
+      // and it matches `city` and the map's SUPPORTED entry this way.
+      say:{ en:'Bluegrass', pl:'Pastwiska' },
+      scene:'bluegrass',
+      // Viewpoint: a farm's limestone drive outside Lexington, so the "road" is gravel.
+      // The first scene in the set with animals a child can name outside a national park.
+      scenery:{ theme:'horse-farm', features:['plankfence','showbarn','thoroughbreds','stonewall'] },
+      trainPreset:{ engine:'steam' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

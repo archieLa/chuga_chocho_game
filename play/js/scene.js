@@ -37,6 +37,7 @@
   const STOP_FAR = 396;            // a car coming down waits above the far gate (arm at y≈421)
   const STOP_NEAR = 566;           // a car coming up waits below the near gate (arm at y≈528)
   const CROSS_MID = 483;           // middle of the track band, y 450–516
+  const CAR_FADE = 46;             // how far before the road's far end a car fades out
   const CROSSING_X = [500, 780];   // where the road meets the rails
 
   const CAR_COLOURS = ['#e84a4a', '#3d7bd6', '#f4b400', '#7b3fb0', '#2aa84a', '#ff8c2a', '#e8e8ee'];
@@ -159,11 +160,110 @@
       });
     });
 
+    // WHERE THE ROAD ENDS. Most scenes run the carriageway to the horizon, but
+    // some stop early: Crater Lake turns onto Rim Drive at y=368 and Horseshoe
+    // Curve ends at the visitor car park at y=376. Cars must not drive off the
+    // tarmac into a lake. Rather than a per-scene table, read it off the art —
+    // the road polygon's own far edge IS the answer, so a scene that truncates
+    // says so just by being drawn that way, and future ones need no code.
+    let roadTop = HORIZON;
+    const roadPoly = svg.querySelector('#road polygon');
+    if (roadPoly) {
+      const ys = (roadPoly.getAttribute('points') || '').trim().split(/\s+/)
+        .map(p => parseFloat(p.split(',')[1])).filter(v => !isNaN(v));
+      if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
+    }
+
+    // An ambient train on a curved line drawn into the scene — Horseshoe Curve
+    // exports #curve-path, the centreline of the near running road. This is
+    // scenery, NOT the gameplay train: it loops for ever and the gate has no
+    // opinion about it, because it never touches the crossing.
+    const curve = buildCurveTrain(svg);
+
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
+                roadTop: roadTop, curve: curve,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
     return s;
+  }
+
+  // =======================================================================
+  // Ambient train on a drawn curve (Horseshoe Curve).
+  //
+  // The gameplay train runs the straight track band between the two gates, and
+  // the crossing, the gates and the endpoint logic are all built on that. A
+  // train following the bowl has no crossing to close a gate against, so this is
+  // deliberately separate: pure background motion, always running, gate-blind.
+  // A scene opts in simply by exporting <path id="curve-path">; every other
+  // scene has none and quietly gets no background train.
+  // =======================================================================
+  const CURVE = {
+    consist: [{ type: 'diesel',       colours: { loco: '#2f4c72', trim: '#c8a23a' } },
+              { type: 'wagon-hopper', colours: { wagon: '#6b6f76' } },
+              { type: 'wagon-hopper', colours: { wagon: '#7c5a3a' } },
+              { type: 'wagon-hopper', colours: { wagon: '#6b6f76' } }],
+    speed: 46,            // local units per second — a slow freight, far away
+    base: 0.36,           // multiplies the art's own depth rule (see depthAt)
+    gap: 8,
+  };
+  // The depth rule the Horseshoe art uses for everything in the bowl, given by
+  // the handoff: 1.0 at the near arms, tiny at the apex. Multiplied by `base` so
+  // the background train sits just behind the gameplay train's 0.55 at the
+  // crossing rather than towering over it.
+  const curveDepth = (y) => CURVE.base * (0.36 + 1.02 * (y - 306) / 146);
+
+  function buildCurveTrain(svg) {
+    const path = svg.querySelector('#curve-path');
+    if (!path || !path.getTotalLength) return null;
+    let total = 0;
+    try { total = path.getTotalLength(); } catch (e) { return null; }
+    if (!total) return null;
+
+    const holder = el('g', { class: 'cc-curve-train' });
+    // Deepest of everything the engine adds: this is distant scenery, so it goes
+    // behind the far gate along with the far cars.
+    const gateFar = svg.querySelector('#gate-far');
+    gateFar.parentNode.insertBefore(holder, gateFar);
+
+    const items = CC.rolling.layout(CURVE.consist, CURVE.gap);
+    const cars = items.map(it => {
+      const g = CC.rolling.build(it.type, it.colours);
+      holder.appendChild(g);
+      return { el: g, type: it.type, offset: it.offset };
+    });
+    return { path: path, total: total, cars: cars, dist: 0,
+             span: CC.rolling.span(items, CURVE.gap) };
+  }
+
+  function updateCurveTrain(dt) {
+    const c = currentScene && currentScene.curve;
+    if (!c) return;
+    c.dist += CURVE.speed * (dt / 1000);
+    // Loop with the whole consist clear of the start, so it re-enters rather
+    // than blinking back into the middle of the bowl.
+    const lap = c.total + c.span * CURVE.base;
+    if (c.dist > lap) c.dist -= lap;
+
+    c.cars.forEach(car => {
+      // offset is <= 0 (measured back from the front of the train).
+      let at = c.dist + car.offset * CURVE.base;
+      const on = at >= 0 && at <= c.total;
+      car.el.setAttribute('opacity', on ? '1' : '0');
+      if (!on) return;
+      const p = c.path.getPointAtLength(at);
+      // Heading from a nearby second sample — atan2 of the difference. Sampling
+      // forward near the end would clamp and give a heading of zero, so step
+      // backwards there instead.
+      const ahead = Math.min(at + 6, c.total);
+      const back = Math.max(at - 6, 0);
+      const a = c.path.getPointAtLength(back), b = c.path.getPointAtLength(ahead);
+      const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      const s = Math.max(0.05, curveDepth(p.y));
+      car.el.setAttribute('transform',
+        'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ') rotate(' + deg.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+      CC.rolling.roll(car.el, c.dist / CURVE.base, car.type);
+    });
   }
 
   // =======================================================================
@@ -306,7 +406,13 @@
   function spawnCar() {
     if (!currentScene || cars.length >= 8) return;
     const down = Math.random() < 0.5;                  // down = toward the viewer
-    const at = down ? HORIZON + 4 : H + 120;
+    // Cars enter and leave at the FAR END OF THE ROAD, which is the horizon in
+    // most scenes but not all — see roadTop. At Crater Lake that end is the Rim
+    // Drive junction, so a car leaving there reads as turning off; at Horseshoe
+    // it is the visitor car park, so it reads as parking. Either way nothing
+    // drives past the tarmac.
+    const top = currentScene ? currentScene.roadTop : HORIZON;
+    const at = down ? top + 4 : H + 120;
     // Don't drop a car on top of one that has not got clear of the entrance yet.
     if (cars.some(c => c.dir === (down ? 1 : -1) && Math.abs(c.y - at) < carGap(at) * 1.2)) return;
     const car = {
@@ -329,6 +435,11 @@
     const x = ROAD_CX + (car.dir > 0 ? -half * 0.5 : half * 0.5);
     const s = depthScale(car.y);
     car.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + car.y.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+    // Fade over the last stretch before the road's far end. At the horizon a car
+    // is tiny and this is invisible; on a truncated road it is what stops a
+    // still-sizeable car from popping out of existence in mid-picture.
+    const top = currentScene ? currentScene.roadTop : HORIZON;
+    car.el.setAttribute('opacity', clamp((car.y - top) / CAR_FADE, 0, 1).toFixed(2));
     // A car past the middle of the tracks is in front of the train; before it,
     // behind. Reparent only when that actually changes.
     const near = car.y > CROSS_MID;
@@ -379,7 +490,10 @@
         CC.emit && CC.emit('carpassed', passed);
       }
       placeCar(car);
-      if (car.y < HORIZON - 40 || car.y > H + 170) {
+      // Gone once it reaches the end of the tarmac (it has already faded to
+      // nothing by then) or has driven off the bottom of the frame.
+      const top = currentScene ? currentScene.roadTop : HORIZON;
+      if (car.y < top || car.y > H + 170) {
         if (car.el.parentNode) car.el.parentNode.removeChild(car.el);
         cars.splice(i, 1);
       }
@@ -471,6 +585,7 @@
     updateSmoke(dt);
     updateCars(dt);
     updateScenery(dt);
+    updateCurveTrain(dt);
     drawGates(t);
     requestAnimationFrame(frame);
   }

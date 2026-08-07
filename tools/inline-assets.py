@@ -55,7 +55,15 @@ ANIM_IDS = ['driver-0', 'driver-1', 'driver-2', 'coupling-rod', 'coupling-rod-hi
 
 # Ids the engine looks up inside a mounted scene. They must stay untouched or
 # scene.js cannot find the layers it inserts the train between.
-KEEP_IDS = {'gate-near', 'gate-far', 'scenery-front', 'track', 'road-surface'}
+# Ids the ENGINE looks up inside a mounted scene, so they must survive the
+# per-scene namespacing. Duplicates across several mounted scenes are fine —
+# every lookup is scoped to that scene's own <svg> root, never to the document.
+#   road       scene.js reads the carriageway's far edge to learn where the road
+#              ends: most scenes run to the horizon, Crater Lake stops at the Rim
+#              Drive junction and Horseshoe Curve at the visitor car park.
+#   curve-path the centreline of a drawn railway an ambient train follows.
+KEEP_IDS = {'gate-near', 'gate-far', 'scenery-front', 'track', 'road-surface',
+            'road', 'curve-path'}
 
 
 def strip(svg):

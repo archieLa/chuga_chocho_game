@@ -27,20 +27,69 @@ TRACK_TOP, TRACK_BOT = 450, 516
 
 # ============================================================== FURNITURE ====
 
-def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe066'):
-    """Perspective road: vanishing point on the horizon, so it recedes INTO the
-    scene rather than slicing through it."""
+def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe066',
+         top=HORIZON, junction=None):
+    """Perspective road: vanishing point on the horizon, so it recedes INTO the scene
+    rather than slicing through it.
+
+    `top` truncates the carriageway at a given y instead of running it to the horizon. The
+    geometry BELOW that line — and so the crossing, both gates and the corridor the checker
+    tests — is completely unchanged; only the far end stops early. A scene that truncates is
+    expected to draw where the road goes next in its own `scenery-back` layer, which is
+    painted immediately before this one.
+
+    `junction=(y0, y1)` opens the RIGHT verge between those two heights and pavesetthe gap,
+    so a side road drawn in `scenery-back` runs straight into the carriageway. Without it
+    you get tarmac, then a pale strip of verge, then tarmac again — which is not how two
+    roads meet. Real junctions have the verge stop and the surface wrap round a radius.
+
+    With `top=300, junction=None` this emits exactly what it always did, so the scenes that
+    do not opt in are untouched.
+    """
+    t = (top - HORIZON) / 420.0
+    lx = 622 - 112 * t
+    rx = 658 + 112 * t
+    lsh = 636 - 108 * t
+    rsh = 644 + 108 * t
+
+    def edge_r(y):
+        return 658 + 112 * (y - HORIZON) / 420.0
+
+    def inner_r(y):
+        return 644 + 108 * (y - HORIZON) / 420.0
+
+    if junction:
+        j0, j1 = junction
+        f0, f1 = j0 - 11, j1 + 11          # the radius, above and below the side road
+        right_verge = (
+            f'<polygon points="{inner_r(f0):.0f},{f0} {edge_r(f0):.0f},{f0} '
+            f'{rx:.0f},{top} {rsh:.0f},{top}" fill="{shoulder}" opacity="0.45"/>'
+            f'<polygon points="752,720 770,720 {edge_r(f1):.0f},{f1} '
+            f'{inner_r(f1):.0f},{f1}" fill="{shoulder}" opacity="0.45"/>'
+            # the paved radius: the verge gives way to tarmac where the roads meet
+            f'<polygon points="{inner_r(f0):.0f},{f0} {edge_r(f0):.0f},{f0} '
+            f'{edge_r(f1):.0f},{f1} {inner_r(f1):.0f},{f1}" fill="{surface2}"/>')
+    else:
+        right_verge = (f'<polygon points="752,720 770,720 {rx:.0f},{top} {rsh:.0f},{top}" '
+                       f'fill="{shoulder}" opacity="0.45"/>')
+
+    dashes = [(704, 660), (626, 590), (560, 532), (392, 368), (352, 336)]
+    coords = {704: (634, 646, 645, 635), 626: (636, 644, 643, 637),
+              560: (637, 643, 642, 638), 392: (638, 642, 641, 639),
+              352: (639, 641, 641, 639)}
+    dash_svg = ''.join(
+        f'<polygon points="{coords[y0][0]},{y0} {coords[y0][1]},{y0} '
+        f'{coords[y0][2]},{y1} {coords[y0][3]},{y1}"/>'
+        for y0, y1 in dashes if y1 >= top)
     return f'''  <g id="road">
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="{surface}"/><stop offset="1" stop-color="{surface2}"/>
     </linearGradient></defs>
-    <polygon points="510,720 770,720 658,300 622,300" fill="url(#roadg)"/>
-    <polygon points="510,720 528,720 636,300 622,300" fill="{shoulder}" opacity="0.45"/>
-    <polygon points="752,720 770,720 658,300 644,300" fill="{shoulder}" opacity="0.45"/>
+    <polygon points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
+    <polygon points="510,720 528,720 {lsh:.0f},{top} {lx:.0f},{top}" fill="{shoulder}" opacity="0.45"/>
+    {right_verge}
     <g fill="{dash}">
-      <polygon points="634,704 646,704 645,660 635,660"/><polygon points="636,626 644,626 643,590 637,590"/>
-      <polygon points="637,560 643,560 642,532 638,532"/><polygon points="638,392 642,392 641,368 639,368"/>
-      <polygon points="639,352 641,352 641,336 639,336"/>
+      {dash_svg}
     </g>
   </g>'''
 
@@ -8969,7 +9018,1596 @@ def smokies():
     }, d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies()
+def bluegrass():
+    """KENTUCKY BLUEGRASS — a thoroughbred farm outside Lexington, early summer.
+
+    Three things make this place itself and nothing else in the set has any of them:
+    white four-board plank fence running in long CURVES over rolling ground, pasture mown
+    into a green far brighter than any other scene uses, and horses. The fence is the
+    signature — straight fencing on flat grass would be Kansas with a different palette.
+
+    The road is the farm's limestone drive, so it is pale gravel rather than asphalt."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f8fd0"/><stop offset="0.45" stop-color="#8fc0e2"/>
+      <stop offset="0.8" stop-color="#c6dcec"/><stop offset="1" stop-color="#e4eef0"/>
+    </linearGradient>
+    <linearGradient id="pasture" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fb04a"/><stop offset="0.5" stop-color="#6da33f"/>
+      <stop offset="1" stop-color="#5c9136"/>
+    </linearGradient>''')
+
+    # ------------------------------------------------------------------ sky ----
+    def cumulus(x, y, r, c='#ffffff', shade='#dfe6ec'):
+        """Flat-based summer cumulus, same construction as Kansas — these are the same
+        skies, four hundred miles apart."""
+        return (f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.58:.0f}" fill="{c}"/>'
+                f'<ellipse cx="{x-r*0.72:.0f}" cy="{y+r*0.3:.0f}" rx="{r*0.6:.0f}" '
+                f'ry="{r*0.4:.0f}" fill="{c}"/>'
+                f'<ellipse cx="{x+r*0.76:.0f}" cy="{y+r*0.28:.0f}" rx="{r*0.54:.0f}" '
+                f'ry="{r*0.36:.0f}" fill="{c}"/>'
+                f'<ellipse cx="{x-r*0.3:.0f}" cy="{y-r*0.3:.0f}" rx="{r*0.46:.0f}" '
+                f'ry="{r*0.34:.0f}" fill="{c}"/>'
+                f'<rect x="{x-r*1.3:.0f}" y="{y+r*0.54:.0f}" width="{r*2.6:.0f}" '
+                f'height="{r*0.17:.0f}" rx="{r*0.08:.0f}" fill="{shade}"/></g>')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             + '    <g>'
+             + ''.join(cumulus(x, y, r) for x, y, r in
+                       [(150, 76, 58), (400, 52, 44), (660, 88, 62), (900, 58, 40),
+                        (1150, 82, 54), (270, 150, 30), (780, 162, 26), (1030, 146, 32)])
+             + '</g>')
+
+    # -------------------------------------------------- the roll of the land ----
+    def swale(y, x0, x1, dip, fill, op=1.0):
+        """A band of pasture with a curved lower edge. Stacking a few of these is what
+        makes the ground roll instead of lying flat like a billiard table."""
+        mid = (x0 + x1) / 2
+        return (f'<path d="M{x0},{y} L{x1},{y} L{x1},{y+dip+40} '
+                f'C {mid+ (x1-mid)*0.4:.0f},{y+dip+16} {mid - (mid-x0)*0.4:.0f},{y+dip+16} '
+                f'{x0},{y+dip+40} Z" fill="{fill}" opacity="{op}"/>')
+
+    far_l = ('    <g id="horizon">'
+             # the wooded ridge that closes every Bluegrass horizon
+             '<rect x="0" y="288" width="1280" height="20" fill="#4a7038"/>'
+             + '<g fill="#3f6231">'
+             + ''.join(f'<ellipse cx="{x}" cy="290" rx="{11 + (x % 5) * 4}" '
+                       f'ry="{7 + (x % 3) * 3}"/>' for x in range(-10, 1300, 23)) + '</g>'
+             + '<g fill="#5b8442" opacity="0.75">'
+             + ''.join(f'<ellipse cx="{x}" cy="284" rx="{9 + (x % 4) * 3}" '
+                       f'ry="{5 + (x % 3) * 2}"/>' for x in range(20, 1300, 37)) + '</g>'
+             + '</g>')
+
+    ground_l = ('    <rect x="0" y="306" width="1280" height="414" fill="url(#pasture)"/>\n'
+                # the rolling — three long swales, each a slightly different green
+                '    ' + swale(306, -20, 1300, 26, '#75a944')
+                + swale(352, -20, 1300, 40, '#6ba03d')
+                + swale(430, -20, 1300, 56, '#639838')
+                + swale(548, -20, 1300, 70, '#5a8f33') + '\n'
+                # mower stripes, which is half of why these pastures look manicured
+                + '    <g fill="#7cb14e" opacity="0.35">'
+                + ''.join(f'<polygon points="{x},306 {x+44},306 '
+                          f'{640 + (x + 44 - 640) * 2.2:.0f},720 '
+                          f'{640 + (x - 640) * 2.2:.0f},720"/>'
+                          for x in range(-60, 1320, 108)) + '</g>\n'
+                # soft shadows where the ground dips
+                + '    <g fill="#3f6631" opacity="0.14">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.13:.0f}"/>'
+                          for x, y, r in [(230, 470, 180), (820, 500, 160), (1150, 452, 150),
+                                          (400, 664, 190), (990, 686, 170)]) + '</g>')
+
+    # ------------------------------------------------------------- the fence ----
+    def ph(y):
+        """Post height at this depth. Everything about the fence scales off this."""
+        return 16 + 40 * max(0.0, (y - 300)) / 420
+
+    def plank_fence(pts, board='#f6f4ee', post='#e6e2d6', shade='#c9c4b4', n_rails=4):
+        """Four-board plank fence. The CURVE is the signature of the Bluegrass — these
+        fences follow the roll of the ground for miles, and drawn straight they turn the
+        farm into a paddock. Posts are spaced and sized by depth so the line recedes."""
+        out = []
+        # rails, one polyline per board, each riding at a fraction of the local post height
+        for k in range(n_rails):
+            f = 0.16 + k * 0.26
+            segs = []
+            for i in range(len(pts) - 1):
+                (x0, y0), (x1, y1) = pts[i], pts[i + 1]
+                w = max(1.4, 3.4 * ((y0 + y1) / 2 - 300) / 420 + 1.2)
+                segs.append(f'<path d="M{x0:.0f},{y0 - ph(y0) * f:.1f} '
+                            f'L{x1:.0f},{y1 - ph(y1) * f:.1f}" stroke="{board}" '
+                            f'stroke-width="{w:.1f}" fill="none" stroke-linecap="round"/>')
+            out.append(''.join(segs))
+        # posts, walked along the line at a spacing that also shrinks with distance
+        for i in range(len(pts) - 1):
+            (x0, y0), (x1, y1) = pts[i], pts[i + 1]
+            L = max(1.0, abs(x1 - x0))
+            step = max(14.0, 26 * (((y0 + y1) / 2 - 300) / 420) + 12)
+            k = 0
+            while k * step < L:
+                t = k * step / L
+                x = x0 + (x1 - x0) * t
+                y = y0 + (y1 - y0) * t
+                h = ph(y)
+                w = max(1.8, h * 0.11)
+                out.append(f'<rect x="{x - w/2:.1f}" y="{y - h:.1f}" width="{w:.1f}" '
+                           f'height="{h:.1f}" fill="{post}"/>')
+                out.append(f'<rect x="{x + w/2 - w*0.34:.1f}" y="{y - h:.1f}" '
+                           f'width="{w*0.34:.1f}" height="{h:.1f}" fill="{shade}"/>')
+                k += 1
+        return '<g>' + ''.join(out) + '</g>'
+
+    def curve(x0, x1, y0, y1, sag, n=14):
+        """Sample a gently sagging curve — the fence following a dip in the ground."""
+        pts = []
+        for i in range(n + 1):
+            t = i / n
+            x = x0 + (x1 - x0) * t
+            y = y0 + (y1 - y0) * t + sag * (4 * t * (1 - t))
+            pts.append((x, y))
+        return pts
+
+    # ------------------------------------------------------------- buildings ----
+    def show_barn(x, base, s=1.0, body='#f4f2ea', trim='#dcd6c6', roof='#3f4650',
+                  door='#2f5f4a'):
+        """The Bluegrass show barn: long, low, brilliant white, a dark roof, and cupolas
+        with little spires along the ridge. The proportion is the thing — it is four times
+        as long as it is tall, and drawn square it becomes a house."""
+        w, h = 300, 54
+        cup = ''.join(
+            f'<g transform="translate({cx},{-h-16})">'
+            f'<rect x="-11" y="-16" width="22" height="17" fill="{body}"/>'
+            f'<rect x="-11" y="-16" width="7" height="17" fill="{trim}"/>'
+            f'<rect x="-13" y="-19" width="26" height="4" fill="{roof}"/>'
+            f'<polygon points="-9,-19 9,-19 0,-40" fill="{roof}"/>'
+            f'<rect x="-1" y="-48" width="2" height="9" fill="{roof}"/></g>'
+            for cx in (-92, 0, 92))
+        return (f'<g id="show-barn" transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 5, w*0.5, 10, 0.2)}'
+                f'<rect x="{-w/2}" y="{-h}" width="{w}" height="{h}" fill="{body}"/>'
+                f'<rect x="{-w/2}" y="{-h}" width="{w*0.2:.0f}" height="{h}" fill="#ffffff" '
+                f'opacity="0.5"/>'
+                f'<rect x="{w/2-w*0.14:.0f}" y="{-h}" width="{w*0.14:.0f}" height="{h}" '
+                f'fill="{trim}"/>'
+                # the long roof plane and its ridge
+                f'<path d="M{-w/2-8},{-h} L{-w/2+22},{-h-22} L{w/2-22},{-h-22} '
+                f'L{w/2+8},{-h} Z" fill="{roof}"/>'
+                f'<path d="M{-w/2-8},{-h} L{-w/2+22},{-h-22} L{w/2-22},{-h-22} '
+                f'L{w/2-22},{-h-18} L{-w/2+18},{-h-18} L{w/2-22},{-h-18} Z" fill="#4d5661"/>'
+                f'<rect x="{-w/2-10}" y="{-h-3}" width="{w+20}" height="5" fill="{trim}"/>'
+                f'{cup}'
+                # stall doors down the length, and the windows between them
+                + '<g>' + ''.join(
+                    f'<rect x="{-w/2 + 16 + i*34}" y="{-h+16}" width="20" height="{h-16}" '
+                    f'rx="2" fill="{door}"/>'
+                    f'<rect x="{-w/2 + 20 + i*34}" y="{-h+20}" width="12" height="10" '
+                    f'fill="#1f4234"/>' for i in range(8)) + '</g>'
+                + '<g fill="#c9d6dc">' + ''.join(
+                    f'<rect x="{-w/2 + 8 + i*34}" y="{-h+8}" width="8" height="8"/>'
+                    for i in range(9)) + '</g></g>')
+
+    def board_barn(x, base, s=1.0, board='#7a7168', dark='#5f574f', roof='#b8bcc0'):
+        """The ordinary working barn: grey weathered board, a bright metal roof, open
+        equipment bay. Every farm has three of these for every show barn."""
+        w, h = 150, 62
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 4, w*0.5, 8, 0.2)}'
+                f'<rect x="{-w/2}" y="{-h}" width="{w}" height="{h}" fill="{board}"/>'
+                f'<rect x="{w/2-w*0.18:.0f}" y="{-h}" width="{w*0.18:.0f}" height="{h}" '
+                f'fill="{dark}"/>'
+                + f'<g fill="{dark}" opacity="0.5">'
+                + ''.join(f'<rect x="{-w/2 + 5 + i*9}" y="{-h}" width="1.8" height="{h}"/>'
+                          for i in range(16)) + '</g>'
+                f'<path d="M{-w/2-9},{-h} L{-w/2+14},{-h-20} L{w/2-14},{-h-20} '
+                f'L{w/2+9},{-h} Z" fill="{roof}"/>'
+                f'<path d="M{-w/2-9},{-h} L{-w/2+14},{-h-20} L{w/2-14},{-h-20} '
+                f'L{w/2-14},{-h-16} L{-w/2-5},{-h-4} Z" fill="#cdd2d6"/>'
+                f'<rect x="{-w*0.3:.0f}" y="{-h+12}" width="{w*0.34:.0f}" height="{h-12}" '
+                f'fill="#3a352f"/>'
+                f'<rect x="{w*0.06:.0f}" y="{-h+18}" width="{w*0.2:.0f}" height="14" '
+                f'fill="#3a352f"/></g>')
+
+    def shade_tree(x, y, s=1.0, a='#4a7f38', b='#5c9445', c='#3d6a2f', trunk='#6b5a44'):
+        """A single big hardwood standing alone in the pasture — an oak or a hackberry.
+        Broad and round-headed, never conical."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(4, 3, 40, 8, 0.18)}'
+                f'<path d="M-6,2 L-5,-40 L-16,-62 L-3,-50 L0,-78 L3,-50 L17,-64 L5,-40 L6,2 Z" '
+                f'fill="{trunk}"/>'
+                f'<ellipse cx="0" cy="-104" rx="46" ry="34" fill="{a}"/>'
+                f'<ellipse cx="-24" cy="-92" rx="28" ry="21" fill="{c}"/>'
+                f'<ellipse cx="26" cy="-96" rx="25" ry="19" fill="{c}"/>'
+                f'<ellipse cx="-6" cy="-126" rx="27" ry="19" fill="{b}"/>'
+                f'<ellipse cx="21" cy="-116" rx="21" ry="15" fill="{b}"/>'
+                f'<ellipse cx="-30" cy="-114" rx="17" ry="13" fill="{b}"/></g>')
+
+    def cedar(x, y, s=1.0):
+        """Eastern red cedar — the dark spire that turns up along every Kentucky fence."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-3" y="-16" width="6" height="16" fill="#5a4a38"/>'
+                f'<path d="M0,-104 L15,-64 L8,-64 L21,-32 L11,-32 L24,-6 L-24,-6 L-11,-32 '
+                f'L-21,-32 L-8,-64 L-15,-64 Z" fill="#2f5233"/>'
+                f'<path d="M0,-104 L15,-64 L8,-64 L21,-32 L11,-32 L24,-6 L0,-6 Z" '
+                f'fill="#264428"/></g>')
+
+    def gate_pillar(x, y, s=1.0, gate_dir=1):
+        """Limestone pillar with an iron gate hung off it. The dry-stone wall and these
+        pillars are what a Bluegrass farm entrance actually looks like."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 3, 26, 6, 0.2)}'
+                f'<rect x="-22" y="-86" width="44" height="86" fill="#9c9a90"/>'
+                f'<rect x="-22" y="-86" width="14" height="86" fill="#b0aea3"/>'
+                f'<rect x="12" y="-86" width="10" height="86" fill="#7f7d74"/>'
+                + '<g fill="#8a887e" opacity="0.85">'
+                + ''.join(f'<rect x="{-20 + (r % 2) * 9}" y="{-82 + r*10}" '
+                          f'width="{16 + (r % 3) * 5}" height="7" rx="1"/>'
+                          for r in range(8)) + '</g>'
+                f'<rect x="-27" y="-96" width="54" height="11" rx="2" fill="#b8b6ab"/>'
+                f'<rect x="-27" y="-99" width="54" height="4" rx="2" fill="#cfcdc2"/>'
+                # the iron gate leaf, hung on the side away from the drive
+                f'<g transform="translate({22 * gate_dir},0) scale({gate_dir},1)">'
+                f'<rect x="0" y="-70" width="76" height="5" rx="2" fill="#2f3a36"/>'
+                f'<rect x="0" y="-22" width="76" height="5" rx="2" fill="#2f3a36"/>'
+                f'<rect x="0" y="-70" width="5" height="53" fill="#2f3a36"/>'
+                f'<rect x="71" y="-70" width="5" height="53" fill="#2f3a36"/>'
+                f'<path d="M2,-66 L74,-21 M74,-66 L2,-21" stroke="#2f3a36" '
+                f'stroke-width="4"/></g></g>')
+
+    def stone_wall(x0, x1, y, h=22):
+        """Dry-laid limestone. The courses are irregular and that irregularity is the
+        entire read — even coursing turns it into brickwork."""
+        rows = []
+        for r in range(4):
+            yy = y - h + r * (h / 4)
+            k = 0
+            x = x0
+            while x < x1:
+                w = 16 + ((k * 37 + r * 19) % 22)
+                rows.append(f'<rect x="{x:.0f}" y="{yy:.1f}" width="{w}" '
+                            f'height="{h/4 - 1:.1f}" rx="1" '
+                            f'fill="{["#9c9a90", "#a8a69b", "#8e8c83"][(k + r) % 3]}"/>')
+                x += w + 2
+                k += 1
+        return ('<g>' + ''.join(rows)
+                + f'<rect x="{x0}" y="{y-h-3}" width="{x1-x0}" height="4" fill="#b8b6ab"/></g>')
+
+    # -------------------------------------------------------------- horses ----
+    def horse(x, y, s=1.0, coat='#8a5230', shade='#6f3f24', point='#2b2119',
+              sock=None, grazing=False, facing=1):
+        """A thoroughbred, drawn 100 units tall at the withers so every other measurement
+        can be read off that.
+
+        The proportions are unforgiving and the first attempt got them all wrong:
+
+        * **Legs are more than half the horse.** Belly at −56, ground at 0 — the legs are
+          56 of the 100. Short legs plus a deep barrel is a camel, which is exactly what
+          came out.
+        * **The barrel is shorter than you think** — about 78 long against 100 tall, and
+          only 42 deep. Longer and lower and it becomes a cow.
+        * **The head is SMALL**, roughly 28 long: a bit over a quarter of the body.
+        * **The neck rises steeply** from the withers, and is much thinner at the poll than
+          at the base.
+
+        `point` is mane, tail and lower legs. On a bay those are black, and that black is
+        most of what makes the silhouette read as a horse rather than a brown shape."""
+        sock = sock or []
+
+        def foreleg(lx, lean=0.0):
+            return (f'<path d="M{lx-6},-62 L{lx+6},-62 L{lx+4+lean},-34 '
+                    f'L{lx+3.5+lean*2},-5 L{lx-3.5+lean*2},-5 L{lx-4+lean},-34 Z" '
+                    f'fill="{coat}"/>'
+                    f'<path d="M{lx-4+lean},-34 L{lx+4+lean},-34 L{lx+3.5+lean*2},-5 '
+                    f'L{lx-3.5+lean*2},-5 Z" fill="{point}"/>'
+                    f'<path d="M{lx-4.5+lean*2},-5 L{lx+4.5+lean*2},-5 L{lx+4+lean*2},0 '
+                    f'L{lx-4+lean*2},0 Z" fill="#3a332c"/>')
+
+        def hindleg(lx):
+            return (f'<path d="M{lx-14},-88 C {lx+6},-90 {lx+14},-78 {lx+12},-58 '
+                    f'L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 L{lx-1},-34 L{lx-4},-56 '
+                    f'C {lx-12},-62 {lx-16},-74 {lx-14},-88 Z" fill="{coat}"/>'
+                    f'<path d="M{lx-1},-34 L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 Z" '
+                    f'fill="{point}"/>'
+                    f'<path d="M{lx-3},-5 L{lx+7},-5 L{lx+6.5},0 L{lx-2.5},0 Z" '
+                    f'fill="#3a332c"/>')
+
+        socks = ''.join(f'<rect x="{lx-4.5}" y="-16" width="9" height="11" rx="2" '
+                        f'fill="#efe9dc"/>' for lx in sock)
+
+        if grazing:
+            # head down to the grass: the neck swings forward and down off the withers
+            neck = (f'<path d="M-34,-96 C -50,-88 -62,-64 -70,-34 L-52,-28 '
+                    f'C -46,-56 -36,-74 -24,-84 Z" fill="{coat}"/>')
+            mane = (f'<path d="M-32,-100 C -50,-92 -64,-66 -72,-34 L-66,-32 '
+                    f'C -58,-64 -46,-86 -28,-94 Z" fill="{point}"/>')
+            head = (f'<path d="M-70,-34 C -78,-24 -82,-14 -80,-6 L-64,-4 '
+                    f'C -62,-14 -58,-24 -52,-30 Z" fill="{coat}"/>'
+                    f'<path d="M-80,-6 C -79,-1 -74,1 -68,-1 L-64,-4 Z" fill="{point}"/>'
+                    f'<circle cx="-68" cy="-27" r="2.6" fill="#1a1410"/>'
+                    f'<path d="M-62,-36 L-58,-48 L-53,-35 Z" fill="{coat}"/>')
+        else:
+            neck = (f'<path d="M-34,-96 C -44,-104 -56,-114 -64,-124 L-48,-134 '
+                    f'C -42,-120 -32,-106 -22,-96 Z" fill="{coat}"/>')
+            mane = (f'<path d="M-48,-134 C -58,-120 -52,-106 -38,-94 L-30,-98 '
+                    f'C -42,-108 -48,-120 -42,-132 Z" fill="{point}"/>')
+            head = (f'<path d="M-64,-124 C -76,-126 -88,-120 -94,-112 L-88,-104 '
+                    f'C -80,-108 -68,-112 -58,-114 Z" fill="{coat}"/>'
+                    f'<path d="M-94,-112 C -97,-109 -96,-105 -92,-104 L-88,-104 Z" '
+                    f'fill="{point}"/>'
+                    f'<circle cx="-70" cy="-118" r="2.6" fill="#1a1410"/>'
+                    f'<path d="M-58,-126 L-56,-140 L-49,-129 Z" fill="{coat}"/>'
+                    f'<path d="M-50,-128 L-47,-141 L-42,-130 Z" fill="{coat}"/>')
+
+        return (f'<g transform="translate({x},{y}) scale({s * facing},{s})">'
+                f'{shadow(0, 2, 46, 7, 0.2)}'
+                # far side legs first
+                + hindleg(20) + foreleg(-32, 1.5)
+                # the barrel: withers high at the front, croup a touch lower, belly at −56
+                + f'<path d="M-38,-88 C -36,-98 -22,-102 0,-100 C 22,-98 38,-92 44,-80 '
+                f'C 48,-70 46,-62 40,-58 C 26,-52 -10,-52 -28,-56 C -36,-60 -40,-74 '
+                f'-38,-88 Z" fill="{coat}"/>'
+                + f'<path d="M-28,-56 C -10,-52 26,-52 40,-58 C 28,-48 -8,-47 -26,-52 Z" '
+                f'fill="{shade}"/>'
+                + neck + mane + head
+                # near side legs on top
+                + hindleg(36) + foreleg(-17, 0.5)
+                + socks
+                # the tail falls from the top of the croup, well behind the hip
+                + f'<path d="M42,-84 C 54,-78 56,-58 52,-38 C 50,-26 47,-18 44,-12 '
+                f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/>'
+                + '</g>')
+
+    def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119'):
+        """A foal is not a small horse. The legs are already almost full length, the barrel
+        is short and shallow, and the head looks a size too big for it. That awkwardness is
+        the whole read — scale a horse down and you just get a pony."""
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 30, 5, 0.18)}'
+                + ''.join(f'<path d="M{lx-4},-46 L{lx+4},-46 L{lx+3},-24 L{lx+2.5},-4 '
+                          f'L{lx-2.5},-4 L{lx-3},-24 Z" fill="{coat}"/>'
+                          f'<path d="M{lx-3},-24 L{lx+3},-24 L{lx+2.5},-4 L{lx-2.5},-4 Z" '
+                          f'fill="{point}"/>'
+                          f'<path d="M{lx-3.5},-4 L{lx+3.5},-4 L{lx+3},0 L{lx-3},0 Z" '
+                          f'fill="#3a332c"/>' for lx in (-20, -12, 14, 24))
+                + f'<path d="M-24,-66 C -22,-73 -10,-76 4,-75 C 20,-74 30,-69 33,-60 '
+                f'C 35,-53 33,-48 28,-46 C 16,-42 -8,-42 -18,-45 C -24,-48 -26,-58 '
+                f'-24,-66 Z" fill="{coat}"/>'
+                f'<path d="M-22,-70 C -30,-78 -38,-88 -42,-98 L-30,-104 C -26,-92 -18,-80 '
+                f'-12,-72 Z" fill="{coat}"/>'
+                f'<path d="M-42,-98 C -52,-100 -60,-96 -63,-90 L-58,-84 C -52,-88 -44,-90 '
+                f'-38,-92 Z" fill="{coat}"/>'
+                f'<path d="M-63,-90 C -65,-88 -64,-85 -61,-84 L-58,-84 Z" fill="{point}"/>'
+                f'<circle cx="-46" cy="-93" r="2.2" fill="#1a1410"/>'
+                f'<path d="M-38,-100 L-37,-112 L-31,-102 Z" fill="{coat}"/>'
+                f'<path d="M-31,-102 L-29,-113 L-24,-104 Z" fill="{coat}"/>'
+                f'<path d="M-30,-104 C -38,-94 -34,-82 -22,-70 L-16,-74 C -26,-84 -30,-94 '
+                f'-25,-102 Z" fill="{point}"/>'
+                f'<path d="M31,-64 C 39,-58 39,-42 36,-28 L30,-31 C 33,-42 33,-52 30,-60 Z" '
+                f'fill="{point}"/></g>')
+
+    def person(x, y, s=1.0, top='#3f5f8c', bottom='#4a4a52', skin='#c98d63', hat=None):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+                f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
+                f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
+                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                + (f'<ellipse cx="0" cy="-53" rx="13" ry="3" fill="{hat}"/>'
+                   f'<path d="M-6,-53 C -6,-60 6,-60 6,-53 Z" fill="{hat}"/>' if hat else
+                   f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/>') + '</g>')
+
+    def run_in(x, y, s=1.0, board='#6f6058', dark='#564a44', roof='#b8bcc0'):
+        """A three-sided run-in shelter — every paddock has one, and it is the smallest
+        building on the farm."""
+        w, h = 96, 42
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, w*0.5, 7, 0.2)}'
+                f'<rect x="{-w/2}" y="{-h}" width="{w}" height="{h}" fill="{board}"/>'
+                f'<rect x="{-w/2}" y="{-h}" width="{w*0.5:.0f}" height="{h}" fill="#2f2823"/>'
+                + f'<g fill="{dark}" opacity="0.6">'
+                + ''.join(f'<rect x="{-w/2 + 4 + i*9}" y="{-h}" width="1.8" height="{h}"/>'
+                          for i in range(5, 11)) + '</g>'
+                f'<path d="M{-w/2-8},{-h} L{-w/2+6},{-h-14} L{w/2+8},{-h-14} L{w/2+8},{-h} Z" '
+                f'fill="{roof}"/>'
+                f'<rect x="{-w/2-8}" y="{-h-4}" width="{w+16}" height="4" fill="#9aa0a4"/></g>')
+
+    def trough(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 26, 5, 0.18)}'
+                f'<rect x="-26" y="-16" width="52" height="16" rx="3" fill="#8f8a80"/>'
+                f'<rect x="-26" y="-16" width="52" height="5" rx="2" fill="#a8a49a"/>'
+                f'<rect x="-22" y="-14" width="44" height="4" rx="2" fill="#6f9ab0"/></g>')
+
+    # ---------------------------------------------------------------- layers ----
+    back = ('    '
+            # the far fence line, running the width of the picture and dipping with the land
+            + plank_fence(curve(-30, 560, 428, 424, 16))
+            + plank_fence(curve(700, 1310, 424, 430, 14))
+            # the show barn on the left rise, the working barn away on the right
+            + show_barn(268, 396, 0.62)
+            + board_barn(1010, 388, 0.6)
+            + board_barn(1178, 380, 0.46, '#6f675f', '#57504a', '#a8adb2')
+            # trees: two big hardwoods standing alone, cedars along the fence
+            + shade_tree(96, 402, 0.62) + shade_tree(486, 396, 0.5)
+            + shade_tree(846, 400, 0.56)
+            + ''.join(cedar(x, 404, sc) for x, sc in
+                      [(178, 0.4), (556, 0.34), (930, 0.38), (1264, 0.44)])
+            # a band of horses out on the middle pasture
+            + horse(360, 448, 0.24, '#7a4a2c', '#623a20', '#241c14', grazing=True)
+            + horse(430, 446, 0.23, '#3f3630', '#2f2822', '#1f1a16', grazing=True)
+            + foal(468, 446, 0.17, '#8a5a34')
+            + horse(890, 450, 0.25, '#c2a06a', '#a8875a', '#6b5436', grazing=True)
+            + horse(1096, 448, 0.24, '#8f8a84', '#75716c', '#3f3a36')
+            + person(600, 446, 0.42, '#b8442f', '#3f4650', '#c98d63', '#e8e2d4'))
+
+    front = ('    '
+             # the near fence, much bigger, with the road cut through it
+             + plank_fence(curve(-30, 470, 592, 606, 22))
+             + plank_fence(curve(806, 1310, 606, 592, 22))
+             # the drive entrance: dry-stone wall and a pillar either side of the road
+             + stone_wall(-20, 452, 678, 26)
+             + stone_wall(826, 1300, 678, 26)
+             + gate_pillar(468, 682, 0.95, -1) + gate_pillar(812, 682, 0.95, 1)
+             # the two big trees that frame the whole picture
+             + shade_tree(74, 700, 1.35) + shade_tree(1216, 712, 1.45)
+             + cedar(392, 640, 0.85) + cedar(918, 646, 0.9)
+             # the hero horses, close enough to count the legs
+             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119', sock=[-20, 34])
+             + horse(1046, 700, 0.52, '#5c3a22', '#472b18', '#241c14', grazing=True)
+             + foal(1140, 700, 0.36, '#a8703f')
+             + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
+             + horse(880, 578, 0.34, '#a8a29a', '#8c867e', '#4a443e', grazing=True)
+             + horse(432, 566, 0.31, '#7a4a2c', '#623a20', '#241c14', grazing=True)
+             + horse(1078, 550, 0.3, '#5c3a22', '#472b18', '#241c14')
+             + foal(470, 566, 0.22, '#a8703f')
+             + person(880, 700, 0.9, '#2f6f4f', '#3f4650', '#8a5a3c', '#e8e2d4'))
+
+    scene('bluegrass', 'KENTUCKY — bluegrass horse farm, white board fence and a show barn', {
+        'sky': sky_l,
+        'far': far_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#3f6631" opacity="0.28"><rect x="0" y="712" width="1280" height="8"/></g>',
+        # the road is the farm's limestone drive, not a highway
+        'roadkw': dict(surface='#c9c2ae', surface2='#b5ae99', shoulder='#7fb04a',
+                       dash='#c9c2ae'),
+        'trackkw': dict(ballast='#9c9382', ballast_hi='#aea795', tie='#5a4632',
+                        rail='#d3d7dc'),
+    }, d)
+
+
+def crater_lake():
+    """CRATER LAKE — from the rim, built straight off the reference photograph.
+
+    Three horizontal bands, which is exactly how the place presents itself: the caldera
+    wall along the top, all lake across the middle with Wizard Island sitting in it, and
+    the pumice rim we are standing on at the bottom. The blue is so saturated it is DARKER
+    than the sky above it, which is the opposite of every other water in this set and the
+    one thing that has to be right.
+
+    **The road turns.** Earlier drafts had to shove the lake off to one side, because a
+    road running to a vanishing point on the horizon would otherwise run straight out
+    across the water. Instead the carriageway now stops at the shore and swings RIGHT,
+    following Rim Drive away round the caldera — which is what Rim Drive actually does, and
+    which frees the whole width of the picture for the lake. `road(top=...)` in the shared
+    furniture makes that possible without disturbing any other scene."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a8ec6"/><stop offset="0.55" stop-color="#8fbdd8"/>
+      <stop offset="1" stop-color="#cfe0e8"/>
+    </linearGradient>
+    <linearGradient id="deep" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b4a94"/><stop offset="0.35" stop-color="#12336f"/>
+      <stop offset="1" stop-color="#0e2a60"/>
+    </linearGradient>
+    <linearGradient id="pumice" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b6ab96"/><stop offset="1" stop-color="#988d79"/>
+    </linearGradient>''')
+
+    # The shoreline sits ABOVE where the carriageway ends, which is what gives the
+    # overlook a strip of land to stand on. Get these the wrong way round and the barrier
+    # and the people admiring the view are floating in the lake.
+    import math as _m
+
+    SHORE = 346            # water ends here
+    ROADTOP = 368          # the carriageway ends here, at the overlook barrier
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             + '    <g fill="#ffffff" opacity="0.34">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.1:.0f}"/>'
+                       for x, y, r in [(220, 40, 150), (620, 22, 120), (1020, 52, 140),
+                                       (400, 78, 90), (880, 88, 76), (1180, 34, 90)])
+             + '</g>')
+
+    # ==================================================== the caldera wall ====
+    # Palettes off the photograph. The wall is cool grey-brown, NOT the warm tan of the
+    # pumice underfoot, and it carries big creamy scree fans that are much paler than the
+    # rock around them.
+    RIM_NEAR = ('#7e7a74', '#9a958c', '#5e5b57', '#c6bda9', '#37423b')
+    RIM_MID = ('#8d8f92', '#a4a6a8', '#6e7175', '#c4c0b4', '#44514a')
+    RIM_FAR = ('#868d95', '#9ba1a8', '#6c747c', '#bcbcb6', '#4f5a56')
+
+    def ridgeline(x0, x1, base, top, relief, seed):
+        """A crest built from named landforms rather than from uniform noise.
+
+        The first version sampled a random height every fixed step, which is why the wall
+        came out as a row of near-identical trapezoids: uniform noise at a uniform interval
+        IS a repeating pattern. A real caldera rim is a sequence of different things — a
+        sharp peak, a long flat-topped mesa, a broad dome, a deep saddle — each a different
+        width. Choosing landforms and giving each its own span is what breaks the rhythm.
+        """
+        rr = rnd(seed)
+        pts = [(x0, base - relief * 0.25)]
+        x = x0
+        while x < x1:
+            kind = rr()
+            w = 110 + rr() * 230
+            h = top + relief * (0.15 + rr() * 0.85)
+            if kind < 0.16:                     # a sharp peak — the rarest form here
+                pts.append((x + w * 0.45, h - relief * 0.18))
+                pts.append((x + w, h + relief * 0.3))
+            elif kind < 0.56:                   # a flat-topped mesa: the commonest form
+                pts.append((x + w * 0.2, h))
+                pts.append((x + w * 0.78, h + relief * 0.05))
+                pts.append((x + w, h + relief * 0.34))
+            elif kind < 0.86:                   # a broad worn dome
+                pts.append((x + w * 0.25, h + relief * 0.16))
+                pts.append((x + w * 0.55, h + relief * 0.04))
+                pts.append((x + w, h + relief * 0.28))
+            else:                               # a saddle dropping between two masses
+                pts.append((x + w * 0.5, h + relief * 0.62))
+                pts.append((x + w, h + relief * 0.4))
+            x += w
+        pts.append((x1, base - relief * 0.3))
+        return [(px, min(py, base - 6)) for px, py in pts]
+
+    def mix(c1, c2, t):
+        """Blend two hex colours. Distance and shading are baked into SOLID colours here,
+        never applied as a translucent wash — see the note on rim_wall."""
+        a1 = [int(c1[i:i+2], 16) for i in (1, 3, 5)]
+        a2 = [int(c2[i:i+2], 16) for i in (1, 3, 5)]
+        return '#' + ''.join(f'{int(v1 + (v2 - v1) * t):02x}' for v1, v2 in zip(a1, a2))
+
+    def rim_wall(pts, base, body, seed, scree=True, snow=True, forest=True, dist=0.0):
+        """The caldera wall.
+
+        **Everything here is opaque.** The previous version faded distance in with a pale
+        translucent overlay across each rank, and drew the faces at low alpha on top of
+        that. The result was that the mountains went semi-transparent — you could see one
+        ridge through another, and the whole wall looked like it was dissolving. Distance
+        is a COLOUR, not a transparency: a far rank is lighter and bluer than a near one,
+        and it is still a solid object. `dist` mixes the whole palette toward the sky
+        before anything is drawn, so the rank recedes without ever going see-through.
+
+        Faces are shaded off the wall's own profile — each is a quadrilateral dropped from
+        one crest segment, lit if that segment rises to the right and shadowed if it falls,
+        carried part of the way down so light reads as falling on the tops rather than as
+        slabs of flat colour from crest to water.
+        """
+        body = mix(body, '#b6d2e2', dist)
+        lit = mix(body, '#c8d2da', 0.3)
+        lit2 = mix(body, '#c8d2da', 0.15)
+        dark = mix(body, '#232a33', 0.24)
+        dark2 = mix(body, '#232a33', 0.12)
+        screec = mix(body, '#d8d2c2', 0.24)
+        gully = mix(body, '#232a33', 0.1)
+        foot = mix(body, '#232a33', 0.14)
+        forestc = '#36453f'
+        snowc = '#e6ecef'
+        rr = rnd(seed)
+
+        d0 = ('M' + ' L'.join(f'{px:.0f},{py:.0f}' for px, py in pts)
+              + f' L{pts[-1][0]:.0f},{base} L{pts[0][0]:.0f},{base} Z')
+        out = [f'<path d="{d0}" fill="{body}"/>']
+        for i in range(len(pts) - 1):
+            (ax, ay), (bx, by) = pts[i], pts[i + 1]
+            if bx - ax < 1:
+                continue
+            rising = by < ay
+            for step, fill in ((0.44, lit if rising else dark),
+                               (0.74, lit2 if rising else dark2)):
+                da = ay + (base - ay) * step
+                db = by + (base - by) * step
+                out.append(f'<polygon points="{ax:.0f},{ay:.0f} {bx:.0f},{by:.0f} '
+                           f'{bx:.0f},{db:.0f} {ax:.0f},{da:.0f}" fill="{fill}"/>')
+        out.append(f'<rect x="{pts[0][0]:.0f}" y="{base - 40:.0f}" '
+                   f'width="{pts[-1][0] - pts[0][0]:.0f}" height="40" fill="{foot}"/>')
+        if scree:
+            for i in range(1, len(pts) - 1):
+                if rr() > 0.66 and pts[i][1] < base - 30:
+                    px, py = pts[i]
+                    ty = py + (base - py) * 0.42
+                    w = 22 + rr() * 54
+                    out.append(f'<path d="M{px:.0f},{ty:.0f} '
+                               f'L{px + w:.0f},{base - 6:.0f} '
+                               f'L{px - w * 0.8:.0f},{base - 6:.0f} Z" fill="{screec}"/>')
+        for i in range(1, len(pts) - 1):
+            if rr() > 0.55:
+                px, py = pts[i]
+                w = 5 + rr() * 11
+                gy = py + (base - py) * 0.66
+                out.append(f'<path d="M{px:.0f},{py + 3:.0f} L{px + w:.0f},{gy:.0f} '
+                           f'L{px - w:.0f},{gy:.0f} Z" fill="{gully}"/>')
+        if snow:
+            for i in range(1, len(pts) - 1):
+                px, py = pts[i]
+                if py < base - 66 and rr() > 0.84:
+                    w = 4 + rr() * 6
+                    dp = 9 + rr() * 16
+                    out.append(f'<path d="M{px - w:.0f},{py + 4:.0f} '
+                               f'L{px:.0f},{py + 1:.0f} L{px + w:.0f},{py + 5:.0f} '
+                               f'L{px + w * 0.3:.0f},{py + dp:.0f} '
+                               f'L{px - w * 0.2:.0f},{py + dp * 0.75:.0f} Z" '
+                               f'fill="{snowc}"/>')
+        if forest:
+            band = []
+            xx = pts[0][0]
+            while xx < pts[-1][0]:
+                r = 7 + rr() * 15
+                band.append(f'<ellipse cx="{xx:.0f}" cy="{base - 8 - rr() * 9:.0f}" '
+                            f'rx="{r:.0f}" ry="{r * 0.62:.0f}"/>')
+                xx += r * 1.1
+            out.append(f'<g fill="{forestc}">' + ''.join(band)
+                       + f'<rect x="{pts[0][0]:.0f}" y="{base - 9:.0f}" '
+                       f'width="{pts[-1][0] - pts[0][0]:.0f}" height="11"/></g>')
+        return '<g>' + ''.join(out) + '</g>'
+
+    far_l = ('    <g id="rim">'
+             # ONE wall, not a range. In the photograph the caldera rim is a single
+             # continuous band of dark blue-grey rock sitting low under a great deal of
+             # sky — not three ranks of pale peaks stacked into the distance. Stacking
+             # them was what made it read as generic mountains, and no amount of
+             # atmospheric fading was going to fix that; it only made them dissolve.
+             #
+             # There is no haze here at all. One solid colour, and a single lower
+             # shoulder behind the left-hand end for the depth the photo actually shows.
+             + rim_wall(ridgeline(-40, 700, 306, 196, 60, 61), 306, '#6a7581', 62,
+                        scree=False, snow=False, forest=False)
+             + rim_wall(ridgeline(-40, 1320, 306, 174, 88, 43), 306, '#586470', 44)
+             + '</g>')
+
+    # ============================================================ the lake ====
+    def wizard(x, base, s=1.0):
+        """Wizard Island.
+
+        The shape is ASYMMETRIC and that is the whole recognition. It is not a rounded
+        green dome. It is a blunt cinder cone with a **notch** — its own small crater — bitten
+        out of the summit, sitting on a **long, low, bare lava apron** that runs away to one
+        side, much wider and far flatter than the cone itself. The left flank is steeper
+        than the right. Trees crowd the lower slopes and thin out toward the top, where the
+        cone is bare grey scree.
+        """
+        return (f'<g id="wizard-island" transform="translate({x},{base}) scale({s})">'
+                # the shallow shelf of pale water around the whole thing
+                f'<ellipse cx="30" cy="4" rx="234" ry="12" fill="#2f8fa8" opacity="0.7"/>'
+                f'<ellipse cx="24" cy="2" rx="182" ry="8" fill="#5cc0c4" opacity="0.6"/>'
+                # the lava apron: long, low and bare, running off to the right
+                f'<path d="M-118,3 C -96,-10 -60,-19 -14,-22 C 60,-26 140,-20 206,-6 '
+                f'C 214,-4 216,0 210,3 Z" fill="#3a4038"/>'
+                f'<path d="M-14,-22 C 60,-26 140,-20 206,-6 C 140,-14 62,-18 -14,-15 Z" '
+                f'fill="#4a5148"/>'
+                # the outlying rocks and shoals off the far end of it
+                + '<g fill="#3a4038">'
+                + ''.join(f'<ellipse cx="{px}" cy="{py}" rx="{r}" ry="{r*0.42:.0f}"/>'
+                          for px, py, r in [(228, 2, 14), (252, 5, 8), (206, 7, 10)])
+                + '</g>'
+                # the cone: steep on the left, longer on the right, blunt at the top
+                f'<path d="M-104,-12 C -88,-48 -62,-78 -34,-90 L-16,-95 L4,-94 '
+                f'C 40,-84 76,-46 104,-12 Z" fill="#3d5741"/>'
+                f'<path d="M-104,-12 C -88,-48 -62,-78 -34,-90 L-18,-95 L-14,-12 Z" '
+                f'fill="#4c6d50"/>'
+                # bare scree on the upper cone, above where the trees give out
+                f'<path d="M-56,-62 C -44,-78 -28,-88 -16,-95 L4,-94 C 24,-84 42,-70 '
+                f'54,-56 C 20,-66 -22,-70 -56,-62 Z" fill="#7b7261"/>'
+                f'<path d="M-56,-62 C -44,-78 -28,-88 -16,-95 L-12,-66 Z" fill="#8d836f"/>'
+                # THE NOTCH — the crater bitten out of the summit
+                f'<path d="M-30,-92 C -20,-99 6,-99 18,-91 C 2,-86 -18,-87 -30,-92 Z" '
+                f'fill="#5f5749"/>'
+                f'<path d="M-30,-92 C -22,-97 -8,-98 -2,-98 L-2,-88 C -16,-88 -26,-90 '
+                f'-30,-92 Z" fill="#918770"/>'
+                # trees: dense low down, thinning out as the cone goes bare
+                + '<g fill="#2c4736">'
+                + ''.join(f'<path d="M{px},{py} L{px+4.6},{py+13} L{px-4.6},{py+13} Z"/>'
+                          for px, py in [(-96, -14), (-78, -30), (-58, -48), (-36, -62),
+                                         (-12, -70), (14, -68), (38, -56), (60, -42),
+                                         (82, -24), (98, -12), (-88, -6), (-66, -22),
+                                         (-44, -38), (-20, -52), (6, -54), (30, -44),
+                                         (52, -30), (74, -14), (92, -4), (-108, -4),
+                                         (110, -6), (-2, -80), (-26, -76), (20, -78)])
+                + '</g>'
+                # and a scatter of trees out along the apron
+                + '<g fill="#334f3c">'
+                + ''.join(f'<path d="M{px},{py} L{px+3.4},{py+9} L{px-3.4},{py+9} Z"/>'
+                          for px, py in [(126, -12), (148, -10), (172, -8), (196, -5),
+                                         (138, -4), (162, -2), (186, 0), (114, -6)])
+                + '</g></g>')
+
+    LAKE = f'M-40,300 L1320,300 L1320,{SHORE + 4} L-40,{SHORE + 4} Z'
+
+    water_l = ('    <g id="lake">'
+               f'<path d="{LAKE}" fill="url(#deep)"/>'
+               # the reflection of the wall along the far shore: paler, and streaked
+               + '<g clip-path="url(#lakeclip)">'
+               '<rect x="-40" y="300" width="1360" height="26" fill="#2f5fae" '
+               'opacity="0.55"/>'
+               '<rect x="-40" y="300" width="1360" height="10" fill="#4e78bc" '
+               'opacity="0.5"/>'
+               + '<g fill="#6f93cc" opacity="0.3">'
+               + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="2"/>'
+                         for x, y, w, h in [(120, 306, 130, 18), (430, 306, 90, 22),
+                                            (900, 306, 140, 16), (1130, 306, 80, 20)])
+               + '</g>'
+               # the still-water sheen: long flat highlights, never ripples
+               + '<g fill="#3f6fbc" opacity="0.3">'
+               + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="3" rx="1.5"/>'
+                         for x, y, w in [(60, 330, 220), (330, 344, 150), (760, 336, 200),
+                                         (1040, 350, 170), (170, 358, 140),
+                                         (560, 358, 120)]) + '</g></g>'
+               + wizard(614, 340, 0.88)
+               # a tour boat, tiny, which is what gives the caldera its scale
+               + '<g transform="translate(940,336) scale(0.42)">'
+               '<path d="M-30,0 L30,0 L24,9 L-24,9 Z" fill="#f2f2ec"/>'
+               '<rect x="-16" y="-11" width="30" height="11" rx="2" fill="#e4e4dc"/>'
+               '<rect x="-16" y="-15" width="34" height="5" rx="2" fill="#4a5560"/>'
+               '<path d="M30,2 C 44,4 52,7 56,10 C 42,10 32,7 28,5 Z" fill="#ffffff" '
+               'opacity="0.7"/></g>'
+               # the shallow shelf along the near shore, jade over the pale rock ledge
+               + '<g clip-path="url(#lakeclip)">'
+               f'<path d="M-40,{ROADTOP - 7} C 200,{ROADTOP - 12} 520,{ROADTOP - 2} '
+               f'820,{SHORE - 9} C 1060,{SHORE - 13} 1200,{SHORE - 4} '
+               f'1320,{SHORE - 9} L1320,{SHORE + 4} L-40,{SHORE + 4} Z" '
+               'fill="#2f8fa8" opacity="0.85"/>'
+               f'<path d="M-40,{ROADTOP - 2} C 200,{ROADTOP - 7} 520,{ROADTOP + 2} '
+               f'820,{SHORE - 4} C 1060,{ROADTOP - 8} 1200,{ROADTOP + 1} '
+               f'1320,{ROADTOP - 4} L1320,{ROADTOP + 4} L-40,{ROADTOP + 4} Z" '
+               'fill="#6fcfce" opacity="0.8"/></g>'
+               + '</g>')
+
+    # ==================================================== the rim we stand on ====
+    ground_l = (f'    <rect x="0" y="{SHORE}" width="1280" height="{720 - SHORE}" '
+                'fill="url(#pumice)"/>\n'
+                # the shoreline: a rocky lip with a low stone parapet along Rim Drive
+                f'    <g><path d="M-20,{SHORE + 2} C 200,{SHORE - 4} 520,{SHORE + 8} '
+                f'820,{SHORE} C 1060,{SHORE - 6} 1200,{SHORE + 6} 1320,{SHORE} '
+                f'L1320,{SHORE + 18} L-20,{SHORE + 18} Z" fill="#8f8676"/>'
+                + '<g fill="#aaa290">'
+                + ''.join(f'<rect x="{x}" y="{SHORE + 1 + ((x//37) % 3)}" width="22" '
+                          f'height="7" rx="2"/>' for x in range(-20, 1300, 26)) + '</g></g>\n'
+                # the walk along the bench, well clear of the rails
+                '    <g><rect x="0" y="586" width="1280" height="32" fill="#c4bdab"/>'
+                '<rect x="0" y="586" width="1280" height="4" fill="#d4cdbc"/>'
+                '<rect x="0" y="618" width="1280" height="4" fill="#8f8676"/></g>\n'
+                + '    <g fill="#8d8371" opacity="0.4">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.15:.0f}"/>'
+                          for x, y, r in [(200, 556, 170), (820, 574, 150), (1120, 546, 160),
+                                          (380, 676, 180), (960, 692, 170)]) + '</g>\n'
+                + '    <g fill="#6f665a" opacity="0.32">'
+                + ''.join(f'<ellipse cx="{(i*137) % 1300 - 10}" cy="{534 + (i*83) % 176}" '
+                          f'rx="{5 + i % 7}" ry="{2 + i % 3}"/>' for i in range(52)) + '</g>\n'
+                + '    <g>'
+                + ''.join(f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.4:.0f}" '
+                          f'fill="#4f6b4a"/>'
+                          f'<ellipse cx="{x-r*0.3:.0f}" cy="{y-r*0.16:.0f}" '
+                          f'rx="{r*0.55:.0f}" ry="{r*0.26:.0f}" fill="#5f7f58"/></g>'
+                          for x, y, r in [(96, 552, 26), (300, 566, 20), (452, 556, 17),
+                                          (700, 560, 16), (930, 566, 22), (1180, 554, 24),
+                                          (60, 660, 34), (250, 688, 30), (520, 664, 22),
+                                          (760, 676, 26), (1030, 686, 30), (1246, 664, 32)])
+                + '</g>')
+
+    # ------------------------------------------------------- THE ROAD TURNING ----
+    def rim_drive():
+        """Rim Drive, and the overlook our road dies at.
+
+        The earlier version swept the carriageway round in one continuous curve, which is
+        not how a road behaves and not how this one behaves: it fanned out toward the frame
+        edge, its width drifted the whole way along, and the shading banded. A real junction
+        is two roads meeting. So:
+
+        * **Rim Drive runs left-to-right at a CONSTANT depth**, which means constant height
+          on the canvas and one flat colour end to end. Cars turn onto it and then go
+          straight, because that is what cars do.
+        * **Our road carries straight on past the junction** for a few metres and stops at
+          an **overlook** — a barrier across the end, right at the water. That is the only
+          honest reason for a road to stop at a lake, and it is what Rim Drive's pull-outs
+          actually are.
+        """
+        JY0, JY1 = 382, 412           # Rim Drive's near and far edges — parallel, always
+        X0 = 664                      # it meets our carriageway here and runs right
+        rail = ''.join(
+            f'<rect x="{x}" y="{JY0 - 11}" width="4" height="11" fill="#6b5a44"/>'
+            for x in range(X0 + 60, 1330, 46))
+        dashes = ''.join(
+            f'<rect x="{x}" y="{(JY0 + JY1)//2 - 1}" width="20" height="3" rx="1.4" '
+            f'fill="#f0e3a8" opacity="0.8"/>' for x in range(X0 + 40, 1330, 54))
+
+        def crossing_car(x, y, s, body):
+            return (f'<g transform="translate({x},{y}) scale({s})">'
+                    f'{shadow(0, 3, 30, 4, 0.24)}'
+                    f'<rect x="-30" y="-17" width="60" height="13" rx="4" fill="{body}"/>'
+                    f'<path d="M-17,-17 L-11,-29 L13,-29 L20,-17 Z" fill="{body}"/>'
+                    f'<path d="M-14,-19 L-9,-27 L0,-27 L0,-19 Z" fill="#cfe4f2"/>'
+                    f'<path d="M3,-19 L3,-27 L11,-27 L17,-19 Z" fill="#cfe4f2"/>'
+                    f'<g fill="#1b1f25"><circle cx="-18" cy="-3" r="6"/>'
+                    f'<circle cx="18" cy="-3" r="6"/></g></g>')
+
+        return ('<g id="rim-drive">'
+                # the carriageway: one rectangle, one colour, one width
+                f'<rect x="{X0}" y="{JY0}" width="{1330 - X0}" height="{JY1 - JY0}" '
+                f'fill="#5f5a54"/>'
+                f'<rect x="{X0}" y="{JY0}" width="{1330 - X0}" height="4" fill="#6d6862"/>'
+                f'<rect x="{X0}" y="{JY1 - 4}" width="{1330 - X0}" height="4" '
+                f'fill="#4d4842"/>'
+                # the gravel verge and guard rail start clear of the junction, so the
+                # two carriageways meet tarmac-to-tarmac
+                f'<rect x="{X0 + 44}" y="{JY0 - 8}" width="{1330 - X0 - 44}" height="8" '
+                f'fill="#aaa290"/>'
+                + f'<g>{rail}</g>'
+                f'<rect x="{X0 + 54}" y="{JY0 - 10}" width="{1276 - X0}" height="3.4" '
+                f'rx="1.6" fill="#7d6a50"/>'
+                f'<rect x="{X0 + 54}" y="{JY0 - 5}" width="{1276 - X0}" height="3" '
+                f'rx="1.5" fill="#6b5a44"/>'
+                + dashes
+                + crossing_car(900, JY1 - 4, 0.62, '#b8342c')
+                + crossing_car(1180, JY1 - 6, 0.58, '#e8e2d2')
+                + crossing_car(760, JY0 + 12, 0.54, '#2f5f9e')
+                + '</g>')
+
+    def overlook():
+        """The end of the road: a turning apron at the water with a barrier across it.
+        Everything about the scene now has a reason — the road comes here to look at the
+        lake, turns onto Rim Drive, or stops."""
+        lx = 622 - 112 * (ROADTOP - 300) / 420.0
+        rx = 658 + 112 * (ROADTOP - 300) / 420.0
+        posts = ''.join(
+            f'<g transform="translate({x},{ROADTOP - 1})">'
+            f'<rect x="-3" y="-15" width="6" height="15" fill="#6b5a44"/>'
+            f'<rect x="-3.4" y="-17" width="6.8" height="3" rx="1.2" fill="#8a7454"/></g>'
+            for x in range(int(lx) - 22, int(rx) + 24, 17))
+        return ('<g id="overlook">'
+                # the apron itself, a touch wider than the carriageway
+                f'<path d="M{lx - 26:.0f},{ROADTOP + 16} L{lx - 16:.0f},{ROADTOP - 3} '
+                f'L{rx + 16:.0f},{ROADTOP - 3} L{rx + 26:.0f},{ROADTOP + 16} Z" '
+                f'fill="#5f5a54"/>'
+                f'<path d="M{lx - 16:.0f},{ROADTOP - 3} L{rx + 16:.0f},{ROADTOP - 3} '
+                f'L{rx + 17:.0f},{ROADTOP + 1} L{lx - 17:.0f},{ROADTOP + 1} Z" '
+                f'fill="#6d6862"/>'
+                # the barrier: timber posts and a double rail, the standard park detail
+                + f'<g>{posts}</g>'
+                f'<rect x="{lx - 26:.0f}" y="{ROADTOP - 15}" width="{rx - lx + 52:.0f}" '
+                f'height="4" rx="1.8" fill="#8a7454"/>'
+                f'<rect x="{lx - 26:.0f}" y="{ROADTOP - 9}" width="{rx - lx + 52:.0f}" '
+                f'height="3.6" rx="1.6" fill="#6b5a44"/>'
+                + '</g>')
+
+    # ---------------------------------------------------------------- props ----
+    def whitebark(x, y, s=1.0, live='#3f5f45', lit='#4f7355', dead='#c9c1b3',
+                  trunk='#8a7f6e'):
+        """Whitebark pine on the rim: wind-beaten, half of it dead silver wood, foliage
+        pushed to one side. Nothing grows straight at eight thousand feet."""
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(2, 2, 26, 5, 0.16)}'
+                f'<path d="M-7,2 C -5,-20 -3,-40 2,-58 L10,-56 C 6,-38 4,-18 5,2 Z" '
+                f'fill="{trunk}"/>'
+                f'<path d="M2,-52 L-26,-72 L-22,-76 L4,-58 Z" fill="{dead}"/>'
+                f'<path d="M4,-44 L26,-56 L28,-51 L6,-40 Z" fill="{dead}"/>'
+                f'<ellipse cx="10" cy="-74" rx="26" ry="17" fill="{live}"/>'
+                f'<ellipse cx="-8" cy="-66" rx="17" ry="12" fill="{live}"/>'
+                f'<ellipse cx="20" cy="-84" rx="17" ry="11" fill="{lit}"/>'
+                f'<ellipse cx="0" cy="-80" rx="12" ry="8" fill="{lit}"/></g>')
+
+    def hemlock(x, y, s=1.0, a='#2f5140', b='#3b6349'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-3" y="-14" width="6" height="14" fill="#5a4c3c"/>'
+                f'<path d="M0,-104 L15,-62 L8,-62 L21,-32 L11,-32 L25,-4 L-25,-4 L-11,-32 '
+                f'L-21,-32 L-8,-62 L-15,-62 Z" fill="{a}"/>'
+                f'<path d="M0,-104 L15,-62 L8,-62 L21,-32 L11,-32 L25,-4 L0,-4 Z" '
+                f'fill="#264334"/>'
+                f'<path d="M0,-98 L10,-66 L4,-66 L13,-40 L0,-40 Z" fill="{b}"/></g>')
+
+    # Palettes taken off the photograph. The rim has two quite different rocks lying
+    # together: pale weathered stacks the colour of the pumice, and near-black masses of
+    # broken lava. Using one grey for everything is half of why the first attempts looked
+    # manufactured.
+    # darkened off the pumice: at the photograph's value the pale rock all but
+    # disappeared into the ground and only its facet edges showed, which is what
+    # made it look like crumpled paper
+    ROCK_PALE = ('#94886f', '#c6bba1', '#6f6553', '#584f42')
+    ROCK_MID = ('#837868', '#b6ac97', '#615950', '#4c463e')
+    ROCK_DARK = ('#514a42', '#7a7164', '#39332e', '#262220')
+
+    def rock(x, y, s=1.0, seed=1, w=30, h=24, jag=0.3, pal=None, veg=0, lean=0.0):
+        """A single rock, shaded as a SOLID.
+
+        The previous version split each one into a light half and a dark half either side
+        of an interior spine, then scattered random facet triangles over it. That is the
+        scheme built for the caldera wall, and it is wrong here: at twenty-five pixels
+        across it does not describe a solid at all — it reads as a folded piece of paper.
+        The rocks were also far too flat, which made it worse.
+
+        A small rock needs three things and nothing else:
+
+        1. **Height.** Roughly three-quarters as tall as it is wide. Flatter than that and
+           it is a shard lying on the ground, not a lump sitting on it.
+        2. **Light on top.** One band hugging the upper edge of the silhouette, following
+           its actual shape, because that is where the sky is.
+        3. **Shadow underneath.** One band along the bottom, plus the cast shadow.
+
+        No interior spine, no random facets. The irregular outline does all the work of
+        making it look like stone; the shading only has to say "this is solid and the light
+        is above".
+        """
+        pal = pal or ROCK_MID
+        base, lit, dark, deep = pal
+        k = [seed * 7919 + 13]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+
+        h = max(h, w * 0.72)                 # never flatter than three-quarters
+        n = 14
+        pts = []
+        prev = 1.0
+        for i in range(n + 1):
+            ang = _m.pi * (1 - i / n)
+            f = 1 + (rr() - 0.5) * 2 * jag
+            f = max(1 - jag, min(1 + jag, f))
+            f = prev * 0.45 + f * 0.55
+            prev = f
+            px = w * _m.cos(ang) * f + lean * h * _m.sin(ang)
+            py = -h * _m.sin(ang) * max(0.55, f)
+            pts.append((px, py))
+        outline = 'M' + ' L'.join(f'{px:.1f},{py:.1f}' for px, py in pts) + ' Z'
+
+        def cap(cut, fill, op):
+            """The lit top of the rock: only the vertices ABOVE a horizontal cut, closed
+            with a straight chord. Scaling the whole silhouette instead — as the first
+            attempt did — wraps the highlight round the sides and down to the ground, and
+            the rock ends up with a pale halo drawn round its outline."""
+            up = [(px, py) for px, py in pts if py < cut]
+            if len(up) < 2:
+                return ''
+            return ('<path d="M' + ' L'.join(f'{px:.1f},{py:.1f}' for px, py in up)
+                    + f' L{up[-1][0]:.1f},{cut:.1f} L{up[0][0]:.1f},{cut:.1f} Z" '
+                    f'fill="{fill}" opacity="{op}"/>')
+
+        g = [f'{shadow(lean * h * 0.25, 1.5, w * 0.92, w * 0.17, 0.2)}',
+             f'<path d="{outline}" fill="{base}"/>',
+             # light catching the top, following the silhouette
+             cap(-h * 0.44, lit, 0.9),
+             # the underside in shadow
+             # the underside, closed on a chord the same way
+             f'<path d="M{pts[0][0]:.1f},0 L{pts[-1][0]:.1f},0 L'
+             + ' L'.join(f'{px:.1f},{py:.1f}' for px, py in reversed(pts) if py > -h * 0.3)
+             + f' Z" fill="{dark}" opacity="0.5"/>']
+        # one crack, only on the bigger ones, and only where it will read
+        if w > 26 and rr() > 0.45:
+            i = 4 + int(rr() * 5)
+            g.append(f'<path d="M{pts[i][0]:.1f},{pts[i][1]:.1f} '
+                     f'L{pts[i][0] * 0.55:.1f},{pts[i][1] * 0.35:.1f}" '
+                     f'stroke="{deep}" stroke-width="{max(0.8, w * 0.03):.1f}" '
+                     f'opacity="0.3" fill="none"/>')
+        for j in range(veg):
+            vx = pts[3 + j * 4][0] * 0.7
+            vy = pts[3 + j * 4][1] * 0.7
+            g.append(f'<path d="M{vx:.1f},{vy - 12:.1f} L{vx + 4.4:.1f},{vy + 2:.1f} '
+                     f'L{vx - 4.4:.1f},{vy + 2:.1f} Z" fill="#3f5f45"/>')
+        return f'<g transform="translate({x},{y}) scale({s})">' + ''.join(g) + '</g>'
+
+    def lava_stack(x, y, s=1.0, seed=5):
+        """The big black outcrop on the rim edge: not one rock but a heap of broken lava,
+        several masses piled together with a spiky crest and trees rooted in the gaps."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + rock(0, 0, 1.0, seed, 60, 50, 0.3, ROCK_DARK, veg=2, lean=0.12)
+                + rock(-46, 2, 0.72, seed + 3, 44, 38, 0.32, ROCK_DARK, veg=1, lean=-0.1)
+                + rock(44, 3, 0.66, seed + 7, 40, 32, 0.3, ROCK_DARK, lean=0.16)
+                + rock(-14, 4, 0.5, seed + 11, 32, 24, 0.28, ROCK_DARK) + '</g>')
+
+    def pale_stack(x, y, s=1.0, seed=9):
+        """The pale weathered stack: lighter, more layered, the tan of the pumice it sits
+        on, with the horizontal breaks that give it its stacked look."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                + rock(0, 0, 1.0, seed, 42, 54, 0.22, ROCK_PALE, lean=-0.08)
+                + rock(34, 2, 0.66, seed + 5, 32, 34, 0.24, ROCK_PALE, lean=0.14)
+                + rock(-30, 3, 0.58, seed + 13, 28, 28, 0.24, ROCK_PALE)
+                + '<g stroke="#8a8172" stroke-width="1.6" opacity="0.45" fill="none">'
+                + ''.join(f'<path d="M-36,{-8 - i*11} L34,{-11 - i*11}"/>'
+                          for i in range(3)) + '</g></g>')
+
+    def lodge(x, base, s=1.0):
+        stone, timber, lit, roof = '#8f8676', '#5f4636', '#75563f', '#7d6a52'
+        return (f'<g id="rim-lodge" transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 4, 78, 9, 0.2)}'
+                f'<rect x="-76" y="-26" width="152" height="26" fill="{stone}"/>'
+                + '<g fill="#a49a83" opacity="0.8">'
+                + ''.join(f'<rect x="{-72 + (r % 2) * 8 + c*20}" y="{-22 + r*8}" '
+                          f'width="16" height="6" rx="1"/>'
+                          for r in range(3) for c in range(7)) + '</g>'
+                f'<rect x="-70" y="-66" width="140" height="42" fill="{timber}"/>'
+                f'<rect x="-70" y="-66" width="40" height="42" fill="{lit}"/>'
+                + '<g fill="#f2d68a">'
+                + ''.join(f'<rect x="{-58 + i*26}" y="-58" width="15" height="16" rx="1"/>'
+                          for i in range(5)) + '</g>'
+                f'<path d="M-82,-66 L0,-108 L82,-66 Z" fill="{roof}"/>'
+                f'<path d="M-82,-66 L0,-108 L0,-66 Z" fill="#8f7a5f"/>'
+                f'<rect x="-84" y="-70" width="168" height="6" rx="2" fill="#5f5044"/>'
+                f'<rect x="34" y="-116" width="20" height="34" fill="{stone}"/>'
+                f'<rect x="31" y="-121" width="26" height="7" rx="2" fill="#a49a83"/></g>')
+
+    def person(x, y, s=1.0, top='#b8442f', bottom='#3f4650', skin='#c98d63'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+                f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
+                f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
+                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/></g>')
+
+    def sign(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-4" y="-40" width="4" height="40" fill="#5f4636"/>'
+                f'<rect x="10" y="-40" width="4" height="40" fill="#5f4636"/>'
+                f'<rect x="-12" y="-64" width="34" height="26" rx="2" fill="#5f4636"/>'
+                f'<rect x="-8" y="-60" width="26" height="18" rx="1" fill="#8a7255"/>'
+                + '<g fill="#e8e2d4">'
+                + ''.join(f'<rect x="-5" y="{-56 + i*6}" width="{20 - i*4}" height="2.6"/>'
+                          for i in range(3)) + '</g></g>')
+
+    def scope(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 14, 4, 0.18)}'
+                f'<rect x="-4" y="-46" width="8" height="46" fill="#4a5560"/>'
+                f'<rect x="-13" y="-2" width="26" height="4" rx="2" fill="#4a5560"/>'
+                f'<g transform="rotate(-16)"><rect x="-16" y="-60" width="36" height="13" '
+                f'rx="6" fill="#3f4a55"/>'
+                f'<circle cx="20" cy="-53" r="7" fill="#2b333c"/>'
+                f'<circle cx="-16" cy="-53" r="5" fill="#5b6774"/></g></g>')
+
+    def carveh(x, y, s=1.0, body='#2f5f9e'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 4, 46, 6, 0.24)}'
+                f'<rect x="-42" y="-24" width="84" height="18" rx="6" fill="{body}"/>'
+                f'<path d="M-24,-24 L-16,-40 L18,-40 L28,-24 Z" fill="{body}"/>'
+                f'<path d="M-20,-26 L-14,-37 L0,-37 L0,-26 Z" fill="#cfe4f2"/>'
+                f'<path d="M4,-26 L4,-37 L16,-37 L24,-26 Z" fill="#cfe4f2"/>'
+                f'<g fill="#1b1f25"><circle cx="-26" cy="-4" r="8"/>'
+                f'<circle cx="26" cy="-4" r="8"/></g></g>')
+
+    # the turning road goes in scenery-back, so the carriageway is painted over its join
+    back = ('    ' + rim_drive() + overlook()
+            + ''.join(person(x, ROADTOP - 2, 0.34, t) for x, t in
+                      [(586, '#e0983c'), (612, '#2f6f8c'), (688, '#b8442f')])
+            # the bench west of the junction: a gravel pull-out, and the trees and
+            # boulders that make the rim a place rather than an empty apron
+            + '<g><path d="M60,414 C 180,406 320,408 420,418 C 320,432 170,432 56,424 Z" '
+            'fill="#9c948a"/>'
+            + ''.join(f'<rect x="{x}" y="{y}" width="15" height="8" rx="2" fill="{c}"/>'
+                      for x, y, c in [(110, 412, '#2f5f9e'), (150, 410, '#e8e2d2'),
+                                      (192, 411, '#3f7d4a'), (236, 413, '#e8b02a'),
+                                      (128, 421, '#b8342c'), (196, 421, '#7a4f9e')])
+            + '</g>'
+            + ''.join(whitebark(x, y, sc) for x, y, sc in
+                      [(40, 402, 0.38), (196, 396, 0.32), (352, 400, 0.36),
+                       (488, 404, 0.4), (534, 436, 0.5)])
+            + ''.join(hemlock(x, y, sc) for x, y, sc in
+                      [(112, 398, 0.3), (280, 402, 0.34), (430, 396, 0.28)])
+            + ''.join(rock(x, y, sc, sd, 24, 20, jg, pl)
+                      for x, y, sc, sd, jg, pl in
+                      [(76, 434, 0.4, 201, 0.28, ROCK_DARK), (256, 438, 0.34, 213, 0.22, ROCK_PALE),
+                       (386, 430, 0.38, 225, 0.26, ROCK_MID), (470, 440, 0.32, 237, 0.28, ROCK_DARK),
+                       (14, 420, 0.28, 249, 0.22, ROCK_PALE), (330, 424, 0.26, 261, 0.26, ROCK_MID)])
+            + ''.join(person(x, 436, sc, t) for x, sc, t in
+                      [(320, 0.3, '#b8442f'), (352, 0.28, '#2f6f8c')]))
+
+    front = ('    '
+             + lodge(1104, 630, 0.6)
+             + hemlock(70, 704, 1.3) + hemlock(1216, 716, 1.4)
+             + hemlock(190, 648, 0.85) + hemlock(1278, 654, 0.9)
+             + whitebark(298, 668, 1.0) + whitebark(946, 662, 0.95)
+             + whitebark(120, 598, 0.6) + whitebark(1186, 594, 0.62)
+             + whitebark(392, 578, 0.44) + whitebark(872, 574, 0.46)
+             # the two big outcrops on the rim edge, straight off the photograph: a black
+             # heap of broken lava on one side, a pale weathered stack on the other
+             + lava_stack(1146, 714, 1.05, 5) + pale_stack(214, 706, 0.9, 9)
+             + ''.join(rock(x, y, sc, sd, rw, rh, jg, pl, veg=vg, lean=ln)
+                       for x, y, sc, sd, rw, rh, jg, pl, vg, ln in
+                       [(58, 560, 0.62, 21, 26, 22, 0.28, ROCK_MID, 0, 0.1),
+                        (236, 574, 0.54, 33, 24, 19, 0.22, ROCK_PALE, 0, -0.12),
+                        (466, 562, 0.44, 45, 22, 17, 0.30, ROCK_DARK, 0, 0.0),
+                        (786, 566, 0.4, 57, 21, 17, 0.26, ROCK_MID, 0, 0.14),
+                        (1252, 562, 0.6, 69, 25, 21, 0.22, ROCK_PALE, 0, 0.0),
+                        (444, 650, 0.78, 81, 28, 24, 0.28, ROCK_MID, 0, -0.08),
+                        (884, 656, 0.8, 93, 30, 25, 0.30, ROCK_DARK, 1, 0.12),
+                        (1006, 706, 0.95, 105, 32, 27, 0.24, ROCK_PALE, 0, 0.0),
+                        (330, 716, 0.9, 117, 31, 26, 0.3, ROCK_MID, 0, 0.16),
+                        (414, 700, 0.66, 129, 24, 21, 0.22, ROCK_PALE, 0, -0.14),
+                        (846, 690, 0.56, 141, 23, 19, 0.30, ROCK_DARK, 0, 0.0),
+                        (474, 712, 0.5, 153, 21, 17, 0.28, ROCK_MID, 0, 0.1)])
+             + scope(478, 580, 0.72) + scope(824, 578, 0.7)
+             + person(452, 580, 0.48, '#e0983c') + person(506, 582, 0.45, '#2f6f8c')
+             + person(852, 578, 0.48, '#b8442f')
+             + person(348, 668, 0.8, '#2f6f8c') + person(384, 674, 0.74, '#e0983c')
+             + person(1004, 676, 0.82, '#7a4f9e')
+             + sign(232, 704, 0.9) + sign(1064, 586, 0.5)
+             + ''.join(f'<g transform="translate({bx},{by}) scale({bs})">'
+                       f'{shadow(0, 3, 36, 6, 0.2)}'
+                       f'<rect x="-34" y="-14" width="68" height="6" rx="2" fill="#6b5a44"/>'
+                       f'<rect x="-34" y="-24" width="68" height="6" rx="2" fill="#7d6a50"/>'
+                       f'<rect x="-30" y="-14" width="5" height="14" fill="#4a4038"/>'
+                       f'<rect x="25" y="-14" width="5" height="14" fill="#4a4038"/></g>'
+                       for bx, by, bs in [(330, 580, 0.55), (912, 576, 0.55),
+                                          (460, 676, 0.85), (920, 682, 0.9)]))
+
+    scene('crater-lake', 'CRATER LAKE — Wizard Island from the rim, Rim Drive turning away', {
+        'sky': sky_l,
+        'far': far_l,
+        'water': water_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#6f665a" opacity="0.28"><rect x="0" y="712" width="1280" height="8"/></g>',
+        'roadkw': dict(surface='#5f5a54', surface2='#4d4842', shoulder='#aaa290',
+                       dash='#f0e3a8', top=ROADTOP, junction=(382, 412)),
+        'trackkw': dict(ballast='#9c9382', ballast_hi='#aea795', tie='#4a3a2e',
+                        rail='#d3d7dc'),
+    }, d + '\n    <clipPath id="lakeclip"><path d="' + LAKE + '"/></clipPath>')
+
+
+def horseshoe_curve():
+    """HORSESHOE CURVE — Kittanning Point, Pennsylvania, looking down into the bowl.
+
+    Twenty-five scenes into this game and the railway had never once been the landmark. It
+    was always the thing running through somebody else's view. Here the railroad IS the
+    place: to get over the Alleghenies the line was thrown right around the head of a
+    valley, bending a full half-circle so that a long enough train can see its own tail.
+
+    The first attempt drew the line in elevation, from the valley floor, and it read as a
+    sagging wire — you could not tell it was a horseshoe at all. This one looks DOWN into
+    the bowl instead, so the loop opens toward the viewer: the tight bend is the farthest
+    point and sits at the top, the two arms sweep round and come toward us, and everything
+    enclosed by them — two reservoirs, the lawn, the park road — is the inside of the
+    horseshoe. That enclosure is what makes the shape legible.
+
+    The road climbs the valley, passes UNDER the line through the stone arch at the apex
+    (which is what Kittanning Point Road actually does), and disappears over the hill."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b9ed2"/><stop offset="0.55" stop-color="#9cc6de"/>
+      <stop offset="1" stop-color="#d6e4e6"/>
+    </linearGradient>
+    <linearGradient id="resv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f5a5c"/><stop offset="1" stop-color="#417069"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#54803c"/><stop offset="1" stop-color="#446b32"/>
+    </linearGradient>''')
+
+    import math as _m
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             + '    <g fill="#ffffff" opacity="0.5">'
+             + ''.join(f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.42:.0f}"/>'
+                       f'<ellipse cx="{x-r*0.66:.0f}" cy="{y+r*0.2:.0f}" '
+                       f'rx="{r*0.54:.0f}" ry="{r*0.3:.0f}"/>'
+                       f'<ellipse cx="{x+r*0.7:.0f}" cy="{y+r*0.18:.0f}" '
+                       f'rx="{r*0.48:.0f}" ry="{r*0.28:.0f}"/></g>'
+                       for x, y, r in [(250, 48, 52), (640, 30, 40), (1040, 58, 46)])
+             + '</g>')
+
+    # ------------------------------------------------- the Allegheny ridges ----
+    def ridge(seed, top, amp, fill, x0=-40, x1=1320, step=120, base=306):
+        rr = rnd(seed)
+        pts, x = [], x0
+        while x < x1:
+            pts.append((x, top + rr() * amp))
+            x += step * (0.6 + rr() * 0.8)
+        pts.append((x1, top + rr() * amp))
+        dd = [f'M{x0},{base}']
+        for i, (px, py) in enumerate(pts):
+            if i == 0:
+                dd.append(f'L{px:.0f},{py:.0f}')
+            else:
+                mx = (pts[i-1][0] + px) / 2
+                dd.append(f'C {mx:.0f},{pts[i-1][1]:.0f} {mx:.0f},{py:.0f} '
+                          f'{px:.0f},{py:.0f}')
+        dd.append(f'L{x1},{base} Z')
+        return f'<path d="{" ".join(dd)}" fill="{fill}"/>'
+
+    far_l = ('    <g id="alleghenies">'
+             + ridge(5, 150, 34, '#93a9b6')
+             + ridge(13, 182, 30, '#7c96a1')
+             + ridge(29, 214, 26, '#628076')
+             + ridge(41, 244, 22, '#4d6b4a')
+             + '</g>')
+
+    # ============================================================== THE CURVE ====
+    # The half-ellipse the whole scene is built on. Looking down into the bowl, the tight
+    # bend is the farthest point (top centre) and the two arms sweep toward us and out of
+    # frame. Foreshortened hard — there are only ~140px between the horizon and the track
+    # band — so the arms are given real curl at the ends, which is what sells the loop.
+    CX, CY, RX, RY = 634, 452, 726, 140
+
+    def curve_pt(t):
+        return (CX + RX * _m.cos(t), CY - RY * _m.sin(t))
+
+    CURVE = [curve_pt(_m.pi * (1 - i / 120.0)) for i in range(121)]
+
+    def curve_scale(y):
+        """Nearer is lower on the picture here — we are looking down at the loop."""
+        return 0.36 + 1.02 * max(0.0, (y - 306)) / 146
+
+    def offset_curve(dy):
+        """The same ellipse shifted down the slope, for the second and third tracks."""
+        return [(x, y + dy * curve_scale(y)) for x, y in CURVE]
+
+    def ribbon(pts_a, pts_b, fill):
+        d0 = ('M' + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in pts_a)
+              + ' L' + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in reversed(pts_b)) + ' Z')
+        return f'<path d="{d0}" fill="{fill}"/>'
+
+    def polyline(pts, stroke, w):
+        return (f'<path d="M' + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in pts)
+                + f'" stroke="{stroke}" stroke-width="{w}" fill="none"/>')
+
+    def roadbed():
+        """The shelf the line runs on: a cut into the hillside above, a pale ballast bench
+        carrying four tracks, and a retaining wall dropping away below. Without the cut and
+        the wall the line looks painted onto the trees instead of carved into them."""
+        cut_top = [(x, y - 34 * curve_scale(y)) for x, y in CURVE]
+        bench_t = [(x, y - 10 * curve_scale(y)) for x, y in CURVE]
+        bench_b = [(x, y + 12 * curve_scale(y)) for x, y in CURVE]
+        wall_b = [(x, y + 32 * curve_scale(y)) for x, y in CURVE]
+        out = [ribbon(cut_top, bench_t, '#6b5f4c'),
+               ribbon(bench_t, bench_b, '#8e8475'),
+               ribbon(bench_b, wall_b, '#5f5648')]
+        # the four running lines
+        for dy in (-6.0, -1.0, 4.0, 8.0):
+            pts = offset_curve(dy)
+            out.append(polyline([(x, y - 1.2 * curve_scale(y)) for x, y in pts],
+                                '#cfd6dc', 1.5))
+            out.append(polyline([(x, y + 1.2 * curve_scale(y)) for x, y in pts],
+                                '#cfd6dc', 1.5))
+        # buttresses down the retaining wall, which give the curve its depth
+        out.append('<g fill="#5f5648" opacity="0.7">')
+        for i in range(4, len(CURVE) - 4, 5):
+            x, y = CURVE[i]
+            sc = curve_scale(y)
+            out.append(f'<rect x="{x - 2*sc:.1f}" y="{y + 13*sc:.1f}" '
+                       f'width="{4*sc:.1f}" height="{17*sc:.1f}"/>')
+        out.append('</g>')
+        return ''.join(out)
+
+    def consist(track_dy=-6.0, i0=5, i1=114, step=2):
+        """The train, wrapped right round the bowl. This is the whole reason the place is
+        famous and the reason it earned a scene: a long enough train can see its own tail.
+
+        `#curve-path` is exported alongside it so the engine can, if it ever wants to,
+        animate a consist along the curve with getPointAtLength instead of leaving this
+        one standing still. See HANDOFF.md."""
+        pts = offset_curve(track_dy)
+        out = []
+        for k, i in enumerate(range(i0, i1, step)):
+            x, y = pts[i]
+            x1, y1 = pts[min(i + 1, len(pts) - 1)]
+            ang = _m.degrees(_m.atan2(y1 - y, x1 - x))
+            sc = curve_scale(y)
+            lead = k < 3
+            if lead:
+                body, roof, w, h = '#2b3138', '#1f242a', 27, 12.5
+            else:
+                body = ['#8a4438', '#3f5a7a', '#4a6b4a', '#8a7a3f', '#5a4a6b',
+                        '#7a3f4a'][k % 6]
+                roof, w, h = '#e2ddd2', 25, 11.5
+            out.append(
+                f'<g transform="translate({x:.0f},{y:.1f}) rotate({ang:.1f}) '
+                f'scale({sc:.2f})">'
+                f'{shadow(0, 1.5, w*0.5, 2.4, 0.22)}'
+                f'<rect x="{-w/2}" y="{-h}" width="{w}" height="{h}" rx="1.4" '
+                f'fill="{body}"/>'
+                f'<rect x="{-w/2}" y="{-h}" width="{w}" height="2.6" rx="1.3" '
+                f'fill="{roof}"/>'
+                + (f'<rect x="{w/2-5.5}" y="{-h+1.6}" width="4.4" height="3.2" '
+                   f'fill="#cfe4f2"/>' if lead else '')
+                + '</g>')
+        hx, hy = pts[i0]
+        hs = curve_scale(hy)
+        out.append('<g fill="#d8dee2" opacity="0.45">' + ''.join(
+            f'<ellipse cx="{hx - 4 - i*8:.0f}" cy="{hy - 18*hs - i*5:.0f}" '
+            f'rx="{(7 + i*3) * hs:.1f}" ry="{(5 + i*2) * hs:.1f}"/>' for i in range(4))
+            + '</g>')
+        return ''.join(out)
+
+    # ------------------------------------------------ the bowl around the loop ----
+    def canopy(pts, fill, seed=3, r0=13, dy=0):
+        rr = rnd(seed)
+        out = []
+        for i in range(len(pts) - 1):
+            (x0, y0), (x1, y1) = pts[i], pts[i + 1]
+            n = max(1, int(abs(x1 - x0) / r0))
+            for j in range(n):
+                t = j / n
+                x = x0 + (x1 - x0) * t
+                y = y0 + (y1 - y0) * t + dy
+                r = r0 * (0.55 + rr() * 0.7)
+                out.append(f'<ellipse cx="{x:.0f}" cy="{y + r*0.25:.0f}" rx="{r:.0f}" '
+                           f'ry="{r*0.78:.0f}" fill="{fill}"/>')
+        return ''.join(out)
+
+    # everything OUTSIDE the loop is mountainside: a crescent, thick at the edges where
+    # the arms come toward us and thin over the apex. That crescent shape is exactly what
+    # looking into a bowl gives you.
+    OUTSIDE = ('M-40,306 L1320,306 L1320,452 '
+               + 'L' + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in reversed(CURVE))
+               + ' L-40,452 Z')
+
+    INSIDE = ('M' + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in CURVE)
+              + ' L1320,452 L-40,452 Z')
+
+    mid_l = ('    <g id="bowl">'
+             # the floor enclosed by the horseshoe
+             f'<path d="{INSIDE}" fill="url(#floor)"/>'
+             # the mountainside outside it
+             + f'<path d="{OUTSIDE}" fill="#3f6231"/>'
+             + canopy([(x, y) for x, y in CURVE][::4], '#4a7238', seed=7, r0=14, dy=-34)
+             # draws running down the mountain face, so it is not a flat wedge of green
+             + '<g fill="#365a2b" opacity="0.32">'
+             + ''.join(f'<path d="M{x},312 C {x-10},350 {x-18},380 {x-28},410 '
+                       f'L{x-8},412 C {x-1},382 {x+4},350 {x+10},312 Z"/>'
+                       for x in (80, 190, 300, 1000, 1110, 1220)) + '</g>'
+             # a whole wooded mountainside, not a lawn: clumps of canopy scattered right
+             # across the crescent outside the loop, sized by depth
+             + '<g>' + ''.join(
+                 f'<ellipse cx="{(i*173) % 1360 - 40}" '
+                 f'cy="{314 + (i*97) % 130}" '
+                 f'rx="{9 + (i % 7) * 3}" ry="{(9 + (i % 7) * 3) * 0.72:.1f}" '
+                 f'fill="{["#4e7a3c", "#365a2b", "#2f4c26", "#578a44"][i % 4]}"/>'
+                 for i in range(150)) + '</g>'
+             # the shadowed cut face immediately above the line, which is what makes the
+             # bench read as carved into a hillside rather than laid on a plain
+             + f'<path d="M' + ' L'.join(f'{x:.0f},{y - 34*curve_scale(y):.1f}'
+                                         for x, y in CURVE)
+             + ' L' + ' L'.join(f'{x:.0f},{y - 72*curve_scale(y):.1f}'
+                                for x, y in reversed(CURVE))
+             + '" fill="#2f4c26" opacity="0.4"/>'
+             + '</g>')
+
+    # the two little reservoirs and the park inside the loop
+    RES_L = 'M262,396 C 342,386 424,388 480,398 L490,432 C 412,442 316,440 250,430 Z'
+    RES_R = 'M800,400 C 878,390 962,392 1016,402 L1026,434 C 950,444 856,442 790,432 Z'
+
+    def dam(x0, x1, y):
+        return (f'<g><path d="M{x0},{y} L{x1},{y+2} L{x1+4},{y+16} L{x0-4},{y+14} Z" '
+                f'fill="#9c948a"/>'
+                f'<path d="M{x0},{y} L{x1},{y+2} L{x1},{y+5} L{x0},{y+3} Z" '
+                f'fill="#c2bcae"/>'
+                + '<g fill="#8a8278" opacity="0.7">'
+                + ''.join(f'<rect x="{x}" y="{y+5}" width="4" height="10"/>'
+                          for x in range(int(x0) + 10, int(x1), 22)) + '</g></g>')
+
+    def underpass(x, y, s=1.0):
+        """The stone arch that carries the line over Kittanning Point Road. The road really
+        does go under the curve here, and the arch is what stops the road and the railway
+        looking like they collide."""
+        return (f'<g id="underpass" transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-38" y="-26" width="76" height="30" fill="#8f8676"/>'
+                + '<g fill="#a29881" opacity="0.8">'
+                + ''.join(f'<rect x="{-34 + (r % 2) * 7 + c*17}" y="{-22 + r*8}" '
+                          f'width="14" height="6" rx="1"/>'
+                          for r in range(3) for c in range(4)) + '</g>'
+                f'<path d="M-13,4 L-13,-12 a13,13 0 0 1 26,0 L13,4 Z" fill="#2f3830"/>'
+                f'<path d="M-16,-12 a16,16 0 0 1 32,0 l-4,0 a12,12 0 0 0 -24,0 Z" '
+                f'fill="#b8ae9c"/>'
+                f'<rect x="-42" y="-30" width="84" height="6" rx="2" fill="#a8a094"/></g>')
+
+    def visitor(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 3, 46, 7, 0.2)}'
+                f'<rect x="-44" y="-32" width="88" height="32" fill="#8a6b4a"/>'
+                f'<rect x="-44" y="-32" width="24" height="32" fill="#9c7c58"/>'
+                + '<g fill="#f2d68a">'
+                + ''.join(f'<rect x="{-34 + i*19}" y="-25" width="11" height="12" rx="1"/>'
+                          for i in range(4)) + '</g>'
+                f'<path d="M-50,-32 L0,-52 L50,-32 Z" fill="#5f5044"/>'
+                f'<rect x="-52" y="-36" width="104" height="5" rx="2" fill="#6f6152"/></g>')
+
+    def hardwood(x, y, s=1.0, a='#3f6231', b='#4e7a3c', c='#2f4c26', trunk='#5d4a38'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M-5,2 L-4,-34 L-14,-54 L-2,-44 L0,-68 L2,-44 L14,-56 L4,-34 '
+                f'L5,2 Z" fill="{trunk}"/>'
+                f'<ellipse cx="0" cy="-92" rx="40" ry="30" fill="{a}"/>'
+                f'<ellipse cx="-20" cy="-80" rx="24" ry="18" fill="{c}"/>'
+                f'<ellipse cx="22" cy="-84" rx="21" ry="16" fill="{c}"/>'
+                f'<ellipse cx="-4" cy="-110" rx="23" ry="16" fill="{b}"/>'
+                f'<ellipse cx="18" cy="-102" rx="18" ry="13" fill="{b}"/></g>')
+
+    def pine(x, y, s=1.0, a='#2f5233', b='#3b6440'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<rect x="-3" y="-14" width="6" height="14" fill="#5a4a38"/>'
+                f'<path d="M0,-100 L15,-60 L8,-60 L21,-30 L11,-30 L24,-4 L-24,-4 L-11,-30 '
+                f'L-21,-30 L-8,-60 L-15,-60 Z" fill="{a}"/>'
+                f'<path d="M0,-100 L15,-60 L8,-60 L21,-30 L11,-30 L24,-4 L0,-4 Z" '
+                f'fill="#264428"/>'
+                f'<path d="M0,-94 L10,-64 L4,-64 L13,-38 L0,-38 Z" fill="{b}"/></g>')
+
+    def signal(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 2, 16, 4, 0.18)}'
+                f'<rect x="-5" y="-96" width="10" height="96" fill="#4a5560"/>'
+                f'<rect x="-14" y="-4" width="28" height="6" rx="2" fill="#4a5560"/>'
+                f'<rect x="-3" y="-96" width="3" height="96" fill="#5f6b76"/>'
+                f'<rect x="18" y="-30" width="26" height="30" rx="2" fill="#8a8f92"/>'
+                f'<rect x="18" y="-30" width="9" height="30" rx="2" fill="#9ba0a3"/>'
+                f'<rect x="-15" y="-136" width="30" height="44" rx="5" fill="#2f3840"/>'
+                f'<circle cx="0" cy="-126" r="6.4" fill="#2f7d4a"/>'
+                f'<circle cx="0" cy="-110" r="6.4" fill="#31383f"/>'
+                f'<path d="M-15,-136 L15,-136 L18,-142 L-18,-142 Z" fill="#232a30"/></g>')
+
+    def person(x, y, s=1.0, top='#b8442f', bottom='#3f4650', skin='#c98d63'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+                f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
+                f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
+                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/></g>')
+
+    def car(x, y, s=1.0, body='#2f5f9e'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 5, 52, 7, 0.24)}'
+                f'<rect x="-46" y="-26" width="92" height="20" rx="7" fill="{body}"/>'
+                f'<path d="M-26,-26 L-18,-44 L20,-44 L30,-26 Z" fill="{body}"/>'
+                f'<path d="M-22,-28 L-15,-41 L0,-41 L0,-28 Z" fill="#cfe4f2"/>'
+                f'<path d="M4,-28 L4,-41 L18,-41 L26,-28 Z" fill="#cfe4f2"/>'
+                f'<g fill="#1b1f25"><circle cx="-28" cy="-5" r="9"/>'
+                f'<circle cx="28" cy="-5" r="9"/></g></g>')
+
+    floor_l = ('    <g id="valley-floor">'
+               # the park inside the loop: two reservoirs either side of the road
+               f'<path d="{RES_L}" fill="url(#resv)"/>'
+               f'<path d="{RES_R}" fill="url(#resv)"/>'
+               + '<g fill="#5f8f88" opacity="0.55">'
+               + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2.4" rx="1.2"/>'
+                         for x, y, w in [(292, 408, 90), (346, 420, 70), (836, 412, 84),
+                                         (892, 424, 66)]) + '</g>'
+               + f'<path d="{RES_L}" fill="none" stroke="#7f7a68" stroke-width="2.6"/>'
+               + f'<path d="{RES_R}" fill="none" stroke="#7f7a68" stroke-width="2.6"/>'
+               + dam(250, 490, 430) + dam(790, 1026, 432)
+               # trees crowding the water's edge, which every Allegheny reservoir has
+               + '<g>' + ''.join(
+                   f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.7:.1f}" fill="{c}"/>'
+                   for x, y, r, c in [(240, 392, 13, '#365a2b'), (300, 384, 11, '#4e7a3c'),
+                                      (370, 380, 12, '#365a2b'), (440, 384, 10, '#4e7a3c'),
+                                      (496, 394, 13, '#2f4c26'), (222, 414, 12, '#4e7a3c'),
+                                      (782, 396, 13, '#365a2b'), (840, 386, 11, '#4e7a3c'),
+                                      (912, 382, 12, '#365a2b'), (980, 388, 10, '#4e7a3c'),
+                                      (1032, 398, 13, '#2f4c26'), (1044, 420, 12, '#4e7a3c')])
+               + '</g>'
+               # the mown lawn and the loop of park road between them
+               + '<path d="M540,412 C 620,404 720,406 762,418 C 700,432 596,432 536,424 Z" '
+               'fill="#67a047"/>'
+               + '<path d="M556,418 C 618,412 706,414 742,422 C 692,430 604,430 552,422 Z" '
+               'fill="none" stroke="#b8b2a2" stroke-width="3.4"/>'
+               + '</g>')
+
+    def car_park(x, y, w, s=1.0):
+        """The end of the road: the visitor car park at the foot of the curve. Kittanning
+        Point Road really does stop here — it does not cross the line, which is exactly why
+        the scene can carry an animated train without driving it through the traffic."""
+        return (f'<g id="car-park" transform="translate({x},{y}) scale({s})">'
+                f'<path d="M{-w/2 - 8:.0f},18 L{-w/2:.0f},-14 L{w/2:.0f},-14 '
+                f'L{w/2 + 8:.0f},18 Z" fill="#9c948a"/>'
+                f'<path d="M{-w/2:.0f},-14 L{w/2:.0f},-14 L{w/2 + 1:.0f},-10 '
+                f'L{-w/2 - 1:.0f},-10 Z" fill="#b0a89c"/>'
+                # bays marked out, and something parked in most of them
+                + '<g stroke="#c2bcae" stroke-width="1.4" opacity="0.7">'
+                + ''.join(f'<path d="M{-w/2 + 8 + i*16:.0f},-12 L{-w/2 + 6 + i*16:.0f},4"/>'
+                          for i in range(int(w / 16))) + '</g>'
+                + ''.join(f'<g transform="translate({-w/2 + 15 + i*16:.0f},2)">'
+                          f'{shadow(0, 1, 7, 2, 0.2)}'
+                          f'<rect x="-6" y="-9" width="12" height="10" rx="2.4" '
+                          f'fill="{c}"/>'
+                          f'<rect x="-4.4" y="-7" width="8.8" height="3.6" rx="1.4" '
+                          f'fill="#cfe4f2"/></g>'
+                          for i, c in enumerate(['#b8342c', '#e8e2d2', '#2f5f9e', '#3f7d4a',
+                                                 '#e8b02a', '#7a4f9e', '#e8e2d2', '#b8342c'])
+                          if i * 16 < w - 16)
+                + '</g>')
+
+    def funicular(x0, y0, x1, y1):
+        """The incline that carries people from the car park up to the curve itself. It is
+        also the answer to 'how do you get up there', which a scene where the road stops at
+        the bottom of a mountain otherwise leaves hanging."""
+        ang = _m.degrees(_m.atan2(y1 - y0, x1 - x0))
+        n = 11
+        ties = ''.join(
+            f'<rect x="-6" y="-1.4" width="12" height="2.8" fill="#6b5a44" '
+            f'transform="translate({x0 + (x1-x0)*(i+0.5)/n:.1f},'
+            f'{y0 + (y1-y0)*(i+0.5)/n:.1f}) rotate({ang:.1f})"/>' for i in range(n))
+        return (f'<g id="funicular">'
+                f'<path d="M{x0},{y0} L{x1},{y1}" stroke="#8a8478" stroke-width="11"/>'
+                f'{ties}'
+                f'<path d="M{x0},{y0} L{x1},{y1}" stroke="#b8b2a6" stroke-width="1.2"/>'
+                f'<g transform="translate({(x0+x1)/2:.0f},{(y0+y1)/2:.0f}) '
+                f'rotate({ang:.1f})">'
+                f'<rect x="-8" y="-10" width="16" height="10" rx="2" fill="#b8442f"/>'
+                f'<rect x="-8" y="-10" width="16" height="2.6" rx="1.2" fill="#e2ddd2"/>'
+                f'<rect x="-5.5" y="-7" width="4.4" height="3.6" rx="1" fill="#cfe4f2"/>'
+                f'<rect x="1.2" y="-7" width="4.4" height="3.6" rx="1" fill="#cfe4f2"/></g></g>')
+
+    back = ('    <g id="horseshoe">'
+            + f'<path id="curve-path" d="M'
+            + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in offset_curve(-6.0))
+            + '" fill="none" stroke="none"/>'
+            + roadbed() + consist() + '</g>\n'
+            # The road STOPS at the car park; it never crosses the line. Earlier drafts ran
+            # it to the horizon, so the carriageway was painted over the railway at the apex
+            # — no bridge, no underpass, and a moving train would have driven straight
+            # through the traffic. The real road does exactly this: it ends here.
+            + '    ' + car_park(634, 372, 150, 1.0)
+            + funicular(722, 370, 818, 320)
+            + visitor(836, 398, 0.44)
+            + ''.join(person(x, 382, 0.3) for x in (550, 584, 716, 748))
+            + signal(214, 428, 0.36) + signal(1058, 430, 0.36)
+            + ''.join(pine(x, y, sc) for x, y, sc in
+                      [(96, 440, 0.4), (1190, 442, 0.42), (330, 444, 0.3),
+                       (960, 446, 0.32), (520, 400, 0.26), (860, 404, 0.28)]))
+
+    ground_l = ('    <rect x="0" y="440" width="1280" height="280" fill="#4a7238"/>\n'
+                '    <g><rect x="0" y="440" width="1280" height="12" fill="#3f6231"/></g>\n'
+                '    <g><rect x="0" y="592" width="1280" height="30" fill="#a8a094"/>'
+                '<rect x="0" y="592" width="1280" height="4" fill="#bbb3a6"/>'
+                '<rect x="0" y="622" width="1280" height="4" fill="#7f7568"/></g>\n'
+                + '    <g fill="#3f6231" opacity="0.22">'
+                + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.14:.0f}"/>'
+                          for x, y, r in [(220, 550, 170), (830, 566, 150), (1140, 542, 160),
+                                          (400, 676, 180), (980, 690, 170)]) + '</g>')
+
+    front = ('    '
+             + ''.join(hardwood(x, y, sc) for x, y, sc in
+                       [(60, 706, 1.4), (1230, 716, 1.5), (196, 650, 1.0),
+                        (1096, 656, 1.05), (330, 604, 0.66), (958, 610, 0.7)])
+             + ''.join(pine(x, y, sc) for x, y, sc in
+                       [(128, 634, 0.85), (272, 700, 1.15), (1010, 704, 1.2),
+                        (1168, 636, 0.9), (424, 588, 0.5), (868, 592, 0.54)])
+             + signal(252, 560, 0.5) + signal(1036, 566, 0.52)
+             + car(300, 700, 0.62, '#b8342c') + car(986, 690, 0.58, '#e8e2d2')
+             + person(452, 660, 0.8, '#2f6f8c') + person(486, 666, 0.74, '#e0983c')
+             + person(830, 668, 0.82, '#7a4f9e')
+             + '<g>' + ''.join(
+                 f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.42:.0f}" '
+                 f'fill="#3f6231"/>'
+                 f'<ellipse cx="{x-r*0.3:.0f}" cy="{y-r*0.2:.0f}" rx="{r*0.55:.0f}" '
+                 f'ry="{r*0.28:.0f}" fill="#4e7a3c"/></g>'
+                 for x, y, r in [(90, 570, 30), (250, 580, 24), (400, 566, 18),
+                                 (880, 570, 20), (1040, 578, 26), (1220, 566, 30),
+                                 (40, 672, 36), (210, 690, 30), (500, 664, 22),
+                                 (790, 676, 26), (1080, 690, 32), (1256, 668, 34)])
+             + '</g>')
+
+    scene('horseshoe-curve',
+          'HORSESHOE CURVE — the line thrown round the head of the valley at Altoona', {
+        'sky': sky_l,
+        'far': far_l,
+        'mid': mid_l + '\n' + floor_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#2f4c26" opacity="0.28"><rect x="0" y="712" width="1280" height="8"/></g>',
+        # the carriageway stops at the car park — see the note in `back`
+        'roadkw': dict(surface='#5f5a54', surface2='#4d4842', shoulder='#a8a094',
+                       dash='#f0e3a8', top=376),
+        'trackkw': dict(ballast='#a8a094', ballast_hi='#bbb3a6', tie='#4a3a2e',
+                        rail='#d3d7dc'),
+    }, d)
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')
