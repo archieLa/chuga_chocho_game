@@ -174,6 +174,26 @@
       if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
     }
 
+    // The launch. Cape Canaveral draws a rocket mid-climb with a flame and a
+    // rolling ground cloud; the engine sets her back on the pad and flies her.
+    let rocket = null;
+    const rocketG = svg.querySelector('.cc-rocket');
+    if (rocketG) {
+      const puffs = svg.querySelector('.cc-rocket-puffs');
+      const pad = ((puffs && puffs.getAttribute('data-pad')) || '').split(',').map(Number);
+      rocket = {
+        el: rocketG,
+        flame: rocketG.querySelector('.cc-flame'),
+        cloud: svg.querySelector('.cc-rocket-smoke'),
+        glow: svg.querySelector('.cc-rocket-glow'),
+        puffG: puffs,
+        padX: pad.length === 2 && !isNaN(pad[0]) ? pad[0] : 886,
+        padY: pad.length === 2 && !isNaN(pad[1]) ? pad[1] : 282,
+        padDy: parseFloat(rocketG.getAttribute('data-pad-dy')) || 0,
+        t: 0, phase: 'wait', dy: 0, vel: 0, puffs: [],
+      };
+    }
+
     // Chairlifts. Gatlinburg's SkyLift climbs the hillside on two cables, and a
     // child watching it expects the chairs to move. Same shape of contract as
     // everything else here: the art tags itself and the engine drives it.
@@ -200,7 +220,7 @@
     const curve = buildCurveTrain(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
-                roadTop: roadTop, curve: curve, cablecars: cablecars,
+                roadTop: roadTop, curve: curve, cablecars: cablecars, rocket: rocket,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -269,6 +289,103 @@
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
   const CABLE_SPEED = 0.05;          // fraction of the cable per second
+
+  // =======================================================================
+  // The launch (Cape Canaveral). Sit on the pad, light up, climb out of frame,
+  // wait, go again — with a real exhaust column rather than a painted one.
+  // Ambient like the other scenery motion: the gate has no opinion about it.
+  // =======================================================================
+  const ROCKET = {
+    hold: 4.5,        // seconds on the pad between launches
+    accel: 62,        // px per second per second — slow off the pad, then quick
+    gone: -560,       // climbed this far above her drawn position: out of frame
+    rest: 3.0,        // seconds of empty sky before she is back on the pad
+    puffEvery: 0.055, // seconds between exhaust puffs while thrusting
+  };
+
+  function updateRocket(dt) {
+    const r = currentScene && currentScene.rocket;
+    if (!r) return;
+    const secs = dt / 1000;
+    r.t += secs;
+
+    if (r.phase === 'wait') {
+      // Sitting on the pad: down at pad level, no flame, no cloud.
+      r.dy = r.padDy; r.vel = 0;
+      if (r.flame) r.flame.setAttribute('opacity', '0');
+      if (r.glow) r.glow.setAttribute('opacity', '0');
+      if (r.t > ROCKET.hold) { r.phase = 'burn'; r.t = 0; r.puffT = 0; }
+    } else if (r.phase === 'burn') {
+      r.vel += ROCKET.accel * secs;
+      r.dy -= r.vel * secs;
+      if (r.flame) r.flame.setAttribute('opacity', '1');
+      if (r.glow) r.glow.setAttribute('opacity', '1');
+      // Exhaust, thickest while she is still low over the pad.
+      r.puffT = (r.puffT || 0) + secs;
+      const low = r.dy > -230;
+      while (r.puffT > ROCKET.puffEvery) {
+        r.puffT -= ROCKET.puffEvery;
+        if (low) emitRocketPuff(r);
+      }
+      if (r.dy < ROCKET.gone) { r.phase = 'rest'; r.t = 0; }
+    } else {
+      if (r.flame) r.flame.setAttribute('opacity', '0');
+      if (r.glow) r.glow.setAttribute('opacity', '0');
+      if (r.t > ROCKET.rest) { r.phase = 'wait'; r.t = 0; }
+    }
+
+    r.el.setAttribute('transform', 'translate(0,' + r.dy.toFixed(1) + ')');
+    // The painted ground cloud belongs to the burn, so it comes and goes with it.
+    if (r.cloud) {
+      const want = r.phase === 'wait' ? 0 : (r.phase === 'burn' ? 1 : 0.35);
+      r.cloud.setAttribute('opacity', want.toFixed(2));
+    }
+    updateRocketPuffs(r, secs);
+  }
+
+  function emitRocketPuff(r) {
+    if (!r.puffG) return;
+    // Blown out sideways along the flame trench, the way a real pad vents.
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const c = el('ellipse', { fill: '#f4f6f7', cx: 0, cy: 0, rx: 12, ry: 8, opacity: 0.9 });
+    r.puffG.appendChild(c);
+    r.puffs.push({
+      el: c,
+      x: r.padX + (Math.random() * 40 - 20),
+      y: r.padY + (Math.random() * 10 - 5),
+      vx: side * (34 + Math.random() * 46),
+      vy: -(10 + Math.random() * 26),
+      rr: 12 + Math.random() * 10,
+      o: 0.9,
+    });
+    if (r.puffs.length > 90) dropRocketPuff(r);
+  }
+
+  function dropRocketPuff(r) {
+    const p = r.puffs.shift();
+    if (p && p.el.parentNode) p.el.parentNode.removeChild(p.el);
+  }
+
+  function updateRocketPuffs(r, secs) {
+    for (let i = r.puffs.length - 1; i >= 0; i--) {
+      const p = r.puffs[i];
+      p.x += p.vx * secs;
+      p.y += p.vy * secs;
+      p.vy *= 0.985;                 // the column slows as it billows
+      p.rr += 26 * secs;
+      p.o -= 0.30 * secs;
+      if (p.o <= 0) {
+        if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
+        r.puffs.splice(i, 1);
+        continue;
+      }
+      p.el.setAttribute('cx', p.x.toFixed(1));
+      p.el.setAttribute('cy', p.y.toFixed(1));
+      p.el.setAttribute('rx', p.rr.toFixed(1));
+      p.el.setAttribute('ry', (p.rr * 0.62).toFixed(1));
+      p.el.setAttribute('opacity', p.o.toFixed(2));
+    }
+  }
 
   function updateCableCars(dt) {
     const list = currentScene && currentScene.cablecars;
@@ -666,6 +783,7 @@
     updateScenery(dt);
     updateCurveTrain(dt);
     updateCableCars(dt);
+    updateRocket(dt);
     drawGates(t);
     requestAnimationFrame(frame);
   }

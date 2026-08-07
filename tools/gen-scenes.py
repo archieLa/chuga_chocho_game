@@ -3029,10 +3029,17 @@ def cape_canaveral():
            '<polygon points="790,286 996,286 1016,304 770,304" fill="#c6c9c4"/>'
            '<polygon points="790,286 996,286 1000,292 792,292" fill="#dcdfda"/>'
            + tower(958, 292, 0.82)
-           + f'<circle cx="{PAD_X}" cy="{PAD_Y-LIFT}" r="190" fill="url(#sung)"/>'
+           + f'<circle class="cc-rocket-glow" cx="{PAD_X}" cy="{PAD_Y-LIFT}" r="190" fill="url(#sung)"/>'
+           # Tagged for the engine. She is DRAWN mid-climb, and data-pad-dy says
+           # how far below that the pad is, so scene.js can set her back down,
+           # hold, light the flame and fly her out of frame on a loop. A scene
+           # without .cc-rocket simply has nothing to launch.
+           + f'<g class="cc-rocket" data-pad-dy="{LIFT}">'
            + rocket(PAD_X, PAD_Y - LIFT - 26, 0.62)
-           + flame(PAD_X, PAD_Y - LIFT - 28, 1.05)
-           + smoke(PAD_X - 10, PAD_Y - 16)
+           + f'<g class="cc-flame">' + flame(PAD_X, PAD_Y - LIFT - 28, 1.05) + '</g>'
+           + '</g>'
+           + f'<g class="cc-rocket-smoke">' + smoke(PAD_X - 10, PAD_Y - 16) + '</g>'
+           + f'<g class="cc-rocket-puffs" data-pad="{PAD_X},{PAD_Y - 10}"></g>'
            + '</g>')
 
     # ---- ground: sand, saltmarsh grass, and a tidal creek ----
