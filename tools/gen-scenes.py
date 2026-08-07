@@ -10544,7 +10544,12 @@ def horseshoe_curve():
             + f'<path id="curve-path" d="M'
             + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in offset_curve(-6.0))
             + '" fill="none" stroke="none"/>'
-            + roadbed() + consist() + '</g>\n'
+            # consist() is NOT drawn any more. It was a train painted standing
+            # still round the bowl; the engine now animates a real one along
+            # #curve-path, and two trains on one track looked like a mistake.
+            # The function is left defined so the still version can be brought
+            # back by adding `+ consist()` here if the animation is ever dropped.
+            + roadbed() + '</g>\n'
             # The road STOPS at the car park; it never crosses the line. Earlier drafts ran
             # it to the horizon, so the carriageway was painted over the railway at the apex
             # — no bridge, no underpass, and a moving train would have driven straight

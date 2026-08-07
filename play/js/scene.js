@@ -198,14 +198,19 @@
   // A scene opts in simply by exporting <path id="curve-path">; every other
   // scene has none and quietly gets no background train.
   // =======================================================================
+  // A long freight — the whole reason Horseshoe Curve is famous is that a train
+  // long enough can see its own tail round the bowl. The path is ~1517 units and
+  // a hopper eats ~53 of them at mean depth, so 24 wagons wrap about nine tenths
+  // of the loop and leave just enough gap to tell the head from the tail.
+  const CURVE_HOPPERS = ['#6b6f76', '#7c5a3a', '#5d6670', '#8a5a34'];
   const CURVE = {
-    consist: [{ type: 'diesel',       colours: { loco: '#2f4c72', trim: '#c8a23a' } },
-              { type: 'wagon-hopper', colours: { wagon: '#6b6f76' } },
-              { type: 'wagon-hopper', colours: { wagon: '#7c5a3a' } },
-              { type: 'wagon-hopper', colours: { wagon: '#6b6f76' } }],
-    speed: 46,            // local units per second — a slow freight, far away
-    base: 0.36,           // multiplies the art's own depth rule (see depthAt)
-    gap: 8,
+    consist: [{ type: 'diesel', colours: { loco: '#2f4c72', trim: '#c8a23a' } }].concat(
+      Array.from({ length: 24 }, (_, i) => ({
+        type: 'wagon-hopper', colours: { wagon: CURVE_HOPPERS[i % CURVE_HOPPERS.length] },
+      }))),
+    speed: 46,            // path units per second — a slow freight, far away
+    base: 0.36,           // multiplies the art's own depth rule (see curveDepth)
+    gap: 6,
   };
   // The depth rule the Horseshoe art uses for everything in the bowl, given by
   // the handoff: 1.0 at the near arms, tiny at the apex. Multiplied by `base` so
@@ -226,14 +231,17 @@
     const gateFar = svg.querySelector('#gate-far');
     gateFar.parentNode.insertBefore(holder, gateFar);
 
-    const items = CC.rolling.layout(CURVE.consist, CURVE.gap);
-    const cars = items.map(it => {
-      const g = CC.rolling.build(it.type, it.colours);
+    // Each car carries its OWN length, because spacing has to be computed per
+    // vehicle at its own depth — see updateCurveTrain.
+    const cars = CURVE.consist.map(v => {
+      const m = CC.rolling.meta(v.type) || { length: 250, originFromRear: 125 };
+      const g = CC.rolling.build(v.type, v.colours);
       holder.appendChild(g);
-      return { el: g, type: it.type, offset: it.offset };
+      return { el: g, type: v.type, len: m.length, originFromRear: m.originFromRear };
     });
-    return { path: path, total: total, cars: cars, dist: 0,
-             span: CC.rolling.span(items, CURVE.gap) };
+    // Rough total in path units at mean depth, only used to decide when to loop.
+    const span = cars.reduce((t, c) => t + (c.len + CURVE.gap) * CURVE.base * 0.62, 0);
+    return { path: path, total: total, cars: cars, dist: 0, span: span };
   }
 
   function updateCurveTrain(dt) {
@@ -245,9 +253,18 @@
     const lap = c.total + c.span * CURVE.base;
     if (c.dist > lap) c.dist -= lap;
 
+    // Walk the consist front to back, stepping by each vehicle's own length AT
+    // ITS OWN DEPTH. The first version spaced everything by a fixed scale while
+    // drawing each vehicle at its depth scale — so up at the apex, where things
+    // are drawn a third of the size, the couplings tore open and the loco looked
+    // joined to its wagons by nothing at all.
+    let front = c.dist;                       // path distance of the train's nose
     c.cars.forEach(car => {
-      // offset is <= 0 (measured back from the front of the train).
-      let at = c.dist + car.offset * CURVE.base;
+      const headP = c.path.getPointAtLength(clamp(front, 0, c.total));
+      const s = Math.max(0.05, curveDepth(headP.y));
+      // A vehicle's origin sits (length - originFromRear) behind its own front.
+      const at = front - (car.len - car.originFromRear) * s;
+      front -= (car.len + CURVE.gap) * s;     // next vehicle's nose
       const on = at >= 0 && at <= c.total;
       car.el.setAttribute('opacity', on ? '1' : '0');
       if (!on) return;
@@ -259,7 +276,6 @@
       const back = Math.max(at - 6, 0);
       const a = c.path.getPointAtLength(back), b = c.path.getPointAtLength(ahead);
       const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
-      const s = Math.max(0.05, curveDepth(p.y));
       car.el.setAttribute('transform',
         'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ') rotate(' + deg.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
       CC.rolling.roll(car.el, c.dist / CURVE.base, car.type);
