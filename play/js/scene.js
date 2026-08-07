@@ -174,6 +174,25 @@
       if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
     }
 
+    // Chairlifts. Gatlinburg's SkyLift climbs the hillside on two cables, and a
+    // child watching it expects the chairs to move. Same shape of contract as
+    // everything else here: the art tags itself and the engine drives it.
+    const cablecars = [];
+    svg.querySelectorAll('.cc-cablecar').forEach(node => {
+      const m = (node.getAttribute('data-cable') || '').trim().split(/\s+/)
+        .map(pair => pair.split(',').map(Number));
+      if (m.length !== 2 || m.some(p => p.length !== 2 || p.some(isNaN))) return;
+      const chairs = [].map.call(node.querySelectorAll('.cc-chair'), c => ({
+        el: c,
+        t: parseFloat(c.getAttribute('data-t')) || 0,
+        lane: parseInt(c.getAttribute('data-lane'), 10) || 0,
+      }));
+      if (chairs.length) {
+        cablecars.push({ a: m[0], b: m[1], chairs: chairs,
+                         dy: parseFloat(node.getAttribute('data-lane-dy')) || 0 });
+      }
+    });
+
     // An ambient train on a curved line drawn into the scene — Horseshoe Curve
     // exports #curve-path, the centreline of the near running road. This is
     // scenery, NOT the gameplay train: it loops for ever and the gate has no
@@ -181,7 +200,7 @@
     const curve = buildCurveTrain(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
-                roadTop: roadTop, curve: curve,
+                roadTop: roadTop, curve: curve, cablecars: cablecars,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -244,6 +263,34 @@
     // it is not in local units, so do not scale it again downstream.
     const span = cars.reduce((t, c) => t + (c.len + CURVE.gap) * CURVE.base * 0.62, 0);
     return { path: path, total: total, cars: cars, dist: 0, span: span };
+  }
+
+  // Chairs crawl up one cable and back down the other, wrapping at each end.
+  // A lift is slow — a full traverse takes about twenty seconds, which is what
+  // makes it read as a chairlift rather than a fairground ride.
+  const CABLE_SPEED = 0.05;          // fraction of the cable per second
+
+  function updateCableCars(dt) {
+    const list = currentScene && currentScene.cablecars;
+    if (!list || !list.length) return;
+    const step = CABLE_SPEED * (dt / 1000);
+    list.forEach(cc => {
+      const ax = cc.a[0], ay = cc.a[1], bx = cc.b[0], by = cc.b[1];
+      cc.chairs.forEach(ch => {
+        // Lane 0 rides up the hill, lane 1 comes back down the lower cable.
+        ch.t += ch.lane ? -step : step;
+        // At each end the chair goes round the bullwheel and changes cable,
+        // rather than wrapping. Wrapping teleported it from the bottom of the
+        // cable back to the top — 124px across open sky, in full view, because
+        // unlike the Colorado and Horseshoe runs BOTH ends of this cable are on
+        // screen. Swapping lanes at the ends is also just what a lift does.
+        if (ch.t > 1) { ch.t = 1; ch.lane = 1; }
+        else if (ch.t < 0) { ch.t = 0; ch.lane = 0; }
+        const x = ax + (bx - ax) * ch.t;
+        const y = ay + (by - ay) * ch.t + (ch.lane ? cc.dy : 0);
+        ch.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
+      });
+    });
   }
 
   function updateCurveTrain(dt) {
@@ -618,6 +665,7 @@
     updateCars(dt);
     updateScenery(dt);
     updateCurveTrain(dt);
+    updateCableCars(dt);
     drawGates(t);
     requestAnimationFrame(frame);
   }

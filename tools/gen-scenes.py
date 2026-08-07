@@ -8697,15 +8697,23 @@ def smokies():
     def skylift(x0, y0, x1, y1, n=6):
         """The SkyLift: an orange tower, a cable up the hillside, and bright yellow chairs
         hanging off it. Nothing else in the set has anything crossing the sky like this."""
+        # Chairs alternate between the two cables — even ones ride the upper
+        # cable up the hill, odd ones the lower cable back down — so the lift
+        # reads as a loop rather than a row of chairs all going the same way.
+        # class/data-* are the engine's hook: scene.js slides them along and
+        # wraps them. A scene without .cc-cablecar simply has nothing to move.
         chairs = ''.join(
-            f'<g transform="translate({x0 + (x1-x0)*t:.0f},{y0 + (y1-y0)*t:.0f})">'
+            f'<g class="cc-chair" data-t="{t:.4f}" data-lane="{i % 2}" '
+            f'transform="translate({x0 + (x1-x0)*t:.0f},'
+            f'{y0 + (y1-y0)*t + (22 if i % 2 else 0):.0f})">'
             f'<path d="M0,0 L0,10" stroke="#c8871f" stroke-width="2.4"/>'
             f'<rect x="-9" y="10" width="18" height="4" rx="1.5" fill="#f2c23c"/>'
             f'<rect x="-9" y="0" width="3" height="12" fill="#f2c23c"/>'
             f'<rect x="6" y="0" width="3" height="12" fill="#f2c23c"/>'
             f'<rect x="-9" y="14" width="18" height="3" rx="1.5" fill="#e07a2c"/></g>'
-            for t in [(i + 0.5) / n for i in range(n)])
-        return (f'<g id="skylift">'
+            for i, t in enumerate((i + 0.5) / n for i in range(n)))
+        return (f'<g id="skylift" class="cc-cablecar" '
+                f'data-cable="{x0},{y0} {x1},{y1}" data-lane-dy="22">'
                 f'<path d="M{x0},{y0} L{x1},{y1}" stroke="#4a4a52" stroke-width="2"/>'
                 f'<path d="M{x0},{y0+22} L{x1},{y1+22}" stroke="#4a4a52" stroke-width="1.6"/>'
                 f'<g><polygon points="{x0-13},{y0+96} {x0-5},{y0-6} {x0+5},{y0-6} '
@@ -8933,7 +8941,7 @@ def smokies():
                       for x in range(-10, 1290, 17)) + '</g>'
             + space_needle(214, 352, 0.7)
             + ''.join(strip_unit(i, *u) for i, u in enumerate(STRIP))
-            + skylift(1152, 344, 1276, 196, 4)
+            + skylift(1152, 344, 1276, 196, 6)
             + ''.join(lamp(x, 412, 0.5, b) for x, b in
                       [(96, '#5f3f8c'), (268, '#2f6f8c'), (446, '#5f3f8c'),
                        (830, '#2f6f8c'), (1006, '#5f3f8c'), (1188, '#2f6f8c')])
