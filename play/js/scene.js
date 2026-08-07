@@ -239,7 +239,9 @@
       holder.appendChild(g);
       return { el: g, type: v.type, len: m.length, originFromRear: m.originFromRear };
     });
-    // Rough total in path units at mean depth, only used to decide when to loop.
+    // The train's own length ALREADY IN PATH UNITS: local length x base x the
+    // mean of the depth rule over the path (~0.62). Whoever touches this next:
+    // it is not in local units, so do not scale it again downstream.
     const span = cars.reduce((t, c) => t + (c.len + CURVE.gap) * CURVE.base * 0.62, 0);
     return { path: path, total: total, cars: cars, dist: 0, span: span };
   }
@@ -250,8 +252,8 @@
     c.dist += CURVE.speed * (dt / 1000);
     // Loop with the whole consist clear of the start, so it re-enters rather
     // than blinking back into the middle of the bowl.
-    const lap = c.total + c.span * CURVE.base;
-    if (c.dist > lap) c.dist -= lap;
+    // NO estimate of the train's length is used to decide when to wrap — see the
+    // note after the walk below.
 
     // Walk the consist front to back, stepping by each vehicle's own length AT
     // ITS OWN DEPTH. The first version spaced everything by a fixed scale while
@@ -280,6 +282,20 @@
         'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ') rotate(' + deg.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
       CC.rolling.roll(car.el, c.dist / CURVE.base, car.type);
     });
+
+    // `front` is now the path position just behind the LAST vehicle — the true
+    // tail, produced by the same depth-aware walk that just drew them. Restart
+    // only once that has passed the end of the path.
+    //
+    // An estimated length does not work here, and it is worth knowing why: the
+    // spacing uses the LOCAL depth at each vehicle, and near the ends of the
+    // path (y=444) that scale is 0.48 against a mean of 0.23 — more than double.
+    // So a train sitting over the ends is far longer than any average predicts.
+    // Estimating it wrapped the train while 13 wagons were still in plain view.
+    // Both ends of the path are off-screen (x=-92 and x=1360), so restarting the
+    // instant the real tail clears is invisible: the train rolls off the right
+    // one wagon at a time and a new head slides in from the left.
+    if (front > c.total) c.dist = 0;
   }
 
   // =======================================================================
