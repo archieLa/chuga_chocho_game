@@ -167,7 +167,7 @@
     // the road polygon's own far edge IS the answer, so a scene that truncates
     // says so just by being drawn that way, and future ones need no code.
     let roadTop = HORIZON;
-    const roadPoly = svg.querySelector('#road polygon');
+    const roadPoly = svg.querySelector('.cc-road');
     if (roadPoly) {
       const ys = (roadPoly.getAttribute('points') || '').trim().split(/\s+/)
         .map(p => parseFloat(p.split(',')[1])).filter(v => !isNaN(v));

@@ -85,7 +85,7 @@ def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe06
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="{surface}"/><stop offset="1" stop-color="{surface2}"/>
     </linearGradient></defs>
-    <polygon points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
+    <polygon class="cc-road" points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
     <polygon points="510,720 528,720 {lsh:.0f},{top} {lx:.0f},{top}" fill="{shoulder}" opacity="0.45"/>
     {right_verge}
     <g fill="{dash}">

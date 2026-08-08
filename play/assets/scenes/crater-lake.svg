@@ -46,7 +46,7 @@
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#5f5a54"/><stop offset="1" stop-color="#4d4842"/>
     </linearGradient></defs>
-    <polygon points="510,720 770,720 676,368 604,368" fill="url(#roadg)"/>
+    <polygon class="cc-road" points="510,720 770,720 676,368 604,368" fill="url(#roadg)"/>
     <polygon points="510,720 528,720 619,368 604,368" fill="#aaa290" opacity="0.45"/>
     <polygon points="662,371 677,371 676,368 661,368" fill="#aaa290" opacity="0.45"/><polygon points="752,720 770,720 691,423 676,423" fill="#aaa290" opacity="0.45"/><polygon points="662,371 677,371 691,423 676,423" fill="#4d4842"/>
     <g fill="#f0e3a8">

@@ -58,12 +58,17 @@ ANIM_IDS = ['driver-0', 'driver-1', 'driver-2', 'coupling-rod', 'coupling-rod-hi
 # Ids the ENGINE looks up inside a mounted scene, so they must survive the
 # per-scene namespacing. Duplicates across several mounted scenes are fine —
 # every lookup is scoped to that scene's own <svg> root, never to the document.
-#   road       scene.js reads the carriageway's far edge to learn where the road
-#              ends: most scenes run to the horizon, Crater Lake stops at the Rim
-#              Drive junction and Horseshoe Curve at the visitor car park.
 #   curve-path the centreline of a drawn railway an ambient train follows.
+#
+# `road` is deliberately NOT kept. scene.js needs the carriageway to learn where
+# the road ends, but colorado.svg calls BOTH its road gradient and its road layer
+# `road`, and every generated scene has a road layer too. Keeping the id left 28
+# elements sharing it across the mounted scenes, so Colorado's url(#road) bound to
+# some other scene's <g> and its carriageway painted through as green grass. The
+# carriageway carries class="cc-road" instead — classes are never namespaced, and
+# the lookup is scoped to the scene's own root anyway.
 KEEP_IDS = {'gate-near', 'gate-far', 'scenery-front', 'track', 'road-surface',
-            'road', 'curve-path'}
+            'curve-path'}
 
 
 def strip(svg):
