@@ -7363,10 +7363,10 @@ def duluth():
                 + '</g>')
 
     # ---------------------------------------------------------- the ore boat ----
-    def laker(x, y, s=1.0):
+    def laker(x, y, s=1.0, cls='', attrs=''):
         """A thousand-footer. The proportion IS the point: absurdly long and low, a small
         white house forward, the big one aft, and a red hull that goes on forever."""
-        return (f'<g transform="translate({x},{y}) scale({s})">'
+        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
                 f'<path d="M-300,0 L286,0 C 304,0 314,-6 316,-16 L316,-30 L-300,-30 Z" '
                 f'fill="#a8342c"/>'
                 f'<rect x="-300" y="-30" width="616" height="7" fill="#8f2a24"/>'
@@ -7482,7 +7482,11 @@ def duluth():
                  f'</g>')
 
         # the lifting deck: a through-girder carrying the roadway, sitting DOWN
-        deck = (f'<g id="lift-span">'
+        # THE SPAN LIFTS. data-lift is how far up it travels: from y=396 to y=181,
+        # which stops it clear below the fixed overhead truss at y=152. A boat in
+        # the canal cannot pass with it down, which is the whole point of the
+        # bridge and the reason this is worth animating in a game about a gate.
+        deck = (f'<g id="lift-span" class="cc-lift-span" data-lift="215">'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="30" fill="{steel}"/>'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="7" fill="{lit}"/>'
                 f'<rect x="{LT-4}" y="420" width="{RT+TW-LT+8}" height="6" fill="{dark}"/>'
@@ -7744,7 +7748,14 @@ def duluth():
         'sky': sky_l,
         'far': far_l,
         'ground': ground_l,
-        'water': canal + '\n' + lift_bridge(),
+        # The boat sits between the water and the bridge, so it passes BEHIND the
+        # towers and under the raised span. data-sail is "from,to,y"; the engine
+        # couples it to .cc-lift-span so the span is always up before it arrives.
+        'water': (canal + '\n    '
+                  + laker(1420, 414, 0.5,
+                          cls=' class="cc-canal-boat"',
+                          attrs=' data-sail="1420,-360,414" data-scale="0.5" data-nose="-1"')
+                  + '\n' + lift_bridge()),
         'scenery-back': back,
         'scenery-front': front,
         'foreground': '    <g fill="#3f5f38" opacity="0.3"><rect x="0" y="712" width="1280" height="8"/></g>',

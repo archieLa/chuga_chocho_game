@@ -38,6 +38,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Path follower** — a consist walking a drawn centreline | `<path id="curve-path">` (and it must be in `KEEP_IDS`) | Horseshoe Curve |
 | **Rail arc** — a short train on a quadratic | `.cc-scenery-train` with `data-rail="x0,y0 cx,cy x1,y1"` and `data-lift` | Colorado trestle |
 | **Launch** — sit, ignite, climb out, repeat | `.cc-rocket` with `data-pad-dy`, plus `.cc-flame`, `.cc-rocket-glow`, `.cc-rocket-smoke`, and an empty `.cc-rocket-puffs` with `data-pad` | Cape Canaveral |
+| **Lift bridge** — a span that rises, coupled to a ship | `.cc-lift-span` with `data-lift`, plus `.cc-canal-boat` with `data-sail="from,to,y"`. One controller runs both so the span is always up before the ship arrives. | Duluth |
 | **Road junction** — traffic turns off instead of fading | `.cc-road-exit` with `data-exit="nearEdgeY,farEdgeY,junctionX"` | Crater Lake |
 | **Where the road ends** | `class="cc-road"` on the carriageway polygon — the engine reads its far edge | every scene |
 
@@ -53,7 +54,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (8 scenes)
+## What moves today (9 scenes)
 
 | Scene | What |
 |---|---|
@@ -64,42 +65,37 @@ Two traps, both already paid for once:
 | Horseshoe Curve | 25-wagon freight round the bowl |
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | tractor and grain trailer working the field |
+| Duluth | the Aerial Lift Bridge raises for a thousand-footer in the canal |
 
 ---
 
 ## Queued, best first
 
-**1. Duluth — the Aerial Lift Bridge, and a boat under it.** ← *in progress*
-The best one in the game: the child presses CLOSE and a gate comes **down**; here
-a whole bridge span goes **up**. The ore freighter is already drawn, so the whole
-sequence is available — boat approaches, span lifts, boat passes, span lowers.
-Needs one new mechanism (a vertical lift) plus the existing shuttle for the boat.
-
-**2. Seattle — the ferry.** Already drawn. Pure shuttle, no new code. The
+**1. Seattle — the ferry.** Already drawn. Pure shuttle, no new code. The
 cheapest real win on the list.
 
-**3. New Orleans — the riverboat.** Shuttle for the hull, rotator for the
+**2. New Orleans — the riverboat.** Shuttle for the hull, rotator for the
 paddlewheel. Two existing contracts, no new mechanism.
 
-**4. Austin — the bats.** The scene's whole identity is a million bats off the
+**3. Austin — the bats.** The scene's whole identity is a million bats off the
 Congress Avenue Bridge at sunset, and they do not move. The one item here that
 wants genuinely new code — a small swarm.
 
-**5. Las Vegas — the neon.** The only night scene in the set and its signs do not
+**4. Las Vegas — the neon.** The only night scene in the set and its signs do not
 flash. A blink cycle on tagged elements; very cheap.
 
-**6. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
+**5. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
 along the slickrock track. (Listed as "skip" in an earlier pass — wrong call, a
 vehicle is exactly what lands with the audience.)
 
-**7. Yellowstone — the geyser erupts**, and the bison amble. The rocket's plume
+**6. Yellowstone — the geyser erupts**, and the bison amble. The rocket's plume
 machinery is most of the eruption already.
 
-**8. Bluegrass — a thoroughbred canters** the paddock. Shuttle.
+**7. Bluegrass — a thoroughbred canters** the paddock. Shuttle.
 
-**9. Oʻahu — an outrigger on the reef.** Shuttle.
+**8. Oʻahu — an outrigger on the reef.** Shuttle.
 
-**10. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
+**9. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
 scene where it would read.
 
 Below the line, in rough order: Kansas City's fountain, traffic on the Brooklyn
