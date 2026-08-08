@@ -282,7 +282,18 @@
     // mean of the depth rule over the path (~0.62). Whoever touches this next:
     // it is not in local units, so do not scale it again downstream.
     const span = cars.reduce((t, c) => t + (c.len + CURVE.gap) * CURVE.base * 0.62, 0);
-    return { path: path, total: total, cars: cars, dist: 0, span: span };
+    // The USABLE stretch, not the whole path. Its last 240 units dive steeply
+    // off the bottom-right — heading swings from 10 to 54 degrees and the depth
+    // scale nearly doubles — so a vehicle out there tips nose-down and looms,
+    // which read as the train lifting off the rail before it vanished. All of
+    // that is past the right edge of the frame anyway, so it is simply not used:
+    // the train is hidden and wrapped at the point the path leaves the picture.
+    // It also stops the tail taking half a minute to clear.
+    let exitAt = total;
+    for (let d = 0; d <= total; d += 4) {
+      if (path.getPointAtLength(d).x > 1330) { exitAt = d; break; }
+    }
+    return { path: path, total: total, exitAt: exitAt, cars: cars, dist: 0, span: span };
   }
 
   // Chairs crawl up one cable and back down the other, wrapping at each end.
@@ -426,19 +437,26 @@
     // joined to its wagons by nothing at all.
     let front = c.dist;                       // path distance of the train's nose
     c.cars.forEach(car => {
-      const headP = c.path.getPointAtLength(clamp(front, 0, c.total));
+      const headP = c.path.getPointAtLength(clamp(front, 0, c.exitAt));
       const s = Math.max(0.05, curveDepth(headP.y));
       // A vehicle's origin sits (length - originFromRear) behind its own front.
       const at = front - (car.len - car.originFromRear) * s;
       front -= (car.len + CURVE.gap) * s;     // next vehicle's nose
-      const on = at >= 0 && at <= c.total;
-      car.el.setAttribute('opacity', on ? '1' : '0');
-      if (!on) return;
+      const on = at >= 0 && at <= c.exitAt;
+      // Fade across the last stretch instead of cutting. Two reasons, and the
+      // second is the honest one: it makes the exit smooth, AND #curve-path
+      // drifts above the drawn rail past about x=1200, so a vehicle out there
+      // rides visibly off the track. Rather than pretend the data fits, it is
+      // faded out over exactly the stretch where it stops fitting.
+      let op = 0;
+      if (on) op = clamp(Math.min(at, c.exitAt - at) / CURVE.fade, 0, 1);
+      car.el.setAttribute('opacity', op.toFixed(2));
+      if (!on || op <= 0) return;
       const p = c.path.getPointAtLength(at);
       // Heading from a nearby second sample — atan2 of the difference. Sampling
       // forward near the end would clamp and give a heading of zero, so step
       // backwards there instead.
-      const ahead = Math.min(at + 6, c.total);
+      const ahead = Math.min(at + 6, c.exitAt);
       const back = Math.max(at - 6, 0);
       const a = c.path.getPointAtLength(back), b = c.path.getPointAtLength(ahead);
       const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
@@ -459,7 +477,7 @@
     // Both ends of the path are off-screen (x=-92 and x=1360), so restarting the
     // instant the real tail clears is invisible: the train rolls off the right
     // one wagon at a time and a new head slides in from the left.
-    if (front > c.total) c.dist = 0;
+    if (front > c.exitAt) c.dist = 0;
   }
 
   // =======================================================================
