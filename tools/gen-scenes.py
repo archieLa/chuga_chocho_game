@@ -7974,6 +7974,36 @@ def kansas():
                 f'<circle cx="0" cy="0" r="3.4" fill="#8a8478"/></g>'
                 f'<path d="M2,-92 L26,-86 L26,-98 Z" fill="#8a8478"/></g>')
 
+    def tractor(s=1.0):
+        """A tractor pulling a heaped grain trailer, drawn NOSE-RIGHT so the engine's
+        default facing applies. Origin is on the ground between the tractor's wheels;
+        the trailer trails off to -x behind it."""
+        tyre, rim, body, dark = '#2b2f34', '#c9ced4', '#c2362c', '#96271f'
+        def wheel(cx, cy, r):
+            return (f'<g><circle cx="{cx}" cy="{cy}" r="{r}" fill="{tyre}"/>'
+                    f'<circle cx="{cx}" cy="{cy}" r="{r*0.45:.1f}" fill="{rim}"/>'
+                    f'<circle cx="{cx}" cy="{cy}" r="{r*0.16:.1f}" fill="#8b9199"/></g>')
+        # the trailer: a flat bed on two wheels, heaped with grain
+        heap = ('<path d="M-98,-26 Q-88,-42 -74,-34 Q-64,-46 -52,-35 Q-40,-44 -32,-27 Z" '
+                'fill="#e3c469"/>'
+                '<path d="M-98,-26 Q-88,-42 -74,-34 Q-68,-38 -64,-30 Z" fill="#efd88b"/>')
+        trailer = (f'<g>{heap}'
+                   f'<rect x="-100" y="-27" width="70" height="12" rx="2" fill="#7c6a52"/>'
+                   f'<rect x="-100" y="-27" width="70" height="3" fill="#95826a"/>'
+                   f'<rect x="-30" y="-22" width="14" height="4" rx="2" fill="#5c5f66"/>'
+                   + wheel(-84, -10, 9) + wheel(-52, -10, 9) + '</g>')
+        return (f'<g class="cc-tractor" data-drive="-150,1420,422" data-scale="{s}" transform="translate(-150,422) scale({s})">'
+                + trailer
+                + f'<rect x="-18" y="-30" width="40" height="14" rx="3" fill="{dark}"/>'
+                + f'<rect x="14" y="-34" width="26" height="16" rx="3" fill="{body}"/>'
+                + f'<rect x="14" y="-34" width="26" height="4" rx="2" fill="#d9584c"/>'
+                + f'<rect x="-16" y="-56" width="30" height="26" rx="4" fill="{body}"/>'
+                + f'<rect x="-11" y="-51" width="20" height="13" rx="2" fill="#cfe7f7"/>'
+                + f'<rect x="-18" y="-60" width="36" height="5" rx="2.5" fill="{dark}"/>'
+                + f'<rect x="26" y="-52" width="5" height="20" rx="2.5" fill="#4a4e55"/>'
+                + wheel(-4, -16, 16) + wheel(34, -9, 9)
+                + '</g>')
+
     def bale(x, y, s=1.0, a='#d9bc62', b='#e6cd7c', c='#b89a48'):
         """A round bale is a short fat CYLINDER lying on its side: a barrel of straw with one
         rolled end face turned towards you. Drawn as concentric rings on a flat disc it reads
@@ -8034,7 +8064,7 @@ def kansas():
                 f'stroke-width="2.4" stroke-linecap="round">'
                 f'<path d="M-12,0 q6,-7 12,0 q6,-7 12,0"/></g>')
 
-    back = ('    ' + barn(214, 430, 0.66) + windmill(322, 428, 0.62)
+    back = ('    ' + tractor(0.62) + barn(214, 430, 0.66) + windmill(322, 428, 0.62)
             + ''.join(cottonwood(x, 428, s) for x, s in
                       [(552, 0.52), (588, 0.46), (620, 0.56), (652, 0.44),
                        (1146, 0.5), (1184, 0.58), (1218, 0.46)])

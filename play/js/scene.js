@@ -190,7 +190,8 @@
     }));
 
     const shuttles = [];
-    [['.cc-el-train', 'data-run', 96], ['.cc-plane', 'data-fly', 58]].forEach(([sel, attr, speed]) => {
+    [['.cc-el-train', 'data-run', 96], ['.cc-plane', 'data-fly', 58],
+     ['.cc-tractor', 'data-drive', 24]].forEach(([sel, attr, speed]) => {
       [].forEach.call(svg.querySelectorAll(sel), node => {
         const v = (node.getAttribute(attr) || '').split(',').map(Number);
         if (v.length !== 3 || v.some(isNaN)) return;
@@ -203,6 +204,10 @@
                         // -1 nose-left (the plane). Mirror only when the two
                         // disagree, or it flies backwards.
                         nose: parseFloat(node.getAttribute('data-nose')) || 1,
+                        // The engine rewrites the whole transform each frame, so any
+                        // scale baked into the art would be thrown away. Art that is
+                        // drawn at another size says so with data-scale.
+                        s: parseFloat(node.getAttribute('data-scale')) || 1,
                         bank: sel === '.cc-plane', turn: 0 });
       });
     });
@@ -418,7 +423,9 @@
         const k = s.turn > 0 ? (1 - Math.abs(s.turn - 0.55) / 0.55) : 0;
         tr += ' rotate(' + (facing * -12 * k).toFixed(1) + ')';
       }
-      if (facing !== s.nose) tr += ' scale(-1,1)';
+      // Mirror and size in one scale, so the two cannot fight each other.
+      const sx = (facing !== s.nose ? -s.s : s.s);
+      if (sx !== 1 || s.s !== 1) tr += ' scale(' + sx + ',' + s.s + ')';
       s.el.setAttribute('transform', tr);
     });
   }
