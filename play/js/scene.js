@@ -174,6 +174,32 @@
       if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
     }
 
+    // Chicago's three moving parts. Same contract as everything else: the art
+    // tags itself, the engine drives it, and a scene without the tags gets
+    // nothing. The Ferris wheel turns with its pods hanging level, the L shuttles
+    // along the viaduct, and the plane patrols above the lake and banks round.
+    const ferris = [].map.call(svg.querySelectorAll('.cc-ferris'), node => ({
+      el: node,
+      secs: parseFloat(node.getAttribute('data-secs')) || 16,
+      pods: [].map.call(node.querySelectorAll('.cc-pod'), q => ({
+        el: q,
+        px: parseFloat(q.getAttribute('data-px')) || 0,
+        py: parseFloat(q.getAttribute('data-py')) || 0,
+      })),
+      a: 0,
+    }));
+
+    const shuttles = [];
+    [['.cc-el-train', 'data-run', 96], ['.cc-plane', 'data-fly', 58]].forEach(([sel, attr, speed]) => {
+      [].forEach.call(svg.querySelectorAll(sel), node => {
+        const v = (node.getAttribute(attr) || '').split(',').map(Number);
+        if (v.length !== 3 || v.some(isNaN)) return;
+        shuttles.push({ el: node, x0: v[0], x1: v[1], y: v[2],
+                        x: v[0] + (v[1] - v[0]) * 0.5, dir: 1, speed: speed,
+                        bank: sel === '.cc-plane', turn: 0 });
+      });
+    });
+
     // The launch. Cape Canaveral draws a rocket mid-climb with a flame and a
     // rolling ground cloud; the engine sets her back on the pad and flies her.
     let rocket = null;
@@ -242,6 +268,7 @@
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
+                ferris: ferris, shuttles: shuttles,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -334,6 +361,54 @@
     rest: 3.0,        // seconds of empty sky before she is back on the pad
     puffEvery: 0.055, // seconds between exhaust puffs while thrusting
   };
+
+  // =======================================================================
+  // Chicago: the wheel, the L and the plane. All ambient — the gate has no
+  // opinion about any of them.
+  // =======================================================================
+  function updateFerris(dt) {
+    const list = currentScene && currentScene.ferris;
+    if (!list || !list.length) return;
+    list.forEach(f => {
+      f.a = (f.a + 360 * (dt / 1000) / f.secs) % 360;
+      f.el.setAttribute('transform', 'rotate(' + f.a.toFixed(2) + ')');
+      // Each pod counter-rotates by the same amount, so it hangs level all the
+      // way round instead of tumbling — which is what a real wheel's cars do,
+      // and the reason the pods are a separate tagged group at all.
+      f.pods.forEach(q => {
+        q.el.setAttribute('transform',
+          'translate(' + q.px + ',' + q.py + ') rotate(' + (-f.a).toFixed(2) + ')');
+      });
+    });
+  }
+
+  function updateShuttles(dt) {
+    const list = currentScene && currentScene.shuttles;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    list.forEach(s => {
+      // Turning: hold at the end and swing round rather than flipping in a frame.
+      if (s.turn > 0) {
+        s.turn -= secs;
+        if (s.turn <= 0) { s.dir = -s.dir; s.turn = 0; }
+      } else {
+        s.x += s.speed * s.dir * secs;
+        if (s.x > s.x1) { s.x = s.x1; s.turn = s.bank ? 1.1 : 1.8; }
+        else if (s.x < s.x0) { s.x = s.x0; s.turn = s.bank ? 1.1 : 1.8; }
+      }
+      // Mirror to face the way it is going. The art is drawn nose-right, so a
+      // leftward run is scale(-1,1); the plane also tips its nose through the
+      // turn, which reads as banking.
+      const facing = s.dir > 0 ? 1 : -1;
+      let tr = 'translate(' + s.x.toFixed(1) + ',' + s.y.toFixed(1) + ')';
+      if (s.bank) {
+        const t = s.turn > 0 ? (1 - Math.abs(s.turn - 0.55) / 0.55) : 0;
+        tr += ' rotate(' + (facing * (-9 + t * 26)).toFixed(1) + ')';
+      }
+      if (facing < 0) tr += ' scale(-1,1)';
+      s.el.setAttribute('transform', tr);
+    });
+  }
 
   function updateRocket(dt) {
     const r = currentScene && currentScene.rocket;
@@ -897,6 +972,8 @@
     updateCurveTrain(dt);
     updateCableCars(dt);
     updateRocket(dt);
+    updateFerris(dt);
+    updateShuttles(dt);
     drawGates(t);
     requestAnimationFrame(frame);
   }

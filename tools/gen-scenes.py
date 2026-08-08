@@ -767,16 +767,20 @@ def chicago():
         spokes = ''.join(f'<line x1="0" y1="0" x2="{r*math.cos(a):.1f}" y2="{r*math.sin(a):.1f}"/>'
                          for a in [i * math.pi / 8 for i in range(16)])
         cols = ['#e8574a', '#f2b134', '#4fb8d6', '#7bc86c', '#b47fd0', '#f28c34']
-        pods = ''.join(f'<g transform="translate({r*math.cos(i*2*math.pi/cabins):.1f},'
+        pods = ''.join(f'<g class="cc-pod" data-px="{r*math.cos(i*2*math.pi/cabins):.1f}" '
+                       f'data-py="{r*math.sin(i*2*math.pi/cabins):.1f}" '
+                       f'transform="translate({r*math.cos(i*2*math.pi/cabins):.1f},'
                        f'{r*math.sin(i*2*math.pi/cabins):.1f})">'
                        f'<rect x="-3.6" y="-1" width="7.2" height="7" rx="2.4" fill="{cols[i%6]}"/>'
                        f'<rect x="-3.6" y="-2.4" width="7.2" height="2.4" rx="1.2" fill="#f6f6f0"/></g>'
                        for i in range(cabins))
         return (f'<g transform="translate({cx},{cy})">'
+                f'<g class="cc-ferris" data-secs="16">'
                 f'<g stroke="#dfe6ea" stroke-width="2.6" fill="none"><circle cx="0" cy="0" r="{r}"/>'
                 f'<circle cx="0" cy="0" r="{r-7}"/></g>'
                 f'<g stroke="#cfd8de" stroke-width="1.3">{spokes}</g>'
-                f'{pods}<circle cx="0" cy="0" r="5" fill="#e8eef2"/>'
+                f'{pods}</g>'
+                f'<circle cx="0" cy="0" r="5" fill="#e8eef2"/>'
                 f'<circle cx="0" cy="0" r="2" fill="#8e9daa"/>'
                 f'<g stroke="#b9c4cc" stroke-width="3.5" fill="none">'
                 f'<path d="M-{r*0.62:.0f},{r*0.92:.0f} L0,2 L{r*0.62:.0f},{r*0.92:.0f}"/></g></g>')
@@ -851,7 +855,10 @@ def chicago():
                     f'<path d="M{x+11},338 L{x+56},398 M{x+56},338 L{x+11},398" stroke="#69727d" stroke-width="3"/>'
                     f'<rect x="{x-4}" y="398" width="79" height="8" rx="2" fill="#4b535d"/></g>'
                     for x in range(30, 1260, 132))
-    ltrain = ('<g transform="translate(150,318)">'
+    # Tagged so scene.js can run it along the deck. data-run is "x0,x1,y": it
+    # travels between those two x, turns round at each end and comes back, which
+    # is what a terminating L service does.
+    ltrain = ('<g class="cc-el-train" data-run="-210,1290,318" transform="translate(150,318)">'
               '<rect x="0" y="-38" width="196" height="38" rx="5" fill="#c9d2da"/>'
               '<rect x="0" y="-38" width="196" height="9" rx="4" fill="#aab5c0"/>'
               '<rect x="0" y="-18" width="196" height="5" fill="#1f6f3d"/>'
@@ -938,7 +945,8 @@ def chicago():
              '<rect x="-38" y="-6" width="8" height="18" fill="#41474f"/>'
              '<rect x="30" y="-6" width="8" height="18" fill="#41474f"/></g>')
 
-    plane = ('    <g transform="translate(1090,126) rotate(-9)">'
+    # Tagged for scene.js: it patrols above the lake and banks round at each end.
+    plane = ('    <g class="cc-plane" data-fly="700,1330,126" transform="translate(1090,126)">'
              '<ellipse cx="0" cy="0" rx="46" ry="7" fill="#eef2f6"/>'
              '<path d="M-30,0 L-4,-4 L14,-26 L26,-26 L18,-2 L26,26 L14,26 L-4,4 Z" fill="#e2e8ee"/>'
              '<path d="M30,-2 L44,-10 L48,-2 L44,6 Z" fill="#cfd7df"/>'
@@ -948,6 +956,12 @@ def chicago():
              '<ellipse cx="-30" cy="1" rx="6" ry="4" fill="#cfd7df"/></g>')
 
     scene('chicago', 'CHICAGO — skyline, the elevated L, Lake Michigan, city streets', {
+        # The street passes UNDER the elevated railway, so the carriageway stops
+        # just below the deck (which occupies y 312-337) instead of being painted
+        # across it. The L can then run the full width without the road cutting
+        # it in half, and cars appear and leave at the underpass — which is what
+        # a road does when it goes under a bridge.
+        'roadkw': {'top': 340},
         'sky': (sky('', '', '', sun=(1150, 88, 145)) + '\n' + clouds([(300, 74, 48), (760, 60, 40)], op=0.75)
                 + '\n' + birds([(880, 178), (932, 202)]) + '\n' + plane),
         'far': lake + '\n' + skyline + '\n' + willis + '\n' + hancock + '\n' + navy_pier,
