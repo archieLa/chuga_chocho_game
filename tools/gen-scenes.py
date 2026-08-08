@@ -9843,7 +9843,10 @@ def crater_lake():
           honest reason for a road to stop at a lake, and it is what Rim Drive's pull-outs
           actually are.
         """
-        JY0, JY1 = 382, 412           # Rim Drive's near and far edges — parallel, always
+        # 56px deep, not 30. A car on Rim Drive is 24px tall at this depth, so the
+        # old 15px lanes had traffic driving through each other. Sized off the
+        # vehicle rather than picked by eye.
+        JY0, JY1 = 376, 432           # Rim Drive's near and far edges — parallel, always
         X0 = 664                      # it meets our carriageway here and runs right
         rail = ''.join(
             f'<rect x="{x}" y="{JY0 - 11}" width="4" height="11" fill="#6b5a44"/>'
@@ -10178,7 +10181,7 @@ def crater_lake():
         'scenery-front': front,
         'foreground': '    <g fill="#6f665a" opacity="0.28"><rect x="0" y="712" width="1280" height="8"/></g>',
         'roadkw': dict(surface='#5f5a54', surface2='#4d4842', shoulder='#aaa290',
-                       dash='#f0e3a8', top=ROADTOP, junction=(382, 412)),
+                       dash='#f0e3a8', top=ROADTOP, junction=(376, 432)),
         'trackkw': dict(ballast='#9c9382', ballast_hi='#aea795', tie='#4a3a2e',
                         rail='#d3d7dc'),
     }, d + '\n    <clipPath id="lakeclip"><path d="' + LAKE + '"/></clipPath>')

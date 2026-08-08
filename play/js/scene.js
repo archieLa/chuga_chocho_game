@@ -253,8 +253,11 @@
       if (v.length === 3 && !v.some(isNaN)) {
         roadExit = {
           y0: v[0], y1: v[1], jx: v[2],
-          laneOut: v[0] + (v[1] - v[0]) * 0.70,   // outbound keeps the near lane
-          laneIn: v[0] + (v[1] - v[0]) * 0.28,    // inbound the far one
+          // Pushed to the outer thirds so the two streams clear each other: a car
+          // is ~24px tall here and the band is 56px, so 0.75/0.25 leaves a full
+          // car's height between them.
+          laneOut: v[0] + (v[1] - v[0]) * 0.75,   // outbound keeps the near lane
+          laneIn: v[0] + (v[1] - v[0]) * 0.25,    // inbound the far one
           toX: 1340,
         };
       }
@@ -339,7 +342,7 @@
     // It also stops the tail taking half a minute to clear.
     let exitAt = total;
     for (let d = 0; d <= total; d += 4) {
-      if (path.getPointAtLength(d).x > 1330) { exitAt = d; break; }
+      if (path.getPointAtLength(d).x > 1250) { exitAt = d; break; }
     }
     return { path: path, total: total, exitAt: exitAt, cars: cars, dist: 0, span: span };
   }
