@@ -946,7 +946,10 @@ def chicago():
              '<rect x="30" y="-6" width="8" height="18" fill="#41474f"/></g>')
 
     # Tagged for scene.js: it patrols above the lake and banks round at each end.
-    plane = ('    <g class="cc-plane" data-fly="700,1330,126" transform="translate(1090,126)">'
+    # data-nose="-1" because this aircraft is drawn NOSE-LEFT: the blue nose is at
+    # x=-40 and the tail fin at x=+30..48. Without it the engine mirrors the wrong
+    # way and it flies backwards in both directions.
+    plane = ('    <g class="cc-plane" data-fly="1330,700,126" data-nose="-1" transform="translate(1330,126)">'
              '<ellipse cx="0" cy="0" rx="46" ry="7" fill="#eef2f6"/>'
              '<path d="M-30,0 L-4,-4 L14,-26 L26,-26 L18,-2 L26,26 L14,26 L-4,4 Z" fill="#e2e8ee"/>'
              '<path d="M30,-2 L44,-10 L48,-2 L44,6 Z" fill="#cfd7df"/>'

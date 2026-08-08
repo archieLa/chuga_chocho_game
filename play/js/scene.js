@@ -194,8 +194,15 @@
       [].forEach.call(svg.querySelectorAll(sel), node => {
         const v = (node.getAttribute(attr) || '').split(',').map(Number);
         if (v.length !== 3 || v.some(isNaN)) return;
-        shuttles.push({ el: node, x0: v[0], x1: v[1], y: v[2],
-                        x: v[0] + (v[1] - v[0]) * 0.5, dir: 1, speed: speed,
+        // data-fly / data-run is "from,to,y" — it STARTS at the first and heads
+        // for the second, so the art can say which side it enters from.
+        const lo = Math.min(v[0], v[1]), hi = Math.max(v[0], v[1]);
+        shuttles.push({ el: node, x0: lo, x1: hi, y: v[2],
+                        x: v[0], dir: v[1] > v[0] ? 1 : -1, speed: speed,
+                        // Which way the ARTWORK points. +1 nose-right (the L),
+                        // -1 nose-left (the plane). Mirror only when the two
+                        // disagree, or it flies backwards.
+                        nose: parseFloat(node.getAttribute('data-nose')) || 1,
                         bank: sel === '.cc-plane', turn: 0 });
       });
     });
@@ -405,10 +412,13 @@
       const facing = s.dir > 0 ? 1 : -1;
       let tr = 'translate(' + s.x.toFixed(1) + ',' + s.y.toFixed(1) + ')';
       if (s.bank) {
-        const t = s.turn > 0 ? (1 - Math.abs(s.turn - 0.55) / 0.55) : 0;
-        tr += ' rotate(' + (facing * (-9 + t * 26)).toFixed(1) + ')';
+        // Nose up a touch through the turn and level the rest of the time. The
+        // rotate sits after the mirror in the transform list, so it is already
+        // in screen space and needs no sign flip.
+        const k = s.turn > 0 ? (1 - Math.abs(s.turn - 0.55) / 0.55) : 0;
+        tr += ' rotate(' + (facing * -12 * k).toFixed(1) + ')';
       }
-      if (facing < 0) tr += ' scale(-1,1)';
+      if (facing !== s.nose) tr += ' scale(-1,1)';
       s.el.setAttribute('transform', tr);
     });
   }
