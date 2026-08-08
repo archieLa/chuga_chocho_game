@@ -153,6 +153,18 @@ cannot be the gameplay train, because that runs the straight track band the cros
 gates and the endpoint logic are all built on — a train round the bowl has no crossing to
 close a gate against. Scenes without the path simply get no background train.
 
+### Ambient motion — see `AMBIENT.md`
+
+Eight scenes have things that move on their own (a train round the Horseshoe, a
+rocket off Pad 39, a tractor in the Kansas wheat). All of it is **gate-blind**:
+the crossing is the game and this is only the world behind it. Every one uses the
+same shape of contract — the art tags itself with a class, the engine finds it,
+and a scene without the tag gets nothing.
+
+`AMBIENT.md` has the contracts, what moves today, and the queue. It lives outside
+`SCENE_GUIDE.md`/`SCENE_ROADMAP.md` on purpose: those come from the scene
+collaborator and are overwritten by every art drop.
+
 ### How to verify a change (do this, don't skip it)
 
 `tools/shot.py` drives a real headless Chrome over the DevTools Protocol with **real** input
