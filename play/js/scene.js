@@ -213,6 +213,27 @@
       }
     });
 
+    // WHERE THE ROAD GOES NEXT. Crater Lake's carriageway does not just stop —
+    // it meets Rim Drive and turns. Without this, cars reaching the end simply
+    // faded out in the middle of the picture, which looked like a bug because it
+    // was one. data-exit is "nearEdgeY,farEdgeY,junctionX" and the engine drives
+    // the turn from it: traffic going away swings right and runs off east, and
+    // traffic coming toward us arrives along Rim Drive and turns down onto the
+    // carriageway. A scene without .cc-road-exit keeps the old fade.
+    let roadExit = null;
+    const exitEl = svg.querySelector('.cc-road-exit');
+    if (exitEl) {
+      const v = (exitEl.getAttribute('data-exit') || '').split(',').map(Number);
+      if (v.length === 3 && !v.some(isNaN)) {
+        roadExit = {
+          y0: v[0], y1: v[1], jx: v[2],
+          laneOut: v[0] + (v[1] - v[0]) * 0.70,   // outbound keeps the near lane
+          laneIn: v[0] + (v[1] - v[0]) * 0.28,    // inbound the far one
+          toX: 1340,
+        };
+      }
+    }
+
     // An ambient train on a curved line drawn into the scene — Horseshoe Curve
     // exports #curve-path, the centreline of the near running road. This is
     // scenery, NOT the gameplay train: it loops for ever and the gate has no
@@ -220,7 +241,7 @@
     const curve = buildCurveTrain(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
-                roadTop: roadTop, curve: curve, cablecars: cablecars, rocket: rocket,
+                roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -626,12 +647,31 @@
     // it is the visitor car park, so it reads as parking. Either way nothing
     // drives past the tarmac.
     const top = currentScene ? currentScene.roadTop : HORIZON;
+    const ex = currentScene ? currentScene.roadExit : null;
     const at = down ? top + 4 : H + 120;
+    // Where the road turns, traffic coming toward us has driven in along the side
+    // road rather than materialising at the end of ours.
+    if (down && ex) {
+      const car = newCar(1, ex.laneIn);
+      car.phase = 'enter';
+      car.x = ex.toX;
+      cars.push(car); placeCar(car);
+      return;
+    }
     // Don't drop a car on top of one that has not got clear of the entrance yet.
     if (cars.some(c => c.dir === (down ? 1 : -1) && Math.abs(c.y - at) < carGap(at) * 1.2)) return;
+    const car = newCar(down ? 1 : -1, at);
+    cars.push(car);
+    placeCar(car);
+  }
+
+  /** A car in its default state: on the carriageway, following its y. */
+  function newCar(dir, y) {
     const car = {
-      dir: down ? 1 : -1,
-      y: at,
+      dir: dir,
+      y: y,
+      phase: 'road',
+      x: null,
       colour: CAR_COLOURS[(Math.random() * CAR_COLOURS.length) | 0],
       speed: 150 + Math.random() * 40,                 // world speed; screen speed scales with depth
       stopped: false,
@@ -639,21 +679,31 @@
       near: null,
     };
     car.el = buildCar(car.colour, car.dir);
-    cars.push(car);
-    placeCar(car);
+    return car;
   }
 
   function placeCar(car) {
     // Traffic keeps right: cars coming toward us use the left half of the road.
+    // A car on the side road steers by an explicit x instead of by its lane.
     const half = roadHalf(car.y);
-    const x = ROAD_CX + (car.dir > 0 ? -half * 0.5 : half * 0.5);
+    const x = car.x != null ? car.x : ROAD_CX + (car.dir > 0 ? -half * 0.5 : half * 0.5);
     const s = depthScale(car.y);
-    car.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + car.y.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+    // A car sprite is drawn nose-up/nose-down for a vertical carriageway. On the
+    // side road it is travelling across the picture, so it has to be turned a
+    // quarter. Both directions want the SAME +90: an outbound car carries a
+    // nose-up sprite and ends up pointing east, an inbound one carries nose-down
+    // and ends up pointing west, which is exactly right.
+    const turn = car.phase === 'road' ? '' : ' rotate(90)';
+    car.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + car.y.toFixed(1) + ')' + turn + ' scale(' + s.toFixed(3) + ')');
     // Fade over the last stretch before the road's far end. At the horizon a car
     // is tiny and this is invisible; on a truncated road it is what stops a
     // still-sizeable car from popping out of existence in mid-picture.
     const top = currentScene ? currentScene.roadTop : HORIZON;
-    car.el.setAttribute('opacity', clamp((car.y - top) / CAR_FADE, 0, 1).toFixed(2));
+    // Fade only applies to the carriageway. A car that has turned onto the side
+    // road sits just above the road's end by y, and would otherwise be dimmed
+    // for its whole run along a road it is legitimately driving on.
+    car.el.setAttribute('opacity',
+      car.phase === 'road' ? clamp((car.y - top) / CAR_FADE, 0, 1).toFixed(2) : '1');
     // A car past the middle of the tracks is in front of the train; before it,
     // behind. Reparent only when that actually changes.
     const near = car.y > CROSS_MID;
@@ -667,14 +717,59 @@
       a fixed gap on the road shrinks on screen, so the gap scales too. */
   const carGap = (y) => 165 * depthScale(y);
 
+  /** Cars on the side road at a scene whose carriageway turns (Crater Lake).
+      Rim Drive runs at a constant depth, so a car on it keeps one size and one
+      y and simply tracks across — which is exactly how it looks from the rim.
+      Returns true if it handled this car and the carriageway logic should skip it. */
+  function driveSideRoad(car, secs) {
+    const ex = currentScene && currentScene.roadExit;
+    if (!ex) return false;
+
+    if (car.phase === 'exit') {
+      car.x += car.speed * depthScale(car.y) * secs;
+      if (car.x > ex.toX) car.dead = true;
+      return true;
+    }
+    if (car.phase === 'enter') {
+      car.x -= car.speed * depthScale(car.y) * secs;
+      // Reached the junction: swing onto our carriageway and head down.
+      if (car.x <= ex.jx + 16) { car.phase = 'road'; car.x = null; car.y = ex.y1; }
+      return true;
+    }
+    // Going away from the viewer and has reached the junction: turn right.
+    if (car.dir < 0 && car.y <= ex.y1) {
+      car.phase = 'exit';
+      car.y = ex.laneOut;
+      car.x = ROAD_CX + roadHalf(car.y) * 0.5;
+      return true;
+    }
+    return false;
+  }
+
   function updateCars(dt) {
     const blocked = CC.gate.isBlocking() || trainOnCrossing();
     const secs = dt / 1000;
 
     // Each lane is a queue. Walk it from the front so every car knows what it
     // has to stop behind — the gate for the leader, the car ahead for the rest.
+    // Side-road traffic first: a car that has turned off is no longer part of
+    // the carriageway queue and must not be given a stop line on it.
+    cars.forEach(car => { car.offRoad = driveSideRoad(car, secs); });
+    // Rim Drive is a queue too. Without this, two cars released together at the
+    // gate turn together and then sit 7px apart the whole way across.
+    ['exit', 'enter'].forEach(ph => {
+      const lane = cars.filter(c => c.phase === ph)
+        .sort((a, b) => ph === 'exit' ? b.x - a.x : a.x - b.x);   // front first
+      let limit = null;
+      lane.forEach(c => {
+        const gap = 150 * depthScale(c.y);
+        if (limit != null) c.x = ph === 'exit' ? Math.min(c.x, limit) : Math.max(c.x, limit);
+        limit = ph === 'exit' ? c.x - gap : c.x + gap;
+      });
+    });
+
     [1, -1].forEach(dir => {
-      const lane = cars.filter(c => c.dir === dir)
+      const lane = cars.filter(c => c.dir === dir && c.phase === 'road')
         .sort((a, b) => dir > 0 ? b.y - a.y : a.y - b.y);   // front of the queue first
       const stopLine = dir > 0 ? STOP_FAR : STOP_NEAR;
       let limit = null;                                     // set by the car ahead
@@ -707,7 +802,7 @@
       // Gone once it reaches the end of the tarmac (it has already faded to
       // nothing by then) or has driven off the bottom of the frame.
       const top = currentScene ? currentScene.roadTop : HORIZON;
-      if (car.y < top || car.y > H + 170) {
+      if (car.dead || car.y < top || car.y > H + 170) {
         if (car.el.parentNode) car.el.parentNode.removeChild(car.el);
         cars.splice(i, 1);
       }

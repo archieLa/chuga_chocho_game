@@ -9865,9 +9865,11 @@ def crater_lake():
                 f'<rect x="{X0 + 54}" y="{JY0 - 5}" width="{1276 - X0}" height="3" '
                 f'rx="1.5" fill="#6b5a44"/>'
                 + dashes
-                + crossing_car(900, JY1 - 4, 0.62, '#b8342c')
-                + crossing_car(1180, JY1 - 6, 0.58, '#e8e2d2')
-                + crossing_car(760, JY0 + 12, 0.54, '#2f5f9e')
+                # No parked cars drawn here any more: the game's own traffic turns
+                # onto Rim Drive and drives along it, so painted ones sat frozen
+                # while live ones flowed past them. The engine reads .cc-road-exit
+                # below to know where to turn and which lane to use.
+                + f'<g class="cc-road-exit" data-exit="{JY0},{JY1},{X0}"></g>'
                 + '</g>')
 
     def overlook():
