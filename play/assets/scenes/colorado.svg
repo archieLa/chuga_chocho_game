@@ -110,6 +110,20 @@
     </g>
   </g>
 
+
+  <!-- ===== GONDOLA on the right-hand peak — the cabins MOVE =====
+       Same contract as the Gatlinburg SkyLift, so scene.js drives it with no new
+       code: .cc-cablecar carries the two ends of the haul cable, each .cc-chair
+       its position along it and its lane. Lane 0 climbs, lane 1 rides the lower
+       cable back down, and they swap at the bullwheels. -->
+  <g id="gondola" class="cc-cablecar" data-cable="982,276 1074,128" data-lane-dy="18">
+    <g stroke="#8d939b" stroke-width="1.3" fill="none"><line x1="982" y1="276" x2="1074" y2="128"/><line x1="982" y1="294" x2="1074" y2="146"/></g>
+    <g transform="translate(1015,244)"><rect x="-1.8" y="-22" width="3.6" height="22" fill="#6a6f76"/><rect x="-8" y="-25" width="16" height="3.6" rx="1.5" fill="#7b8189"/></g><g transform="translate(1045,196)"><rect x="-1.8" y="-19" width="3.6" height="19" fill="#6a6f76"/><rect x="-8" y="-22" width="16" height="3.6" rx="1.5" fill="#7b8189"/></g>
+    <g transform="translate(982,276)"><path d="M-14,20 L-11,-2 L13,-2 L16,20 Z" fill="#7a5636"/><rect x="-12" y="-6" width="24" height="6" rx="2.2" fill="#8a6340"/></g>
+    <g transform="translate(1074,128)"><path d="M-10,15 L-8,-2 L9,-2 L11,15 Z" fill="#7a5636"/><rect x="-9" y="-5" width="18" height="5" rx="2" fill="#8a6340"/></g>
+    <g class="cc-chair" data-t="0.0000" data-lane="0"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#2f7cc4"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g><g class="cc-chair" data-t="0.1667" data-lane="1"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#d2453c"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g><g class="cc-chair" data-t="0.3333" data-lane="0"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#2f7cc4"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g><g class="cc-chair" data-t="0.5000" data-lane="1"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#d2453c"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g><g class="cc-chair" data-t="0.6667" data-lane="0"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#2f7cc4"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g><g class="cc-chair" data-t="0.8333" data-lane="1"><rect x="-1" y="-6" width="2" height="6" fill="#5a5f66"/><rect x="-5" y="0" width="10" height="9" rx="2.6" fill="#d2453c"/><rect x="-3.4" y="1.6" width="6.8" height="4" rx="1.4" fill="#cfe7f7"/></g>
+  </g>
+
   <!-- ===== GEORGETOWN LOOP curved red trestle (HERO) ===== -->
   <g id="bridge">
     <polygon points="240,300 250,318 420,318 410,300" fill="#2f6144" opacity="0.5"/>
