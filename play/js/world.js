@@ -196,6 +196,26 @@
       scenery:{ theme:'horse-farm', features:['plankfence','showbarn','thoroughbreds','stonewall'] },
       trainPreset:{ engine:'steam' } },
 
+    { id:'mtwashington', state:'New Hampshire', city:'Mount Washington',
+      say:{ en:'Mount Washington', pl:'Góra Waszyngtona' },
+      scene:'mt-washington',
+      // Viewpoint: the road at Marshfield, looking straight up the mountain. The steepest
+      // thing in the set — the cog line is ruled up a bare dome and the engine PUSHES its
+      // coach, boiler tilted back so it sits level on the grade.
+      scenery:{ theme:'alpine-cog', features:['cogline','jacobsladder','marshfield','treeline'] },
+      trainPreset:{ engine:'steam' } },
+
+    { id:'cedarpoint', state:'Ohio', city:'Cedar Point',
+      // No Polish form — it is a proper noun. spoken() will hand this to an
+      // English voice rather than letting a Polish one mangle it.
+      say:{ en:'Cedar Point', pl:'Cedar Point' },
+      scene:'cedar-point',
+      // Viewpoint: the brick midway, looking across the park railroad at the coasters. The
+      // most colourful scene in the game, and the only one where the level crossing is a
+      // real thing that is really there — the park has its own narrow-gauge line.
+      scenery:{ theme:'fairground', features:['coasters','midway','parkrailroad','lakeerie'] },
+      trainPreset:{ engine:'steam' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

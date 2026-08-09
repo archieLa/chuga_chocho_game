@@ -56,6 +56,8 @@ const SUPPORTED = {
   'Pennsylvania': ['Horseshoe Curve'],
   'Oregon': ['Crater Lake'],
   'Kentucky': ['Bluegrass'],
+  'New Hampshire': ['Mount Washington'],
+  'Ohio': ['Cedar Point'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

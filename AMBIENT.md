@@ -70,6 +70,17 @@ Two traps, both already paid for once:
 
 ## Queued, best first
 
+**0. Mount Washington and Cedar Point — the art already ships the geometry.**
+Wave 4a exported `<path id="cog-path">` (base at length 0, summit at the end,
+scale `s = 1 − 0.62·t`) and `<path id="coaster-path-blue">` / `"-red"` (foot of
+the lift hill to the last valley, **constant** size — the rides are all at the
+same distance). Both are the Horseshoe path-follower with different easing: the
+cog runs up and back down the same single track, the coaster crawls the lift and
+then runs the hills fast. Two things to remember — the ids need adding to
+`KEEP_IDS` in `inline-assets.py` or the lookup silently finds nothing, and
+`curve-path` is currently hard-coded in `scene.js`, so the follower wants
+generalising to a list before a second scene uses it.
+
 **1. Seattle — the ferry.** Already drawn. Pure shuttle, no new code. The
 cheapest real win on the list.
 

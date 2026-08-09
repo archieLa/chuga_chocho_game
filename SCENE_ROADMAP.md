@@ -905,3 +905,39 @@ What CAN be done, cheaply and additively:
 
 That would give exactly the thing the place is famous for — a train visibly working its way
 round the bend — while the crossing keeps doing its job in the foreground.
+
+
+---
+
+## Wave 4 — decided
+
+Four states that currently have **zero** locations. One each.
+
+| Destination | State | Why this one |
+|---|---|---|
+| **Mount Washington Cog Railway** ✅ BUILT | New Hampshire | A train *climbing* — tilted boiler, cog drive, trestle. The second railway-as-hero and visually the opposite of Horseshoe Curve's loop-from-above |
+| **Cedar Point** ✅ BUILT | Ohio | The first fairground: steel, colour and curves where every other skyline is buildings or rock. Huge appeal for the target age |
+| **Savannah** | Georgia | The first scene whose hero is a *tree* — live oaks and Spanish moss over the squares |
+| **Stonington, Deer Isle** | Maine | The first cold *working* coast, against three warm holiday ones |
+
+Reference-photo prompts: `REFERENCE_PROMPT_wave4.md`.
+
+**Status: half shipped.** Mount Washington and Cedar Point are built and drop as Wave 4a.
+Savannah and Stonington are still waiting on reference photographs — both are places whose
+character lives entirely in details worth getting right rather than inventing (the shape of
+Spanish moss; the build of a lobster boat), so neither is being drawn from memory.
+
+**Name the place, not the type.** Maine was picked as "a lobster harbour" and then pinned to
+Stonington, because a generic search returns a scatter of anonymous wharves while a named
+harbour returns the same real place from twenty angles. Every prompt in this wave names a
+specific location for that reason.
+
+After this wave the set will stand at **31 destinations across 26 states plus DC**, leaving
+**24 states** empty — and by the ordering rule the batch after this comes entirely from
+those.
+
+### Still parked at the front of the queue
+
+**Philadelphia** (Art Museum steps, *not* the Rocky statue — 1980 sculpture, almost certainly
+still in copyright), **Portland**, **Louisville**. Each would be a second location in a state
+that now has one.
