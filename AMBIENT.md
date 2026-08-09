@@ -48,6 +48,13 @@ Two traps, both already paid for once:
   origin and 25 ahead; turn it round and the trailer is 62 *ahead*. A stop that
   clears an obstacle facing one way can put the load straight through it facing
   the other, so clear it by the longer of the two.
+- **The Cog Railway engine never runs round.** It stays below the coach in both
+  directions — pushing up, braking down — and on Mount Washington the coach is
+  not even coupled to it, just resting against it with its own brakes, so that
+  nothing uphill of the engine depends on a coupling that could fail. The
+  locomotive also faces UPHILL: chimney and smokebox at the end against the
+  coach, cab and tender at the downhill end. Both were drawn back to front once
+  and look plausible either way, so check a photograph before changing them.
 - **Rotating an upright vehicle by more than 90° turns it upside down.** Mount
   Washington's cog line climbs up and to the LEFT — heading about −125° — and
   rotating by that hangs the train under the rail with its roof pointing
@@ -81,7 +88,7 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
-| Mount Washington | the cog train climbs to the summit, waits, and comes back down |
+| Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
 | Seattle | the ferry crosses Elliott Bay and turns at the houseboat moorings |
 | New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |

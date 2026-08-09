@@ -10979,8 +10979,11 @@ def mt_washington():
                 # rotating an upright vehicle by that swings it past vertical, so it
                 # ends up hanging under the rail with its roof pointing downhill.
                 # Turning to the DOWNHILL angle instead keeps it the right way up,
-                # and mirroring then points it back up the mountain. The coach still
-                # leads and the engine still sits below it, pushing.
+                # and mirroring then points it back up the mountain. The engine stays
+                # BELOW the coach in both directions and pushes it up — it never runs
+                # round, and on Mount Washington the coach is not even coupled to it,
+                # just resting against it with its own brakes. Draw it pulling and it
+                # is simply the wrong railway.
                 f'transform="translate({x:.0f},{y:.0f}) rotate({LINE_ANG + 180:.1f}) '
                 f'scale({-sc:.2f},{sc:.2f})">'
                 # the coach, upslope of the engine
@@ -10991,24 +10994,35 @@ def mt_washington():
                 + ''.join(f'<rect x="{-20 + i*8}" y="-16" width="5" height="7" rx="1"/>'
                           for i in range(5)) + '</g>'
                 f'<rect x="-24" y="-4" width="48" height="3" fill="#3a352f"/></g>'
-                # the locomotive, downslope, boiler tilted back to sit level on the grade
+                # The locomotive, downslope of the coach, FACING UPHILL — smokebox and
+                # chimney at the +x end, hard against the coach it is pushing, cab and
+                # tender at the downhill end. That is the way round the real one is
+                # built and it was drawn back to front here: chimney at the far
+                # downhill end, cab against the coach.
+                #
+                # The boiler is tilted so it sits LEVEL while the frame follows the
+                # grade, which means its uphill end drops relative to the frame — a
+                # positive rotation, not the negative one that was here. Get the sign
+                # wrong and the boiler is steeper than the track instead of flatter.
                 f'<g transform="translate(-18,0)">'
                 f'<rect x="-19" y="-5" width="38" height="4" fill="#3a352f"/>'
-                f'<g transform="rotate(-8)">'
-                f'<rect x="-16" y="-17" width="26" height="12" rx="3" fill="#22262b"/>'
-                f'<rect x="-16" y="-17" width="26" height="3" rx="1.5" fill="#333941"/>'
-                f'<rect x="-19" y="-24" width="6" height="8" fill="#22262b"/>'
-                f'<path d="M-21,-24 L-11,-24 L-13,-30 L-19,-30 Z" fill="#22262b"/>'
-                f'<rect x="4" y="-25" width="13" height="10" rx="1.5" fill="#1a1e22"/>'
-                f'<rect x="6" y="-23" width="4" height="4" fill="#cfe4f2"/>'
-                f'<rect x="-4" y="-21" width="4" height="5" fill="#c0392b"/></g>'
-                + '<g fill="#1b1f25"><circle cx="-10" cy="-2" r="4"/>'
-                f'<circle cx="2" cy="-2" r="4"/><circle cx="13" cy="-2" r="4"/></g></g>'
+                f'<g transform="rotate(8)">'
+                f'<rect x="-10" y="-17" width="26" height="12" rx="3" fill="#22262b"/>'
+                f'<rect x="-10" y="-17" width="26" height="3" rx="1.5" fill="#333941"/>'
+                f'<rect x="13" y="-24" width="6" height="8" fill="#22262b"/>'
+                f'<path d="M21,-24 L11,-24 L13,-30 L19,-30 Z" fill="#22262b"/>'
+                f'<rect x="-17" y="-25" width="13" height="10" rx="1.5" fill="#1a1e22"/>'
+                f'<rect x="-10" y="-23" width="4" height="4" fill="#cfe4f2"/>'
+                f'<rect x="0" y="-21" width="4" height="5" fill="#c0392b"/></g>'
+                + '<g fill="#1b1f25"><circle cx="10" cy="-2" r="4"/>'
+                f'<circle cx="-2" cy="-2" r="4"/><circle cx="-13" cy="-2" r="4"/></g></g>'
                 # the exhaust, blowing back down the hill
                 # a thin trail of exhaust, not a cloud. Drawn any bigger it pools into a
                 # pale blob beside the line and reads as a hole in the mountain.
                 + '<g fill="#dfe4e7" opacity="0.42">'
-                + ''.join(f'<ellipse cx="{-18 - i*9}" cy="{-30 - i*6}" '
+                # From the chimney's NEW place — train-local x=-2, just downhill of
+                # the coach — and blowing back down the mountain behind her.
+                + ''.join(f'<ellipse cx="{-2 - i*9}" cy="{-30 - i*6}" '
                           f'rx="{4 + i*1.6:.1f}" ry="{3 + i*1.1:.1f}"/>' for i in range(4))
                 + '</g>'
                 + '</g>')

@@ -446,6 +446,12 @@
     // No mirroring when it reverses: the engine stays downslope going both ways,
     // which is exactly what a pushing cog engine does.
     const s = COG.depth(c.t);
+    // The train does NOT run round at the summit, and must not be made to. The
+    // engine stays below the coach in both directions — pushing up, braking
+    // down — and on this railway the coach is not even coupled to it, just
+    // resting against it with its own brakes. Nothing uphill of the engine
+    // depends on a coupling that could fail. That is the whole safety story of
+    // the line, so `flip` is constant and the mirror never changes with `dir`.
     c.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
       ') rotate(' + c.deg.toFixed(1) + ') scale(' + (c.flip * s).toFixed(3) + ',' + s.toFixed(3) + ')');
   }
