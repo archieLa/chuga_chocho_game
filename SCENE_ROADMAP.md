@@ -917,15 +917,15 @@ Four states that currently have **zero** locations. One each.
 |---|---|---|
 | **Mount Washington Cog Railway** ✅ BUILT | New Hampshire | A train *climbing* — tilted boiler, cog drive, trestle. The second railway-as-hero and visually the opposite of Horseshoe Curve's loop-from-above |
 | **Cedar Point** ✅ BUILT | Ohio | The first fairground: steel, colour and curves where every other skyline is buildings or rock. Huge appeal for the target age |
-| **Savannah** | Georgia | The first scene whose hero is a *tree* — live oaks and Spanish moss over the squares |
-| **Stonington, Deer Isle** | Maine | The first cold *working* coast, against three warm holiday ones |
+| **Savannah** ✅ BUILT | Georgia | The first scene whose hero is a *tree* — live oaks and Spanish moss over the squares |
+| **Stonington, Deer Isle** ✅ BUILT | Maine | The first cold *working* coast, against three warm holiday ones |
 
 Reference-photo prompts: `REFERENCE_PROMPT_wave4.md`.
 
-**Status: half shipped.** Mount Washington and Cedar Point are built and drop as Wave 4a.
-Savannah and Stonington are still waiting on reference photographs — both are places whose
-character lives entirely in details worth getting right rather than inventing (the shape of
-Spanish moss; the build of a lobster boat), so neither is being drawn from memory.
+**Status: complete.** All four are built. Mount Washington and Cedar Point shipped as
+Wave 4a; Savannah and Stonington follow as Wave 4b. The set now stands at **31 destinations
+across 26 states plus DC**, leaving **24 states** empty — and by the ordering rule the next
+batch comes entirely from those.
 
 **Name the place, not the type.** Maine was picked as "a lobster harbour" and then pinned to
 Stonington, because a generic search returns a scatter of anonymous wharves while a named

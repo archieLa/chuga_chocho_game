@@ -58,6 +58,8 @@ const SUPPORTED = {
   'Kentucky': ['Bluegrass'],
   'New Hampshire': ['Mount Washington'],
   'Ohio': ['Cedar Point'],
+  'Georgia': ['Savannah'],
+  'Maine': ['Stonington'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

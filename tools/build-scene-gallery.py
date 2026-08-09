@@ -73,6 +73,10 @@ CATALOGUE = [
      ['steam', 'wagon-coach-old', 'wagon-caboose']),
     ('cedar-point',  'Ohio',       'Cedar Point',     'The midway and the park railroad, under the coasters',
      ['steam', 'wagon-coach-old', 'wagon-coach-old']),
+    ('savannah',     'Georgia',    'Savannah',        'A historic square under the live oaks and Spanish moss',
+     ['streetcar', 'wagon-coach-old', 'wagon-coach-old']),
+    ('stonington',   'Maine',      'Stonington',      'The town landing on Deer Isle, and the lobster fleet',
+     ['diesel', 'wagon-boxcar', 'wagon-caboose']),
 ]
 
 
@@ -95,7 +99,7 @@ def veh_inner(key):
 # Colorado) and a layer name (in every scene) — a blind id="water" rewrite renamed the
 # layer too, which silently breaks anything looking layers up by id.
 def namespace(inner, sid):
-    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass']:
+    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass', 'savg', 'harbour', 'ledge']:
         # match the definition, not any element that happens to share the name
         for kind in ('linearGradient', 'radialGradient', 'pattern', 'filter', 'clipPath'):
             inner = inner.replace(f'<{kind} id="{gid}"', f'<{kind} id="{sid}-{gid}"')

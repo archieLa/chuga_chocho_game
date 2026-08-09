@@ -216,6 +216,26 @@
       scenery:{ theme:'fairground', features:['coasters','midway','parkrailroad','lakeerie'] },
       trainPreset:{ engine:'steam' } },
 
+    { id:'savannah', state:'Georgia', city:'Savannah',
+      say:{ en:'Savannah', pl:'Savannah' },
+      scene:'savannah',
+      // Viewpoint: a street through one of the historic squares. The first scene whose hero
+      // is a TREE — live oaks hung with Spanish moss standing in the square. (An overhead
+      // canopy arching across the top of the frame was tried during authoring and CUT: every
+      // other scene looks *at* its subject, and a leaf frame read as decoration pasted on.)
+      scenery:{ theme:'lowcountry', features:['liveoaks','spanishmoss','rowhouses','square'] },
+      trainPreset:{ engine:'streetcar' } },
+
+    { id:'stonington', state:'Maine', city:'Stonington',
+      say:{ en:'Stonington', pl:'Stonington' },
+      scene:'stonington',
+      // Viewpoint: the road down to the town landing on Deer Isle, which STOPS at the car
+      // park — the harbour is beyond it. A town wrapped round a basin, and the first cold
+      // WORKING coast in the set against three warm holiday ones: the colour comes from the
+      // gear (traps, pot buoys, oilskins), not from the houses.
+      scenery:{ theme:'downeast', features:['lobsterboats','fishhouses','traps','granite'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
