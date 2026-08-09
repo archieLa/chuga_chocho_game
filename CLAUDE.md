@@ -156,8 +156,8 @@ close a gate against. Scenes without the path simply get no background train.
 
 ### Ambient motion — see `AMBIENT.md`
 
-Eight scenes have things that move on their own (a train round the Horseshoe, a
-rocket off Pad 39, a tractor in the Kansas wheat). All of it is **gate-blind**:
+Ten scenes have things that move on their own (a train round the Horseshoe, a
+rocket off Pad 39, a cog train up Mount Washington, coasters at Cedar Point). All of it is **gate-blind**:
 the crossing is the game and this is only the world behind it. Every one uses the
 same shape of contract — the art tags itself with a class, the engine finds it,
 and a scene without the tag gets nothing.

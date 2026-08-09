@@ -39,6 +39,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Rail arc** — a short train on a quadratic | `.cc-scenery-train` with `data-rail="x0,y0 cx,cy x1,y1"` and `data-lift` | Colorado trestle |
 | **Launch** — sit, ignite, climb out, repeat | `.cc-rocket` with `data-pad-dy`, plus `.cc-flame`, `.cc-rocket-glow`, `.cc-rocket-smoke`, and an empty `.cc-rocket-puffs` with `data-pad` | Cape Canaveral |
 | **Road junction** — traffic turns off instead of fading | `.cc-road-exit` with `data-exit="nearEdgeY,farEdgeY,junctionX"` | Crater Lake |
+| **Cog railway** — one train up a single track and back down | `<path id="cog-path">` (base at length 0, summit at the end) plus a drawn `#cog-train-a` to clone. Scale is the art's rule, `1 − 0.62·t`. | Mount Washington |
+| **Coaster** — a train winched up a lift hill, then gravity | `<path id="coaster-path-*">` (foot of the lift to the last valley). No depth scaling; the crest is found by walking the path, and speed after it grows with how far the train has fallen below it. | Cedar Point |
 | **Where the road ends** | `class="cc-road"` on the carriageway polygon — the engine reads its far edge | every scene |
 
 Two traps, both already paid for once:
@@ -50,10 +52,16 @@ Two traps, both already paid for once:
   class for anything the engine looks up. An id kept unnamespaced collides across
   the several scenes the game keeps mounted at once — that is what turned
   Colorado's road green.
+- **When the art hands you an id anyway, match its SUFFIX.** The namespace is a
+  prefix (`cog-path` → `s-mt-washington-cog-path`), so `[id$="cog-path"]` finds it
+  with no `KEEP_IDS` entry and therefore no way to collide — and because the
+  lookup runs on the scene's own root, a second scene using the same name would
+  still be safe. Prefer this to adding to `KEEP_IDS`, which is the mechanism that
+  broke Colorado. `curve-path` predates the trick and is still in `KEEP_IDS`.
 
 ---
 
-## What moves today (8 scenes)
+## What moves today (10 scenes)
 
 | Scene | What |
 |---|---|
@@ -65,21 +73,12 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | tractor and grain trailer working the field |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
+| Mount Washington | the cog train climbs to the summit, waits, and comes back down |
+| Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
 
 ---
 
 ## Queued, best first
-
-**0. Mount Washington and Cedar Point — the art already ships the geometry.**
-Wave 4a exported `<path id="cog-path">` (base at length 0, summit at the end,
-scale `s = 1 − 0.62·t`) and `<path id="coaster-path-blue">` / `"-red"` (foot of
-the lift hill to the last valley, **constant** size — the rides are all at the
-same distance). Both are the Horseshoe path-follower with different easing: the
-cog runs up and back down the same single track, the coaster crawls the lift and
-then runs the hills fast. Two things to remember — the ids need adding to
-`KEEP_IDS` in `inline-assets.py` or the lookup silently finds nothing, and
-`curve-path` is currently hard-coded in `scene.js`, so the follower wants
-generalising to a list before a second scene uses it.
 
 **1. Seattle — the ferry.** Already drawn. Pure shuttle, no new code. The
 cheapest real win on the list.

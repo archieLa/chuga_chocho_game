@@ -281,9 +281,15 @@
     // opinion about it, because it never touches the crossing.
     const curve = buildCurveTrain(svg);
 
+    // Mount Washington's cog train and Cedar Point's coaster cars. Same rule as
+    // everything else in here: the art tags itself, a scene without the tags
+    // quietly gets nothing, and neither one knows the gate exists.
+    const cog = buildCogTrain(svg);
+    const coasters = buildCoasters(svg);
+
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
-                ferris: ferris, shuttles: shuttles,
+                ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -357,6 +363,189 @@
       if (path.getPointAtLength(d).x > 1250) { exitAt = d; break; }
     }
     return { path: path, total: total, exitAt: exitAt, cars: cars, dist: 0, span: span };
+  }
+
+  // =======================================================================
+  // The Cog Railway (Mount Washington).
+  //
+  // The art exports <path id="cog-path"> — base at length 0, summit at the end —
+  // and two drawn trains, #cog-train-a and #cog-train-b. We clone one of those
+  // rather than building rolling stock, because the drawn one is RIGHT in ways
+  // that are easy to get wrong and hard to spot: the boiler is tilted back so it
+  // sits level on the grade while the coach stays upright, and the engine is
+  // downslope of the coach because a cog engine PUSHES. Cloning keeps all of it.
+  //
+  // Both originals are then hidden. It is a single track, and the real railway
+  // genuinely does send one train up and bring it back down the same rail — so
+  // exactly one train may be on it, or the scene is telling a child a lie about
+  // how the mountain works.
+  //
+  // Ids are namespaced per scene by inline-assets.py, but the namespace is a
+  // PREFIX (s-mt-washington-cog-path), so a suffix match finds them without
+  // needing a KEEP_IDS entry — and because we only ever search inside this
+  // scene's own root, there is nothing to collide with.
+  // =======================================================================
+  const COG = {
+    up: 15,            // seconds base to summit
+    down: 12.5,        // and back down
+    holdTop: 2.5,      // a breather at the top …
+    holdBottom: 3.5,   // … and longer at Marshfield, where it loads
+    // The art's own depth rule, given by the handoff: full size at the base,
+    // 0.38 at the summit. An animated train has to use it or it will not match
+    // the mountain it is climbing.
+    depth: (t) => 1 - 0.62 * t,
+  };
+
+  function buildCogTrain(svg) {
+    const path = svg.querySelector('[id$="cog-path"]');
+    if (!path || !path.getTotalLength) return null;
+    let total = 0;
+    try { total = path.getTotalLength(); } catch (e) { return null; }
+    if (!total) return null;
+
+    const drawn = svg.querySelector('[id$="cog-train-a"]');
+    const other = svg.querySelector('[id$="cog-train-b"]');
+    if (!drawn) return null;
+
+    const train = drawn.cloneNode(true);
+    train.removeAttribute('id');
+    train.setAttribute('class', 'cc-cog-train');
+    drawn.parentNode.insertBefore(train, drawn);
+    drawn.setAttribute('display', 'none');
+    if (other) other.setAttribute('display', 'none');
+
+    // The line is ruled dead straight, so the heading is a constant and we can
+    // take it once from the two ends instead of sampling every frame.
+    const a = path.getPointAtLength(0), b = path.getPointAtLength(total);
+    const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    return { path: path, total: total, el: train, deg: deg,
+             t: 0, dir: 1, wait: COG.holdBottom };
+  }
+
+  function updateCogTrain(dt) {
+    const c = currentScene && currentScene.cog;
+    if (!c) return;
+    if (c.wait > 0) { c.wait -= dt / 1000; if (c.wait > 0) return; }
+    c.t += (c.dir * (dt / 1000)) / (c.dir > 0 ? COG.up : COG.down);
+    if (c.t >= 1) { c.t = 1; c.dir = -1; c.wait = COG.holdTop; }
+    else if (c.t <= 0) { c.t = 0; c.dir = 1; c.wait = COG.holdBottom; }
+    const p = c.path.getPointAtLength(c.t * c.total);
+    // No mirroring when it reverses: the engine stays downslope going both ways,
+    // which is exactly what a pushing cog engine does.
+    c.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
+      ') rotate(' + c.deg.toFixed(1) + ') scale(' + COG.depth(c.t).toFixed(3) + ')');
+  }
+
+  // =======================================================================
+  // Roller coasters (Cedar Point). <path id="coaster-path-blue"> and "-red"
+  // run from the foot of the lift hill to the last valley.
+  //
+  // No depth scaling here — the rides are all at about the same distance, so a
+  // car is a constant size. Rotation matters far more than it does on the cog
+  // line: sample two nearby points, or the car climbs a vertical lift lying flat
+  // on its back.
+  //
+  // Speed is not a constant and must not be. A coaster is winched slowly up the
+  // lift and then runs on gravity, and that contrast IS what a coaster looks
+  // like from across a park. So: constant crawl to the crest, and after it a
+  // speed that grows with how far the car has fallen below that crest. Both come
+  // out of the path's own geometry, so neither scene nor ride is hard-coded.
+  // =======================================================================
+  const COASTER = {
+    lift: 70,          // units/s up the lift hill — winched, so steady and slow
+    minSpeed: 90,      // crawling over a crest
+    gain: 1.25,        // units/s gained per unit fallen below the crest
+    maxSpeed: 360,     // the bottom of the first drop
+    station: 1.8,      // seconds in the station before the next run
+    cars: 3,           // a coaster TRAIN — one car alone reads as a bird
+    spacing: 17,       // path units between car centres
+  };
+
+  function buildCoasterCar(body) {
+    const g = el('g', { class: 'cc-coaster-car' });
+    g.appendChild(el('rect', { x: -9, y: -4, width: 18, height: 4, rx: 1.6, fill: '#2f3440' }));
+    g.appendChild(el('rect', { x: -8, y: -13, width: 16, height: 9, rx: 3.2, fill: body }));
+    // Two riders with their arms up, because that is the whole point of a coaster.
+    [-3.4, 3.2].forEach(x => {
+      g.appendChild(el('circle', { cx: x, cy: -15.4, r: 2.4, fill: '#f0c49a' }));
+      g.appendChild(el('path', {
+        d: 'M' + (x - 2) + ',-16.2 l-1.8,-3.4 M' + (x + 2) + ',-16.2 l1.8,-3.4',
+        stroke: '#f0c49a', 'stroke-width': 1.4, 'stroke-linecap': 'round', fill: 'none' }));
+    });
+    return g;
+  }
+
+  function buildCoasters(svg) {
+    const out = [];
+    const paths = svg.querySelectorAll('[id$="coaster-path-blue"], [id$="coaster-path-red"]');
+    paths.forEach((path, i) => {
+      if (!path.getTotalLength) return;
+      let total = 0;
+      try { total = path.getTotalLength(); } catch (e) { return; }
+      if (!total) return;
+
+      // Walk the path once to find the crest — the highest point, which is the
+      // top of the lift hill on both of these. Everything after it is gravity.
+      let liftEnd = 0, yTop = Infinity;
+      for (let d = 0; d <= total; d += 4) {
+        const y = path.getPointAtLength(d).y;
+        if (y < yTop) { yTop = y; liftEnd = d; }
+      }
+
+      // A train, not a single car. Each car is placed on the path from its OWN
+      // length, rather than drawn as one rigid group at an offset — a rigid
+      // three-car train is 34 units long and these hills are barely 100 across,
+      // so it would visibly lift off the rail at every crest.
+      const cars = [];
+      for (let k = 0; k < COASTER.cars; k++) {
+        const car = buildCoasterCar(i === 0 ? '#f7c331' : '#ff6b35');
+        path.parentNode.appendChild(car);
+        cars.push(car);
+      }
+      // Stagger them, or the two rides pulse in lockstep and read as one machine.
+      out.push({ path: path, total: total, cars: cars, liftEnd: liftEnd, yTop: yTop,
+                 d: i === 0 ? 0 : total * 0.45, wait: i === 0 ? 0 : 0.9 });
+    });
+    return out;
+  }
+
+  function updateCoasters(dt) {
+    const list = currentScene && currentScene.coasters;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    const tail = (COASTER.cars - 1) * COASTER.spacing;
+    list.forEach(c => {
+      if (c.wait > 0) {
+        c.wait -= secs;
+        c.cars.forEach(car => car.setAttribute('display', 'none'));
+        return;
+      }
+      // Speed is taken at the FRONT car: the whole train is on the lift until the
+      // leader crests, and then the whole train accelerates, which is what a
+      // chain lift and a drop actually do to one.
+      const head = c.path.getPointAtLength(clamp(c.d, 0, c.total));
+      const speed = c.d < c.liftEnd
+        ? COASTER.lift
+        : clamp(COASTER.minSpeed + COASTER.gain * (head.y - c.yTop), COASTER.minSpeed, COASTER.maxSpeed);
+      c.d += speed * secs;
+      if (c.d > c.total + tail) {   // the last car has cleared the final valley
+        c.d = 0; c.wait = COASTER.station;
+        c.cars.forEach(car => car.setAttribute('display', 'none'));
+        return;
+      }
+      c.cars.forEach((car, k) => {
+        const at = c.d - k * COASTER.spacing;
+        if (at < 0 || at > c.total) { car.setAttribute('display', 'none'); return; }
+        car.removeAttribute('display');
+        const p = c.path.getPointAtLength(at);
+        // Heading from two nearby samples — on a lift hill this is near vertical.
+        const a = c.path.getPointAtLength(Math.max(0, at - 3));
+        const b = c.path.getPointAtLength(Math.min(c.total, at + 3));
+        const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+        car.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
+          ') rotate(' + deg.toFixed(1) + ')');
+      });
+    });
   }
 
   // Chairs crawl up one cable and back down the other, wrapping at each end.
@@ -990,6 +1179,8 @@
     updateCars(dt);
     updateScenery(dt);
     updateCurveTrain(dt);
+    updateCogTrain(dt);
+    updateCoasters(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
