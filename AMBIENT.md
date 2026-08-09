@@ -32,13 +32,12 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 
 | Contract | Tag it | Used by |
 |---|---|---|
-| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-tractor` with `data-run` / `data-fly` / `data-drive` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, Kansas tractor |
+| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-tractor` / `.cc-ship` with `data-run` / `data-fly` / `data-drive` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, Kansas tractor, both Duluth boats |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
 | **Rotator** — a wheel whose cars stay level | `.cc-ferris` with `data-secs`; children `.cc-pod` with `data-px`/`data-py` | Chicago Ferris wheel |
 | **Path follower** — a consist walking a drawn centreline | `<path id="curve-path">` (and it must be in `KEEP_IDS`) | Horseshoe Curve |
 | **Rail arc** — a short train on a quadratic | `.cc-scenery-train` with `data-rail="x0,y0 cx,cy x1,y1"` and `data-lift` | Colorado trestle |
 | **Launch** — sit, ignite, climb out, repeat | `.cc-rocket` with `data-pad-dy`, plus `.cc-flame`, `.cc-rocket-glow`, `.cc-rocket-smoke`, and an empty `.cc-rocket-puffs` with `data-pad` | Cape Canaveral |
-| **Lift bridge** — a span that rises, coupled to a ship | `.cc-lift-span` with `data-lift`, plus `.cc-canal-boat` with `data-sail="from,to,y"`. One controller runs both so the span is always up before the ship arrives. | Duluth |
 | **Road junction** — traffic turns off instead of fading | `.cc-road-exit` with `data-exit="nearEdgeY,farEdgeY,junctionX"` | Crater Lake |
 | **Where the road ends** | `class="cc-road"` on the carriageway polygon — the engine reads its far edge | every scene |
 
@@ -54,7 +53,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (9 scenes)
+## What moves today (8 scenes)
 
 | Scene | What |
 |---|---|
@@ -65,7 +64,7 @@ Two traps, both already paid for once:
 | Horseshoe Curve | 25-wagon freight round the bowl |
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | tractor and grain trailer working the field |
-| Duluth | the Aerial Lift Bridge raises for a thousand-footer in the canal |
+| Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 
 ---
 
@@ -97,6 +96,33 @@ machinery is most of the eruption already.
 
 **9. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
 scene where it would read.
+
+---
+
+## Duluth: the bridge itself does not lift, and that was on purpose
+
+The first attempt raised the span. It was rejected, correctly: **a grey rectangle
+going up and down does not read as a bridge lifting.** The reason is structural,
+not a tuning problem — the bridge lives in the `water` layer, which is drawn
+*before* `road`, so the girder can rise but **the roadway on it cannot**. You get
+a deck detaching from the road it carries.
+
+Making it work needs the art redrawn, and that is a request for the scene side,
+not something the engine can fix:
+
+> **Duluth lift span, spec.** Draw the deck and the roadway it carries as ONE
+> group, `.cc-lift-span`, placed *after* the road so it can take the tarmac with
+> it. Leave a gap patch (water, or the road's own dark underside) behind it, so
+> that when the group rises the hole it leaves looks like a hole and not like a
+> missing shape. The far crossing gate would then want to sit between the two
+> road ends rather than across them.
+
+Even with that, **do not couple the crossing gate to the bridge.** Those two
+buttons are the one thing a three-year-old has learned mean *the train is
+coming*; making them also mean *a boat is coming* takes that away. If the span
+ever lifts, it lifts on its own timer, gate-blind like everything else here.
+
+---
 
 Below the line, in rough order: Kansas City's fountain, traffic on the Brooklyn
 Bridge, a boat in San Francisco Bay.

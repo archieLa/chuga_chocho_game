@@ -7395,7 +7395,11 @@ def duluth():
                 f'fill="#ffffff" opacity="0.8"/></g>')
 
     far_l = (lake + '\n' + far_shore + '\n'
-             + '    ' + laker(1020, 330, 0.46) + '\n'
+             # She crosses the far water behind the bridge portal, well above the
+             # deck, so nothing has to lift for her.
+             + '    ' + laker(1020, 330, 0.46,
+                              cls=' class="cc-ship"',
+                              attrs=' data-sail="1560,-380,330" data-scale="0.46"') + '\n'
              + hillside)
 
     # ---------------------------------------------- the ship canal and its piers ----
@@ -7417,6 +7421,29 @@ def duluth():
              '</g>')
 
     # ------------------------------------------- THE AERIAL LIFT BRIDGE ----
+    def tug(x, y, s=1.0, cls='', attrs=''):
+        """A harbour workboat. Deliberately LOW: her wheelhouse tops out about 24
+        above the waterline, so at y=430 she reaches y=406 — inside the span's
+        396..426 band. Drawn before the bridge, so the deck passes in front of
+        her and she reads as going under it."""
+        hull, deck_c, house, dark = '#b8342c', '#8f2a22', '#eef2f4', '#2f3a42'
+        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
+                # bow wave, so she reads as moving even in a still frame
+                f'<path d="M52,-2 C 66,-4 78,-1 86,3 C 74,4 62,3 52,1 Z" '
+                f'fill="#ffffff" opacity="0.7"/>'
+                # hull, with a rounded bow to the right
+                f'<path d="M-46,0 L40,0 C 52,0 60,-5 62,-12 L62,-17 L-46,-17 Z" '
+                f'fill="{hull}"/>'
+                f'<path d="M-46,-17 L62,-17 L62,-20 L-46,-20 Z" fill="{deck_c}"/>'
+                # wheelhouse and funnel — the tallest thing on her, and still low
+                f'<rect x="-22" y="-36" width="34" height="16" rx="2" fill="{house}"/>'
+                f'<rect x="-18" y="-32" width="8" height="7" rx="1" fill="#cfe4f2"/>'
+                f'<rect x="-6" y="-32" width="8" height="7" rx="1" fill="#cfe4f2"/>'
+                f'<rect x="16" y="-30" width="9" height="10" rx="2" fill="{dark}"/>'
+                f'<rect x="16" y="-30" width="9" height="3" rx="1" fill="{hull}"/>'
+                f'<rect x="-40" y="-26" width="3" height="9" fill="{dark}"/>'
+                f'</g>')
+
     def lift_bridge():
         # The towers are placed so the gap between them is centred on the ROAD, not on the
         # canvas. The road's vanishing point sits at x≈634, not 640, so a symmetric bridge
@@ -7482,11 +7509,16 @@ def duluth():
                  f'</g>')
 
         # the lifting deck: a through-girder carrying the roadway, sitting DOWN
-        # THE SPAN LIFTS. data-lift is how far up it travels: from y=396 to y=181,
-        # which stops it clear below the fixed overhead truss at y=152. A boat in
-        # the canal cannot pass with it down, which is the whole point of the
-        # bridge and the reason this is worth animating in a game about a gate.
-        deck = (f'<g id="lift-span" class="cc-lift-span" data-lift="215">'
+        # The span does NOT lift, deliberately. Raising the girder while the
+        # roadway stayed painted on the road below read as a grey box sliding up
+        # and down, because a lift bridge only reads as one when the ROAD goes up
+        # with it and leaves a gap. Doing that properly means the deck and its
+        # carriageway have to be one group drawn AFTER road() with a patch to
+        # punch the gap, and the bridge currently sits in the `water` layer,
+        # behind the road. That is a scene rebuild, not an engine tweak — it is
+        # written up in AMBIENT.md for the art side. Meanwhile the ships move,
+        # and a small boat passing under a closed bridge is what actually happens.
+        deck = (f'<g id="lift-span">'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="30" fill="{steel}"/>'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="7" fill="{lit}"/>'
                 f'<rect x="{LT-4}" y="420" width="{RT+TW-LT+8}" height="6" fill="{dark}"/>'
@@ -7674,18 +7706,11 @@ def duluth():
             # sat on the waterline and the ore boat ran straight through them; Park Point is
             # sand and pine anyway, and the city itself is up the hill behind.
             + lighthouse(438, 338, 0.5) + lighthouse(838, 338, 0.5, '#f2f2ec', '#2f6f4f')
-            # a harbour tug working the canal, so the water isn't a dead band
-            + '<g transform="translate(300,404) scale(0.5)">'
-            '<path d="M-52,0 L44,0 C 56,0 62,-6 64,-14 L64,-22 L-52,-22 Z" fill="#2f4a5c"/>'
-            '<rect x="-52" y="-22" width="116" height="6" fill="#c0392b"/>'
-            '<rect x="-34" y="-52" width="46" height="30" rx="3" fill="#f2f2ec"/>'
-            '<rect x="-26" y="-66" width="30" height="16" rx="2" fill="#f2f2ec"/>'
-            '<g fill="#3f4a52"><rect x="-28" y="-46" width="11" height="10"/>'
-            '<rect x="-12" y="-46" width="11" height="10"/></g>'
-            '<rect x="16" y="-64" width="10" height="18" rx="2" fill="#c0392b"/>'
-            '<rect x="16" y="-70" width="10" height="7" rx="2" fill="#2f3038"/>'
-            '<path d="M60,-2 C 78,2 88,6 94,10 C 74,10 58,6 52,2 Z" fill="#ffffff" '
-            'opacity="0.8"/></g>'
+            # There WAS a second, static workboat parked here at (300,404). She has
+            # gone: the canal now has a tug that actually sails it (see 'water'),
+            # and two near-identical tugs — one moving, one frozen — only drew the
+            # eye to the frozen one. She was also floating at y=404, inside the
+            # span's own 396..426 band, so she read as sitting on the roadway.
             + ''.join(gull(x, y, s) for x, y, s in
                       [(360, 180, 1.0), (430, 214, 0.8), (280, 232, 0.7),
                        (960, 196, 0.9), (1046, 168, 0.75)]))
@@ -7748,13 +7773,13 @@ def duluth():
         'sky': sky_l,
         'far': far_l,
         'ground': ground_l,
-        # The boat sits between the water and the bridge, so it passes BEHIND the
-        # towers and under the raised span. data-sail is "from,to,y"; the engine
-        # couples it to .cc-lift-span so the span is always up before it arrives.
+        # A workboat in the canal, drawn BEFORE the bridge so the deck paints over
+        # her wheelhouse as she goes by: she passes under the closed span, which
+        # is exactly what a boat that size does at a real lift bridge.
         'water': (canal + '\n    '
-                  + laker(1420, 414, 0.5,
-                          cls=' class="cc-canal-boat"',
-                          attrs=' data-sail="1420,-360,414" data-scale="0.5" data-nose="-1"')
+                  + tug(1360, 430, 1.0,
+                        cls=' class="cc-ship"',
+                        attrs=' data-sail="1360,-140,430"')
                   + '\n' + lift_bridge()),
         'scenery-back': back,
         'scenery-front': front,

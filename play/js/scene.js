@@ -174,26 +174,6 @@
       if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
     }
 
-    // Duluth's Aerial Lift Bridge, coupled to the ship it lifts for. The span and
-    // the boat are NOT independent: a boat sailing through a lowered span would
-    // be the one thing worse than no animation. One controller runs both.
-    let lift = null;
-    const span = svg.querySelector('.cc-lift-span');
-    if (span) {
-      const boat = svg.querySelector('.cc-canal-boat');
-      const sail = boat ? (boat.getAttribute('data-sail') || '').split(',').map(Number) : null;
-      lift = {
-        span: span,
-        travel: parseFloat(span.getAttribute('data-lift')) || 0,
-        boat: boat,
-        from: sail && sail.length === 3 ? sail[0] : 0,
-        to: sail && sail.length === 3 ? sail[1] : 0,
-        y: sail && sail.length === 3 ? sail[2] : 0,
-        s: boat ? (parseFloat(boat.getAttribute('data-scale')) || 1) : 1,
-        phase: 'wait', t: 0, up: 0, x: sail ? sail[0] : 0,
-      };
-    }
-
     // Chicago's three moving parts. Same contract as everything else: the art
     // tags itself, the engine drives it, and a scene without the tags gets
     // nothing. The Ferris wheel turns with its pods hanging level, the L shuttles
@@ -211,7 +191,7 @@
 
     const shuttles = [];
     [['.cc-el-train', 'data-run', 96], ['.cc-plane', 'data-fly', 58],
-     ['.cc-tractor', 'data-drive', 24]].forEach(([sel, attr, speed]) => {
+     ['.cc-tractor', 'data-drive', 24], ['.cc-ship', 'data-sail', 40]].forEach(([sel, attr, speed]) => {
       [].forEach.call(svg.querySelectorAll(sel), node => {
         const v = (node.getAttribute(attr) || '').split(',').map(Number);
         if (v.length !== 3 || v.some(isNaN)) return;
@@ -303,7 +283,7 @@
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
-                ferris: ferris, shuttles: shuttles, lift: lift,
+                ferris: ferris, shuttles: shuttles,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -401,58 +381,6 @@
   // Chicago: the wheel, the L and the plane. All ambient — the gate has no
   // opinion about any of them.
   // =======================================================================
-  // =======================================================================
-  // The Aerial Lift Bridge (Duluth). A whole bridge span that goes UP, in a game
-  // whose one control makes a gate go DOWN — which is why this scene earns the
-  // most elaborate ambient sequence in the set.
-  //
-  // Deliberately COUPLED. The span is always fully raised before the ship
-  // reaches the towers and stays up until she is clear; a thousand-footer
-  // sailing through a closed bridge would be worse than leaving both still.
-  // Still gate-blind, like everything else here.
-  // =======================================================================
-  const LIFT = {
-    wait: 5.0,      // seconds with the span down and the canal empty
-    move: 3.2,      // seconds to raise, and to lower
-    speed: 150,     // ship speed, px per second
-  };
-
-  function updateLift(dt) {
-    const b = currentScene && currentScene.lift;
-    if (!b) return;
-    const secs = dt / 1000;
-    b.t += secs;
-
-    if (b.phase === 'wait') {
-      b.up = 0;
-      if (b.t > LIFT.wait) { b.phase = 'raise'; b.t = 0; }
-    } else if (b.phase === 'raise') {
-      // ease-in-out, because a counterweighted span starts and stops gently
-      const k = Math.min(1, b.t / LIFT.move);
-      b.up = b.travel * (k * k * (3 - 2 * k));
-      if (k >= 1) { b.phase = 'sail'; b.t = 0; b.x = b.from; }
-    } else if (b.phase === 'sail') {
-      b.up = b.travel;
-      const dir = b.to > b.from ? 1 : -1;
-      b.x += LIFT.speed * dir * secs;
-      if ((dir < 0 && b.x <= b.to) || (dir > 0 && b.x >= b.to)) { b.phase = 'lower'; b.t = 0; }
-    } else {
-      const k = Math.min(1, b.t / LIFT.move);
-      b.up = b.travel * (1 - k * k * (3 - 2 * k));
-      if (k >= 1) { b.phase = 'wait'; b.t = 0; }
-    }
-
-    b.span.setAttribute('transform', 'translate(0,' + (-b.up).toFixed(1) + ')');
-    if (b.boat) {
-      // Parked off-frame unless she is actually sailing, so she never sits
-      // waiting in the canal mouth with the bridge down.
-      const x = b.phase === 'sail' ? b.x : b.from;
-      // data-nose="-1": the hull is drawn bow-right, and she sails west.
-      b.boat.setAttribute('transform',
-        'translate(' + x.toFixed(1) + ',' + b.y + ') scale(' + (-b.s) + ',' + b.s + ')');
-    }
-  }
-
   function updateFerris(dt) {
     const list = currentScene && currentScene.ferris;
     if (!list || !list.length) return;
@@ -1065,7 +993,6 @@
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
-    updateLift(dt);
     updateShuttles(dt);
     drawGates(t);
     requestAnimationFrame(frame);
