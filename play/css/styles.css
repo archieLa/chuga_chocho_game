@@ -9,11 +9,18 @@
    unavailable. */
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:#7ec0ee;
+/* dvh, not vh. On iOS Safari `100vh` is the height with the toolbar HIDDEN, so
+   a full-height page is taller than what you can actually see and its bottom
+   slides underneath the chrome — which is exactly what happened: the foot of
+   every scene and part of the CLOSE/OPEN buttons were cut off on a real iPhone.
+   `dvh` tracks the viewport that is really on screen. The plain `vh` line stays
+   first as the fallback for anything older than iOS 15.4, where the old
+   behaviour is still better than no height at all. */
+html,body{height:100%;height:100dvh;overflow:hidden;background:#7ec0ee;
   font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;user-select:none;touch-action:manipulation;}
 button{font-family:inherit;}
 
-#wrap{position:relative;width:100vw;height:100vh;overflow:hidden;}
+#wrap{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;}
 
 /* ---------- the scene ---------- */
 #stage{position:absolute;inset:0;background:linear-gradient(#8fd0f0,#bfe6fb);}
@@ -39,7 +46,12 @@ button{font-family:inherit;}
 .icon:active{transform:translateY(3px);box-shadow:0 1px 4px rgba(0,0,0,.28);}
 
 /* ---------- the two gate buttons: above everything, always ---------- */
-#controls{position:absolute;bottom:3vh;left:0;right:0;z-index:60;
+/* The gate is never unavailable, so its buttons must never be under the home
+   indicator either. index.html asks for viewport-fit=cover, which means the page
+   deliberately extends into the safe areas — so anything that has to stay
+   pressable has to add the inset back. 0px everywhere that has no inset, so this
+   costs desktop nothing. */
+#controls{position:absolute;bottom:calc(3vh + env(safe-area-inset-bottom, 0px));left:0;right:0;z-index:60;
   display:flex;justify-content:center;gap:8vw;pointer-events:none;
   transition:transform .25s ease, bottom .25s ease;transform-origin:bottom center;}
 .big{pointer-events:auto;border:none;border-radius:50%;

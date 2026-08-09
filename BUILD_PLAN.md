@@ -499,8 +499,19 @@ lives out to the sides: Miami Beach in portrait lost the Atlantic, the beach, th
 lifeguard towers and most of the Deco row. The geography teaching was the first thing
 the crop took.
 
-**Still not verified on real hardware.** All of the above was reproduced by rendering at
-those viewport sizes in headless Chrome. It does **not** cover iOS Safari's own
-behaviour: the dynamic toolbar making `100vh` taller than the visible area (`#wrap` is
-`100vh`), or safe-area insets under the notch and home indicator. If a real iPhone shows
-something the table does not explain, start with those two.
+**Checked on a real iPhone, and one of the two predicted problems was real.**
+Everything above was reproduced by rendering at those viewport sizes in headless Chrome,
+which does not cover iOS Safari's own behaviour. On the device:
+
+- **The dynamic toolbar did cut the page off.** `100vh` on iOS is the height with the
+  toolbar HIDDEN, so a `100vh` page is taller than what is actually on screen and its foot
+  slides underneath the chrome — the bottom of every scene and part of the CLOSE/OPEN
+  buttons. Fixed by giving `html`, `body` and `#wrap` `100dvh`, which tracks the viewport
+  that is really there, with the old `100vh` line kept first as the pre-iOS-15.4 fallback.
+- **Safe-area insets were fine** — nothing was clipped by the notch in landscape. The gate
+  buttons still add `env(safe-area-inset-bottom)` anyway, because they sit lowest and the
+  gate is the one control that must never be unreachable. It resolves to 0px everywhere
+  without an inset, so it costs other devices nothing.
+
+Headless Chrome cannot see either of these, so **anything about viewport height has to be
+checked on the device**; the shot.py loop will happily report a clean pass.

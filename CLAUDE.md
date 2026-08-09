@@ -216,8 +216,9 @@ look at the PNG. Reading your own diff is not looking at it.
   everywhere. Portrait therefore shows `#rotate` rather than shrinking the art for everyone.
   It is a pure CSS `max-aspect-ratio: 115/100` query — no resize handler — and it sits above
   the gate buttons on purpose, `CC.gate` still running underneath. Measurements and the
-  reasoning are in `BUILD_PLAN.md` §12.1. Not yet checked on real iOS hardware: `100vh` under
-  Safari's dynamic toolbar and safe-area insets are the two things that could still bite.
+  reasoning are in `BUILD_PLAN.md` §12.1. **Checked on a real iPhone now.** `100vh` did cut
+  the foot off the page (fixed with `100dvh`); safe-area insets were fine. Headless Chrome
+  cannot see either, so anything touching viewport height needs a device.
 - **No automated test suite.** Verification is the `shot.py` loop above, by hand.
 - **Open decision #4 (single-file offline bundle) is still open** — see the list below.
 - **Art pipeline (open decision #2)** settled in practice, not on paper: scenes and vehicles
