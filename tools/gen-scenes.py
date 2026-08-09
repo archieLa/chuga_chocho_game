@@ -8045,7 +8045,21 @@ def kansas():
                    f'<rect x="-100" y="-27" width="70" height="3" fill="#95826a"/>'
                    f'<rect x="-30" y="-22" width="14" height="4" rx="2" fill="#5c5f66"/>'
                    + wheel(-84, -10, 9) + wheel(-52, -10, 9) + '</g>')
-        return (f'<g class="cc-tractor" data-drive="-150,1420,422" data-scale="{s}" transform="translate(-150,422) scale({s})">'
+        # The rig is 140 long at 1:1 — trailer back to x=-100, bonnet out to +40 —
+        # so at s=0.62 it reaches 62 behind its origin and 25 ahead. AND WHEN IT
+        # TURNS, THAT SWAPS: mirrored, the trailer is 62 AHEAD of the origin. So
+        # a turn-round has to clear the road by the longer of the two, not the
+        # shorter — the first attempt parked at 550, which is fine facing right
+        # and puts the trailer 22 units into the carriageway facing left.
+        # The road spans 589..691 at this y, hence 515 and 775.
+        #
+        # It used to run -150 to 1420 in one straight sweep, which took it
+        # through the level crossing and under the road surface. It now works the
+        # two fields either side and turns back at the verge, calling at the
+        # grain elevator (x=838) on the right-hand round.
+        return (f'<g class="cc-tractor cc-route" data-scale="{s}" data-y="422" data-speed="34"'
+                f' data-route="900:1.6 1380 @-120 515:1.0 -120 @1380 775:1.0"'
+                f' transform="translate(775,422) scale({s})">'
                 + trailer
                 + f'<rect x="-18" y="-30" width="40" height="14" rx="3" fill="{dark}"/>'
                 + f'<rect x="14" y="-34" width="26" height="16" rx="3" fill="{body}"/>'
@@ -10961,8 +10975,14 @@ def mt_washington():
         sc = line_scale(t) * s
         idattr = f' id="{tid}"' if tid else ''
         return (f'<g{idattr} '
-                f'transform="translate({x:.0f},{y:.0f}) rotate({LINE_ANG:.1f}) '
-                f'scale({sc:.2f})">'
+                # LINE_ANG is about -125deg — the line climbs up and to the LEFT — and
+                # rotating an upright vehicle by that swings it past vertical, so it
+                # ends up hanging under the rail with its roof pointing downhill.
+                # Turning to the DOWNHILL angle instead keeps it the right way up,
+                # and mirroring then points it back up the mountain. The coach still
+                # leads and the engine still sits below it, pushing.
+                f'transform="translate({x:.0f},{y:.0f}) rotate({LINE_ANG + 180:.1f}) '
+                f'scale({-sc:.2f},{sc:.2f})">'
                 # the coach, upslope of the engine
                 f'<g transform="translate(30,0)">'
                 f'<rect x="-24" y="-19" width="48" height="17" rx="2" fill="{coach}"/>'

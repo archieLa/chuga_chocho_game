@@ -10,14 +10,9 @@ the queue below lives here instead, where it survives.
 
 ---
 
-## The rule that keeps this from ruining the game
+## The one rule
 
-Every scene twitching is noise, not delight, and the gate is what the child is
-supposed to be watching. **Cap it at roughly twelve to fourteen scenes with
-motion and leave the rest quiet.** Some places are partly *about* stillness — the
-Grand Canyon is the obvious one.
-
-Motion is also always **gate-blind**. Nothing here reacts to the crossing, waits
+Motion is always **gate-blind**. Nothing here reacts to the crossing, waits
 for it, or is blocked by it. If a thing needs to know about the gate it is not
 ambient motion, it is gameplay, and it belongs somewhere else.
 
@@ -32,7 +27,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 
 | Contract | Tag it | Used by |
 |---|---|---|
-| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-tractor` / `.cc-ship` with `data-run` / `data-fly` / `data-drive` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, Kansas tractor, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
+| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
+| **Route** — stops in order, dwelling, looping | `.cc-route` with `data-route` = stops separated by spaces: `"x"`, `"x:dwell"` (seconds held) or `"@x"` (jump there instantly — only ever off-screen, so a thing can leave one side and reappear on the other without crossing what is between). Plus `data-y`, `data-speed`, `data-scale`, `data-nose`. | the Kansas tractor |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
 | **Rotator** — a wheel whose cars stay level | `.cc-ferris` with `data-secs`; children `.cc-pod` with `data-px`/`data-py` | Chicago Ferris wheel |
 | **Path follower** — a consist walking a drawn centreline | `<path id="curve-path">` (and it must be in `KEEP_IDS`) | Horseshoe Curve |
@@ -48,6 +44,15 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 
 Two traps, both already paid for once:
 
+- **A mirrored thing's overhang swaps sides.** The tractor reaches 62 behind its
+  origin and 25 ahead; turn it round and the trailer is 62 *ahead*. A stop that
+  clears an obstacle facing one way can put the load straight through it facing
+  the other, so clear it by the longer of the two.
+- **Rotating an upright vehicle by more than 90° turns it upside down.** Mount
+  Washington's cog line climbs up and to the LEFT — heading about −125° — and
+  rotating by that hangs the train under the rail with its roof pointing
+  downhill. Turn to the *downhill* angle and mirror instead: same direction of
+  travel, right way up. The engine does this for any heading past ±90°.
 - **The engine rewrites the whole `transform` every frame.** Anything baked into
   it in the markup — a `scale`, a `rotate` — is thrown away the moment the thing
   moves. Declare it (`data-scale`) instead.
@@ -74,7 +79,7 @@ Two traps, both already paid for once:
 | Gatlinburg | SkyLift chairs up the hillside |
 | Horseshoe Curve | 25-wagon freight round the bowl |
 | Crater Lake | traffic turns onto Rim Drive |
-| Wheat Country | tractor and grain trailer working the field |
+| Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
@@ -87,10 +92,6 @@ Two traps, both already paid for once:
 
 ## Queued, best first
 
-> **We are at the cap.** Fourteen scenes move; the rule at the top of this file
-> says twelve to fourteen. Everything below would take it past that, so the next
-> one is a judgement call and not just the next item on a list — pick the one
-> that earns it, or decide the rule was too tight and say so here.
 
 **1. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
 along the slickrock track. (Listed as "skip" in an earlier pass — wrong call, a
@@ -136,5 +137,9 @@ ever lifts, it lifts on its own timer, gate-blind like everything else here.
 Below the line, in rough order: Kansas City's fountain, traffic on the Brooklyn
 Bridge, a boat in San Francisco Bay.
 
-**Deliberately left still:** Houston (the shuttle on the 747 is a museum exhibit
-and is *meant* to sit), Washington DC, Miami Beach, Los Angeles, Grand Canyon.
+**There is no cap on how many scenes move.** There used to be a
+twelve-to-fourteen limit in this file, on the theory that too much motion would
+pull attention off the crossing. In practice the animations turned out to be
+half of why the places are worth visiting, so the call is the maintainer's and
+is made scene by scene. Some places are still better still — the Grand Canyon
+is about not moving — but that is a judgement about *that* place, not a budget.

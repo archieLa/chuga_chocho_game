@@ -191,7 +191,7 @@
 
     const shuttles = [];
     [['.cc-el-train', 'data-run', 96], ['.cc-plane', 'data-fly', 58],
-     ['.cc-tractor', 'data-drive', 24], ['.cc-ship', 'data-sail', 40]].forEach(([sel, attr, speed]) => {
+     ['.cc-ship', 'data-sail', 40]].forEach(([sel, attr, speed]) => {
       [].forEach.call(svg.querySelectorAll(sel), node => {
         const v = (node.getAttribute(attr) || '').split(',').map(Number);
         if (v.length !== 3 || v.some(isNaN)) return;
@@ -289,11 +289,12 @@
     const spinners = buildSpinners(svg);
     const swarms = buildSwarms(svg);
     const chases = buildChases(svg);
+    const routes = buildRoutes(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -421,8 +422,16 @@
     // The line is ruled dead straight, so the heading is a constant and we can
     // take it once from the two ends instead of sampling every frame.
     const a = path.getPointAtLength(0), b = path.getPointAtLength(total);
-    const deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
-    return { path: path, total: total, el: train, deg: deg,
+    let deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    // KEEP IT THE RIGHT WAY UP. This line climbs up and to the LEFT, so its
+    // heading is about -125 degrees, and rotating an upright vehicle by that
+    // swings it past vertical — it ends up hanging under the rail with its roof
+    // pointing downhill, which is exactly what it looked like. Turn to the
+    // DOWNHILL angle instead and mirror: same direction of travel, right way up.
+    // The rule is general, so a line climbing to the right needs no special case.
+    let flip = 1;
+    if (Math.abs(deg) > 90) { deg += 180; flip = -1; }
+    return { path: path, total: total, el: train, deg: deg, flip: flip,
              t: 0, dir: 1, wait: COG.holdBottom };
   }
 
@@ -436,8 +445,9 @@
     const p = c.path.getPointAtLength(c.t * c.total);
     // No mirroring when it reverses: the engine stays downslope going both ways,
     // which is exactly what a pushing cog engine does.
+    const s = COG.depth(c.t);
     c.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
-      ') rotate(' + c.deg.toFixed(1) + ') scale(' + COG.depth(c.t).toFixed(3) + ')');
+      ') rotate(' + c.deg.toFixed(1) + ') scale(' + (c.flip * s).toFixed(3) + ',' + s.toFixed(3) + ')');
   }
 
   // =======================================================================
@@ -649,6 +659,74 @@
       for (let i = 0; i < c.bulbs.length; i++) {
         c.bulbs[i].setAttribute('opacity', (i + step) % 3 === 0 ? CHASE_ON : CHASE_OFF);
       }
+    });
+  }
+
+  // =======================================================================
+  // A waypoint route (.cc-route) — for a thing that works, pauses, and turns
+  // back somewhere specific, rather than bouncing between two x like a shuttle.
+  //
+  // The Kansas tractor is why this exists. As a shuttle it ran the full width of
+  // the frame at a constant speed, which drove it straight through the level
+  // crossing and under the road surface. A tractor does not do that; it works
+  // one field, turns at the verge, and comes back.
+  //
+  //   data-route   stops in order, looping. Each is "x", "x:dwell" (seconds held
+  //                there) or "@x" (jump there instantly — only ever used
+  //                off-screen, where the jump cannot be seen, so the thing can
+  //                leave one side and reappear on the other without crossing
+  //                what is in between).
+  //   data-y  data-scale  data-speed  data-nose   as for a shuttle.
+  // =======================================================================
+  function buildRoutes(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-route').forEach(node => {
+      const stops = (node.getAttribute('data-route') || '').trim().split(/\s+/)
+        .filter(Boolean).map(tok => {
+          const jump = tok.charAt(0) === '@';
+          const parts = (jump ? tok.slice(1) : tok).split(':');
+          return { x: parseFloat(parts[0]), dwell: parseFloat(parts[1]) || 0, jump: jump };
+        }).filter(s => !isNaN(s.x));
+      if (stops.length < 2) { console.warn('cc-route has no usable data-route'); return; }
+      out.push({
+        el: node, stops: stops, i: 0, wait: 0, dir: 1,
+        x: stops[stops.length - 1].x,      // start where the loop ends, so stop 0 is the first drive
+        y: parseFloat(node.getAttribute('data-y')) || 0,
+        s: parseFloat(node.getAttribute('data-scale')) || 1,
+        nose: parseFloat(node.getAttribute('data-nose')) || 1,
+        speed: parseFloat(node.getAttribute('data-speed')) || 30,
+      });
+    });
+    return out;
+  }
+
+  function updateRoutes(dt) {
+    const list = currentScene && currentScene.routes;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    list.forEach(r => {
+      if (r.wait > 0) {
+        r.wait -= secs;
+      } else {
+        const stop = r.stops[r.i];
+        if (stop.jump) {
+          r.x = stop.x;                          // off-screen: nobody sees the jump
+          r.i = (r.i + 1) % r.stops.length;
+        } else {
+          const d = stop.x - r.x;
+          if (Math.abs(d) <= r.speed * secs) {   // arrived
+            r.x = stop.x;
+            r.wait = stop.dwell;
+            r.i = (r.i + 1) % r.stops.length;
+          } else {
+            r.dir = d > 0 ? 1 : -1;
+            r.x += r.speed * r.dir * secs;
+          }
+        }
+      }
+      const sx = (r.dir !== r.nose ? -r.s : r.s);
+      r.el.setAttribute('transform', 'translate(' + r.x.toFixed(1) + ',' + r.y +
+        ') scale(' + sx + ',' + r.s + ')');
     });
   }
 
@@ -1288,6 +1366,7 @@
     updateSpinners(dt);
     updateSwarms(t);
     updateChases(t);
+    updateRoutes(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
