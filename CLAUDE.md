@@ -88,8 +88,8 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
 | `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
-| `world.js` | The 29 locations as data, `select()`, `spoken()`, persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
-| `map.js` | The map overlay — and the game's front door. |
+| `world.js` | The 29 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
+| `map.js` | The map overlay — and the game's front door. Also **Surprise me**, the random-destination draw. |
 | `trains.js` | The consist data layer: 1 loco + 3 wagons, per-slot colours, cycling helpers, preset latch. **Was given; don't redesign it.** |
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |
 | `scene.js` | Mounts a location, animates both gates, the road cars, the train, the counter. Owns the single `requestAnimationFrame` loop. |
@@ -125,6 +125,26 @@ drive it with `shot.py`. There is a ready-made cross-check — it catches all fo
 CC.world.all().filter(l => !CC.assets.scenes[l.scene])          // scene not inlined
 Object.keys(CC.world.byState())                                 // vs data-supported in the map
 ```
+
+### "Surprise me" draws without replacement
+
+The 🎲 on the map picks a destination at random, shows it on the map, says it,
+then travels there. The draw is **without replacement**: `world.drawRandom()`
+keeps a bag in `localStorage` (`cc.drawn`) and a place cannot come up again
+until every other one has. A plain random pick hands a child Chicago four times
+before it ever shows them Denali.
+
+**Choosing a place yourself never touches the bag**, deliberately — it records
+where *chance* has taken you, not where you have been, so a favourite can be
+visited every day without the dice using it up. `select()` must stay out of it.
+
+### Styling a state on the map needs extra specificity
+
+`us-map.svg` carries its **own `<style>` block**, and because the overlay is
+built at runtime that block lands in the document *after* `styles.css`. At equal
+weight the later sheet wins, so `#us-map .state--picked` lost to the SVG's own
+`#us-map .state--supported` and a tapped state never lit up at all. Name both
+classes — `#us-map .state.state--picked` — and it sticks.
 
 ### Not every scene's road reaches the horizon
 

@@ -222,6 +222,26 @@
   const STORAGE_KEY = 'cc.location';
   let currentId = localStorage.getItem(STORAGE_KEY) || LOCATIONS[0].id;
 
+  // ---- the surprise bag ----------------------------------------------------
+  // "Surprise me" draws WITHOUT REPLACEMENT: once a place has come up it is
+  // skipped until every other one has, and only then does the bag refill. A
+  // plain random pick would hand a child Chicago four times before it ever
+  // showed them Denali, which is the opposite of encouraging them to explore.
+  //
+  // Choosing a place YOURSELF never touches the bag, deliberately. The bag is a
+  // record of where CHANCE has taken you, not of where you have been, so going
+  // back to a favourite on purpose does not use it up — and a child who loves
+  // Chicago can visit it every day without ever being denied it by the dice.
+  const DRAWN_KEY = 'cc.drawn';
+  let drawn = [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(DRAWN_KEY));
+    // Filter against the current list: a location that has since been renamed or
+    // removed would otherwise sit in the bag for ever and never empty it.
+    if (Array.isArray(raw)) drawn = raw.filter(id => LOCATIONS.some(l => l.id === id));
+  } catch (e) { drawn = []; }
+  const saveDrawn = () => { try { localStorage.setItem(DRAWN_KEY, JSON.stringify(drawn)); } catch (e) {} };
+
   const world = {
     all() { return LOCATIONS.slice(); },
     byState() {
@@ -246,6 +266,27 @@
       const text = (loc.sayAs && loc.sayAs[lang]) || shown;
       const untranslated = loc.say && loc.say.en === shown && lang !== 'en';
       return { text: text, lang: untranslated ? 'en' : lang };
+    },
+
+    /** How far round the bag we are — { drawn, total }. */
+    explored() { return { drawn: drawn.length, total: LOCATIONS.length }; },
+
+    /** Draw the next surprise. Returns { loc, wrapped }; `wrapped` is true when
+        the bag had to be refilled, which means everywhere has now come up once. */
+    drawRandom() {
+      let wrapped = false;
+      let pool = LOCATIONS.filter(l => drawn.indexOf(l.id) < 0);
+      if (!pool.length) { drawn = []; wrapped = true; pool = LOCATIONS.slice(); }
+      // Never draw the place we are already standing in unless it is genuinely
+      // the only one left — "surprise!" followed by going nowhere is not one.
+      if (pool.length > 1) {
+        const elsewhere = pool.filter(l => l.id !== currentId);
+        if (elsewhere.length) pool = elsewhere;
+      }
+      const loc = pool[Math.floor(Math.random() * pool.length)];
+      drawn.push(loc.id);
+      saveDrawn();
+      return { loc: loc, wrapped: wrapped };
     },
 
     select(id, opts) {

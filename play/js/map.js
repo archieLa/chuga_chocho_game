@@ -15,6 +15,7 @@
     overlay: null,
     open_: false,
     visited: false,          // have we ever left the map this session?
+    drawSeq: 0,              // bumped by close(), so a reveal in flight gives up
 
     get isOpen() { return this.open_; },
 
@@ -32,10 +33,12 @@
       this.open_ = true;
       document.body.classList.add('map-open');
       this.relabel();
+      this.refreshDice();
     },
 
     close() {
       if (!this.overlay) return;
+      this.drawSeq++;                   // abandons a reveal that is still running
       this.overlay.hidden = true;
       this.open_ = false;
       this.visited = true;
@@ -56,6 +59,13 @@
         '<div class="cc-rail"><div class="cc-track"></div></div>' +
         '<div class="map-head">' +
           '<span class="map-title" data-i18n="pickPlace">Where shall we go?</span>' +
+          // Drawn WITHOUT replacement — see world.drawRandom. The count is not
+          // decoration: it is the reason the button is worth pressing again.
+          '<button class="map-dice" data-i18n-title="surprise">' +
+            '<span class="dice-face">🎲</span>' +
+            '<span class="dice-label" data-i18n="surprise">Surprise me!</span>' +
+            '<span class="dice-count"></span>' +
+          '</button>' +
           '<button class="map-close" data-i18n-title="back" title="Back">✕</button>' +
         '</div>' +
         '<div class="map-holder">' + CC.US_MAP_SVG + '</div>' +
@@ -70,6 +80,7 @@
         CC.audio.blip();
         this.close();
       });
+      o.querySelector('.map-dice').addEventListener('click', () => this.surprise());
 
       // One delegated handler covers the whole map. A tap on a state we can
       // travel to opens its places; a tap on any OTHER state still says its
@@ -101,6 +112,75 @@
       CC.speech && CC.speech.say(name, { interrupt: true, lang: 'en' });
       el.classList.add('state--said');
       setTimeout(() => el.classList.remove('state--said'), 1100);
+    },
+
+    /** The bag's progress, shown on the button. */
+    refreshDice() {
+      if (!this.overlay) return;
+      const el = this.overlay.querySelector('.dice-count');
+      const btn = this.overlay.querySelector('.map-dice');
+      if (!el || !btn) return;
+      const p = CC.world.explored();
+      el.textContent = p.drawn + '/' + p.total;
+      btn.disabled = false;
+    },
+
+    /* Roll for somewhere to go. Two things make this more than Math.random():
+       the bag never repeats until it is empty (world.drawRandom), and the place
+       is SHOWN ON THE MAP before we travel — a surprise that teleports teaches a
+       child nothing about where anywhere is. */
+    surprise() {
+      const dice = this.overlay.querySelector('.map-dice');
+      if (dice.disabled) return;        // a three-year-old will press it five times
+      const res = CC.world.drawRandom();
+      if (!res) return;
+      const seq = ++this.drawSeq;
+      dice.disabled = true;
+      CC.audio.blip();
+      this.clearChoice();
+
+      const shape = this.overlay.querySelector('[data-name="' + res.loc.state + '"]');
+      if (shape) shape.classList.add('state--picked', 'state--surprise');
+
+      const box = this.overlay.querySelector('.map-cities');
+      const card = document.createElement('div');
+      card.className = 'surprise-card';
+      const line = (cls, text) => {
+        const s = document.createElement('span');
+        s.className = cls;
+        s.textContent = text;
+        card.appendChild(s);
+      };
+      if (res.wrapped) line('surprise-allseen', CC.i18n.t('ui.allSeen'));
+      line('surprise-kicker', CC.i18n.t('ui.nextStop'));
+      line('surprise-name', (res.loc.say && res.loc.say[CC.i18n.code]) || res.loc.city || res.loc.state);
+      box.appendChild(card);
+
+      // Every word on that card is spoken, in the order it is written. The first
+      // two are UI language; the place name takes whichever voice its own name
+      // wants, which is not always the same one — see world.spoken().
+      if (CC.speech) {
+        const said = CC.world.spoken(res.loc);
+        let first = true;
+        const say = (txt, lang) => {
+          CC.speech.say(txt, { interrupt: first, lang: lang || undefined });
+          first = false;
+        };
+        if (res.wrapped) say(CC.i18n.t('ui.allSeen'));
+        say(CC.i18n.t('ui.nextStop'));
+        say(said.text, said.lang);
+      }
+      this.refreshDice();
+      dice.disabled = true;             // refreshDice re-enables; hold it shut for the reveal
+
+      // Long enough to hear the name and find the state, not so long that a
+      // child thinks the button did nothing.
+      setTimeout(() => {
+        if (seq !== this.drawSeq) return;       // they pressed ✕ — leave them where they are
+        if (shape) shape.classList.remove('state--surprise');
+        CC.world.select(res.loc.id, { speak: false });   // already announced above
+        this.close();
+      }, res.wrapped ? 3600 : 2400);
     },
 
     relabel() {

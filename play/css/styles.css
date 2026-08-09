@@ -235,9 +235,16 @@ svg.cc-roller{position:absolute;bottom:0;height:22vh;width:auto;
 @media (prefers-reduced-motion:reduce){
   #us-map .state--supported:not(.state-hit):not(.state--picked){animation:none;}
 }
-#us-map .state--picked{fill:#ffd166;}
+/* SPECIFICITY, and it matters: us-map.svg carries its OWN <style> block, and
+   because the overlay is built at runtime that block lands in the document
+   AFTER this file. At equal weight the later sheet wins, so plain
+   `#us-map .state--picked` (0,1,1,0) lost to the SVG's own
+   `#us-map .state--supported` and a tapped state never actually lit up.
+   Naming both classes takes it to (0,2,1,0) and it sticks. Any new state
+   colour has to do the same. */
+#us-map .state.state--picked{fill:#ffd166;}
 /* A state with no scene yet still lights up and says its name when tapped. */
-#us-map .state--said{fill:#9ec9e8;}
+#us-map .state.state--said{fill:#9ec9e8;}
 /* Light blue, not green: these sit on the grass bank, and green-on-green made
    them disappear into it. Blue also ties them back to the sky and the map. */
 .city-btn{border:none;background:linear-gradient(#7fd3f5,#43aee4);color:#0d3550;
@@ -246,6 +253,41 @@ svg.cc-roller{position:absolute;bottom:0;height:22vh;width:auto;
   box-shadow:0 6px 0 #2b83b3,0 9px 14px rgba(0,0,0,.22);
   text-shadow:0 1px 0 rgba(255,255,255,.45);}
 .city-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2b83b3;}
+
+/* ---------- "Surprise me" ----------
+   Gold, so it reads as the treat it is and never competes with the green ✕ (go
+   back) or the blue place buttons (a deliberate choice). It sits in the head
+   rather than the .map-cities row because that row is cleared every time a
+   state is tapped, and this button must never disappear. */
+.map-dice{display:flex;align-items:center;gap:1.4vw;border:none;cursor:pointer;
+  background:linear-gradient(#ffd166,#f0a92e);color:#5a3a05;
+  font-weight:bold;font-size:3.2vmin;line-height:1.15;
+  padding:1.2vh 3vw;border-radius:999px;
+  box-shadow:0 6px 0 #c07f13,0 9px 14px rgba(0,0,0,.22);
+  text-shadow:0 1px 0 rgba(255,255,255,.5);}
+.map-dice:active{transform:translateY(3px);box-shadow:0 2px 0 #c07f13;}
+.map-dice:disabled{opacity:.55;box-shadow:0 6px 0 #c07f13;}
+.dice-face{font-size:4.2vmin;line-height:1;}
+/* tabular-nums so the pill does not twitch as the count goes 9/29 -> 10/29 */
+.dice-count{font-size:2.5vmin;opacity:.8;font-variant-numeric:tabular-nums;}
+
+/* The reveal lives in .map-cities, whose height is already reserved, so the map
+   does not jump when it appears. */
+.surprise-card{display:flex;flex-direction:column;align-items:center;gap:.3vh;}
+.surprise-allseen{font-size:2.9vmin;font-weight:bold;color:#146b2f;
+  text-shadow:0 2px 0 rgba(255,255,255,.6);}
+.surprise-kicker{font-size:2.9vmin;font-weight:bold;color:#17456e;opacity:.85;
+  text-shadow:0 2px 0 rgba(255,255,255,.6);}
+.surprise-name{font-size:5.2vmin;font-weight:bold;color:#123f16;line-height:1.15;
+  text-shadow:0 2px 0 rgba(255,255,255,.5);}
+
+/* The chosen state flashes, so a child sees WHERE it is before being taken
+   there. Four beats lands inside the 2.4s hold before the scene swaps. */
+@keyframes cc-surprise{0%,100%{fill:#ffd166;}50%{fill:#ff8c2a;}}
+#us-map .state.state--surprise{animation:cc-surprise .55s ease-in-out 4;}
+@media (prefers-reduced-motion:reduce){
+  #us-map .state.state--surprise{animation:none;fill:#ff8c2a;}
+}
 
 /* ---------- the train customizer ---------- */
 .train-overlay{position:absolute;inset:0;z-index:40;background:linear-gradient(#1b2a4a,#101a30);
