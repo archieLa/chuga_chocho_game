@@ -32,7 +32,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 
 | Contract | Tag it | Used by |
 |---|---|---|
-| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-tractor` / `.cc-ship` with `data-run` / `data-fly` / `data-drive` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, Kansas tractor, both Duluth boats |
+| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-tractor` / `.cc-ship` with `data-run` / `data-fly` / `data-drive` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, Kansas tractor, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
 | **Rotator** — a wheel whose cars stay level | `.cc-ferris` with `data-secs`; children `.cc-pod` with `data-px`/`data-py` | Chicago Ferris wheel |
 | **Path follower** — a consist walking a drawn centreline | `<path id="curve-path">` (and it must be in `KEEP_IDS`) | Horseshoe Curve |
@@ -41,6 +41,9 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Road junction** — traffic turns off instead of fading | `.cc-road-exit` with `data-exit="nearEdgeY,farEdgeY,junctionX"` | Crater Lake |
 | **Cog railway** — one train up a single track and back down | `<path id="cog-path">` (base at length 0, summit at the end) plus a drawn `#cog-train-a` to clone. Scale is the art's rule, `1 − 0.62·t`. | Mount Washington |
 | **Coaster** — a train winched up a lift hill, then gravity | `<path id="coaster-path-*">` (foot of the lift to the last valley). No depth scaling; the crest is found by walking the path, and speed after it grows with how far the train has fallen below it. | Cedar Point |
+| **Spinner** — a wheel turning about its own hub | `.cc-spin` with `data-secs` and `data-cx`/`data-cy` (the hub, in the vehicle's OWN local coordinates, so it survives its parent being moved or mirrored). Unlike `.cc-ferris` it keeps nothing level — turning is the point. | the New Orleans paddlewheel |
+| **Swarm** — a cloud that boils | `.cc-swarm` on a parent whose direct `<g>` children are opacity bands with the individuals **interleaved** between them. The engine drifts the bands against each other, so every individual moves relative to its neighbours. | the Austin bats |
+| **Chase** — bulbs lighting in sequence | `.cc-chase` with `data-rate` (bulbs per second) on a group of bulb elements | the Las Vegas neon |
 | **Where the road ends** | `class="cc-road"` on the carriageway polygon — the engine reads its far edge | every scene |
 
 Two traps, both already paid for once:
@@ -61,7 +64,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (10 scenes)
+## What moves today (14 scenes)
 
 | Scene | What |
 |---|---|
@@ -75,36 +78,32 @@ Two traps, both already paid for once:
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
+| Seattle | the ferry crosses Elliott Bay and turns at the houseboat moorings |
+| New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |
+| Austin | the bat column boils out from under the Congress Avenue Bridge |
+| Las Vegas | the marquee bulbs chase round every sign on the Strip |
 
 ---
 
 ## Queued, best first
 
-**1. Seattle — the ferry.** Already drawn. Pure shuttle, no new code. The
-cheapest real win on the list.
+> **We are at the cap.** Fourteen scenes move; the rule at the top of this file
+> says twelve to fourteen. Everything below would take it past that, so the next
+> one is a judgement call and not just the next item on a list — pick the one
+> that earns it, or decide the rule was too tight and say so here.
 
-**2. New Orleans — the riverboat.** Shuttle for the hull, rotator for the
-paddlewheel. Two existing contracts, no new mechanism.
-
-**3. Austin — the bats.** The scene's whole identity is a million bats off the
-Congress Avenue Bridge at sunset, and they do not move. The one item here that
-wants genuinely new code — a small swarm.
-
-**4. Las Vegas — the neon.** The only night scene in the set and its signs do not
-flash. A blink cycle on tagged elements; very cheap.
-
-**5. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
+**1. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
 along the slickrock track. (Listed as "skip" in an earlier pass — wrong call, a
 vehicle is exactly what lands with the audience.)
 
-**6. Yellowstone — the geyser erupts**, and the bison amble. The rocket's plume
+**2. Yellowstone — the geyser erupts**, and the bison amble. The rocket's plume
 machinery is most of the eruption already.
 
-**7. Bluegrass — a thoroughbred canters** the paddock. Shuttle.
+**3. Bluegrass — a thoroughbred canters** the paddock. Shuttle.
 
-**8. Oʻahu — an outrigger on the reef.** Shuttle.
+**4. Oʻahu — an outrigger on the reef.** Shuttle.
 
-**9. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
+**5. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
 scene where it would read.
 
 ---

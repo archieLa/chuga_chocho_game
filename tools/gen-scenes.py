@@ -1734,8 +1734,11 @@ def seattle():
             + ''.join(f'<rect x="{x}" y="264" width="5" height="16" rx="2" fill="#6b5942"/>'
                       for x in (34, 176, 318, 460, 582)))
 
-    def ferry(x, y, s=1.0):
-        return (f'<g transform="translate({x},{y}) scale({s})">'
+    def ferry(x, y, s=1.0, cls='', attrs=''):
+        # A Washington State ferry is DOUBLE-ENDED — no bow, no stern, a
+        # wheelhouse at each end — which is why she can be mirrored at the end of
+        # a run without looking wrong. That is not luck, it is what the boat is.
+        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
                 f'<g opacity="0.16" transform="translate(0,6) scale(1,-0.4)">'
                 f'<rect x="-40" y="-16" width="80" height="16" fill="#f2f2ec"/></g>'
                 f'<path d="M-44,-8 L44,-8 L38,4 L-38,4 Z" fill="#e8e8e0"/>'
@@ -1746,11 +1749,16 @@ def seattle():
                 f'<rect x="-4" y="-40" width="5" height="11" fill="#41474f"/>'
                 f'<rect x="-44" y="-9" width="88" height="3" fill="#2f6f4f"/></g>')
 
-    boats = ('    ' + dock + houseboat(96, 283, 0.86, '#d98f4f', '#4f6f5f', '#fbf6ea', '#e8574a')
+    # The ferry goes FIRST so she passes behind the moored houseboats and the
+    # dinghy rather than ploughing through them. She turns at x=580, short of the
+    # houseboat row, because that is the head of the bay — beyond it is moorings.
+    boats = ('    ' + dock
+             + ferry(1250, 280, 0.95, cls=' class="cc-ship"',
+                     attrs=' data-sail="1250,580,280" data-scale="0.95"')
+             + houseboat(96, 283, 0.86, '#d98f4f', '#4f6f5f', '#fbf6ea', '#e8574a')
              + houseboat(222, 285, 0.9, '#6fa8bf', '#5a5f7a', '#fbf6ea', '#f2b134')
              + houseboat(352, 283, 0.86, '#d9736b', '#4f6f5f', '#fbf6ea', '#7bc86c')
              + houseboat(478, 285, 0.9, '#8fbf7f', '#6a5f4a', '#fbf6ea', '#4fb8d6')
-             + ferry(1160, 280, 0.95)
              # a little dinghy out on the open water
              + '<g transform="translate(662,286)"><path d="M-16,0 L16,0 L12,6 L-12,6 Z" fill="#f2ede0"/>'
              '<rect x="-2" y="-15" width="3" height="15" fill="#7a6350"/>'
@@ -1929,7 +1937,11 @@ def new_orleans():
              '<g fill="#c9c9a8" opacity="0.45"><ellipse cx="240" cy="296" rx="140" ry="3"/>'
              '<ellipse cx="900" cy="290" rx="170" ry="3"/><ellipse cx="560" cy="283" rx="110" ry="2.5"/>'
              '<ellipse cx="1150" cy="298" rx="120" ry="3"/></g>')
-    boat = ('    <g transform="translate(1010,300)">'
+    # A sternwheeler on the Mississippi. The hull is a plain shuttle; the wheel
+    # is a spinner about its own hub. Mirroring at the end of a run is CORRECT
+    # here even though she is asymmetric — the wheel swaps to the other side, and
+    # a rotation that pushed her right appears reversed and pushes her left.
+    boat = ('    <g class="cc-ship" data-sail="1400,-140,300" transform="translate(1010,300)">'
             '<rect x="-78" y="-30" width="156" height="16" rx="3" fill="#f4efe4"/>'
             '<rect x="-68" y="-44" width="136" height="15" rx="3" fill="#fbf7ee"/>'
             '<rect x="-52" y="-56" width="104" height="13" rx="3" fill="#f4efe4"/>'
@@ -1938,7 +1950,8 @@ def new_orleans():
             '<g fill="#2f3a44"><rect x="-16" y="-78" width="7" height="24"/><rect x="6" y="-78" width="7" height="24"/></g>'
             '<rect x="-20" y="-82" width="15" height="5" rx="2" fill="#a63a2c"/>'
             '<rect x="2" y="-82" width="15" height="5" rx="2" fill="#a63a2c"/>'
-            '<g><circle cx="-84" cy="-20" r="17" fill="#a63a2c"/><circle cx="-84" cy="-20" r="8" fill="#c05040"/>'
+            '<g class="cc-spin" data-secs="2.4" data-cx="-84" data-cy="-20">'
+            '<circle cx="-84" cy="-20" r="17" fill="#a63a2c"/><circle cx="-84" cy="-20" r="8" fill="#c05040"/>'
             '<g stroke="#8e2f22" stroke-width="3"><line x1="-101" y1="-20" x2="-67" y2="-20"/>'
             '<line x1="-84" y1="-37" x2="-84" y2="-3"/><line x1="-96" y1="-32" x2="-72" y2="-8"/>'
             '<line x1="-72" y1="-32" x2="-96" y2="-8"/></g></g>'
@@ -2297,7 +2310,11 @@ def austin():
     for k in range(120):
         bat(380 + rnd() * 560, DECK_BOT + 2 + rnd() * rnd() * 22, 0.24 + rnd() * 0.3, 2 + (k % 2))
 
-    bats = ('    <g id="bats">'
+    # Roughly 1,700 bats, in four opacity bands with the individuals INTERLEAVED
+    # between them. Drifting the four bands against each other at different rates
+    # therefore makes the whole column shimmer and boil — every bat moves relative
+    # to its neighbours — for four attribute writes a frame instead of 1,700.
+    bats = ('    <g id="bats" class="cc-swarm">'
             + ''.join(f'<g opacity="{op}">' + ''.join(b) + '</g>'
                       for op, b in zip((0.96, 0.82, 0.6, 0.4), bands))
             + '</g>')
@@ -4043,7 +4060,7 @@ def las_vegas():
                 f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="#1a1a26"/>'
                 f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="none" '
                 f'stroke="{col}" stroke-width="2.6"/>'
-                f'<g>{bulbs}</g><g>{letters}</g>'
+                f'<g class="cc-chase" data-rate="7">{bulbs}</g><g>{letters}</g>'
                 f'<path d="M{-w/2 - 10},{-h*0.2:.0f} l{w*0.4:.0f},-12 l0,6 l{w*0.5:.0f},0 l0,12 '
                 f'l{-w*0.5:.0f},0 l0,6 Z" fill="{col}" opacity="0.9"/></g>')
 
@@ -4067,7 +4084,7 @@ def las_vegas():
                 f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="#f4f2ea"/>'
                 f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="none" '
                 f'stroke="#2f4d8f" stroke-width="3"/>'
-                f'<g>{bulbs}</g><g>{letters}</g>'
+                f'<g class="cc-chase" data-rate="9">{bulbs}</g><g>{letters}</g>'
                 f'<text x="0" y="-16" text-anchor="middle" font-family="Georgia,serif" '
                 f'font-size="17" font-style="italic" fill="#2f4d8f">to Fabulous</text>'
                 f'<text x="0" y="4" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '

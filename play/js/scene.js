@@ -286,10 +286,14 @@
     // quietly gets nothing, and neither one knows the gate exists.
     const cog = buildCogTrain(svg);
     const coasters = buildCoasters(svg);
+    const spinners = buildSpinners(svg);
+    const swarms = buildSwarms(svg);
+    const chases = buildChases(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
+                spinners: spinners, swarms: swarms, chases: chases,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -545,6 +549,106 @@
         car.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
           ') rotate(' + deg.toFixed(1) + ')');
       });
+    });
+  }
+
+  // =======================================================================
+  // Three small contracts that cost almost nothing per frame.
+  //
+  //   .cc-spin   a wheel turning about its own hub  (the New Orleans paddlewheel)
+  //   .cc-swarm  a cloud that boils                 (the Austin bats)
+  //   .cc-chase  bulbs lighting in sequence         (the Las Vegas neon)
+  //
+  // All three are gate-blind like everything else in this file, and a scene
+  // without the class quietly gets nothing.
+  // =======================================================================
+
+  // A wheel. Unlike .cc-ferris this does NOT keep anything level — it is the
+  // whole point that it turns. The hub is in the vehicle's own local
+  // coordinates, so it keeps working when its parent is moved or mirrored.
+  function buildSpinners(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-spin').forEach(node => {
+      const secs = parseFloat(node.getAttribute('data-secs')) || 3;
+      out.push({ el: node, secs: secs,
+                 cx: parseFloat(node.getAttribute('data-cx')) || 0,
+                 cy: parseFloat(node.getAttribute('data-cy')) || 0, a: 0 });
+    });
+    return out;
+  }
+
+  function updateSpinners(dt) {
+    const list = currentScene && currentScene.spinners;
+    if (!list || !list.length) return;
+    list.forEach(s => {
+      s.a = (s.a + 360 * (dt / 1000) / s.secs) % 360;
+      s.el.setAttribute('transform', 'rotate(' + s.a.toFixed(1) + ' ' + s.cx + ' ' + s.cy + ')');
+    });
+  }
+
+  // A swarm. The art draws thousands of individuals split across a handful of
+  // groups, with neighbours landing in DIFFERENT groups; drifting the groups
+  // against each other therefore moves every individual relative to the ones
+  // beside it. Animating the individuals would be thousands of writes a frame
+  // for an effect nobody could tell apart from this one.
+  const SWARM = {
+    ax: 7, ay: 4,                            // drift amplitude, px
+    periods: [3.1, 3.9, 4.7, 5.5],           // seconds — deliberately not multiples
+    fade: 0.13,                              // how much the opacity breathes
+  };
+
+  function buildSwarms(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-swarm').forEach(node => {
+      directChildren(node, 'g').forEach((band, i) => {
+        const base = parseFloat(band.getAttribute('opacity'));
+        out.push({ el: band, i: i, base: isNaN(base) ? 1 : base,
+                   p: SWARM.periods[i % SWARM.periods.length],
+                   q: SWARM.periods[(i + 2) % SWARM.periods.length] });
+      });
+    });
+    return out;
+  }
+
+  function updateSwarms(t) {
+    const list = currentScene && currentScene.swarms;
+    if (!list || !list.length) return;
+    const s = t / 1000;
+    list.forEach(b => {
+      const ph = b.i * 1.7;
+      const dx = SWARM.ax * Math.sin(2 * Math.PI * s / b.p + ph);
+      const dy = SWARM.ay * Math.sin(2 * Math.PI * s / b.q + ph * 1.6);
+      b.el.setAttribute('transform', 'translate(' + dx.toFixed(2) + ',' + dy.toFixed(2) + ')');
+      b.el.setAttribute('opacity',
+        (b.base * (1 - SWARM.fade + SWARM.fade * Math.sin(2 * Math.PI * s / b.q + ph))).toFixed(3));
+    });
+  }
+
+  // Chasing bulbs. Every third bulb is lit and the pattern walks along the
+  // border, which is what a real marquee does — a whole sign blinking on and
+  // off is a different, much cheaper-looking thing.
+  const CHASE_ON = 1, CHASE_OFF = 0.22;
+
+  function buildChases(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-chase').forEach(node => {
+      const bulbs = Array.prototype.slice.call(node.children);
+      if (!bulbs.length) return;
+      out.push({ bulbs: bulbs, rate: parseFloat(node.getAttribute('data-rate')) || 7, step: -1 });
+    });
+    return out;
+  }
+
+  function updateChases(t) {
+    const list = currentScene && currentScene.chases;
+    if (!list || !list.length) return;
+    list.forEach(c => {
+      const step = Math.floor(t / 1000 * c.rate);
+      if (step === c.step) return;          // only touch the DOM when it changes
+      c.step = step;
+      for (let i = 0; i < c.bulbs.length; i++) {
+        c.bulbs[i].setAttribute('opacity', (i + step) % 3 === 0 ? CHASE_ON : CHASE_OFF);
+      }
     });
   }
 
@@ -1181,6 +1285,9 @@
     updateCurveTrain(dt);
     updateCogTrain(dt);
     updateCoasters(dt);
+    updateSpinners(dt);
+    updateSwarms(t);
+    updateChases(t);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
