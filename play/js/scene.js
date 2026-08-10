@@ -290,11 +290,12 @@
     const swarms = buildSwarms(svg);
     const chases = buildChases(svg);
     const routes = buildRoutes(svg);
+    const balloons = buildBalloons(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -733,6 +734,96 @@
       const sx = (r.dir !== r.nose ? -r.s : r.s);
       r.el.setAttribute('transform', 'translate(' + r.x.toFixed(1) + ',' + r.y +
         ') scale(' + sx + ',' + r.s + ')');
+    });
+  }
+
+  // =======================================================================
+  // The Albuquerque mass ascension (.cc-balloon).
+  //
+  // A balloon only ever does two things: it drifts and it bobs. The art hands
+  // over everything needed — data-x/data-y where it starts, data-s which is
+  // both its scale and its depth, and data-maxy, the lowest its basket may go
+  // before it would be buried in the Sandia ridge.
+  //
+  // Two rules make nineteen balloons read as a sky rather than as a sheet of
+  // wallpaper sliding past:
+  //
+  //   PARALLAX — drift amplitude scales with data-s, so the near ones swing and
+  //   the far ones barely stir. Uniform motion flattens the whole thing.
+  //
+  //   RESTRAINT — real balloons at altitude hardly appear to move at all, and
+  //   that is exactly what sells the scale. Periods are tens of seconds, and
+  //   every balloon has its own so the field never falls into step.
+  //
+  // The drift is an OSCILLATION, not a wrap. data-maxy is computed for ±90px
+  // either side of each balloon's OWN x, so carrying one across the frame would
+  // take it somewhere its clearance was never checked. The amplitude stays
+  // inside that budget, and y is clamped to data-maxy as a hard backstop.
+  const BALLOON_SWING = 84;        // px at the nearest depth; data-maxy allows 90
+  const BALLOON_BOB = 6;
+  const BALLOON_NEAR = 0.46;       // data-s of the nearest airborne balloon
+
+  function buildBalloons(svg) {
+    const list = [];
+    svg.querySelectorAll('.cc-balloon').forEach(node => {
+      const x = parseFloat(node.getAttribute('data-x'));
+      const y = parseFloat(node.getAttribute('data-y'));
+      const s = parseFloat(node.getAttribute('data-s'));
+      if (isNaN(x) || isNaN(y) || isNaN(s)) { console.warn('cc-balloon is missing data-x/y/s'); return; }
+      const maxy = parseFloat(node.getAttribute('data-maxy'));
+      const i = parseFloat(node.getAttribute('data-i')) || 0;
+      const depth = Math.max(0.22, Math.min(1, s / BALLOON_NEAR));
+      list.push({
+        el: node, x: x, y: y, s: s,
+        maxy: isNaN(maxy) ? Infinity : maxy,
+        swing: BALLOON_SWING * depth,
+        bob: BALLOON_BOB * depth,
+        // Periods come from data-i, which is the painting order — stable, so the
+        // sky looks the same every run without needing a seeded random.
+        tx: 34 + (i % 7) * 3.5, px: (i % 11) / 11,
+        ty: 11 + (i % 5) * 1.7, py: (i % 9) / 9,
+      });
+    });
+    // Burners, including the ones on the balloons still standing on the field —
+    // an inflating balloon lit from inside is the best thing in the scene, and
+    // those are #cc-launch-N rather than .cc-balloon, so scoping through
+    // .cc-balloon found only four of the ten.
+    //
+    // Cape Canaveral's rocket uses .cc-flame as well, and there the flame is a
+    // SIBLING of .cc-rocket rather than a child, so closest() cannot tell them
+    // apart. A scene has balloons or a rocket, never both, so the honest test is
+    // the scene itself. If that ever stops being true the balloons quietly lose
+    // their burners, which is the right way round to fail.
+    const flames = [];
+    if (!svg.querySelector('.cc-rocket')) {
+      svg.querySelectorAll('.cc-flame').forEach((f, k) => {
+        flames.push({ el: f, period: 2.3 + (k % 6) * 0.47, phase: (k % 7) / 7,
+                      base: parseFloat(f.getAttribute('opacity')) || 1 });
+      });
+    }
+    return list.length ? { list: list, flames: flames } : null;
+  }
+
+  const TAU = Math.PI * 2;
+
+  function updateBalloons(t) {
+    const b = currentScene && currentScene.balloons;
+    if (!b) return;
+    const secs = t / 1000;
+    b.list.forEach(o => {
+      const x = o.x + o.swing * Math.sin((secs / o.tx + o.px) * TAU);
+      let y = o.y + o.bob * Math.sin((secs / o.ty + o.py) * TAU);
+      if (y > o.maxy) y = o.maxy;          // never below its own clearance line
+      o.el.setAttribute('transform',
+        'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + o.s + ')');
+    });
+    // The burners: a short bright lick at irregular intervals, not a steady
+    // glow. Each is on for about a fifth of its cycle and eased, so it swells
+    // and dies rather than blinking.
+    b.flames.forEach(f => {
+      const u = (secs / f.period + f.phase) % 1;
+      const k = u < 0.22 ? Math.sin(u / 0.22 * Math.PI) : 0;
+      f.el.setAttribute('opacity', (f.base * (0.22 + 0.78 * k)).toFixed(2));
     });
   }
 
@@ -1373,6 +1464,7 @@
     updateSwarms(t);
     updateChases(t);
     updateRoutes(dt);
+    updateBalloons(t);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);

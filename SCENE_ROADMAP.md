@@ -941,3 +941,46 @@ those.
 **Philadelphia** (Art Museum steps, *not* the Rocky statue — 1980 sculpture, almost certainly
 still in copyright), **Portland**, **Louisville**. Each would be a second location in a state
 that now has one.
+
+---
+
+## Wave 5 — decided
+
+Four states that currently have **zero** locations. One each.
+
+| Destination | State | Why this one |
+|---|---|---|
+| **Albuquerque balloon fiesta** ✅ BUILT | New Mexico | The first scene where the **sky** is the subject rather than the backdrop — several hundred balloons above the horizon, adobe and the Rio Grande bosque below |
+| **Cape Hatteras** ✅ BUILT | North Carolina | The first **lighthouse**, and the most recognisable one in the country. A bare barrier island and a rough Atlantic — a different sea from Miami, Oʻahu or Stonington |
+| **Quechee village** | Vermont | The first **autumn** palette, the first **waterfall** and the first **mill**. The real view holds the dam, the brick mill on top of it, the covered bridge below and the hills in colour, all at once |
+| **A Detroit assembly plant** | Michigan | The first **factory**, and the first time the train crossing the road is carrying what the place makes — auto-rack wagons loaded at the plant that built the cars |
+
+Reference-photo prompts: `REFERENCE_PROMPT_wave5.md`.
+
+**Vermont is Quechee, not a covered bridge on its own.** The bridge was the first idea and
+was demoted: a covered bridge by itself is a *thing*, not a place, and the point of the slot
+is the region in October. Quechee keeps the bridge while making the falls, the mill and the
+hillside the subject — and it avoids a second "town with a green" so soon after Savannah.
+**Not** to be combined with Quechee Gorge, which is a mile downstream and a different view.
+
+**Michigan is deliberately not Mackinac.** The bridge and the car-free island were the first
+idea and were dropped: Duluth is already a big bridge over water, whereas the motor industry
+is a kind of place the set has nothing like. Detroit is also the only location so far where
+the railway is part of the subject rather than beside it.
+
+**No badges, no logos, no current model shapes** in the Detroit scene. Trademarks and design
+rights both matter for a free, open-source project — the same reasoning that ruled out the
+Rocky statue. Generic mid-century bodies in bright colours, and an unbranded plant.
+
+Optional, and not a blocker: an **auto-rack wagon** would suit Detroit better than a boxcar.
+The scene works with the existing rolling stock, so it stays a nice-to-have.
+
+After this wave the set stands at **35 destinations across 30 states plus DC**, leaving
+**20 states** empty.
+
+### Reserves held for Wave 6
+
+All from empty states: **West Virginia's New River Gorge**, **the South Dakota Badlands**
+(framed as the Badlands, *not* Mount Rushmore — that carving is from 1941 and its copyright
+status isn't clean enough for this project), **the Mississippi Delta**, and **the
+Indianapolis Speedway**.

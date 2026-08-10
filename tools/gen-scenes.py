@@ -13204,7 +13204,1130 @@ def stonington():
     }, d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington()
+def albuquerque():
+    """ALBUQUERQUE — the mass ascension over the Rio Grande, with the Sandias behind.
+
+    The first scene in the set where the **sky is the subject**. Everything else we have
+    drawn puts the interest below the horizon and uses the sky as a backdrop; here there
+    are ninety balloons above the skyline and the ground is the supporting act.
+
+    What the reference photographs insist on:
+
+    * **The Sandias are a WALL, not a peak.** They run the whole width of the picture as a
+      long steep-faced ridge with a nearly level crest — drawn as a triangle they become
+      any mountain anywhere. At dawn the face is pink-grey, which is what the name means.
+    * **The bosque is a green-gold ribbon.** The cottonwoods along the Rio Grande are the
+      only real trees for miles, and in October they are yellow. Either side of them the
+      land is pale dry scrub. Forget the bosque and the valley reads as desert to the
+      horizon, which it isn't.
+    * **A balloon is built from gores.** The envelope is sewn from tapering vertical panels,
+      so it reads as a striped dome, not a smooth egg. Drawn as a plain ellipse the whole
+      scene turns into balloons-from-a-clipart-set.
+    * **Balloons on the ground are a different shape entirely** — half-inflated, lying over
+      on their side with the crown low and the mouth held open by the fan. Those are worth
+      more than another dozen in the air, because they explain how the ones in the air got
+      there.
+
+    The road is the ordinary standard road running out toward the mountains, and for once
+    it needs no truncation: nothing is in its way."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b86bf"/><stop offset="0.45" stop-color="#9dc2da"/>
+      <stop offset="0.78" stop-color="#e8cfa4"/><stop offset="1" stop-color="#f6dbb0"/>
+    </linearGradient>
+    <linearGradient id="abqg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93a163"/><stop offset="1" stop-color="#7d8c52"/>
+    </linearGradient>''')
+
+    import math as _m
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    # The Sandia crest, defined once. The range and the balloon filter both read it, so a
+    # balloon can never end up half-buried in a mountain that has since been redrawn.
+    #
+    # These nodes are hand-authored and deliberately IRREGULAR. Generated on an even
+    # spacing with similar heights they produced eight near-identical triangles — a paper
+    # garland, not a range. A real skyline has one dominant mass, summits at very different
+    # heights, long asymmetric flanks and spacing that never repeats.
+    # The saddles stay HIGH. Dropped toward the valley they cut the range into a row of
+    # separate triangles — a child's drawing of mountains. The Sandias are one continuous
+    # wall with subordinate summits along it, so the crest never falls far.
+    SANDIA = [(-70, 232), (40, 194), (120, 212), (210, 170), (280, 196), (352, 184),
+              (430, 150), (500, 174), (560, 162), (650, 198), (720, 180), (800, 156),
+              (880, 190), (960, 174), (1040, 194), (1120, 160), (1200, 188),
+              (1280, 174), (1350, 214)]
+
+    def sandia_crest(x):
+        for i in range(len(SANDIA) - 1):
+            (x0, y0), (x1, y1) = SANDIA[i], SANDIA[i + 1]
+            if x0 <= x <= x1:
+                return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+        return 268
+
+    # A narrow, loud palette. Real fiesta balloons are mostly primaries and hot colours in
+    # bold bands — muted schemes disappear at this size.
+    BAND = [['#c9382e', '#f2e6cf', '#e8b02a'], ['#2f5f9e', '#f2e6cf', '#3f9e6f'],
+            ['#e8721f', '#f2e6cf', '#c9382e'], ['#7a3f9e', '#e8b02a', '#f2e6cf'],
+            ['#2f7a5f', '#f2e6cf', '#e8b02a'], ['#c9382e', '#2f5f9e', '#f2e6cf'],
+            ['#e8b02a', '#e8721f', '#f2e6cf'], ['#3f9e6f', '#f2e6cf', '#2f5f9e']]
+
+    # ------------------------------------------------------------- balloons ----
+    def envelope(R, H, cols, gores=10, phase=0):
+        """The envelope, built from tapering vertical panels.
+
+        `w(t)` is the half-width at height fraction t: widest a third of the way down,
+        pinching to the throat at the bottom. Each gore is the strip of that surface
+        between two angles, which is what gives the lens shapes that read as a balloon
+        rather than as a striped circle."""
+        def w(t):
+            return R * (_m.sin(_m.pi * (0.12 + 0.88 * t)) ** 0.62) * (1 - 0.62 * t ** 3.2)
+        rows = [i / 12 for i in range(13)]
+        out = []
+        for k in range(gores):
+            th0 = _m.pi * k / gores
+            th1 = _m.pi * (k + 1) / gores
+            left, right = [], []
+            for t in rows:
+                ww = w(t)
+                y = -H + H * t
+                left.append((ww * _m.cos(th1), y))
+                right.append((ww * _m.cos(th0), y))
+            pts = ('M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in right)
+                   + ' L' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in reversed(left)) + ' Z')
+            out.append(f'<path d="{pts}" fill="{cols[(k + phase) % len(cols)]}"/>')
+        return ''.join(out)
+
+    def balloon(x, y, s, seed=1, flame=False, attrs=''):
+        """One balloon in the air: envelope, throat, basket and its rigging."""
+        rr = rnd(seed)
+        cols = BAND[int(rr() * len(BAND))]
+        gores = 8 + int(rr() * 5)
+        R, H = 34, 52
+        bk = (f'<g transform="translate(0,{6})">'
+              f'<path d="M-7,0 L7,0 L6,10 L-6,10 Z" fill="#8f6a45"/>'
+              f'<rect x="-7" y="-1.6" width="14" height="3" rx="1" fill="#a07c55"/></g>')
+        rig = ''.join(f'<path d="M{dx * 9:.0f},{-2} L{dx * 5.4:.0f},{6}" stroke="#6b5744" '
+                      f'stroke-width="1" fill="none"/>' for dx in (-1, 1))
+        fl = (f'<path class="cc-flame" d="M0,2 C -4,-3 4,-3 0,-9 C 2,-4 -2,-4 0,2 Z" '
+              f'fill="#f2b23a"/>' if flame else '')
+        return (f'<g{attrs} transform="translate({x},{y}) scale({s:.3f})">'
+                + envelope(R, H, cols, gores, int(rr() * 3))
+                + f'<path d="M-11,-4 L11,-4 L8,2 L-8,2 Z" fill="#6b5744" opacity="0.55"/>'
+                + rig + fl + bk + '</g>')
+
+    def ground_balloon(x, base, s, seed=1, flip=False, crew=0.32, gid=None):
+        """A balloon standing on the field with its basket on the grass, about to go.
+
+        Two earlier attempts drew it *deflating on its side*, which is what the reference
+        shows in the pre-dawn shots — but a lens-shaped envelope lying flat reads as a leaf
+        or a shell, not as a balloon, and a three-year-old needs to recognise it instantly.
+        Standing and inflated is equally true (the field is full of them at launch) and it
+        is unmistakable, so that is what gets drawn."""
+        rr = rnd(seed)
+        f = -1 if flip else 1
+        tilt = (rr() * 7 + 2) * f
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr} transform="translate({x},{base}) scale({s:.3f})">'
+                f'{shadow(0, 3, 40, 7, 0.18)}'
+                f'<g transform="rotate({tilt:.1f})">'
+                + balloon(0, -4, 1.0, seed, True) + '</g>'
+                # The fan and the crew are drawn at the size of the CROWD around them, not
+                # at the balloon's size. Because they sit inside the balloon's transform,
+                # their scale has to be divided back out — otherwise inflating the balloon
+                # inflates the people standing next to it, which is exactly what happened:
+                # a crew member ended up three times the height of the spectators behind.
+                + (f'<g transform="scale({crew / s:.3f})">'
+                   f'<g transform="translate({f * 44 / (crew / s):.0f},0)">'
+                   f'<rect x="-9" y="-12" width="18" height="12" rx="2" fill="#3f4a52"/>'
+                   f'<circle cx="0" cy="-6" r="4.4" fill="#8f9aa0"/></g>'
+                   + person(f * -52 / (crew / s), 0, 1.0, '#c9382e') + '</g>'
+                   if crew else '') + '</g>')
+
+    def chase_van(x, base, s=1.0, body='#e8e2d2'):
+        return (f'<g transform="translate({x},{base}) scale({s})">{shadow(0, 3, 28, 5, 0.2)}'
+                f'<rect x="-26" y="-24" width="52" height="20" rx="3" fill="{body}"/>'
+                f'<rect x="-26" y="-24" width="52" height="6" rx="3" fill="#f4efe2"/>'
+                f'<rect x="-22" y="-20" width="14" height="9" rx="1.5" fill="#41505a"/>'
+                f'<rect x="-4" y="-20" width="12" height="9" rx="1.5" fill="#41505a"/>'
+                f'<rect x="-28" y="-8" width="56" height="4" rx="2" fill="#8f8a80"/>'
+                + '<g fill="#22262b"><circle cx="-16" cy="-2" r="5"/>'
+                f'<circle cx="16" cy="-2" r="5"/></g>'
+                f'<rect x="10" y="-32" width="16" height="9" rx="2" fill="#a89a84"/></g>')
+
+    def adobe(x, base, w, h, s=1.0, body='#c9a583', lit='#dcb996'):
+        """A pueblo-revival adobe: flat roof, a stepped parapet, rounded corners, projecting
+        vigas (the roof beams that stick out through the wall) and blue-painted trim."""
+        vig = ''.join(f'<rect x="{-w/2 + 8 + i * 17:.0f}" y="{-h - 4}" width="7" '
+                      f'height="6" rx="2.4" fill="#6b5744"/>'
+                      for i in range(max(1, int((w - 12) / 17))))
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 3, w * 0.56, 6, 0.18)}'
+                f'<rect x="{-w/2:.0f}" y="{-h}" width="{w}" height="{h}" rx="4" '
+                f'fill="{body}"/>'
+                f'<rect x="{-w/2:.0f}" y="{-h}" width="{w * 0.3:.0f}" height="{h}" rx="4" '
+                f'fill="{lit}"/>'
+                f'<rect x="{-w/2 - 3:.0f}" y="{-h - 7}" width="{w * 0.56:.0f}" height="9" '
+                f'rx="3" fill="{lit}"/>'
+                f'<rect x="{-w/2 + w * 0.5:.0f}" y="{-h - 12}" width="{w * 0.52:.0f}" '
+                f'height="14" rx="3" fill="{body}"/>{vig}'
+                + '<g fill="#3f6f9e">'
+                + ''.join(f'<rect x="{-w/2 + 10 + i * 24:.0f}" y="{-h + 12}" width="15" '
+                          f'height="15" rx="1.5"/>' for i in range(max(1, int(w / 24))))
+                + '</g>'
+                f'<rect x="{-w * 0.1:.0f}" y="{-h * 0.55:.0f}" width="14" '
+                f'height="{h * 0.55:.0f}" rx="1.5" fill="#7a4f3a"/></g>')
+
+    def city(base=322):
+        """Albuquerque, spread along the foot of the Sandias.
+
+        This band is the whole reason the scene is Albuquerque rather than a balloon
+        festival in a field. The city here is not a wall of towers: it is a very wide,
+        very low carpet of flat-roofed tan and cream buildings filling the valley, with a
+        small cluster of downtown mid-rises poking out of it — and the mountain rising
+        straight out of the back of it.
+
+        Drawn without this, the picture is 'some houses, some trees and balloons', which is
+        exactly what the first version was."""
+        rr = rnd(53)
+        # Warm browns and terracotta. Drawn grey-blue the town read as an office park;
+        # in every photograph of Albuquerque the buildings are the colour of the ground
+        # they stand on.
+        SPRAWL = ['#c9a884', '#d8b995', '#bd9a76', '#e0c6a2', '#c2a382', '#cdae8c']
+        out = []
+        # the low carpet, three ranks deep so it reads as depth rather than as a fence
+        # Four ranks, and the front one is substantial. At 25px tall the town was the
+        # least present band in a picture that is supposed to be *about* a town.
+        for rank, (dy, sc, op) in enumerate([(-30, 0.6, 0.62), (-21, 0.74, 0.74),
+                                             (-11, 0.88, 0.88), (0, 1.15, 1.0)]):
+            x = -40
+            while x < 1330:
+                w = (16 + rr() * 26) * sc
+                h = (11 + rr() * 22) * sc
+                col = SPRAWL[int(rr() * len(SPRAWL))]
+                y = base + dy
+                out.append(f'<g opacity="{op}">'
+                           f'<rect x="{x:.0f}" y="{y - h:.0f}" width="{w:.0f}" '
+                           f'height="{h:.0f}" fill="{col}"/>'
+                           f'<rect x="{x - 1:.0f}" y="{y - h - 2:.0f}" width="{w + 2:.0f}" '
+                           f'height="2.6" fill="#e8dcc6"/></g>')
+                x += w + 2 + rr() * 9
+        # the downtown cluster: a handful of mid-rises, off to one side of the road's axis
+        towers = [(392, 30, 62, '#b8875e'), (430, 24, 46, '#dcc8a8'),
+                  (462, 34, 78, '#a8724f'), (502, 22, 52, '#c08a5f'),
+                  (536, 28, 68, '#8f6244'), (574, 20, 44, '#d2b891'),
+                  (868, 26, 56, '#9c6b48'), (902, 20, 42, '#c9a880'),
+                  (932, 30, 66, '#b07a52')]
+        for tx, tw, th, col in towers:
+            out.append(f'<g><rect x="{tx}" y="{base - th}" width="{tw}" height="{th}" '
+                       f'fill="{col}"/>'
+                       f'<rect x="{tx}" y="{base - th}" width="{tw * 0.3:.0f}" '
+                       f'height="{th}" fill="#ffffff" opacity="0.16"/>'
+                       + '<g fill="#8f9aa8" opacity="0.7">'
+                       + ''.join(f'<rect x="{tx + 3 + i * 7}" y="{base - th + 6 + j * 9}" '
+                                 f'width="4" height="6"/>'
+                                 for i in range(max(1, int((tw - 4) / 7)))
+                                 for j in range(max(1, int((th - 10) / 9)))) + '</g>'
+                       f'<rect x="{tx - 2}" y="{base - th - 4}" width="{tw + 4}" '
+                       f'height="4" fill="#e2d6c2"/></g>')
+        # The one building with a shape to it: the brick-red tower with a red pyramidal
+        # roof that dominates the real skyline. Without a silhouette like this the cluster
+        # is just a row of boxes.
+        out.append(f'<rect x="{454}" y="{base - 96}" width="34" height="96" '
+                   f'fill="#a24a3a"/>'
+                   f'<rect x="{454}" y="{base - 96}" width="11" height="96" '
+                   f'fill="#b85a46"/>'
+                   + '<g fill="#8c3a2c" opacity="0.55">'
+                   + ''.join(f'<rect x="454" y="{base - 88 + i * 11}" width="34" '
+                             f'height="2"/>' for i in range(8)) + '</g>'
+                   + f'<path d="M448,{base - 96} L471,{base - 124} L494,{base - 96} Z" '
+                     f'fill="#8c3a2c"/>'
+                     f'<path d="M448,{base - 96} L471,{base - 124} L471,{base - 96} Z" '
+                     f'fill="#a04a38"/>'
+                     f'<rect x="470" y="{base - 138}" width="2.4" height="15" '
+                     f'fill="#8c3a2c"/>')
+        return '<g id="city">' + ''.join(out) + '</g>'
+
+    def tent(x, base, w=86, s=1.0):
+        """A white peaked event tent. The launch field is lined with them and they are what
+        makes the ground read as an organised event rather than as open country."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 3, w * 0.5, 6, 0.16)}'
+                f'<path d="M{-w/2:.0f},-6 L{-w/2 + 5:.0f},-34 L{-w/4:.0f},-52 '
+                f'L0,-66 L{w/4:.0f},-52 L{w/2 - 5:.0f},-34 L{w/2:.0f},-6 Z" '
+                f'fill="#f2efe6"/>'
+                + '<g fill="#8f8a80">'
+                + ''.join(f'<rect x="{-w/2 + 2 + i * (w - 4) / 4:.0f}" y="-8" width="2.6" '
+                          f'height="8"/>' for i in range(5)) + '</g>'
+                f'<path d="M0,-66 L{w/4:.0f},-52 L{w/2 - 5:.0f},-34 L{w/2:.0f},-6 '
+                f'L{w/4:.0f},-6 Z" fill="#e0dbcd"/>'
+                f'<rect x="-1.2" y="-78" width="2.4" height="13" fill="#8f8a80"/>'
+                f'<path d="M1,-78 l13,4 l-13,4 Z" fill="#c9382e"/></g>')
+
+    def pueblo_house(x, base, s=1.0, tone=0, flip=False, plan=0):
+        """A pueblo-revival house, drawn big and close so the New Mexico architecture is
+        actually legible rather than a smudge on the skyline.
+
+        Everything here is from the reference: **stepped massing** (blocks of different
+        heights pushed together), rounded parapet corners, **vigas** — the round roof beams
+        that project straight through the wall — deep-set windows with blue-painted frames,
+        a heavy earth-coloured wall with a pale sunlit face, a corner buttress, a chile
+        ristra by the door, and a low adobe garden wall in front."""
+        # Two colourways, both from the reference: the pale sand-plaster one and the
+        # deeper red-brown earth one. Same building, different wash.
+        BODY, LIT, DARK, TRIM = [('#c9a583', '#dcb996', '#b08a68', '#3f6f9e'),
+                                 ('#a8604a', '#bd755c', '#8c4a37', '#2f7a5f')][tone % 2]
+        F = -1 if flip else 1
+        # Two plans. Mirroring one house is not variety — the eye reads the same asset
+        # twice. Plan 1 puts the tall block on the other side, drops the upper storey, and
+        # runs a long single-storey range instead.
+        P = plan % 2
+        vig = lambda x0, y0, n, step=22: ''.join(
+            f'<rect x="{x0 + i * step:.0f}" y="{y0}" width="9" height="7" rx="3.4" '
+            f'fill="#6b5744"/>' for i in range(n))
+        return (f'<g transform="translate({x},{base}) scale({s * F},{s})">'
+                f'{shadow(0, 4, 118, 11, 0.2)}'
+                # the low wing on the left
+                f'<rect x="-116" y="-62" width="76" height="62" rx="6" fill="{BODY}"/>'
+                f'<rect x="-116" y="-62" width="24" height="62" rx="6" fill="{LIT}"/>'
+                f'<rect x="-120" y="-70" width="84" height="10" rx="4" fill="{LIT}"/>'
+                + vig(-112, -78, 4, 22)
+                # the tall main block
+                + f'<rect x="-44" y="{-114 if P == 0 else -92}" width="112" '
+                f'height="{114 if P == 0 else 92}" rx="6" fill="{BODY}"/>'
+                f'<rect x="-44" y="{-114 if P == 0 else -92}" width="34" '
+                f'height="{114 if P == 0 else 92}" rx="6" fill="{LIT}"/>'
+                f'<rect x="-50" y="{-124 if P == 0 else -102}" width="124" height="12" '
+                f'rx="5" fill="{LIT}"/>'
+                + vig(-40, -134 if P == 0 else -112, 5, 24)
+                # plan 0: a stepped upper storey set back on the right.
+                # plan 1: a long low range running out to the right instead.
+                + (f'<rect x="14" y="-158" width="60" height="46" rx="5" fill="{BODY}"/>'
+                   f'<rect x="14" y="-158" width="18" height="46" rx="5" fill="{LIT}"/>'
+                   f'<rect x="10" y="-166" width="68" height="10" rx="4" fill="{LIT}"/>'
+                   + vig(18, -175, 3, 20) if P == 0 else
+                   f'<rect x="66" y="-54" width="84" height="54" rx="6" fill="{BODY}"/>'
+                   f'<rect x="66" y="-54" width="22" height="54" rx="6" fill="{LIT}"/>'
+                   f'<rect x="62" y="-62" width="92" height="10" rx="4" fill="{LIT}"/>'
+                   + vig(72, -71, 4, 21))
+                # the corner buttress, which is what makes the wall look like earth
+                + f'<path d="M68,0 L74,-96 L86,-96 L92,0 Z" fill="{DARK}"/>'
+                # windows: deep-set, blue frames
+                + ''.join(f'<g><rect x="{wx - 3}" y="{wy - 3}" width="{ww + 6}" '
+                          f'height="{wh + 6}" rx="2" fill="{TRIM}"/>'
+                          f'<rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" '
+                          f'fill="#41505a"/>'
+                          f'<rect x="{wx}" y="{wy}" width="{ww}" height="{wh * 0.4:.0f}" '
+                          f'fill="#5f7280"/></g>'
+                          for wx, wy, ww, wh in
+                          ([(-104, -48, 22, 26), (-72, -48, 22, 26),
+                            (-30, -96, 26, 30), (10, -96, 26, 30),
+                            (-30, -50, 26, 30), (26, -142, 20, 24), (52, -142, 20, 24)]
+                           if P == 0 else
+                           [(-104, -48, 22, 26), (-72, -48, 22, 26),
+                            (-30, -76, 26, 30), (10, -76, 26, 30), (-30, -36, 26, 26),
+                            (78, -40, 22, 26), (112, -40, 22, 26)]))
+                # the door, its lintel, a doorstep and a chile ristra beside it
+                + f'<rect x="18" y="-56" width="34" height="56" rx="2" fill="#7a4f3a"/>'
+                f'<rect x="14" y="-62" width="42" height="8" rx="2" fill="#6b5744"/>'
+                f'<rect x="10" y="-6" width="50" height="8" rx="2" fill="{DARK}"/>'
+                f'<rect x="6" y="0" width="58" height="6" rx="2" fill="#b89a78"/>'
+                + '<g fill="#b8342c">'
+                + ''.join(f'<ellipse cx="{62 + (i % 2) * 4}" cy="{-52 + i * 7}" rx="4" '
+                          f'ry="6"/>' for i in range(7)) + '</g>'
+                # the garden wall along the front, with a gate opening
+                + f'<rect x="-140" y="-26" width="88" height="26" rx="5" fill="{DARK}"/>'
+                f'<rect x="-140" y="-30" width="88" height="7" rx="3" fill="{BODY}"/>'
+                f'<rect x="76" y="-26" width="72" height="26" rx="5" fill="{DARK}"/>'
+                f'<rect x="76" y="-30" width="72" height="7" rx="3" fill="{BODY}"/></g>')
+
+    def chamisa(x, base, s=1.0, a='#7f8a5c', b='#c9b45a'):
+        """Chamisa and sage — the grey-green scrub with dusty yellow flower heads that is
+        most of the ground cover here."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'<g fill="{a}"><ellipse cx="0" cy="-10" rx="20" ry="12"/>'
+                f'<ellipse cx="-13" cy="-5" rx="12" ry="8"/>'
+                f'<ellipse cx="13" cy="-5" rx="11" ry="7"/></g>'
+                + f'<g fill="{b}">'
+                + ''.join(f'<ellipse cx="{-14 + i * 7}" cy="{-16 - (i % 3) * 4}" rx="5" '
+                          f'ry="3.4"/>' for i in range(5)) + '</g></g>')
+
+    def cottonwood(x, base, s=1.0, a='#c9a02a', b='#dcb63f', c='#7f8f4a'):
+        """A Rio Grande cottonwood: big, round, and in October the only gold for miles."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'<rect x="-5" y="-22" width="10" height="22" fill="#6f5f4a"/>'
+                f'<ellipse cx="0" cy="-46" rx="34" ry="26" fill="{a}"/>'
+                f'<ellipse cx="-16" cy="-38" rx="19" ry="15" fill="{b}"/>'
+                f'<ellipse cx="17" cy="-40" rx="17" ry="13" fill="{b}"/>'
+                f'<ellipse cx="4" cy="-58" rx="18" ry="13" fill="{c}"/></g>')
+
+    def coyote_fence(x0, x1, base, s=1.0):
+        """A coyote fence: unmilled cedar poles set upright side by side with uneven tops.
+        It is the commonest boundary in northern New Mexico and it costs almost nothing."""
+        n = int((x1 - x0) / (6 * s))
+        poles = ''.join(
+            f'<rect x="{x0 + i * 6 * s:.0f}" y="{-(30 + (i * 7) % 11) * s:.0f}" '
+            f'width="{4.4 * s:.1f}" height="{(32 + (i * 7) % 11) * s:.0f}" '
+            f'rx="{2 * s:.1f}" fill="{"#9c8163" if i % 3 else "#8a7156"}"/>'
+            for i in range(n))
+        rail = (f'<rect x="{x0}" y="{-20 * s:.0f}" width="{x1 - x0}" '
+                f'height="{2.6 * s:.1f}" fill="#7d6a52"/>')
+        return f'<g transform="translate(0,{base})">{poles}{rail}</g>'
+
+    def pickup(x, base, s=1.0, body='#2f6f9e'):
+        """A pickup on the dirt. Every yard in the reference photographs has one."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 3, 34, 5, 0.22)}'
+                f'<rect x="-34" y="-14" width="68" height="12" rx="3" fill="{body}"/>'
+                f'<rect x="-14" y="-27" width="30" height="15" rx="4" fill="{body}"/>'
+                f'<rect x="-11" y="-24" width="11" height="9" rx="1.5" fill="#cfe4f2"/>'
+                f'<rect x="2" y="-24" width="11" height="9" rx="1.5" fill="#cfe4f2"/>'
+                + '<g fill="#22262b"><circle cx="-20" cy="-2" r="6.6"/>'
+                f'<circle cx="22" cy="-2" r="6.6"/></g>'
+                + '<g fill="#8f8a80"><circle cx="-20" cy="-2" r="2.6"/>'
+                f'<circle cx="22" cy="-2" r="2.6"/></g></g>')
+
+    def yucca(x, base, s=1.0):
+        """Yucca: a spiky rosette with a tall flower spike. The one plant shape out here
+        that is not a soft blob, which is exactly why it earns its place."""
+        blades = ''.join(
+            f'<path d="M0,0 L{dx},{dy}" stroke="#6f8a5c" stroke-width="4" '
+            f'stroke-linecap="round"/>'
+            for dx, dy in [(-26, -20), (-18, -34), (-7, -40), (6, -39), (17, -32),
+                           (26, -18), (-30, -6), (30, -5)])
+        return (f'<g transform="translate({x},{base}) scale({s})">{blades}'
+                f'<rect x="-2" y="-70" width="4" height="42" fill="#8a9a6a"/>'
+                + '<g fill="#e8e2d2">'
+                + ''.join(f'<ellipse cx="{-5 + (i % 2) * 10}" cy="{-70 + i * 7}" rx="5" '
+                          f'ry="4"/>' for i in range(5)) + '</g></g>')
+
+    def track(x0, x1, y0, x2, x3, y1, col='#c2a980'):
+        """A dirt track worn across the sand — what connects a house to a road, and what
+        stops the ground reading as an empty lot."""
+        return (f'<path d="M{x0},{y0} L{x1},{y0} L{x3},{y1} L{x2},{y1} Z" fill="{col}"/>'
+                f'<path d="M{(x0 + x1) / 2:.0f},{y0} L{(x2 + x3) / 2:.0f},{y1}" '
+                f'stroke="#b09a72" stroke-width="2" opacity="0.7"/>')
+
+    def person(x, y, s=1.0, top='#c9382e', bottom='#3f4650', skin='#c98d63'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+                f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
+                f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
+                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/></g>')
+
+    # ------------------------------------------------------------------ sky ----
+    # Ninety-odd balloons, biggest and lowest at the front, tiny and high at the back.
+    # Laid out on a jittered grid so they neither line up nor clump.
+    def sky_balloons():
+        rr = rnd(11)
+        out = []
+        # The size range has to be BRUTAL. In the photographs a near balloon is twenty
+        # times the area of a far one, and it is that spread — not the count — that makes
+        # the sky read as deep. Evenly sized balloons on an even grid are wallpaper.
+        # FEWER, BIGGER. Ninety balloons at small sizes read as confetti; the festival is
+        # just as legible with forty, and each one is then large enough to see that it is
+        # made of panels.
+        for row, (n, y, sc) in enumerate([(9, 40, 0.26), (8, 84, 0.34), (7, 126, 0.46),
+                                          (6, 166, 0.62), (5, 206, 0.86),
+                                          (3, 244, 1.2)]):
+            for i in range(n):
+                x = -30 + (1340 / max(1, n - 1)) * i + (rr() - 0.5) * 112
+                yy = y + (rr() - 0.5) * 52
+                out.append((x, yy, sc * (0.7 + rr() * 0.62), int(rr() * 9999),
+                            rr() > 0.82))
+        # Drop anything that would be cut by the mountain. A balloon half-buried in the
+        # ridge reads as a mistake, and the big ones near the skyline are drawn in
+        # `scenery-back` anyway, in FRONT of the range, where they belong.
+        # The margin has to clear the PALER RANK BEHIND the main crest as well — that one
+        # rides up to 66 units higher, and a balloon cleared against the front ridge can
+        # still be cut by it.
+        out = [b for b in out if b[1] + 18 * b[2] < sandia_crest(b[0]) - 74]
+        out.sort(key=lambda b: b[2])            # small ones first, so big ones sit in front
+
+        def hooks(i, x, y, sc):
+            """Everything an engine needs to drift this balloon without walking it into a
+            mountain. `data-maxy` is the lowest the BASKET may go while the balloon stays
+            anywhere within ±90px of its start, worked out from the same crest the art
+            uses — so a drifting balloon can never end up half-buried in the ridge."""
+            floor = min(sandia_crest(x - 90), sandia_crest(x), sandia_crest(x + 90)) - 74
+            return (f' class="cc-balloon" data-i="{i}" data-x="{x:.0f}" data-y="{y:.0f}"'
+                    f' data-s="{sc:.3f}" data-maxy="{floor:.0f}"')
+
+        return ''.join(balloon(x, y, sc, sd, fl, hooks(i, x, y, sc))
+                       for i, (x, y, sc, sd, fl) in enumerate(out))
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             + '    <g fill="#ffffff" opacity="0.35">'
+             + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.22:.0f}"/>'
+                       for x, y, r in [(240, 54, 110), (900, 38, 90), (1140, 84, 70)])
+             + '</g>')
+
+    # ------------------------------------------------------- the Sandia wall ----
+    def sandia():
+        """The Sandia Mountains, built as a range rather than as a ridgeline.
+
+        Three things carry it, and all three were missing from earlier versions:
+
+        * **Unequal summits.** The crest nodes are hand-authored and irregular — one
+          dominant high point, others well below it, spacing that never repeats. Evenly
+          spaced peaks of similar height read as a saw blade however well they are shaded.
+        * **Overlapping spurs.** In front of the main wall sit half a dozen shoulders of
+          rock at different distances, each darker and warmer than the one behind, each
+          overlapping its neighbours. That overlap is what tells the eye which part is
+          nearer; a single silhouette, however jagged, stays flat.
+        * **Faces on the upper slopes only.** Run to the base they become huge flat wedges
+          and the whole thing turns to origami — which is exactly what happened when the
+          range was first made this big.
+        """
+        rr = rnd(29)
+        NODES = SANDIA
+
+        def broken(p0, p1, n=4):
+            out = []
+            for i in range(1, n):
+                t = i / n
+                x = p0[0] + (p1[0] - p0[0]) * t
+                y = p0[1] + (p1[1] - p0[1]) * t + (rr() - 0.5) * 8 * (1 - abs(2 * t - 1))
+                out.append((x, y))
+            return out
+
+        pts = [NODES[0]]
+        for i in range(len(NODES) - 1):
+            pts += broken(NODES[i], NODES[i + 1])
+            pts.append(NODES[i + 1])
+        sil = ('M-70,308 L' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in pts)
+               + ' L1350,308 Z')
+
+        faces = []
+        for i in range(1, len(NODES) - 1):
+            x, y = NODES[i]
+            lx, ly = NODES[i - 1]
+            rx, ry = NODES[i + 1]
+            if y > ly or y > ry:
+                continue
+            cut = y + (308 - y) * 0.42
+            fl = min(1.0, (cut - y) / max(1.0, ly - y))
+            fr = min(1.0, (cut - y) / max(1.0, ry - y))
+            faces.append(f'<path d="M{x:.0f},{y:.0f} L{x + (lx - x) * fl:.0f},{cut:.0f} '
+                         f'L{x:.0f},{cut:.0f} Z" fill="#a08b98" opacity="0.7"/>')
+            faces.append(f'<path d="M{x:.0f},{y:.0f} L{x + (rx - x) * fr:.0f},{cut:.0f} '
+                         f'L{x:.0f},{cut:.0f} Z" fill="#7a6674" opacity="0.7"/>')
+
+        # the paler rank behind, offset so its summits do not line up with the main wall
+        back = [(x - 46, y - 30 - (i % 4) * 12) for i, (x, y) in enumerate(NODES)]
+        back_sil = ('M-70,308 L' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in back)
+                    + ' L1350,308 Z')
+
+        # SPURS: shoulders of rock standing in front of the wall at varying distances,
+        # each one warmer and darker than the rank behind it, and each overlapping its
+        # neighbours. This is the part that gives the range depth.
+        def spur(cx, half, top, col, tilt=0.0):
+            base = 308
+            p = [(cx - half, base)]
+            for i in range(1, 9):
+                t = i / 9.0
+                x = cx - half + 2 * half * t
+                # asymmetric: the crest sits off-centre, so no spur is a triangle
+                k = (t - 0.46 - tilt)
+                # exponent above 2 gives a broad flat shoulder rather than a point: these
+                # are ridges standing in front of the wall, not more peaks
+                y = top + (base - top) * min(1.0, (abs(k) / 0.56) ** 2.6)
+                p.append((x, y - rr() * 5))
+            p.append((cx + half, base))
+            return (f'<path d="M' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in p)
+                    + f' Z" fill="{col}"/>')
+
+        spurs = ''.join(spur(cx, half, top, col, tilt) for cx, half, top, col, tilt in
+                        [(120, 380, 224, '#94798a', -0.10), (620, 420, 210, '#94798a', 0.12),
+                         (1140, 390, 218, '#94798a', 0.06),
+                         (330, 340, 244, '#8a7280', 0.13), (820, 360, 240, '#8a7280', -0.11),
+                         (1300, 320, 248, '#8a7280', 0.04),
+                         (180, 300, 262, '#7f6a76', 0.10), (700, 330, 258, '#7f6a76', -0.08),
+                         (1080, 310, 264, '#7f6a76', 0.06)])
+
+        # the warm piñon-covered apron under the rock
+        fh = [(-70, 308)]
+        for x in range(-60, 1351, 48):
+            fh.append((x, 282 - 16 * _m.sin(x / 165.0) - 9 * _m.sin(x / 63.0) - rr() * 7))
+        fh.append((1350, 308))
+        foot = ('M-70,310 L' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in fh) + ' L1350,310 Z')
+
+        return (f'<g id="sandia">'
+                f'<path d="{back_sil}" fill="#a2909f"/>'
+                f'<path d="{sil}" fill="#8b7383"/>'
+                + ''.join(faces)
+                + '<path d="M' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in pts)
+                + '" fill="none" stroke="#c3aab0" stroke-width="1.8"/>'
+                + spurs
+                + f'<path d="{foot}" fill="#8a6f6a"/>'
+                + '<path d="M' + ' L'.join(f'{x:.0f},{y:.0f}' for x, y in fh)
+                + '" fill="none" stroke="#9c8078" stroke-width="2"/></g>')
+
+    far_l = ('    ' + sandia() + '\n'
+             # the far mesa shoulder on the right, much paler because it is much further
+             + '    <path d="M840,306 L980,282 L1180,290 L1320,278 L1320,306 Z" '
+               'fill="#b9a3a6" opacity="0.7"/>\n'
+             # THE CITY, spread along the foot of the range
+             + '    ' + city(326) + '\n'
+             # the bosque: the cottonwood ribbon along the Rio Grande, in front of the town
+             + '    <rect x="0" y="322" width="1280" height="22" fill="#8f9e63"/>\n'
+             + '    <g id="bosque">'
+             # a back rank of small dark crowns, then bigger gold ones in front of it, at
+             # irregular spacing — one rank of identical trees reads as a hedge
+             # Irregular in size, spacing and colour. A single rank of identical crowns
+             # reads as a hedge — the same fault the Stonington village had.
+             + ''.join(cottonwood(x + ((x * 7) % 19), 332 + ((x * 5) % 7),
+                                  0.24 + ((x * 11) % 9) * 0.018,
+                                  ['#a8862a', '#96832e', '#b09030'][(x // 31) % 3],
+                                  '#bd9a34', '#6f7f42')
+                       for x in range(-30, 1330, 31))
+             + ''.join(cottonwood(x + ((x * 13) % 27), 344 + ((x * 3) % 9),
+                                  0.3 + ((x * 17) % 11) * 0.026,
+                                  ['#c9a02a', '#b8912c', '#d2ab34', '#8f9e42'][(x // 47) % 4],
+                                  '#dcb63f', '#7f8f4a')
+                       for x in range(-20, 1330, 47)) + '</g>')
+
+    # ----------------------------------------------------------- the field ----
+    ground_l = ('    <rect x="0" y="336" width="1280" height="384" fill="url(#abqg)"/>\n'
+                # the dusty launch lanes worn across the grass
+                '    <rect x="0" y="392" width="1280" height="34" fill="#c9b58f"/>\n'
+                '    <rect x="0" y="392" width="1280" height="4" fill="#d8c6a2"/>\n'
+                '    <rect x="0" y="556" width="1280" height="164" fill="#c9b58f"/>\n'
+                '    <rect x="0" y="556" width="1280" height="4" fill="#d8c6a2"/>\n'
+                + '    <g fill="#b8a37c" opacity="0.5">'
+                + ''.join(f'<ellipse cx="{(i * 149) % 1276}" cy="{566 + (i * 71) % 150}" '
+                          f'rx="{12 + i % 18}" ry="{3 + i % 4}"/>' for i in range(46))
+                + '</g>\n'
+                + '    <g fill="#7f8c52" opacity="0.45">'
+                + ''.join(f'<ellipse cx="{(i * 197) % 1276}" cy="{440 + (i * 53) % 100}" '
+                          f'rx="{22 + i % 26}" ry="{5 + i % 5}"/>' for i in range(30))
+                + '</g>')
+
+    # -------------------------------------------------- behind the rails ----
+    back = ('    '
+            # Three big balloons just off the ground, in FRONT of the mountains and the
+            # town. The sky layer is painted before them, so a low balloon put there is
+            # hidden — and without something this size close to us the ascension has no
+            # depth at all: everything reads as the same distance away.
+            # These three have just lifted off, so they are HIGH and close: baskets well
+            # above the field, not hovering at the same height as balloons a quarter their
+            # size. The mismatch was the giveaway in the last version — a huge balloon and a
+            # tiny one at the same depth reads as a scale error, not as distance.
+            # Airborne, and BEHIND the ones still on the field — so they are higher in the
+            # frame AND smaller. The last version had it backwards: the biggest balloons
+            # were the highest, which is why the sizes fought each other.
+            + ''.join(balloon(x, y, sc, sd, True) for x, y, sc, sd in
+                      [(206, 330, 1.5, 101), (1122, 320, 1.35, 113), (700, 306, 1.1, 131)])
+            # THE FIELD IS LAID OUT IN LANES. It is an organised event on marked ground,
+            # not open country: white tents along the back, the chase vehicles drawn up
+            # behind the launch positions, balloons on a regular grid of pitches, and the
+            # crowd strung along the lane in front of them.
+            + ''.join(tent(x, 374, 84, 0.7) for x in (74, 272, 1008, 1210))
+            + ''.join(chase_van(x, 382, 0.5, c) for x, c in
+                      [(160, '#e8e2d2'), (356, '#c9c2b0'), (452, '#e8e2d2'),
+                       (742, '#c9c2b0'), (838, '#e8e2d2'), (1112, '#c9c2b0')])
+            # Standing on the field, and sized against the CROWD beside them: a balloon is
+            # roughly seven times a person, so at this depth they are big. Fewer and larger
+            # beats a row of little ones.
+            # Standing on the field. A balloon is about twelve times a person's height, and
+            # the crowd beside them is drawn at 0.32 — so these have to be BIG. Three large
+            # ones say 'launch field' far better than seven small ones.
+            + ''.join(ground_balloon(x, 402, sc, sd, fl, gid=f'cc-launch-{i}')
+                      for i, (x, sc, sd, fl) in enumerate(
+                          [(150, 2.15, 45, True), (476, 1.95, 9, False),
+                           (1010, 2.05, 33, True)]))
+            + ''.join(adobe(x, 388, w, h, sc) for x, w, h, sc in
+                      [(586, 68, 30, 0.5), (676, 62, 28, 0.5)])
+            + ''.join(chamisa(x, 402, sc) for x, sc in
+                      [(48, 0.5), (226, 0.44), (556, 0.46), (960, 0.44), (1256, 0.5)])
+            # the crowd along the lane — jittered in x and in depth, because a row of
+            # evenly spaced figures reads as a fence
+            + ''.join(person(x, y, 0.3 + ((x * 7) % 5) * 0.014, c) for x, y, c in
+                      [(188, 404, '#c9382e'), (214, 400, '#2f5f9e'), (246, 406, '#e8b02a'),
+                       (330, 402, '#3f9e6f'), (352, 407, '#c9382e'), (424, 401, '#7a3f9e'),
+                       (512, 405, '#2f5f9e'), (534, 400, '#e8721f'),
+                       (628, 404, '#c9382e'), (716, 402, '#3f9e6f'),
+                       (804, 406, '#7a3f9e'), (826, 401, '#2f5f9e'),
+                       (900, 404, '#e8b02a'), (996, 403, '#c9382e'),
+                       (1148, 405, '#3f9e6f'), (1172, 400, '#e8721f')]))
+
+    # -------------------------------------------------- in front of the rails ----
+    # Everything here is sized by DEPTH, from one rule: `near(y)`. The first version mixed
+    # figures at 0.6 with figures at 1.0 within thirty pixels of each other, and balloons
+    # small enough to be a hundred metres away standing in front of the rails — which reads
+    # as a scale error rather than as distance. Nothing in this layer is drawn small.
+    def near(y):
+        """Person-height at depth y. Everything else is a MULTIPLE of this.
+
+        The last version scaled a van and a person by the same number, so a man stood two
+        heads taller than the vehicle beside him, and taller than the door of the house.
+        A person is ~1.7m, a van is ~2m tall and ~5m long, a two-storey adobe is ~7m — so
+        each prop carries its own factor, worked out from the units it is actually drawn in
+        (a person is 55 units tall at scale 1, a van 26, a house 175)."""
+        return 0.50 + (y - 540) / 180.0 * 0.40
+
+    VAN_K, HOUSE_K, BUSH_K = 2.3, 1.25, 0.95
+
+    front = ('    '
+             # the pueblo house, close and large, because the architecture is half of what
+             # makes this New Mexico rather than any other balloon field
+             # Sized so its roofline stops just short of the track band: `scenery-front` is
+             # painted in front of the train, so anything taller would occlude the engine.
+             # Dirt tracks go down FIRST, so everything else stands on something. An empty
+             # tan slab between the crossing and the houses was the last big fault here:
+             # ground has to be a place, with routes across it and things growing out of it.
+             # Each track stays on its OWN side of the carriageway. Run across it they are
+             # painted over the road, because scenery-front comes after it.
+             + track(300, 400, 720, 176, 232, 604)
+             + track(842, 940, 720, 1046, 1102, 612)
+             + ''.join(f'<ellipse cx="{(i * 173) % 1270}" cy="{548 + (i * 61) % 168}" '
+                       f'rx="{18 + i % 26}" ry="{3 + i % 4}" fill="#c2a980" '
+                       f'opacity="0.45"/>' for i in range(26))
+             + coyote_fence(-20, 300, 604, 0.5) + coyote_fence(980, 1300, 612, 0.52)
+             + pueblo_house(1046, 720, near(720) * HOUSE_K, 0, False, 0)
+             + pueblo_house(196, 716, near(716) * HOUSE_K, 1, True, 1)
+             + pickup(872, 690, near(690) * 2.1)
+             + chase_van(452, 660, near(660) * VAN_K)
+             + ''.join(yucca(x, y, near(y) * 1.15) for x, y in
+                       [(348, 700), (884, 640), (1180, 596)])
+             + ''.join(chamisa(x, y, near(y) * BUSH_K) for x, y in
+                       [(62, 646), (296, 716), (404, 668), (466, 706), (836, 640),
+                        (806, 712), (960, 690), (1004, 636), (1148, 660)])
+             + ''.join(person(x, y, near(y), c) for x, y, c in
+                       [(430, 712, '#c9382e'), (486, 690, '#2f5f9e'),
+                        (790, 716, '#e8b02a'), (240, 596, '#3f9e6f')]))
+
+    scene('albuquerque',
+          'ALBUQUERQUE — the mass ascension over the Rio Grande, the Sandias behind', {
+        'sky': sky_l + '\n    <g id="ascension">' + sky_balloons() + '</g>',
+        'far': far_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#b8a37c" opacity="0.4">'
+                      '<rect x="0" y="712" width="1280" height="8"/></g>',
+        'roadkw': dict(surface='#6f6a63', surface2='#5d5951', shoulder='#c9b58f',
+                       dash='#f0e3a8'),
+        'trackkw': dict(ballast='#a89878', ballast_hi='#b9a98a', tie='#5a4530',
+                        rail='#d3d7dc'),
+    }, d)
+
+def cape_hatteras():
+    """CAPE HATTERAS — the lighthouse behind the dunes, and the Atlantic beyond.
+
+    The set's **first lighthouse**, and a very different sea from the three we already
+    have: Miami is a holiday, Oʻahu is a holiday, Stonington is a job — this is the one
+    that is dangerous. The Diamond Shoals off this cape wrecked so many ships the water is
+    called the Graveyard of the Atlantic, which is why the tallest brick lighthouse in the
+    country stands on an otherwise empty sandbar.
+
+    What the reference photographs insist on:
+
+    * **The spiral, exactly.** Black and white, wrapping the tower about seven times, on a
+      **red-brown octagonal brick base**. Get the base colour wrong and it stops being
+      Hatteras; draw the stripes as straight bands and it stops being a spiral.
+    * **The island is nearly treeless.** The whole ground cover is sand, dune grass and
+      **sea oats** — tall thin stems with a heavy drooping seed head. There is no
+      landscaping and no shade.
+    * **The dune is a wall.** You cannot see the sea from the road: the beach is on the far
+      side of a dune ridge, which is why every access point is a boardwalk over the top,
+      with slatted sand fence running along it to hold the sand.
+    * **The buildings are two kinds only** — the white keepers' quarters with their dark
+      roofs and brick chimneys, and weathered grey-shingle houses standing on stilts.
+
+    The road stops at a small car park by the dune crossing (`top=406`): you park, and you
+    walk over the boardwalk. Nothing drives onto the beach."""
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d93c9"/><stop offset="0.55" stop-color="#93c0dd"/>
+      <stop offset="1" stop-color="#d6e6ee"/>
+    </linearGradient>
+    <linearGradient id="atl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6f8f"/><stop offset="0.6" stop-color="#3f8fa8"/>
+      <stop offset="1" stop-color="#63aebd"/>
+    </linearGradient>
+    <linearGradient id="sandg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2d3ac"/><stop offset="1" stop-color="#d2c096"/>
+    </linearGradient>''')
+
+    import math as _m
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    SEA_TOP, BEACH = 300, 348      # sea from the horizon to the dune foot
+
+    # ------------------------------------------------------------------ sky ----
+    def cloud(x, y, r):
+        return (f'<g fill="#ffffff"><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.4:.0f}"/>'
+                f'<ellipse cx="{x-r*0.62:.0f}" cy="{y+r*0.16:.0f}" rx="{r*0.56:.0f}" '
+                f'ry="{r*0.3:.0f}"/>'
+                f'<ellipse cx="{x+r*0.66:.0f}" cy="{y+r*0.14:.0f}" rx="{r*0.5:.0f}" '
+                f'ry="{r*0.28:.0f}"/>'
+                f'<ellipse cx="{x-r*0.16:.0f}" cy="{y-r*0.26:.0f}" rx="{r*0.42:.0f}" '
+                f'ry="{r*0.26:.0f}"/></g>')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="306" fill="url(#skyg)"/>\n'
+             + '    <g opacity="0.9">'
+             + ''.join(cloud(x, y, r) for x, y, r in
+                       [(220, 84, 62), (560, 52, 46), (1010, 76, 70), (1240, 130, 40)])
+             + '</g>\n'
+             + '    <g stroke="#7f9db0" stroke-width="2.6" fill="none" '
+               'stroke-linecap="round" opacity="0.45">'
+             + ''.join(f'<path d="M{x},{y} q9,-8 18,0 q9,-8 18,0"/>'
+                       for x, y in [(700, 118), (760, 100), (300, 168)]) + '</g>')
+
+    # ------------------------------------------------------------ the ocean ----
+    def pier(x0, x1, y, deck=6):
+        """The fishing pier: a long low deck on a forest of spindly pilings, running
+        straight out into the surf."""
+        piles = ''.join(f'<rect x="{x:.0f}" y="{y}" width="4" height="26" '
+                        f'fill="#6f6155"/>' for x in range(int(x0) + 8, int(x1), 26))
+        braces = ''.join(f'<path d="M{x},{y + 6} L{x + 26},{y + 22}" stroke="#6f6155" '
+                         f'stroke-width="1.6" fill="none"/>'
+                         for x in range(int(x0) + 8, int(x1) - 20, 26))
+        return (f'<g id="pier">{piles}{braces}'
+                f'<rect x="{x0}" y="{y - deck}" width="{x1 - x0}" height="{deck}" '
+                f'fill="#9a8d7c"/>'
+                f'<rect x="{x0}" y="{y - deck - 2}" width="{x1 - x0}" height="3" '
+                f'fill="#ab9e8b"/>'
+                + '<g fill="#8f8478">'
+                + ''.join(f'<rect x="{x:.0f}" y="{y - deck - 9}" width="2.4" height="8"/>'
+                          for x in range(int(x0) + 6, int(x1), 18)) + '</g>'
+                f'<rect x="{x0}" y="{y - deck - 10}" width="{x1 - x0}" height="2.4" '
+                f'fill="#8f8478"/></g>')
+
+    def surf(y, n, x_step, wide=True):
+        return ''.join(f'<path d="M{x},{y} q{x_step*0.3:.0f},-4 {x_step*0.6:.0f},0 '
+                       f'q{x_step*0.3:.0f},4 {x_step*0.4:.0f},0" stroke="#ffffff" '
+                       f'stroke-width="{3 if wide else 2}" fill="none" opacity="0.75"/>'
+                       for x in range(-20, 1300, x_step))
+
+    far_l = ('    <g id="atlantic">'
+             f'<rect x="0" y="{SEA_TOP}" width="1280" height="{BEACH - SEA_TOP + 6}" '
+             f'fill="url(#atl)"/>'
+             # the shoals: a pale bar offshore where the water shallows and breaks
+             + '<g fill="#8fc6cf" opacity="0.55">'
+             + ''.join(f'<ellipse cx="{x}" cy="{318 + (x % 3) * 4}" rx="{60 + x % 40}" '
+                       f'ry="5"/>' for x in (120, 430, 760, 1080)) + '</g>'
+             + surf(316, 0, 74) + surf(330, 0, 58)
+             + '<g fill="#ffffff" opacity="0.85">'
+             + ''.join(f'<rect x="{(i * 91) % 1276}" y="{338 + (i * 31) % 8}" '
+                       f'width="{26 + i % 34}" height="3.4" rx="1.7"/>' for i in range(30))
+             + '</g></g>\n'
+             + '    ' + pier(884, 1330, 336) + '\n'
+             # the wet strand, then dry beach up to the dune foot
+             + f'    <rect x="0" y="{BEACH}" width="1280" height="18" fill="#c9b894"/>\n'
+             + f'    <rect x="0" y="{BEACH + 14}" width="1280" height="26" '
+               f'fill="#dccda6"/>')
+
+    # ------------------------------------------------------------- the dunes ----
+    def oats(x, base, s=1.0, n=7, seed=1, col='#c9b25f', stem='#a8a06a'):
+        """Sea oats: tall thin stems, each with a heavy seed head that droops over. They
+        are the only plant on the island that has any height, and they are everywhere."""
+        rr = rnd(seed)
+        out = []
+        for i in range(n):
+            dx = (i - (n - 1) / 2) * 6 + (rr() - 0.5) * 5
+            h = 26 + rr() * 20
+            bend = (rr() - 0.5) * 16
+            out.append(f'<path d="M{dx:.0f},0 Q{dx + bend * 0.4:.1f},{-h * 0.6:.0f} '
+                       f'{dx + bend:.1f},{-h:.0f}" stroke="{stem}" stroke-width="1.6" '
+                       f'fill="none"/>'
+                       f'<path d="M{dx + bend:.1f},{-h:.0f} q{bend * 0.3:.1f},7 '
+                       f'{bend * 0.1:.1f},13" stroke="{col}" stroke-width="3.6" '
+                       f'fill="none" stroke-linecap="round"/>')
+        grass = ''.join(f'<path d="M{(i - 3) * 5},0 L{(i - 3) * 5 + (rr() - 0.5) * 12:.0f},'
+                        f'{-10 - rr() * 12:.0f}" stroke="#8f9e5a" stroke-width="1.8" '
+                        f'fill="none"/>' for i in range(7))
+        return f'<g transform="translate({x},{base}) scale({s})">{grass}{"".join(out)}</g>'
+
+    def sand_fence(x0, x1, base, s=1.0):
+        """Slatted sand fence — the thing that actually builds the dune, and the most
+        characteristic small object on the Outer Banks."""
+        n = int((x1 - x0) / (7 * s))
+        slats = ''.join(f'<rect x="{x0 + i * 7 * s:.0f}" y="{-17 * s:.0f}" '
+                        f'width="{2 * s:.1f}" height="{19 * s:.0f}" fill="#b09a76"/>'
+                        for i in range(n))
+        posts = ''.join(f'<rect x="{x0 + i * 56 * s:.0f}" y="{-22 * s:.0f}" '
+                        f'width="{4 * s:.1f}" height="{24 * s:.0f}" fill="#8f7a5c"/>'
+                        for i in range(max(2, int((x1 - x0) / (56 * s)))))
+        wire = (f'<rect x="{x0}" y="{-14 * s:.0f}" width="{x1 - x0}" '
+                f'height="{1.4 * s:.1f}" fill="#8f7a5c"/>'
+                f'<rect x="{x0}" y="{-5 * s:.0f}" width="{x1 - x0}" '
+                f'height="{1.4 * s:.1f}" fill="#8f7a5c"/>')
+        return f'<g transform="translate(0,{base})">{slats}{wire}{posts}</g>'
+
+    def boardwalk(x, base, w, top):
+        """The crossing over the dune. Every beach access here is one of these, because the
+        dune must not be walked on."""
+        wt = w * 0.5
+        planks = ''.join(
+            f'<path d="M{x - w/2 + (w - wt) / 2 * t:.0f},{base - (base - top) * t:.0f} '
+            f'L{x + w/2 - (w - wt) / 2 * t:.0f},{base - (base - top) * t:.0f}" '
+            f'stroke="#a8926f" stroke-width="1.6" opacity="0.85"/>'
+            for t in (0.16, 0.34, 0.52, 0.7, 0.88))
+        rail = ''.join(
+            f'<path d="M{x - w/2 + 4:.0f},{base - 12} L{x - wt/2 + 2:.0f},{top - 8}" '
+            f'stroke="#8f7a5c" stroke-width="3" fill="none"/>'
+            f'<path d="M{x + w/2 - 4:.0f},{base - 12} L{x + wt/2 - 2:.0f},{top - 8}" '
+            f'stroke="#8f7a5c" stroke-width="3" fill="none"/>' for _ in (0,))
+        return (f'<g id="boardwalk">'
+                f'<path d="M{x - w/2:.0f},{base} L{x - wt/2:.0f},{top} '
+                f'L{x + wt/2:.0f},{top} L{x + w/2:.0f},{base} Z" fill="#c2ab86"/>'
+                f'{planks}{rail}</g>')
+
+    # -------------------------------------------------------- the lighthouse ----
+    def lighthouse(x, base, h=316, seed=5):
+        """Cape Hatteras. Two things have to be right or it is just a tower.
+
+        The **spiral**: black and white wrapping about seven times. Seen side-on a helix
+        does not project to a straight band — it bows — so each stripe is drawn as a bowed
+        slanted band clipped to the tower. Straight diagonal stripes read as a barber's
+        pole, which is a different thing entirely.
+
+        The **base**: a red-brown octagonal brick plinth, much wider than the tower. It is
+        the one piece of colour on the whole building and it is what makes it Hatteras
+        rather than any other striped lighthouse."""
+        BW, TW = 40, 25                              # half-width at base and at the top
+        top = base - h
+        body = (f'M{x - BW},{base} L{x - TW},{top} L{x + TW},{top} L{x + BW},{base} Z')
+        cid = f'lh{seed}'
+        bands = []
+        n = 15
+        for k in range(n):
+            t0 = k / n
+            t1 = (k + 1) / n
+            if k % 2:
+                continue
+            def edge(t, off):
+                y = base - h * t + off
+                w = BW + (TW - BW) * t
+                return y, w
+            y0, w0 = edge(t0, 0)
+            y1, w1 = edge(t1, 0)
+            slant = 26 * (1 - t0 * 0.45)
+            bow = 13 * (1 - t0 * 0.4)
+            bands.append(
+                f'<path d="M{x - w0:.0f},{y0:.0f} '
+                f'Q{x:.0f},{y0 + bow:.0f} {x + w0:.0f},{y0 - slant:.0f} '
+                f'L{x + w1:.0f},{y1 - slant:.0f} '
+                f'Q{x:.0f},{y1 + bow:.0f} {x - w1:.0f},{y1:.0f} Z" fill="#22262b"/>')
+        lant = (f'<rect x="{x - TW - 7}" y="{top - 5}" width="{2 * TW + 14}" height="7" '
+                f'rx="2" fill="#2f3338"/>'
+                f'<rect x="{x - TW - 9}" y="{top - 11}" width="{2 * TW + 18}" height="7" '
+                f'rx="2" fill="#3f434a"/>'
+                + '<g fill="#22262b">'
+                + ''.join(f'<rect x="{x - TW - 8 + i * 9}" y="{top - 22}" width="2.6" '
+                          f'height="12"/>' for i in range(int((2 * TW + 16) / 9))) + '</g>'
+                f'<rect x="{x - TW + 1}" y="{top - 40}" width="{2 * TW - 2}" height="20" '
+                f'rx="2" fill="#f2e6a8"/>'
+                f'<rect x="{x - TW + 1}" y="{top - 40}" width="{2 * TW - 2}" height="20" '
+                f'rx="2" fill="none" stroke="#22262b" stroke-width="3"/>'
+                f'<path d="M{x - TW - 4},{top - 40} L{x + TW + 4},{top - 40} '
+                f'L{x},{top - 62} Z" fill="#22262b"/>'
+                f'<rect x="{x - 1.4}" y="{top - 74}" width="2.8" height="13" '
+                f'fill="#22262b"/>')
+        plinth = (f'<path d="M{x - BW - 14},{base + 8} L{x - BW - 8},{base - 78} '
+                  f'L{x + BW + 8},{base - 78} L{x + BW + 14},{base + 8} Z" '
+                  f'fill="#9e5a44"/>'
+                  f'<path d="M{x - BW - 14},{base + 8} L{x - BW - 8},{base - 78} '
+                  f'L{x - BW + 8},{base - 78} L{x - BW + 2},{base + 8} Z" '
+                  f'fill="#b06a50"/>'
+                  + '<g fill="#8c4d3a" opacity="0.5">'
+                  + ''.join(f'<rect x="{x - BW - 12}" y="{base - 72 + i * 10}" '
+                            f'width="{2 * BW + 24}" height="2"/>' for i in range(8))
+                  + '</g>'
+                  f'<rect x="{x - BW - 18}" y="{base - 86}" width="{2 * BW + 36}" '
+                  f'height="10" rx="2" fill="#c9c2b4"/>'
+                  f'<rect x="{x - BW - 20}" y="{base + 4}" width="{2 * BW + 40}" '
+                  f'height="8" rx="2" fill="#c9c2b4"/>'
+                  f'<rect x="{x - 11}" y="{base - 34}" width="22" height="34" rx="2" '
+                  f'fill="#3f3128"/>'
+                  f'<path d="M{x - 12},{base - 34} a12,12 0 0 1 24,0 Z" fill="#3f3128"/>')
+        return (f'<g id="lighthouse">'
+                f'<defs><clipPath id="{cid}"><path d="{body}"/></clipPath></defs>'
+                f'{shadow(x, base + 28, 78, 11, 0.18)}'
+                f'{plinth}'
+                f'<path d="{body}" fill="#f4f1ea"/>'
+                f'<g clip-path="url(#{cid})">{"".join(bands)}</g>'
+                f'<path d="{body}" fill="none" stroke="#d8d2c4" stroke-width="1.4"/>'
+                f'{lant}</g>')
+
+    def keepers(x, base, s=1.0):
+        """The keepers' quarters: white clapboard, a steep dark slate roof, two red brick
+        chimneys and a dormer. Plain, and deliberately so."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                f'{shadow(0, 3, 62, 8, 0.18)}'
+                f'<rect x="-54" y="-52" width="108" height="52" fill="#f4f2ed"/>'
+                f'<rect x="-54" y="-52" width="30" height="52" fill="#ffffff"/>'
+                f'<path d="M-62,-52 L0,-88 L62,-52 Z" fill="#4a4f52"/>'
+                f'<path d="M-62,-52 L0,-88 L0,-52 Z" fill="#5a6064"/>'
+                f'<path d="M-20,-70 L-20,-84 L-4,-84 L-4,-79 Z" fill="#4a4f52"/>'
+                f'<rect x="-18" y="-80" width="12" height="10" fill="#f4f2ed"/>'
+                f'<rect x="-16" y="-78" width="8" height="8" fill="#41505a"/>'
+                + '<g fill="#9e5a44">'
+                f'<rect x="-40" y="-100" width="13" height="22"/>'
+                f'<rect x="28" y="-100" width="13" height="22"/></g>'
+                + '<g fill="#41505a">'
+                + ''.join(f'<rect x="{-44 + i * 22}" y="-44" width="12" height="16" '
+                          f'rx="1"/>' for i in range(5))
+                + ''.join(f'<rect x="{-44 + i * 22}" y="-22" width="12" height="16" '
+                          f'rx="1"/>' for i in range(5)) + '</g>'
+                f'<rect x="-8" y="-24" width="17" height="24" fill="#7d6a52"/>'
+                f'<rect x="-30" y="-6" width="60" height="5" rx="2" fill="#e2ddd0"/></g>')
+
+    def stilt_house(x, base, s=1.0, body='#a89a8c', roof='#8f8478'):
+        """An Outer Banks house: weathered cedar shingle, standing on stilts because the
+        ocean comes over this island, with an outside stair and a deck."""
+        return (f'<g transform="translate({x},{base}) scale({s})">'
+                + '<g fill="#7d6a55">'
+                + ''.join(f'<rect x="{-42 + i * 21}" y="-30" width="6" height="30"/>'
+                          for i in range(5)) + '</g>'
+                f'<rect x="-48" y="-36" width="96" height="7" fill="#8f8478"/>'
+                f'<rect x="-44" y="-76" width="88" height="42" fill="{body}"/>'
+                f'<rect x="-44" y="-76" width="26" height="42" fill="#b8ab9d"/>'
+                + f'<g fill="{roof}" opacity="0.45">'
+                + ''.join(f'<rect x="-44" y="{-72 + i * 7}" width="88" height="1.8"/>'
+                          for i in range(6)) + '</g>'
+                f'<path d="M-52,-76 L0,-102 L52,-76 Z" fill="{roof}"/>'
+                f'<path d="M-52,-76 L0,-102 L0,-76 Z" fill="#9e9488"/>'
+                + '<g fill="#41505a">'
+                + ''.join(f'<rect x="{-34 + i * 21}" y="-68" width="13" height="16" '
+                          f'rx="1"/>' for i in range(4)) + '</g>'
+                f'<rect x="-50" y="-36" width="100" height="4" fill="#a89a84"/>'
+                + '<g fill="#a89a84">'
+                + ''.join(f'<rect x="{-48 + i * 12}" y="-48" width="3" height="13"/>'
+                          for i in range(9)) + '</g>'
+                f'<path d="M44,-32 L64,0 L54,0 L38,-30 Z" fill="#a89a84"/></g>')
+
+    def gull(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="0" cy="-6" rx="9" ry="5" fill="#f2f0ea"/>'
+                f'<path d="M-9,-8 L-16,-4 L-8,-4 Z" fill="#c9c4bc"/>'
+                f'<circle cx="7" cy="-10" r="3.4" fill="#f2f0ea"/>'
+                f'<path d="M10,-10 L15,-9 L10,-8 Z" fill="#e8b02a"/>'
+                f'<rect x="-1" y="-2" width="1.8" height="4" fill="#e8b02a"/>'
+                f'<rect x="3" y="-2" width="1.8" height="4" fill="#e8b02a"/></g>')
+
+    def person(x, y, s=1.0, top='#2f7a9e', bottom='#e8e2d2', skin='#c98d63'):
+        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+                f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+                f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
+                f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
+                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/></g>')
+
+    def car_park(x, y, w):
+        """Where the road stops. You park, and you walk over the dune."""
+        cars = ['#b8342c', '#e8e2d2', '#2f5f9e', '#3f7d4a', '#e8b02a', '#5f6a72']
+        n = int(w / 30)
+        t = (y + 8 - HORIZON) / 420.0
+        lx, rx = 622 - 112 * t, 658 + 112 * t
+        return (f'<g id="car-park" transform="translate({x},{y})">'
+                f'<path d="M{-w/2 - 14:.0f},22 L{-w/2:.0f},-14 L{w/2:.0f},-14 '
+                f'L{w/2 + 14:.0f},22 Z" fill="#a89a80"/>'
+                + '<g stroke="#e2dcc6" stroke-width="1.8" opacity="0.7">'
+                + ''.join(f'<path d="M{-w/2 + 12 + i * 30:.0f},-12 '
+                          f'L{-w/2 + 9 + i * 30:.0f},10"/>' for i in range(n)) + '</g>'
+                + ''.join(f'<g transform="translate({bx - x:.0f},8)">'
+                          f'{shadow(0, 2, 13, 3.4, 0.22)}'
+                          f'<rect x="-12" y="-15" width="24" height="15" rx="4" '
+                          f'fill="{cars[i % 6]}"/>'
+                          f'<rect x="-9" y="-13" width="18" height="7" rx="2.4" '
+                          f'fill="#cfe4f2"/></g>'
+                          for i, bx in enumerate(x - w / 2 + 27 + j * 30
+                                                 for j in range(n - 1))
+                          if not (lx - 18 < bx < rx + 18)) + '</g>')
+
+    # ------------------------------------------------------------ the ground ----
+    ground_l = (f'    <rect x="0" y="{BEACH + 34}" width="1280" '
+                f'height="{720 - BEACH - 34}" fill="url(#sandg)"/>\n'
+                # the dune ridge: a long low swell across the whole picture
+                # The dune is a WALL, and it only reads as one if it is a different tone
+                # from the flat sand either side of it: a pale sunlit crest, then a band of
+                # shadow at its foot where the ground falls away toward us.
+                + '    <path d="M-40,410 Q160,364 380,384 Q560,400 700,372 '
+                  'Q900,344 1080,376 Q1200,396 1320,378 L1320,452 L-40,452 Z" '
+                  'fill="#e9dcb8"/>\n'
+                + '    <path d="M-40,410 Q160,364 380,384 Q560,400 700,372 '
+                  'Q900,344 1080,376 Q1200,396 1320,378" fill="none" stroke="#f4ebcf" '
+                  'stroke-width="7"/>\n'
+                + '    <path d="M-40,438 Q200,420 480,436 Q760,452 1020,432 '
+                  'Q1180,420 1320,430 L1320,452 L-40,452 Z" fill="#c9b68c" '
+                  'opacity="0.65"/>\n'
+                + '    <g fill="#cbb98f" opacity="0.5">'
+                + ''.join(f'<ellipse cx="{(i * 149) % 1276}" cy="{540 + (i * 67) % 176}" '
+                          f'rx="{20 + i % 30}" ry="{4 + i % 5}"/>' for i in range(44))
+                + '</g>\n'
+                # sparse dune grass over the open sand
+                + '    <g stroke="#9aa663" stroke-width="1.6" fill="none" opacity="0.75">'
+                + ''.join(f'<path d="M{(i * 173) % 1276},{500 + (i * 83) % 210} '
+                          f'l{-4 + (i % 5) * 2},-11"/>' for i in range(90)) + '</g>')
+
+    # -------------------------------------------------- behind the rails ----
+    back = ('    '
+            # the dune crossing, the fence along the ridge, and the oats on it
+            # Everything here has to stay ABOVE y=454: scenery-back sits behind the
+            # train, and the track band must be kept clear.
+            + sand_fence(-40, 470, 406, 0.75) + sand_fence(700, 1320, 392, 0.75)
+            + boardwalk(880, 424, 92, 368)
+            + ''.join(oats(x, 404 - ((x * 7) % 17), 0.62, 6, x + 3)
+                      for x in range(-20, 1320, 54))
+            + lighthouse(300, 424)
+            + keepers(452, 424, 0.7)
+            + stilt_house(1108, 420, 0.6)
+            + car_park(634, 430, 300)
+            + ''.join(person(x, 434, 0.34, c) for x, c in
+                      [(430, '#2f7a9e'), (804, '#c9382e'), (932, '#e8b02a')])
+            + ''.join(gull(x, y, s) for x, y, s in
+                      [(196, 388, 0.5), (760, 372, 0.46), (1042, 392, 0.5)]))
+
+    # -------------------------------------------------- in front of the rails ----
+    front = ('    '
+             + stilt_house(150, 682, 1.15) + stilt_house(1136, 700, 1.2, '#9e9285')
+             + ''.join(oats(x, y, sc, n, sd) for x, y, sc, n, sd in
+                       [(56, 640, 1.2, 8, 11), (300, 700, 1.35, 9, 17),
+                        (450, 662, 1.0, 7, 23), (836, 692, 1.2, 8, 29),
+                        (984, 650, 1.05, 7, 37), (1250, 674, 1.3, 9, 41),
+                        (222, 566, 0.66, 6, 47), (1046, 572, 0.7, 6, 53)])
+             + sand_fence(20, 300, 596, 0.5) + sand_fence(980, 1260, 604, 0.5)
+             + ''.join(person(x, y, sc, c) for x, y, sc, c in
+                       [(396, 620, 0.86, '#2f7a9e'), (492, 700, 1.0, '#c9382e'),
+                        (818, 712, 1.02, '#e8b02a'), (1042, 626, 0.88, '#3f7d4a')])
+             + ''.join(gull(x, y, s) for x, y, s in
+                       [(466, 590, 0.8), (818, 616, 0.85), (1180, 596, 0.8)]))
+
+    scene('cape-hatteras',
+          'CAPE HATTERAS — the lighthouse behind the dunes, the Atlantic beyond', {
+        'sky': sky_l,
+        'far': far_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': '    <g fill="#cbb98f" opacity="0.4">'
+                      '<rect x="0" y="712" width="1280" height="8"/></g>',
+        # the road stops at the car park by the dune crossing — nothing drives on the beach
+        'roadkw': dict(surface='#6f6a63', surface2='#5d5951', shoulder='#dccca4',
+                       dash='#f0e3a8', top=424),
+        'trackkw': dict(ballast='#c2b08a', ballast_hi='#d2c096', tie='#6b5a42',
+                        rail='#d3d7dc'),
+    }, d)
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

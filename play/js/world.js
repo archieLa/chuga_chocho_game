@@ -236,6 +236,24 @@
       scenery:{ theme:'downeast', features:['lobsterboats','fishhouses','traps','granite'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'albuquerque', state:'New Mexico', city:'Albuquerque',
+      say:{ en:'Albuquerque', pl:'Albuquerque' },
+      scene:'albuquerque',
+      // Viewpoint: the balloon fiesta launch field at dawn. The first scene where the SKY is
+      // the subject rather than the backdrop — forty balloons above the city, the Sandia wall
+      // behind, the cottonwood bosque along the Rio Grande between them.
+      scenery:{ theme:'highdesert', features:['balloons','sandias','bosque','adobe','launchfield'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'hatteras', state:'North Carolina', city:'Cape Hatteras',
+      say:{ en:'Cape Hatteras', pl:'Cape Hatteras' },
+      scene:'cape-hatteras',
+      // Viewpoint: the road down to the dune crossing, which STOPS at the car park — a
+      // boardwalk goes over the top and nothing drives onto the beach. The set's first
+      // lighthouse, and a working Atlantic rather than a holiday one.
+      scenery:{ theme:'outerbanks', features:['lighthouse','dunes','seaoats','sandfence','atlantic'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

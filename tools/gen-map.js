@@ -60,6 +60,8 @@ const SUPPORTED = {
   'Ohio': ['Cedar Point'],
   'Georgia': ['Savannah'],
   'Maine': ['Stonington'],
+  'New Mexico': ['Albuquerque'],
+  'North Carolina': ['Cape Hatteras'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is
