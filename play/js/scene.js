@@ -759,6 +759,28 @@
   // either side of each balloon's OWN x, so carrying one across the frame would
   // take it somewhere its clearance was never checked. The amplitude stays
   // inside that budget, and y is clamped to data-maxy as a hard backstop.
+  // One balloon at a time leaves the field. The three still on the ground are
+  // #cc-launch-N — ids, so namespaced by inline-assets.py and found by
+  // substring. Launching all three together turns the scene into a screensaver;
+  // one at a time with a long wait between reads like an event you happened to
+  // catch, which is what the handoff asked for.
+  //
+  // It rises SHRINKING. A balloon climbing away from you does get smaller, and
+  // it also settles the composition: on the pitch it is 86x127px, and carrying
+  // that up the frame at full size would put a balloon the size of the gate over
+  // the top of the picture. Ending at 0.3 leaves it a plausible near neighbour
+  // of the drifting ones. They sit in `scenery-back`, which is painted before
+  // the road, so the whole climb happens BEHIND the crossing.
+  const LAUNCH = {
+    idle: 6,        // sitting on the pitch, burner ticking over
+    burn: 3.6,      // burner up, before she unsticks
+    rise: 24,       // to the top of the frame
+    top: -20,       // y at the end of the climb — the envelope is clear by then
+    shrink: 0.30,   // final scale as a fraction of her size on the ground
+    sway: 26,       // how far she wanders sideways on the way up
+    fade: 1400,     // ms to ease her back onto the pitch, so she never pops in
+  };
+
   const BALLOON_SWING = 84;        // px at the nearest depth; data-maxy allows 90
   const BALLOON_BOB = 6;
   const BALLOON_NEAR = 0.46;       // data-s of the nearest airborne balloon
@@ -801,12 +823,71 @@
                       base: parseFloat(f.getAttribute('opacity')) || 1 });
       });
     }
-    return list.length ? { list: list, flames: flames } : null;
+    // The pads. Sorted by their trailing number so the rotation is left to
+    // right rather than whatever order the document happens to be in.
+    const pads = [].slice.call(svg.querySelectorAll('[id*="cc-launch-"]')).map(el => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
+        .exec(el.getAttribute('transform') || '');
+      if (!m) { console.warn('cc-launch pad has no translate/scale to return to'); return null; }
+      const n = /cc-launch-(\d+)/.exec(el.id);
+      return { el: el, n: n ? +n[1] : 0, x: +m[1], y: +m[2], s: +m[3],
+               flame: el.querySelector('.cc-flame'), fade: 1 };
+    }).filter(Boolean).sort((a, b) => a.n - b.n);
+
+    return list.length
+      ? { list: list, flames: flames, launch: pads.length ? { pads: pads, i: 0, t: 0 } : null }
+      : null;
+  }
+
+  function updateLaunch(b, secs, dt) {
+    const L = b.launch;
+    if (!L) return;
+    const p = L.pads[L.i];
+    L.t += dt / 1000;
+
+    // Anyone who has just come home eases back in rather than popping onto an
+    // empty pitch in one frame.
+    L.pads.forEach(q => {
+      if (q === p || q.fade >= 1) return;
+      q.fade = Math.min(1, q.fade + dt / LAUNCH.fade);
+      q.el.setAttribute('opacity', q.fade.toFixed(2));
+    });
+
+    if (L.t < LAUNCH.idle) return;          // the shared flame pulse does the idling
+    const u = L.t - LAUNCH.idle;
+
+    if (u < LAUNCH.burn) {                  // burner up, still on the ground
+      if (p.flame) p.flame.setAttribute('opacity', (0.55 + 0.45 * Math.abs(Math.sin(secs * 9))).toFixed(2));
+      return;
+    }
+
+    const r = (u - LAUNCH.burn) / LAUNCH.rise;
+    if (r >= 1) {                           // gone; put her back and hand over
+      p.el.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ') scale(' + p.s + ')');
+      p.fade = 0;
+      p.el.setAttribute('opacity', '0');
+      L.i = (L.i + 1) % L.pads.length;
+      L.t = 0;
+      return;
+    }
+
+    // Smoothstep, because a balloon does not leap off the ground — it unsticks,
+    // then climbs steadily, then appears to slow as it gets far away.
+    const e = r * r * (3 - 2 * r);
+    const y = p.y + (LAUNCH.top - p.y) * e;
+    const s = p.s * (1 - (1 - LAUNCH.shrink) * e);
+    const x = p.x + LAUNCH.sway * Math.sin(r * Math.PI * 1.6);
+    p.el.setAttribute('transform',
+      'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+    if (p.flame) {                          // still burning, easing off as she settles
+      const k = Math.max(0, 1 - r * 2.2);
+      p.flame.setAttribute('opacity', (0.25 + 0.75 * k * Math.abs(Math.sin(secs * 7))).toFixed(2));
+    }
   }
 
   const TAU = Math.PI * 2;
 
-  function updateBalloons(t) {
+  function updateBalloons(t, dt) {
     const b = currentScene && currentScene.balloons;
     if (!b) return;
     const secs = t / 1000;
@@ -825,6 +906,8 @@
       const k = u < 0.22 ? Math.sin(u / 0.22 * Math.PI) : 0;
       f.el.setAttribute('opacity', (f.base * (0.22 + 0.78 * k)).toFixed(2));
     });
+    // After the shared pulse, so the one that is launching can override it.
+    updateLaunch(b, secs, dt);
   }
 
   // Chairs crawl up one cable and back down the other, wrapping at each end.
@@ -1464,7 +1547,7 @@
     updateSwarms(t);
     updateChases(t);
     updateRoutes(dt);
-    updateBalloons(t);
+    updateBalloons(t, dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
