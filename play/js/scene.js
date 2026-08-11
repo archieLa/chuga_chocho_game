@@ -782,7 +782,8 @@
     top: -20,       // y at the end of the climb — the envelope is clear by then
     shrink: 0.30,   // final scale as a fraction of her size on the ground
     sway: 26,       // how far she wanders sideways on the way up
-    fade: 1400,     // ms to ease her back onto the pitch, so she never pops in
+    shade: 0.35,    // fraction of the climb over which her ground shadow goes
+    fade: 1600,     // ms for the whole field to come back at the end of a round
   };
 
   const BALLOON_SWING = 84;        // px at the nearest depth; data-maxy allows 90
@@ -834,29 +835,41 @@
         .exec(el.getAttribute('transform') || '');
       if (!m) { console.warn('cc-launch pad has no translate/scale to return to'); return null; }
       const n = /cc-launch-(\d+)/.exec(el.id);
+      // Its ground shadow is a sibling — it has to be, or it would fly with her.
+      // data-pad holds the un-namespaced gid, so match on the end of the id.
+      const shade = [].slice.call(svg.querySelectorAll('.cc-launch-shade'))
+        .filter(g => el.id.slice(-g.getAttribute('data-pad').length) === g.getAttribute('data-pad'))[0];
       return { el: el, n: n ? +n[1] : 0, x: +m[1], y: +m[2], s: +m[3],
-               flame: el.querySelector('.cc-flame'), fade: 1 };
+               flame: el.querySelector('.cc-flame'), shade: shade || null };
     }).filter(Boolean).sort((a, b) => a.n - b.n);
 
     return list.length
-      ? { list: list, flames: flames, launch: pads.length ? { pads: pads, i: 0, t: 0 } : null }
+      ? { list: list, flames: flames,
+          launch: pads.length ? { pads: pads, i: 0, t: 0, phase: 'fly' } : null }
       : null;
   }
 
   function updateLaunch(b, secs, dt) {
     const L = b.launch;
     if (!L) return;
-    const p = L.pads[L.i];
     L.t += dt / 1000;
 
-    // Anyone who has just come home eases back in rather than popping onto an
-    // empty pitch in one frame.
-    L.pads.forEach(q => {
-      if (q === p || q.fade >= 1) return;
-      q.fade = Math.min(1, q.fade + dt / LAUNCH.fade);
-      q.el.setAttribute('opacity', q.fade.toFixed(2));
-    });
+    // THE WHOLE FIELD EMPTIES, THEN REFILLS. Each balloon that goes stays gone
+    // until all three have gone, and then they all come back together. Putting
+    // one back before the next left meant the pitch was never actually empty,
+    // so the ascension never read as one — it was just three balloons taking
+    // turns.
+    if (L.phase === 'refill') {
+      const k = Math.min(1, L.t / (LAUNCH.fade / 1000));
+      L.pads.forEach(q => {
+        q.el.setAttribute('opacity', k.toFixed(2));
+        if (q.shade) q.shade.setAttribute('opacity', k.toFixed(2));
+      });
+      if (k >= 1) { L.phase = 'fly'; L.i = 0; L.t = 0; }
+      return;
+    }
 
+    const p = L.pads[L.i];
     if (L.t < LAUNCH.idle) return;          // the shared flame pulse does the idling
     const u = L.t - LAUNCH.idle;
 
@@ -866,12 +879,13 @@
     }
 
     const r = (u - LAUNCH.burn) / LAUNCH.rise;
-    if (r >= 1) {                           // gone; put her back and hand over
+    if (r >= 1) {                           // gone: park her home but keep her hidden
       p.el.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ') scale(' + p.s + ')');
-      p.fade = 0;
       p.el.setAttribute('opacity', '0');
-      L.i = (L.i + 1) % L.pads.length;
+      if (p.shade) p.shade.setAttribute('opacity', '0');
+      L.i++;
       L.t = 0;
+      if (L.i >= L.pads.length) L.phase = 'refill';
       return;
     }
 
@@ -883,6 +897,10 @@
     const x = p.x + LAUNCH.sway * Math.sin(r * Math.PI * 1.6);
     p.el.setAttribute('transform',
       'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+    // Her shadow goes early in the climb. It is cast by her sitting on the
+    // grass, and a few metres up there is nothing to cast it — leaving it on an
+    // empty pitch is what gave the whole thing away.
+    if (p.shade) p.shade.setAttribute('opacity', Math.max(0, 1 - r / LAUNCH.shade).toFixed(2));
     if (p.flame) {                          // still burning, easing off as she settles
       const k = Math.max(0, 1 - r * 2.2);
       p.flame.setAttribute('opacity', (0.25 + 0.75 * k * Math.abs(Math.sin(secs * 7))).toFixed(2));

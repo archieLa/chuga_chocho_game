@@ -13345,7 +13345,15 @@ def albuquerque():
         # spectators behind him. Their local offsets are unchanged: they used to
         # be scale(crew/s) inside scale(s), and are now scale(crew) on their own,
         # which lands every part in exactly the same place.
-        ground = (f'<g transform="translate({x},{base}) scale({s:.3f})">'
+        # Tagged so the engine can take the shadow away with the balloon. A shadow
+        # left lying on an empty pitch is the thing that gives the trick away —
+        # once she is up there is nothing to cast it. data-pad carries the gid
+        # rather than the id, because ids get namespaced by inline-assets.py and
+        # this attribute does not.
+        ground = (f'<g class="cc-launch-shade" data-pad="{gid}" '
+                  f'transform="translate({x},{base}) scale({s:.3f})">'
+                  f'{shadow(0, 3, 40, 7, 0.18)}</g>') if gid else (
+                  f'<g transform="translate({x},{base}) scale({s:.3f})">'
                   f'{shadow(0, 3, 40, 7, 0.18)}</g>')
         gcrew = (f'<g transform="translate({x},{base}) scale({crew:.3f})">'
                  f'<g transform="translate({f * 44 * s / crew:.0f},0)">'
