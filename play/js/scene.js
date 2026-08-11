@@ -291,16 +291,16 @@
     const chases = buildChases(svg);
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
-    const racks = buildRacks(svg);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, racks: racks, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
+    s.racks = buildRacks(svg);       // after attaching: it measures with getBBox
     return s;
   }
 
@@ -1016,14 +1016,40 @@
     lead: 26,       // px the wagon rolls forward as it comes down
   };
 
+  /** Stand the REAL wagon on the siding, in place of the drawing.
+
+      The authored racks are a mix of enclosed vans and open cages, and whichever
+      one gets picked has to turn into the consist's auto-rack. Matching two
+      different drawings pixel for pixel at the one moment anybody is looking at
+      them was never going to work — parked it was a closed brown box, and the
+      instant it moved it became an open cage full of cars.
+
+      So the parked racks ARE the wagon. Each authored group steps aside and a
+      `wagon-autorack` takes its place, scaled to occupy exactly the same length
+      of siding as the drawing it replaces. Same art parked as rolling, so there
+      is nothing left to hide.
+
+      Must run with the scene in the document: the match is done from bounding
+      boxes and getBBox on a detached node is all zeros. */
   function buildRacks(svg) {
     const racks = [];
     svg.querySelectorAll('[id*="cc-autorack-"]').forEach(el => {
       const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
         .exec(el.getAttribute('transform') || '');
       if (!m) return;
+      const drawn = el.getBBox();
+      if (!drawn.width) { console.warn('cc-autorack has no size — is the scene attached?'); return; }
       const n = /cc-autorack-(\d+)/.exec(el.id);
-      racks.push({ el: el, n: n ? +n[1] : 0, x: +m[1], y: +m[2], s: +m[3] });
+      const x = +m[1], y = +m[2], s = +m[3];
+      const g = CC.rolling.build('wagon-autorack');
+      el.parentNode.insertBefore(g, el);
+      const gb = g.getBBox();
+      // Same footprint on the siding as the drawing it stands in for. Both put
+      // y=0 on the rail, so the translate carries straight over.
+      const s2 = gb.width ? (drawn.width * s) / gb.width : s;
+      g.setAttribute('transform', 'translate(' + x + ',' + y + ') scale(' + s2.toFixed(4) + ')');
+      el.setAttribute('visibility', 'hidden');
+      racks.push({ el: g, n: n ? +n[1] : 0, x: x, y: y, s: s2 });
     });
     racks.sort((a, b) => a.n - b.n);
     return racks.length ? racks : null;
@@ -1079,8 +1105,9 @@
         // the same size, worked out from the two bounding boxes rather than
         // guessed, so it does not jump.
         const g = train.els[s.pickIndex];
-        const rb = s.rack.el.getBBox(), gb = g.getBBox();
-        s.startS = gb.width ? (rb.width * s.rack.s) / gb.width : TRAIN_S;
+        // The parked rack IS a wagon-autorack, so the consist's one only has to
+        // take its scale — no bounding-box matching, and nothing to see.
+        s.startS = s.rack.s;
         s.rack.el.setAttribute('visibility', 'hidden');
         s.picked = true;
         s.rollingIndex = s.pickIndex;

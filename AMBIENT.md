@@ -170,12 +170,20 @@ Two rules it must keep:
 - **It must not couple to the gate.** Same rule as everything else here. The
   child can raise the gate mid-shunt and nothing cares.
 
-The wagon that rolls down is the CONSIST'S OWN element, animated from the siding
-to its coupling slot — not the scene's artwork with a swap at the end. Swapping
-at the end means matching two different drawings pixel for pixel at the one
-moment anybody is looking at them. This way there is a single art change, at the
-START of the roll, at the same place and the same size (worked out from the two
-bounding boxes, not guessed), while the wagon is small and far away.
+**The parked racks ARE the wagon.** The authored siding is a mix of enclosed vans
+and open cages, and whichever one gets picked has to become the consist's
+auto-rack. The first attempt animated the consist's wagon and simply swapped at
+the start of the roll, betting that a change at small scale would not be noticed.
+It was, immediately: parked it was a closed brown box, and the instant it moved
+it became an open cage full of cars.
+
+So at mount each `#cc-autorack-N` steps aside and a real `wagon-autorack` takes
+its place, scaled from bounding boxes to occupy the same length of siding. Same
+art parked as rolling, so there is nothing left to hide — measured at the swap
+frame, the two are 0.3px and 0.0015 of scale apart, which is one frame of easing.
+
+This has to run with the scene attached to the document: getBBox on a detached
+node is all zeros.
 
 ---
 
