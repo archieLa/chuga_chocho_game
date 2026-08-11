@@ -291,12 +291,13 @@
     const chases = buildChases(svg);
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
+    const boom = buildBoom(svg);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1136,6 +1137,42 @@
     }
   }
 
+  // =======================================================================
+  // A barrier the road traffic actually uses (.cc-plant-boom).
+  //
+  // Detroit's road stops at the plant gate, and the boom hung permanently down
+  // across it while the works traffic drove up and vanished straight through —
+  // which is exactly the sort of thing a small child spots first.
+  //
+  // It lifts for a car on its way in and drops again behind it. That is the
+  // whole trick: the fade-out at the end of the road stops being a car
+  // disappearing and becomes a car going through a gate.
+  //
+  // NOT the crossing gate, and nothing to do with it. That one is the game.
+  const BOOM = { up: 70, secs: 0.55, watch: 130 };   // degrees, travel time, how far ahead it sees
+
+  function buildBoom(svg) {
+    const el = svg.querySelector('.cc-plant-boom');
+    if (!el) return null;
+    const p = (el.getAttribute('data-pivot') || '').split(',').map(Number);
+    if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-plant-boom has no usable data-pivot'); return null; }
+    return { el: el, px: p[0], py: p[1], a: 0 };
+  }
+
+  function updateBoom(dt) {
+    const b = currentScene && currentScene.boom;
+    if (!b) return;
+    const top = currentScene.roadTop;
+    // Only traffic heading AWAY from us is going into the plant; a car coming
+    // down the road has already been through.
+    const coming = cars.some(c => c.dir < 0 && c.phase === 'road' && c.y < top + BOOM.watch);
+    const want = coming ? BOOM.up : 0;
+    const step = BOOM.up * dt / 1000 / BOOM.secs;
+    b.a += Math.max(-step, Math.min(step, want - b.a));
+    b.el.setAttribute('transform',
+      'rotate(' + b.a.toFixed(1) + ',' + b.px + ',' + b.py + ')');
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -1818,6 +1855,7 @@
     updateRoutes(dt);
     updateBalloons(t, dt);
     updateFalls(t);
+    updateBoom(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);

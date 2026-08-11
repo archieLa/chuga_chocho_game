@@ -15164,11 +15164,15 @@ def detroit():
                 f'<rect x="34" y="-46" width="13" height="46" rx="2" fill="#eeeeea"/>'
                 f'<rect x="30" y="-52" width="52" height="8" rx="2" fill="#8f9498"/>'
                 f'<rect x="40" y="-40" width="32" height="18" rx="2" fill="#41505a"/>'
-                # the boom across the road, and a sign
-                f'<rect x="-96" y="-26" width="122" height="5" rx="2.5" fill="#c9382e"/>'
+                # The boom LIFTS. It hung permanently down across the road while the
+                # works traffic drove up to it and vanished through it, which is the
+                # sort of thing a three-year-old notices before anyone else does.
+                # data-pivot is the hinge, at the foot of its post.
+                + '<g class="cc-plant-boom" data-pivot="26,-24">'
+                + f'<rect x="-96" y="-26" width="122" height="5" rx="2.5" fill="#c9382e"/>'
                 + '<g fill="#f2f0ea">'
                 + ''.join(f'<rect x="{-88 + i * 26}" y="-26" width="13" height="5"/>'
-                          for i in range(5)) + '</g>'
+                          for i in range(5)) + '</g></g>'
                 f'<rect x="24" y="-34" width="7" height="34" fill="#5f6a72"/>'
                 f'<rect x="-112" y="-34" width="7" height="34" fill="#5f6a72"/></g>')
 
@@ -15224,9 +15228,14 @@ def detroit():
                 + '</g>')
 
     # ------------------------------------------------- behind the rails ----
+    # NOTHING STANDS ON THE CROSSING. The road meets the siding at x 591..689,
+    # and the rack that used to sit at 604 was parked squarely across it — the
+    # works traffic drove up to a wagon. check-scenes.py did not catch it because
+    # it tests the road POLYGON, and the siding at y=418 is above the road's far
+    # edge at y=436; the corridor continues past the tarmac even though the
+    # drawing does not.
     SIDING = [(180, 'cc-autorack-0', '#7d4a35', False),
               (392, 'cc-autorack-1', '#6f5a48', True),
-              (604, 'cc-autorack-2', '#7d4a35', False),
               (816, 'cc-autorack-3', '#8a5540', False),
               (1028, 'cc-autorack-4', '#6f5a48', True)]
 
