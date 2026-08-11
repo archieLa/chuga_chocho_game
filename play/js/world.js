@@ -254,6 +254,24 @@
       scenery:{ theme:'outerbanks', features:['lighthouse','dunes','seaoats','sandfence','atlantic'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'quechee', state:'Vermont', city:'Quechee',
+      say:{ en:'Quechee', pl:'Quechee' },
+      scene:'quechee',
+      // Viewpoint: the road down to the covered bridge, which it runs straight INTO — the
+      // most Vermont thing a road can do. The set's first autumn palette, first waterfall
+      // and first mill, and the hero is the hillside rather than the falls.
+      scenery:{ theme:'autumn', features:['falls','mill','coveredbridge','maples','stonewalls'] },
+      trainPreset:{ engine:'steam' } },
+
+    { id:'detroit', state:'Michigan', city:'Detroit',
+      say:{ en:'Detroit', pl:'Detroit' },
+      scene:'detroit',
+      // Viewpoint: the road up to the plant gate, where it stops — you do not drive onto a
+      // shipping lot. The set's first factory, and the one place where the railway is part
+      // of the SUBJECT rather than scenery beside it: the siding exists to load cars.
+      scenery:{ theme:'industrial', features:['assemblyplant','shippinglot','autoracks','skyline'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

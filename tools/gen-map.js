@@ -62,6 +62,8 @@ const SUPPORTED = {
   'Maine': ['Stonington'],
   'New Mexico': ['Albuquerque'],
   'North Carolina': ['Cape Hatteras'],
+  'Vermont': ['Quechee'],
+  'Michigan': ['Detroit'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

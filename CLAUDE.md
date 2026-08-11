@@ -58,7 +58,7 @@ Conventions every vehicle honours:
 ## Where the project actually is (read this first)
 
 **Phase 1 is built and playable.** The art was already finished; the engine now exists.
-Open `play/index.html` and you get the map, all thirty-three destinations, both gates, cars, a
+Open `play/index.html` and you get the map, all thirty-five destinations, both gates, cars, a
 train you can build and colour, English and Polish, and two-way sync with a real gate.
 The definition-of-done checklist in `BUILD_PLAN.md` §9 is ticked, with a note on how each
 box was actually checked. Next up is Phase 2 — the mission modes in `DESIGN.md` §11.
@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **33 done, across 28 states + DC** — Wave 5a adds **Albuquerque** (NM) and **Cape Hatteras** (NC) on top of a complete Wave 4. All in `play/assets/scenes/`. California, Texas, Florida and Tennessee have two destinations each. Austin is the only **dusk** scene and Las Vegas the only **night** one. Hawaii and Alaska are map **insets**; DC is a 3×4px speck reachable via the north-east card. **Seven scenes truncate the road** — see the note below, it is the thing most likely to catch you out. |
+| Locations | **35 done, across 30 states + DC** — Wave 5 complete: **Albuquerque** (NM), **Cape Hatteras** (NC), **Quechee** (VT) and **Detroit** (MI). All in `play/assets/scenes/`. California, Texas, Florida and Tennessee have two destinations each. Austin is the only **dusk** scene and Las Vegas the only **night** one. Hawaii and Alaska are map **insets**; DC is a 3×4px speck reachable via the north-east card. **Nine scenes truncate the road** — see the note below, it is the thing most likely to catch you out. |
 | Rolling stock | **18 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 10 wagons. All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
@@ -88,7 +88,7 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
 | `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
-| `world.js` | The 33 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
+| `world.js` | The 35 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
 | `map.js` | The map overlay — and the game's front door. Also **Surprise me**, the random-destination draw. |
 | `trains.js` | The consist data layer: 1 loco + 3 wagons, per-slot colours, cycling helpers, preset latch. **Was given; don't redesign it.** |
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |
@@ -148,12 +148,14 @@ classes — `#us-map .state.state--picked` — and it sticks.
 
 ### Not every scene's road reaches the horizon
 
-Most do, and cars enter and leave there. Seven do not: **Crater Lake** turns onto Rim Drive
+Most do, and cars enter and leave there. Nine do not: **Crater Lake** turns onto Rim Drive
 at `y=368`, **Horseshoe Curve** ends at the visitor car park at `y=376`, **Mount Washington**
 stops at the Marshfield car park at `y=376`, **Cedar Point**'s midway stops at the entrance
 arch at `y=372`, **Savannah** ends at the far pavement at `y=352`, **Stonington** stops at the
-town-landing car park at `y=410`, and **Cape Hatteras** stops at the car park by the dune
-crossing at `y=424`. Cars must not drive off the tarmac into a harbour, or onto a beach.
+town-landing car park at `y=410`, **Cape Hatteras** stops at the car park by the dune
+crossing at `y=424`, **Quechee** runs into the covered bridge at `y=386`, and **Detroit**
+stops at the plant gate at `y=436`. Cars must not drive off the tarmac into a harbour, onto
+a beach, or across a shipping lot.
 
 The engine works this out from the art rather than from a table: `scene.js` reads the far edge
 of the `#road` polygon at mount time, so a scene that truncates says so simply by being drawn

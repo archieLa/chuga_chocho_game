@@ -82,6 +82,10 @@ CATALOGUE = [
     ('cape-hatteras', 'North Carolina', 'Cape Hatteras',
      'The lighthouse behind the dunes, the Atlantic beyond',
      ['diesel', 'wagon-coach-modern', 'wagon-coach-modern']),
+    ('quechee',      'Vermont',    'Quechee',         'The mill and the falls under a hillside in October',
+     ['steam', 'wagon-coach-old', 'wagon-caboose']),
+    ('detroit',      'Michigan',   'Detroit',         'The assembly plant, the shipping lot and the city behind',
+     ['diesel', 'wagon-boxcar', 'wagon-boxcar']),
 ]
 
 
@@ -104,7 +108,7 @@ def veh_inner(key):
 # Colorado) and a layer name (in every scene) — a blind id="water" rewrite renamed the
 # layer too, which silently breaks anything looking layers up by id.
 def namespace(inner, sid):
-    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass', 'savg', 'harbour', 'ledge', 'abqg', 'atl', 'sandg', 'lh5']:
+    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass', 'savg', 'harbour', 'ledge', 'abqg', 'atl', 'sandg', 'lh5', 'qriver', 'qground', 'dlot']:
         # match the definition, not any element that happens to share the name
         for kind in ('linearGradient', 'radialGradient', 'pattern', 'filter', 'clipPath'):
             inner = inner.replace(f'<{kind} id="{gid}"', f'<{kind} id="{sid}-{gid}"')

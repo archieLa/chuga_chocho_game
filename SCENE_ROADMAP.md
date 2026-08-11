@@ -952,8 +952,8 @@ Four states that currently have **zero** locations. One each.
 |---|---|---|
 | **Albuquerque balloon fiesta** ✅ BUILT | New Mexico | The first scene where the **sky** is the subject rather than the backdrop — several hundred balloons above the horizon, adobe and the Rio Grande bosque below |
 | **Cape Hatteras** ✅ BUILT | North Carolina | The first **lighthouse**, and the most recognisable one in the country. A bare barrier island and a rough Atlantic — a different sea from Miami, Oʻahu or Stonington |
-| **Quechee village** | Vermont | The first **autumn** palette, the first **waterfall** and the first **mill**. The real view holds the dam, the brick mill on top of it, the covered bridge below and the hills in colour, all at once |
-| **A Detroit assembly plant** | Michigan | The first **factory**, and the first time the train crossing the road is carrying what the place makes — auto-rack wagons loaded at the plant that built the cars |
+| **Quechee village** ✅ BUILT | Vermont | The first **autumn** palette, the first **waterfall** and the first **mill**. The real view holds the dam, the brick mill on top of it, the covered bridge below and the hills in colour, all at once |
+| **A Detroit assembly plant** ✅ BUILT | Michigan | The first **factory**, and the first time the train crossing the road is carrying what the place makes — auto-rack wagons loaded at the plant that built the cars |
 
 Reference-photo prompts: `REFERENCE_PROMPT_wave5.md`.
 
