@@ -50,6 +50,8 @@
         'wagon-boxcar': 'Box wagon', 'wagon-container': 'Container wagon',
         'wagon-hopper': 'Coal wagon', 'wagon-tanker': 'Tank wagon',
         'wagon-hs-coach': 'Fast carriage', 'wagon-caboose': 'Little red caboose',
+        'cane-tank': 'Little tank engine', 'wagon-cane': 'Sugar cane wagon',
+        'monorail': 'Monorail', 'wagon-monorail': 'Monorail carriage',
       },
       // Place names spoken on the map come from world.js.
     },
@@ -86,6 +88,8 @@
         'wagon-boxcar': 'Wagon kryty', 'wagon-container': 'Wagon z kontenerem',
         'wagon-hopper': 'Wagon z węglem', 'wagon-tanker': 'Cysterna',
         'wagon-hs-coach': 'Szybki wagon', 'wagon-caboose': 'Wagon konduktora',
+        'cane-tank': 'Mała lokomotywka', 'wagon-cane': 'Wagon z trzciną',
+        'monorail': 'Kolejka jednoszynowa', 'wagon-monorail': 'Wagon jednoszynowy',
       },
     },
     // Spanish (and others) come in a later phase — copy the shape above.
@@ -117,7 +121,22 @@
     },
 
     /** The child-friendly name of a vehicle, e.g. 'Little red caboose'. */
-    vehicle(type) { return this.t('vehicles.' + type) || type; },
+    /** A vehicle's name in the active language.
+
+        NOT via t(), which returns the PATH when a key is missing — so a vehicle
+        with no entry put the literal "vehicles.cane-tank" on the button and, far
+        worse, read it out to the child. Four of the eighteen were in that state.
+
+        This falls back to English, then to a readable form of the id, and warns.
+        The warning matters: tools/shot.py exits non-zero on any console warning,
+        so adding rolling stock without naming it now fails the check rather than
+        reaching a three-year-old's ears. */
+    vehicle(type) {
+      const named = (DICT[current].vehicles || {})[type] || (DICT.en.vehicles || {})[type];
+      if (named) return named;
+      console.warn('i18n: no name for vehicle "' + type + '"');
+      return String(type).replace(/^wagon-/, '').replace(/-/g, ' ');
+    },
 
     /** 'one' … 'ten' — used to say which wagon is being edited. */
     number(n) { const l = this.dict.numbers || []; return l[n] != null ? l[n] : String(n); },
