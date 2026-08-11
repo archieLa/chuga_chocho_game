@@ -14501,25 +14501,53 @@ def quechee():
         # the glassy top third, still river-coloured
         glass = crest + (' L' + ' L'.join(f'{x},{y + (bottom - y) * 0.34:.0f}'
                                           for x, y in reversed(pts)) + ' Z')
+        # THE STREAKS SCROLL. Water going over an edge is the one thing in this
+        # scene that has to move, and the cheapest honest way is a band of
+        # streaks that TILES vertically: draw it twice, one copy a band-height
+        # above the other, and slide the pair down by exactly one band. At the
+        # end of the slide the second copy is where the first began, so it loops
+        # with no seam and costs one transform a frame.
+        #
+        # So the streaks are laid out inside a band rather than at fractions of
+        # the drop — they need to be periodic, or the tile does not meet itself.
+        BAND = 58
         streaks = []
         x = x0 + 4
         while x < x1 - 4:
             w = 1.2 + rr() * 4.4
-            top = lip_y(x) + (bottom - lip_y(x)) * (0.18 + rr() * 0.3)
+            top = lip + rr() * BAND
+            # Longer and closer together than the static version was. Only the
+            # lower 70% of the face is inside the clip, so a streak that read
+            # well as a 14px mark on a 52px drop is a dash on a 36px window —
+            # the sheet came out more gap than water.
             streaks.append(f'<rect x="{x:.0f}" y="{top:.0f}" width="{w:.1f}" '
-                           f'height="{bottom - top - rr() * 8:.0f}" rx="{w / 2:.1f}" '
+                           f'height="{26 + rr() * 32:.0f}" rx="{w / 2:.1f}" '
                            f'fill="#ffffff" opacity="{0.5 + rr() * 0.45:.2f}"/>')
-            x += w + 1.5 + rr() * 5
-        foam = ''.join(
-            f'<ellipse cx="{x0 + rr() * (x1 - x0):.0f}" cy="{bottom - 6 + rr() * 16:.0f}" '
-            f'rx="{10 + rr() * 20:.0f}" ry="{4 + rr() * 6:.0f}" fill="#ffffff" '
-            f'opacity="{0.55 + rr() * 0.45:.2f}"/>' for _ in range(40))
+            x += w + 1.0 + rr() * 3.2
+        band = ''.join(streaks)
+        # Clipped to the BROKEN part of the sheet, not the whole face. At the lip
+        # the water is still glassy and unbroken — let the streaks scroll up over
+        # that and the edge stops reading as an edge.
+        brk = ('M' + ' L'.join(f'{x},{y + (bottom - y) * 0.30:.0f}' for x, y in pts)
+               + f' L{x1},{bottom} L{x0},{bottom} Z')
+        # The foam is split in three so the boil at the base can churn out of
+        # step with itself instead of breathing as one lump.
+        foam = ['', '', '']
+        for k in range(40):
+            foam[k % 3] += (
+                f'<ellipse cx="{x0 + rr() * (x1 - x0):.0f}" cy="{bottom - 6 + rr() * 16:.0f}" '
+                f'rx="{10 + rr() * 20:.0f}" ry="{4 + rr() * 6:.0f}" fill="#ffffff" '
+                f'opacity="{0.55 + rr() * 0.45:.2f}"/>')
         return (f'<g id="falls">'
+                f'<defs><clipPath id="fallsclip"><path d="{brk}"/></clipPath></defs>'
                 f'<path d="{sheet}" fill="#a8c6c4"/>'
                 f'<path d="{glass}" fill="#6f9a94"/>'
-                + ''.join(streaks)
+                f'<g clip-path="url(#fallsclip)">'
+                f'<g class="cc-fall" data-band="{BAND}" data-secs="0.75">'
+                f'<g>{band}</g><g transform="translate(0,{-BAND})">{band}</g>'
+                f'</g></g>'
                 + f'<path d="{crest}" fill="none" stroke="#eef6f6" stroke-width="3.4"/>'
-                + f'<g>{foam}</g></g>')
+                + ''.join(f'<g class="cc-foam">{g}</g>' for g in foam) + '</g>')
 
     def ledge(x, y, s=1.0, seed=1):
         """Quechee's riverbed is a shelf of grey schist, split into flat angular slabs —

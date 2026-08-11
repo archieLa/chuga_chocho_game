@@ -30,6 +30,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
+| **Falling water** — a sheet that never stops | `.cc-fall` with `data-band` (the tile height) and `data-secs`. The art draws a band of streaks that TILES vertically and emits it twice, the second copy one band above the first; the engine slides the pair down by exactly one band and it loops with no seam. Clip it to the BROKEN part of the sheet, not the whole face — streaks scrolling over the glassy lip stop it reading as an edge. `.cc-foam` groups churn out of step at the base. | Quechee |
 | **Route** — stops in order, dwelling, looping | `.cc-route` with `data-route` = stops separated by spaces: `"x"`, `"x:dwell"` (seconds held) or `"@x"` (jump there instantly — only ever off-screen, so a thing can leave one side and reappear on the other without crossing what is between). Plus `data-y`, `data-speed`, `data-scale`, `data-nose`. | the Kansas tractor |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
 | **Rotator** — a wheel whose cars stay level | `.cc-ferris` with `data-secs`; children `.cc-pod` with `data-px`/`data-py` | Chicago Ferris wheel |
@@ -52,6 +53,10 @@ Two traps, both already paid for once:
   balloon launched it carried both into the sky — a shadow and a man hanging in
   mid-air under the basket. Anything belonging to the ground has to be a SIBLING
   of the thing that leaves the ground, not a child of it.
+- **A thing that scrolls has to tile.** The Quechee streaks were laid out at
+  fractions of the drop, which looks right standing still and cannot loop — a
+  tile has to meet itself. Placing them inside a fixed band instead is what makes
+  the seamless two-copy slide possible at all.
 - **A shadow belongs to the ground, not to the thing that left it.** Leaving the
   launch balloons' shadows on the pitch after they had gone was the tell — there
   was nothing up there casting them. They fade over the first third of the climb
@@ -96,7 +101,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (15 scenes)
+## What moves today (16 scenes)
 
 | Scene | What |
 |---|---|
@@ -108,6 +113,7 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
+| Quechee | the falls pour over the dam · the boil churns at the base |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |

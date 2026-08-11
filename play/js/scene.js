@@ -291,11 +291,12 @@
     const chases = buildChases(svg);
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
+    const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -930,6 +931,49 @@
     });
     // After the shared pulse, so the one that is launching can override it.
     updateLaunch(b, secs, dt);
+  }
+
+  // =======================================================================
+  // Falling water (.cc-fall) and the boil under it (.cc-foam).
+  //
+  // The art draws the streaks as a band that TILES vertically and emits it
+  // twice, the second copy one band-height above the first. Sliding the pair
+  // down by exactly one band puts the second copy where the first started, so
+  // it loops with no seam — one transform a frame for the whole waterfall.
+  //
+  // The band is clipped to the BROKEN part of the sheet rather than the whole
+  // face, because at the lip the water is still glassy; streaks scrolling over
+  // the crest stop it reading as an edge at all.
+  function buildFalls(svg) {
+    const bands = [];
+    svg.querySelectorAll('.cc-fall').forEach(node => {
+      const band = parseFloat(node.getAttribute('data-band'));
+      if (!band) { console.warn('cc-fall has no data-band to loop over'); return; }
+      bands.push({ el: node, band: band,
+                   secs: parseFloat(node.getAttribute('data-secs')) || 0.8 });
+    });
+    // Split in three by the art so the boil churns out of step with itself
+    // rather than breathing as one lump.
+    const foam = [];
+    svg.querySelectorAll('.cc-foam').forEach((node, k) => {
+      foam.push({ el: node, period: 1.7 + k * 0.63, phase: k / 3 });
+    });
+    return bands.length ? { bands: bands, foam: foam } : null;
+  }
+
+  function updateFalls(t) {
+    const f = currentScene && currentScene.falls;
+    if (!f) return;
+    const secs = t / 1000;
+    f.bands.forEach(b => {
+      b.el.setAttribute('transform',
+        'translate(0,' + ((secs / b.secs % 1) * b.band).toFixed(1) + ')');
+    });
+    f.foam.forEach(o => {
+      const u = Math.sin((secs / o.period + o.phase) * TAU);
+      o.el.setAttribute('opacity', (0.72 + 0.28 * u).toFixed(2));
+      o.el.setAttribute('transform', 'translate(0,' + (u * 1.4).toFixed(1) + ')');
+    });
   }
 
   // Chairs crawl up one cable and back down the other, wrapping at each end.
@@ -1570,6 +1614,7 @@
     updateChases(t);
     updateRoutes(dt);
     updateBalloons(t, dt);
+    updateFalls(t);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
