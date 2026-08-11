@@ -15154,6 +15154,84 @@ def detroit():
                  f'height="{2 * s:.1f}" fill="#8f9498"/>')
         return f'<g transform="translate(0,{base})">{mesh}{posts}{rails}</g>'
 
+    def gantry():
+        """A rail-mounted gantry over the loading siding — the thing that actually
+        puts a loaded rack on the train, instead of the rack drifting down on its
+        own like a ghost was carrying it.
+
+        Drawn from the real article: a DEEP blue box girder with a walkway along
+        the top, the machinery house riding on top of it, and two portal legs
+        standing on bogies. The first attempt was a thin grey beam, which against
+        a grey plant read as a canopy on the building rather than a machine.
+        Colour and depth are what make it a crane — not height.
+
+        THE LEGS STAND CLEAR OF THE CROSSING, which is the constraint that shapes
+        everything. A gantry has to straddle both the siding (y=418) and the main
+        line (y=500), and the road, the crossing and both gates all live between
+        x=552 and x=728. At x=96 and x=1184 the legs stand on bare apron, fully in
+        frame, with nothing important behind them.
+
+        The girder underside clears the top of a parked rack (y=366) by enough for
+        the hook to get above it."""
+        # Height is set by the LOAD, not by taste. A parked rack's roof is at
+        # y=363, and the hook has to get above it with enough rope left to read as
+        # rope: at a girder of 336 the lifted wagon's roof came out at 333, i.e.
+        # ABOVE the girder, with the spreader inside the beam. 302 leaves 30px of
+        # cable at the top of the lift and 120px when it is down on the rail.
+        GY, TOP, FY = 302, 272, 436     # girder underside, girder top, foot of the legs
+        LX, RX = 96, 1184
+        blue, lit, dark = '#2f6fae', '#4d8fd0', '#1e4a78'
+        pale = '#dfe8ef'
+
+        def leg(x):
+            w, wf = 17, 27              # tapers outward toward the foot
+            return (f'<g><path d="M{x - w},{GY} L{x + w},{GY} L{x + wf},{FY} L{x - wf},{FY} Z" '
+                    f'fill="{blue}"/>'
+                    f'<path d="M{x - w},{GY} L{x - w + 7},{GY} L{x - wf + 8},{FY} L{x - wf},{FY} Z" '
+                    f'fill="{lit}"/>'
+                    + f'<g stroke="{dark}" stroke-width="2.6" fill="none">'
+                    + ''.join(f'<path d="M{x - w - i},{GY + 14 + i * 26} '
+                              f'L{x + w + i},{GY + 36 + i * 26}"/>'
+                              for i in range(3)) + '</g>'
+                    # bogie: the crane rolls along its own rails
+                    f'<rect x="{x - 34}" y="{FY - 4}" width="68" height="12" rx="3" fill="{dark}"/>'
+                    + '<g fill="#2b3138">'
+                    + ''.join(f'<circle cx="{x + dx}" cy="{FY + 12}" r="6"/>' for dx in (-22, -8, 8, 22))
+                    + '</g>'
+                    f'<rect x="{x - 40}" y="{FY + 17}" width="80" height="4" rx="2" fill="#8c9298"/></g>')
+
+        # The trolley rides ON TOP of the girder, as in the reference. Its cables
+        # and hook are drawn by scene.js into the TRAIN's layer instead, because
+        # they have to share depth with the wagon they are carrying — up here they
+        # would be behind the rails while the wagon was in front of them.
+        trolley = (f'<g class="cc-crane-trolley" transform="translate(180,0)">'
+                   f'<rect x="-34" y="{TOP - 26}" width="68" height="28" rx="3" fill="#e8a81f"/>'
+                   f'<rect x="-34" y="{TOP - 26}" width="68" height="8" rx="3" fill="#f7cf62"/>'
+                   f'<rect x="-22" y="{TOP - 42}" width="30" height="17" rx="3" fill="#33414c"/>'
+                   f'<rect x="-17" y="{TOP - 38}" width="14" height="9" rx="1.5" fill="#cfe4f2"/>'
+                   f'<rect x="-10" y="{TOP + 1}" width="20" height="{GY - TOP + 2}" fill="{dark}"/>'
+                   f'</g>')
+
+        # class as well as id: inline-assets.py namespaces ids, so #crane is
+        # s-detroit-crane by the time the game sees it and a plain lookup finds
+        # nothing. Classes are never namespaced.
+        return (f'<g id="crane" class="cc-crane" data-girder="{GY}">'
+                + leg(LX) + leg(RX)
+                # the box girder: deep, with a bright top flange and a walkway
+                # handrail above it — the handrail is what stops it reading as a
+                # plain bar
+                + f'<rect x="{LX - 42}" y="{TOP}" width="{RX - LX + 84}" height="{GY - TOP}" fill="{blue}"/>'
+                + f'<rect x="{LX - 42}" y="{TOP}" width="{RX - LX + 84}" height="8" fill="{lit}"/>'
+                + f'<rect x="{LX - 42}" y="{GY - 7}" width="{RX - LX + 84}" height="7" fill="{dark}"/>'
+                + f'<g stroke="{pale}" stroke-width="2.2" fill="none" opacity="0.85">'
+                + f'<path d="M{LX - 42},{TOP - 15} L{RX + 42},{TOP - 15}"/>'
+                + ''.join(f'<path d="M{x},{TOP - 15} v15"/>' for x in range(LX - 30, RX + 42, 58))
+                + '</g>'
+                # a machinery house at the far end, like the real thing
+                + f'<rect x="{RX - 96}" y="{TOP - 30}" width="86" height="30" rx="3" fill="{dark}"/>'
+                + f'<rect x="{RX - 90}" y="{TOP - 24}" width="26" height="14" rx="2" fill="#8fb6d8"/>'
+                + trolley + '</g>')
+
     def gatehouse(x, base, s=1.0):
         """The gate the road stops at: a little cabin, a boom, and a sliding gate across
         the entrance. You do not drive onto a shipping lot."""
@@ -15271,6 +15349,7 @@ def detroit():
                        (1224, 0.48, 45)])
             + chain_fence(-20, 1300, GATE_Y + 6, 0.62)
             + gatehouse(634, GATE_Y + 8, 0.86)
+            + gantry()
             + ''.join(person(x, GATE_Y + 10, 0.3) for x in (404, 468, 872)))
 
     # ------------------------------------------------- in front of the rails ----

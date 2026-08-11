@@ -294,12 +294,13 @@
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
+    const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1010,13 +1011,27 @@
   // different drawings pixel for pixel at the one moment anybody is looking.
   // Doing it this way there is a single art change, at the START of the roll,
   // at the same place and the same size, while the wagon is small and far away.
+  // The crane does the work now, so the sequence is a list of timed steps rather
+  // than one slide. Each is a plain lerp; the order is what makes it read as a
+  // machine picking something up. Kept tight on purpose — the train stands still
+  // for the whole of it, and about seven seconds is the limit before a small
+  // child stops watching and starts pressing buttons.
   const SHUNT = {
     brake: 300,     // px over which the train slows to a stand
-    hold: 1.0,      // s standing before the wagon is released
-    roll: 2.4,      // s for it to come down off the siding
-    settle: 1.0,    // s coupled, before pulling away
     accel: 1.8,     // s back up to line speed
-    lead: 26,       // px the wagon rolls forward as it comes down
+    lead: 26,       // px further along the rail the wagon is set down
+    lift: 30,       // px the hook raises it before traversing
+    park: 150,      // where the trolley sits when it has nothing to do
+    steps: [        // name, seconds
+      ['hold',    0.5],   // train stands, crane already overhead (see 'run')
+      ['lower',   0.7],   // hook down onto the rack
+      ['grab',    0.3],
+      ['hoist',   0.6],   // up off the siding
+      ['carry',   2.2],   // trolley traverses to the train, load swinging under it
+      ['place',   1.0],   // down onto the rail, growing as it comes nearer
+      ['release', 0.4],
+      ['settle',  0.5],   // hook clear, couplings made
+    ],
   };
 
   /** Stand the REAL wagon on the siding, in place of the drawing.
@@ -1034,111 +1049,6 @@
 
       Must run with the scene in the document: the match is done from bounding
       boxes and getBBox on a detached node is all zeros. */
-  function buildRacks(svg) {
-    const racks = [];
-    svg.querySelectorAll('[id*="cc-autorack-"]').forEach(el => {
-      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
-        .exec(el.getAttribute('transform') || '');
-      if (!m) return;
-      const drawn = el.getBBox();
-      if (!drawn.width) { console.warn('cc-autorack has no size — is the scene attached?'); return; }
-      const n = /cc-autorack-(\d+)/.exec(el.id);
-      const x = +m[1], y = +m[2], s = +m[3];
-      const g = CC.rolling.build('wagon-autorack');
-      el.parentNode.insertBefore(g, el);
-      const gb = g.getBBox();
-      // Same footprint on the siding as the drawing it stands in for. Both put
-      // y=0 on the rail, so the translate carries straight over.
-      const s2 = gb.width ? (drawn.width * s) / gb.width : s;
-      g.setAttribute('transform', 'translate(' + x + ',' + y + ') scale(' + s2.toFixed(4) + ')');
-      el.setAttribute('visibility', 'hidden');
-      racks.push({ el: g, n: n ? +n[1] : 0, x: x, y: y, s: s2 });
-    });
-    racks.sort((a, b) => a.n - b.n);
-    return racks.length ? racks : null;
-  }
-
-  /** Set the shunt up for this run, or return null if it will not fit. */
-  function planShunt() {
-    const racks = currentScene && currentScene.racks;
-    if (!racks || train.items.length < 2) return null;
-    const last = train.items[train.items.length - 1];
-    const tail = -last.offset * TRAIN_S;          // how far the slot sits behind the head
-    // Pick the rack that leaves the ENGINE on screen when the train stops. With a
-    // long consist the tail is most of the frame behind the head, so the wrong
-    // rack parks the locomotive off the right-hand edge where nobody can see the
-    // thing it is supposed to be doing.
-    let best = null, bestErr = Infinity;
-    racks.forEach(r => {
-      const head = r.x + SHUNT.lead + tail;
-      const err = Math.abs(head - 1000);          // engine comfortably inside the frame
-      if (head < W + 60 && err < bestErr) { bestErr = err; best = r; }
-    });
-    if (!best) return null;
-    return { rack: best, phase: 'run', t: 0, picked: false,
-             pickIndex: train.items.length - 1,
-             rollingIndex: -1,          // set only while it drives its own transform
-             stopHead: best.x + SHUNT.lead + tail,
-             targetX: best.x + SHUNT.lead };
-  }
-
-  /** How fast the train may go right now: 1 normally, 0 while it stands. */
-  function shuntSpeed(dt) {
-    const s = train.shunt;
-    if (!s) return 1;
-    if (s.phase === 'run') {
-      const togo = s.stopHead - train.head;
-      if (togo <= 0) { s.phase = 'hold'; s.t = 0; return 0; }
-      return Math.max(0.05, Math.min(1, togo / SHUNT.brake));
-    }
-    if (s.phase === 'away') return Math.min(1, s.t / SHUNT.accel);
-    return 0;
-  }
-
-  function updateShunt(dt) {
-    const s = train.shunt;
-    if (!s || s.phase === 'run') return;
-    s.t += dt / 1000;
-
-    if (s.phase === 'hold') {
-      if (s.t >= SHUNT.hold) {
-        s.phase = 'roll'; s.t = 0;
-        // The one art change, and the cheapest moment for it: the scene's rack
-        // goes and the consist's own wagon takes its place at the same spot and
-        // the same size, worked out from the two bounding boxes rather than
-        // guessed, so it does not jump.
-        const g = train.els[s.pickIndex];
-        // The parked rack IS a wagon-autorack, so the consist's one only has to
-        // take its scale — no bounding-box matching, and nothing to see.
-        s.startS = s.rack.s;
-        s.rack.el.setAttribute('visibility', 'hidden');
-        s.picked = true;
-        s.rollingIndex = s.pickIndex;
-        g.setAttribute('visibility', 'visible');
-        CC.audio.honk && CC.audio.honk();
-      }
-      return;
-    }
-
-    if (s.phase === 'roll') {
-      const r = Math.min(1, s.t / SHUNT.roll);
-      const e = r * r * (3 - 2 * r);
-      const g = train.els[s.pickIndex];
-      const x = s.rack.x + (s.targetX - s.rack.x) * e;
-      const y = s.rack.y + (RAIL_Y - s.rack.y) * e;
-      const sc = s.startS + (TRAIN_S - s.startS) * e;
-      g.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) +
-        ') scale(' + sc.toFixed(3) + ',' + sc.toFixed(3) + ')');
-      CC.rolling.roll(g, (x - s.rack.x) / TRAIN_S, train.items[s.pickIndex].type);
-      if (r >= 1) { s.phase = 'settle'; s.t = 0; s.rollingIndex = -1; }
-      return;
-    }
-
-    if (s.phase === 'settle' && s.t >= SHUNT.settle) {
-      s.phase = 'away'; s.t = 0; CC.audio.whistle();
-    }
-  }
-
   // =======================================================================
   // A barrier the road traffic actually uses (.cc-plant-boom).
   //
@@ -1173,6 +1083,196 @@
     b.a += Math.max(-step, Math.min(step, want - b.a));
     b.el.setAttribute('transform',
       'rotate(' + b.a.toFixed(1) + ',' + b.px + ',' + b.py + ')');
+  }
+
+  /** The crane. The girder and trolley are in the artwork; the cables and the
+      spreader are built HERE, into the train's own layer, because they have to
+      share depth with the wagon they are carrying. Left in the scenery layer
+      they would be drawn behind the rails while the wagon hung in front. */
+  function buildCrane(svg, trainG) {
+    const g = svg.querySelector('.cc-crane');
+    const trolley = svg.querySelector('.cc-crane-trolley');
+    if (!g || !trolley) return null;
+    const girder = parseFloat(g.getAttribute('data-girder'));
+    if (isNaN(girder)) { console.warn('.cc-crane has no data-girder'); return null; }
+    const hoist = el('g', { class: 'cc-hoist', visibility: 'hidden' });
+    const rope = () => el('line', { stroke: '#33414c', 'stroke-width': 3, 'stroke-linecap': 'round' });
+    const l1 = rope(), l2 = rope();
+    const beam = el('rect', { rx: 3, fill: '#e8a81f', height: 11 });
+    const beam2 = el('rect', { rx: 3, fill: '#f7cf62', height: 4 });
+    [l1, l2, beam, beam2].forEach(e => hoist.appendChild(e));
+    trainG.appendChild(hoist);
+    return { trolley: trolley, hoist: hoist, l1: l1, l2: l2, beam: beam, beam2: beam2,
+             girder: girder, x: SHUNT.park };
+  }
+
+  /** Put the trolley at x, and hang the spreader at `top` over a load `halfW` wide. */
+  function setCrane(c, x, top, halfW) {
+    c.x = x;
+    c.trolley.setAttribute('transform', 'translate(' + x.toFixed(1) + ',0)');
+    if (top == null) { c.hoist.setAttribute('visibility', 'hidden'); return; }
+    c.hoist.setAttribute('visibility', 'visible');
+    c.l1.setAttribute('x1', x - 13); c.l1.setAttribute('y1', c.girder);
+    c.l1.setAttribute('x2', x - halfW); c.l1.setAttribute('y2', top);
+    c.l2.setAttribute('x1', x + 13); c.l2.setAttribute('y1', c.girder);
+    c.l2.setAttribute('x2', x + halfW); c.l2.setAttribute('y2', top);
+    c.beam.setAttribute('x', x - halfW - 8); c.beam.setAttribute('y', top - 6);
+    c.beam.setAttribute('width', halfW * 2 + 16);
+    c.beam2.setAttribute('x', x - halfW - 8); c.beam2.setAttribute('y', top - 6);
+    c.beam2.setAttribute('width', halfW * 2 + 16);
+  }
+
+  function buildRacks(svg) {
+    const racks = [];
+    svg.querySelectorAll('[id*="cc-autorack-"]').forEach(el => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
+        .exec(el.getAttribute('transform') || '');
+      if (!m) return;
+      const drawn = el.getBBox();
+      if (!drawn.width) { console.warn('cc-autorack has no size — is the scene attached?'); return; }
+      const n = /cc-autorack-(\d+)/.exec(el.id);
+      const x = +m[1], y = +m[2], s = +m[3];
+      const g = CC.rolling.build('wagon-autorack');
+      el.parentNode.insertBefore(g, el);
+      const gb = g.getBBox();
+      // Same footprint on the siding as the drawing it stands in for. Both put
+      // y=0 on the rail, so the translate carries straight over.
+      const s2 = gb.width ? (drawn.width * s) / gb.width : s;
+      g.setAttribute('transform', 'translate(' + x + ',' + y + ') scale(' + s2.toFixed(4) + ')');
+      el.setAttribute('visibility', 'hidden');
+      racks.push({ el: g, n: n ? +n[1] : 0, x: x, y: y, s: s2 });
+    });
+    racks.sort((a, b) => a.n - b.n);
+    return racks.length ? racks : null;
+  }
+
+  /** Set the shunt up for this run, or return null if it will not fit.
+
+      Two things have to be true at once. The ENGINE must still be on screen when
+      the train stops — with a long consist the tail is most of the frame behind
+      the head, so a careless choice parks the locomotive off the right-hand edge
+      where nobody can see the thing it is doing. And the crane must have a
+      journey worth watching: the first version stopped the train right beside
+      the rack it was going to lift, so the load travelled 26px and the whole
+      crane looked pointless.
+
+      So the coupling slot is placed first, near the left of the frame with the
+      engine comfortably inside it, and then the rack is chosen for the length of
+      the carry rather than for being nearby. */
+  const CARRY_WANT = 560;               // px of traverse that reads as a crane working
+
+  function planShunt() {
+    const racks = currentScene && currentScene.racks;
+    if (!racks || train.items.length < 2) return null;
+    const last = train.items[train.items.length - 1];
+    const tail = -last.offset * TRAIN_S;          // how far the slot sits behind the head
+    const stopHead = clamp(tail + 210, 700, W - 150);
+    const slot = stopHead - tail;
+    if (slot < 40) return null;                   // consist too long to fit the move
+    let best = null, bestErr = Infinity;
+    racks.forEach(r => {
+      const err = Math.abs(Math.abs(r.x - slot) - CARRY_WANT);
+      if (err < bestErr) { bestErr = err; best = r; }
+    });
+    if (!best) return null;
+    return { rack: best, phase: 'run', t: 0, picked: false,
+             pickIndex: train.items.length - 1,
+             rollingIndex: -1,          // set only while it drives its own transform
+             stopHead: stopHead,
+             targetX: slot };
+  }
+
+  /** How fast the train may go right now: 1 normally, 0 while it stands. */
+  function shuntSpeed(dt) {
+    const s = train.shunt;
+    if (!s) return 1;
+    if (s.phase === 'run') {
+      const togo = s.stopHead - train.head;
+      if (togo <= 0) { s.phase = 'work'; s.t = 0; return 0; }
+      return Math.max(0.05, Math.min(1, togo / SHUNT.brake));
+    }
+    if (s.phase === 'away') return Math.min(1, s.t / SHUNT.accel);
+    return 0;
+  }
+
+  /** Seconds into the step list at which each step starts. */
+  function stepAt(name) {
+    let a = 0;
+    for (const s of SHUNT.steps) { if (s[0] === name) return a; a += s[1]; }
+    return a;
+  }
+  const SHUNT_TOTAL = SHUNT.steps.reduce((a, s) => a + s[1], 0);
+
+  /** 0..1 through the named step, clamped. */
+  function stepT(u, name) {
+    const at = stepAt(name), dur = (SHUNT.steps.find(s => s[0] === name) || [0, 1])[1];
+    return clamp((u - at) / dur, 0, 1);
+  }
+
+  const ease = (r) => r * r * (3 - 2 * r);
+
+  function updateShunt(dt) {
+    const s = train.shunt;
+    if (!s) return;
+    const c = currentScene.crane;
+
+    // While the train is still running in, the crane goes and stands over the
+    // rack it is going to lift. By the time the train stops it is in position,
+    // which saves a couple of seconds of everybody waiting and looks like the
+    // yard knew the train was coming.
+    if (s.phase === 'run') {
+      if (c) {
+        const to = s.rack.x;
+        const step = 300 * dt / 1000;
+        setCrane(c, c.x + clamp(to - c.x, -step, step), null, 0);
+      }
+      return;
+    }
+    if (s.phase === 'away') { s.t += dt / 1000; return; }
+
+    s.t += dt / 1000;
+    const u = s.t;
+    const g = train.els[s.pickIndex];
+
+    // Hand-over happens at 'grab', at the rack's own place and scale, so there
+    // is nothing to see: the parked rack IS a wagon-autorack.
+    if (!s.picked && u >= stepAt('grab')) {
+      s.picked = true;
+      s.rollingIndex = s.pickIndex;
+      s.rack.el.setAttribute('visibility', 'hidden');
+      g.setAttribute('visibility', 'visible');
+      CC.audio.honk && CC.audio.honk();
+    }
+
+    // Where the load is, step by step.
+    const lifted = SHUNT.lift * ease(stepT(u, 'hoist'));
+    const carry = ease(stepT(u, 'carry'));
+    const place = ease(stepT(u, 'place'));
+    const x = s.rack.x + (s.targetX - s.rack.x) * carry;
+    const yUp = s.rack.y - lifted;
+    const y = yUp + (RAIL_Y - yUp) * place;
+    const sc = s.rack.s + (TRAIN_S - s.rack.s) * place;
+
+    if (s.picked) {
+      g.setAttribute('transform',
+        'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(3) + ')');
+      CC.rolling.roll(g, (x - s.rack.x) / TRAIN_S, train.items[s.pickIndex].type);
+    }
+
+    if (c) {
+      // The hook comes down onto the rack, rides with it, and lifts clear again.
+      const down = ease(stepT(u, 'lower'));
+      const off = ease(stepT(u, 'release'));
+      const top = y - 140 * sc;                       // the wagon's roof
+      const hookY = c.girder + (top - c.girder) * down * (1 - off);
+      setCrane(c, (s.picked || down > 0) ? x : c.x, down > 0 ? hookY : null, 82 * sc);
+    }
+
+    if (u >= SHUNT_TOTAL) {
+      s.phase = 'away'; s.t = 0; s.rollingIndex = -1;
+      if (c) setCrane(c, c.x, null, 0);
+      CC.audio.whistle();
+    }
   }
 
   // Chairs crawl up one cable and back down the other, wrapping at each end.
@@ -1437,6 +1537,10 @@
       train.els.push(g);
     });
     placeTrain();
+    // trainG was just emptied, and the crane's hoist lives in it — it has to
+    // share depth with the wagon it carries. The element itself survives, so
+    // putting it back is enough.
+    if (currentScene && currentScene.crane) currentScene.trainG.appendChild(currentScene.crane.hoist);
   }
 
   function placeTrain() {
@@ -1542,6 +1646,7 @@
       if (train.shunt) {
         train.shunt.rack.el.setAttribute('visibility', 'visible');
         train.shunt = null;
+        if (currentScene.crane) setCrane(currentScene.crane, SHUNT.park, null, 0);
         buildConsist();
         setTrainVisible(false);
       }

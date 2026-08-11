@@ -121,7 +121,7 @@ Two traps, both already paid for once:
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
-| Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and shunts a loaded auto-rack off the siding. See below. |
+| Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
@@ -159,9 +159,12 @@ written up in this file only because this is where anyone looking for "what
 moves" will come.
 
     the train runs in and brakes to a stand
-    a loaded auto-rack rolls down off the siding onto the main line
-    it settles on the back of the train
+    a gantry crane picks a loaded auto-rack off the siding
+    carries it across the yard and sets it on the back of the train
     the train pulls away one wagon longer
+
+The crane is the point. Without it the wagon drifted down on its own and, in the
+maintainer's words, a ghost was loading the train.
 
 A scene opts in by having `#cc-autorack-N` groups on a siding; every other place
 still runs a train straight through. Every OTHER train shunts — always would
@@ -191,6 +194,27 @@ frame, the two are 0.3px and 0.0015 of scale apart, which is one frame of easing
 
 This has to run with the scene attached to the document: getBBox on a detached
 node is all zeros.
+
+**The crane.** `.cc-crane` carries `data-girder` (the underside of the beam) and
+contains `.cc-crane-trolley`, which the engine slides along it. The cables and
+the spreader are NOT in the artwork — `scene.js` builds them into the train's own
+layer, because they have to share depth with the wagon they are carrying; left in
+the scenery layer they would be drawn behind the rails while the load hung in
+front of them. `buildConsist` empties that layer, so it puts the hoist back.
+
+Three numbers were found the hard way and are worth keeping:
+
+- **The legs stand at x=96 and x=1184.** A gantry has to straddle the siding and
+  the main line, and the road, the crossing and both gates all live between
+  x=552 and x=728. There is nowhere in the middle to put a leg.
+- **The girder is at y=302, and that is set by the load, not by taste.** A parked
+  rack's roof is at 363; at a girder of 336 the lifted wagon's roof came out
+  *above* the beam with the spreader inside it.
+- **The train stops so the crane has a journey.** The first version put the
+  coupling slot right beside the rack it was lifting, so the load travelled 26px
+  and the crane looked pointless. The slot is placed first, near the left with
+  the engine still on screen, and then the rack is chosen for the LENGTH of the
+  carry — about 560px.
 
 ---
 
