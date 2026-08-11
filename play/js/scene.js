@@ -57,7 +57,9 @@
   // object: it has to be recoloured, mirrored and scaled by the engine.
   // =======================================================================
   function buildCar(colour, dir) {
-    const g = el('g', { class: 'cc-car' });
+    // data-dir is for testing as much as anything: "no car may cross a closed
+    // gate" is only checkable from outside if you can tell the two lanes apart.
+    const g = el('g', { class: 'cc-car', 'data-dir': dir });
     const nose = dir > 0 ? 1 : -1;             // dir +1 drives toward the viewer
     const dark = colour === '#e8e8ee' ? '#c9c9d4' : colour;
     g.appendChild(el('ellipse', { cx: 5, cy: 62, rx: 40, ry: 9, fill: '#000', opacity: 0.2 }));
@@ -1698,6 +1700,28 @@
     return false;
   }
 
+  /** Where traffic coming TOWARD the viewer has to wait for the gate.
+
+      STOP_FAR is a fixed 396, which quietly assumes every road runs to the
+      horizon with plenty of tarmac above the far gate to queue on. Two scenes
+      truncate below that line — Detroit's stops at the plant gate at y=424 —
+      so a car spawned at the road's own start (roadTop + 4 = 428) was ALREADY
+      past its stop line, tested as "not before the line", and drove straight
+      through a closed crossing. Always from the same direction, which is the
+      tell: it is the far lane, in the scenes whose far end is too low.
+
+      Clamping it to the road fixes every such scene at once and changes nothing
+      anywhere else, since roadTop is 300 in most of them. Where the road starts
+      that low there is no room to queue between it and the rails, so the car
+      waits essentially at the point it appears — and since cars fade in over
+      the first 46px of road, it waits invisibly and drives in when the gate
+      lifts. Better than a car standing on the ballast, and far better than one
+      driving through a closed gate. */
+  function farStopLine() {
+    const top = currentScene ? currentScene.roadTop : HORIZON;
+    return Math.max(STOP_FAR, top + 4);
+  }
+
   function updateCars(dt) {
     const blocked = CC.gate.isBlocking() || trainOnCrossing();
     const secs = dt / 1000;
@@ -1723,7 +1747,7 @@
     [1, -1].forEach(dir => {
       const lane = cars.filter(c => c.dir === dir && c.phase === 'road')
         .sort((a, b) => dir > 0 ? b.y - a.y : a.y - b.y);   // front of the queue first
-      const stopLine = dir > 0 ? STOP_FAR : STOP_NEAR;
+      const stopLine = dir > 0 ? farStopLine() : STOP_NEAR;
       let limit = null;                                     // set by the car ahead
       lane.forEach(car => {
         const step = car.speed * depthScale(car.y) * secs;
