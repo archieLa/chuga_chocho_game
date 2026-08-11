@@ -120,6 +120,13 @@
       "length": 400,
       "originFromRear": 200.0
     },
+    "wagon-autorack": {
+      "file": "wagon-autorack.svg",
+      "kind": "wagon",
+      "label": "Auto-rack",
+      "length": 290,
+      "originFromRear": 145.0
+    },
     "steam": {
       "file": "steam.svg",
       "kind": "engine",

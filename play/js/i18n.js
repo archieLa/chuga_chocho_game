@@ -52,6 +52,7 @@
         'wagon-hs-coach': 'Fast carriage', 'wagon-caboose': 'Little red caboose',
         'cane-tank': 'Little tank engine', 'wagon-cane': 'Sugar cane wagon',
         'monorail': 'Monorail', 'wagon-monorail': 'Monorail carriage',
+        'wagon-autorack': 'Car carrier',
       },
       // Place names spoken on the map come from world.js.
     },
@@ -90,6 +91,7 @@
         'wagon-hs-coach': 'Szybki wagon', 'wagon-caboose': 'Wagon konduktora',
         'cane-tank': 'Mała lokomotywka', 'wagon-cane': 'Wagon z trzciną',
         'monorail': 'Kolejka jednoszynowa', 'wagon-monorail': 'Wagon jednoszynowy',
+        'wagon-autorack': 'Wagon z autami',
       },
     },
     // Spanish (and others) come in a later phase — copy the shape above.

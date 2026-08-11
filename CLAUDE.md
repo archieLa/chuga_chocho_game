@@ -70,7 +70,7 @@ or your edit will not reach the game.
 | | State |
 |---|---|
 | Locations | **35 done, across 30 states + DC** — Wave 5 complete: **Albuquerque** (NM), **Cape Hatteras** (NC), **Quechee** (VT) and **Detroit** (MI). All in `play/assets/scenes/`. California, Texas, Florida and Tennessee have two destinations each. Austin is the only **dusk** scene and Las Vegas the only **night** one. Hawaii and Alaska are map **insets**; DC is a 3×4px speck reachable via the north-east card. **Nine scenes truncate the road** — see the note below, it is the thing most likely to catch you out. |
-| Rolling stock | **18 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 10 wagons. All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
+| Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
 | The game engine | **Built.** See the module map below. |
@@ -180,7 +180,7 @@ close a gate against. Scenes without the path simply get no background train.
 
 ### Ambient motion — see `AMBIENT.md`
 
-Fifteen scenes have things that move on their own (a train round the Horseshoe,
+Seventeen scenes have things that move on their own (a train round the Horseshoe,
 a rocket off Pad 39, a cog train up Mount Washington, the bats leaving the
 Congress Avenue Bridge, the mass ascension over Albuquerque). **There is no cap**
 — that call is the maintainer's, scene by scene. All of it is **gate-blind**:

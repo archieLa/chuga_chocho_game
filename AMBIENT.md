@@ -101,7 +101,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (16 scenes)
+## What moves today (17 scenes)
 
 | Scene | What |
 |---|---|
@@ -114,6 +114,7 @@ Two traps, both already paid for once:
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
+| Detroit | **not ambient** — every other train stops and shunts a loaded auto-rack off the siding. See below. |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
@@ -140,6 +141,41 @@ machinery is most of the eruption already.
 
 **5. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
 scene where it would read.
+
+---
+
+## Detroit is the exception: this one IS the train
+
+Everything else in this file is scenery. The Detroit shunt is not — it is the
+gameplay train doing something, and it lives in `updateTrain`, not here. It is
+written up in this file only because this is where anyone looking for "what
+moves" will come.
+
+    the train runs in and brakes to a stand
+    a loaded auto-rack rolls down off the siding onto the main line
+    it settles on the back of the train
+    the train pulls away one wagon longer
+
+A scene opts in by having `#cc-autorack-N` groups on a siding; every other place
+still runs a train straight through. Every OTHER train shunts — always would
+make the place feel like a cutscene, never would leave a child waiting on a coin
+flip for the best thing in the scene.
+
+Two rules it must keep:
+
+- **It must not touch the child's train.** The extra wagon goes in as a
+  scene-local extra and is never written to `CC.trains`, so it cannot follow them
+  to the next place or survive a reload. A location does not get to redecorate
+  what they built.
+- **It must not couple to the gate.** Same rule as everything else here. The
+  child can raise the gate mid-shunt and nothing cares.
+
+The wagon that rolls down is the CONSIST'S OWN element, animated from the siding
+to its coupling slot — not the scene's artwork with a swap at the end. Swapping
+at the end means matching two different drawings pixel for pixel at the one
+moment anybody is looking at them. This way there is a single art change, at the
+START of the roll, at the same place and the same size (worked out from the two
+bounding boxes, not guessed), while the wagon is small and far away.
 
 ---
 

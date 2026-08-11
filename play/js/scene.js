@@ -291,12 +291,13 @@
     const chases = buildChases(svg);
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
+    const racks = buildRacks(svg);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, racks: racks, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -976,6 +977,138 @@
     });
   }
 
+  // =======================================================================
+  // THE DETROIT SHUNTING MOVE — the one place where the railway is the subject
+  // rather than scenery, so the train does something instead of just passing.
+  //
+  //   the train runs in and brakes to a stand
+  //   a loaded auto-rack rolls down off the siding onto the main line
+  //   it settles on the back of the train
+  //   the train pulls away one wagon longer
+  //
+  // A scene opts in simply by having #cc-autorack-N groups standing on a siding.
+  // Nothing else in the game changes; every other place still runs a train
+  // straight through.
+  //
+  // TWO THINGS THIS MUST NOT DO.
+  //
+  // It must not touch the child's train. The extra wagon is passed to
+  // buildConsist as a scene-local extra and never written to CC.trains, so it
+  // cannot follow them to the next place or survive a reload — a location does
+  // not get to redecorate what they built.
+  //
+  // And it must not couple to the gate. The gate is the game; this is the train
+  // going about its business behind it. The child can raise the gate mid-shunt
+  // and nothing here cares.
+  //
+  // The wagon that rolls down is the CONSIST'S OWN element, not the scene's
+  // artwork, animated from the siding to its coupling slot. The alternative —
+  // animating the scene's rack and swapping at the end — means matching two
+  // different drawings pixel for pixel at the one moment anybody is looking.
+  // Doing it this way there is a single art change, at the START of the roll,
+  // at the same place and the same size, while the wagon is small and far away.
+  const SHUNT = {
+    brake: 300,     // px over which the train slows to a stand
+    hold: 1.0,      // s standing before the wagon is released
+    roll: 2.4,      // s for it to come down off the siding
+    settle: 1.0,    // s coupled, before pulling away
+    accel: 1.8,     // s back up to line speed
+    lead: 26,       // px the wagon rolls forward as it comes down
+  };
+
+  function buildRacks(svg) {
+    const racks = [];
+    svg.querySelectorAll('[id*="cc-autorack-"]').forEach(el => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
+        .exec(el.getAttribute('transform') || '');
+      if (!m) return;
+      const n = /cc-autorack-(\d+)/.exec(el.id);
+      racks.push({ el: el, n: n ? +n[1] : 0, x: +m[1], y: +m[2], s: +m[3] });
+    });
+    racks.sort((a, b) => a.n - b.n);
+    return racks.length ? racks : null;
+  }
+
+  /** Set the shunt up for this run, or return null if it will not fit. */
+  function planShunt() {
+    const racks = currentScene && currentScene.racks;
+    if (!racks || train.items.length < 2) return null;
+    const last = train.items[train.items.length - 1];
+    const tail = -last.offset * TRAIN_S;          // how far the slot sits behind the head
+    // Pick the rack that leaves the ENGINE on screen when the train stops. With a
+    // long consist the tail is most of the frame behind the head, so the wrong
+    // rack parks the locomotive off the right-hand edge where nobody can see the
+    // thing it is supposed to be doing.
+    let best = null, bestErr = Infinity;
+    racks.forEach(r => {
+      const head = r.x + SHUNT.lead + tail;
+      const err = Math.abs(head - 1000);          // engine comfortably inside the frame
+      if (head < W + 60 && err < bestErr) { bestErr = err; best = r; }
+    });
+    if (!best) return null;
+    return { rack: best, phase: 'run', t: 0, picked: false,
+             pickIndex: train.items.length - 1,
+             rollingIndex: -1,          // set only while it drives its own transform
+             stopHead: best.x + SHUNT.lead + tail,
+             targetX: best.x + SHUNT.lead };
+  }
+
+  /** How fast the train may go right now: 1 normally, 0 while it stands. */
+  function shuntSpeed(dt) {
+    const s = train.shunt;
+    if (!s) return 1;
+    if (s.phase === 'run') {
+      const togo = s.stopHead - train.head;
+      if (togo <= 0) { s.phase = 'hold'; s.t = 0; return 0; }
+      return Math.max(0.05, Math.min(1, togo / SHUNT.brake));
+    }
+    if (s.phase === 'away') return Math.min(1, s.t / SHUNT.accel);
+    return 0;
+  }
+
+  function updateShunt(dt) {
+    const s = train.shunt;
+    if (!s || s.phase === 'run') return;
+    s.t += dt / 1000;
+
+    if (s.phase === 'hold') {
+      if (s.t >= SHUNT.hold) {
+        s.phase = 'roll'; s.t = 0;
+        // The one art change, and the cheapest moment for it: the scene's rack
+        // goes and the consist's own wagon takes its place at the same spot and
+        // the same size, worked out from the two bounding boxes rather than
+        // guessed, so it does not jump.
+        const g = train.els[s.pickIndex];
+        const rb = s.rack.el.getBBox(), gb = g.getBBox();
+        s.startS = gb.width ? (rb.width * s.rack.s) / gb.width : TRAIN_S;
+        s.rack.el.setAttribute('visibility', 'hidden');
+        s.picked = true;
+        s.rollingIndex = s.pickIndex;
+        g.setAttribute('visibility', 'visible');
+        CC.audio.honk && CC.audio.honk();
+      }
+      return;
+    }
+
+    if (s.phase === 'roll') {
+      const r = Math.min(1, s.t / SHUNT.roll);
+      const e = r * r * (3 - 2 * r);
+      const g = train.els[s.pickIndex];
+      const x = s.rack.x + (s.targetX - s.rack.x) * e;
+      const y = s.rack.y + (RAIL_Y - s.rack.y) * e;
+      const sc = s.startS + (TRAIN_S - s.startS) * e;
+      g.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) +
+        ') scale(' + sc.toFixed(3) + ',' + sc.toFixed(3) + ')');
+      CC.rolling.roll(g, (x - s.rack.x) / TRAIN_S, train.items[s.pickIndex].type);
+      if (r >= 1) { s.phase = 'settle'; s.t = 0; s.rollingIndex = -1; }
+      return;
+    }
+
+    if (s.phase === 'settle' && s.t >= SHUNT.settle) {
+      s.phase = 'away'; s.t = 0; CC.audio.whistle();
+    }
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -1221,11 +1354,16 @@
   let puffs = [];
   let idleTrainTimer = 0;
 
-  function buildConsist() {
+  /** `extra` is ONE scene-local vehicle tacked on the back — Detroit's auto-rack.
+      It is never written to CC.trains, so it cannot leak into the child's own
+      train or survive leaving the place. A location must not overwrite what they
+      built. */
+  function buildConsist(extra) {
     train.els = [];
     if (!currentScene) return;
     currentScene.trainG.textContent = '';
-    train.items = CC.rolling.layout(CC.trains.vehicles(), GAP);
+    const list = CC.trains.vehicles().concat(extra ? [extra] : []);
+    train.items = CC.rolling.layout(list, GAP);
     train.span = CC.rolling.span(train.items, GAP) * TRAIN_S;
     train.items.forEach(item => {
       const g = CC.rolling.build(item.type, item.colours);   // colours scoped to THIS vehicle
@@ -1241,6 +1379,10 @@
     train.items.forEach((item, i) => {
       const g = train.els[i];
       if (!g) return;
+      // The wagon coming off the siding drives its own transform until it is
+      // coupled; two systems writing the same attribute is how you get a wagon
+      // that flickers between two places.
+      if (train.shunt && train.shunt.rollingIndex === i) return;
       const x = train.head + dir * item.offset * TRAIN_S;
       g.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + RAIL_Y + ') scale('
         + (dir > 0 ? TRAIN_S : -TRAIN_S) + ',' + TRAIN_S + ')');
@@ -1252,6 +1394,20 @@
   function launchTrain() {
     if (train.active || !currentScene) return;
     train.dir = Math.random() < 0.5 ? 1 : -1;
+    // Where there is a siding, every other train calls at it. Always would make
+    // the place feel like a cutscene; never would mean a child waits for a coin
+    // flip to show them the best thing in the scene. The shunt only works left
+    // to right, so those runs take the direction they need.
+    train.shunt = null;
+    if (currentScene.racks) {
+      currentScene.shuntTurn = !currentScene.shuntTurn;
+      if (currentScene.shuntTurn) {
+        train.dir = 1;
+        buildConsist({ type: 'wagon-autorack' });
+        train.shunt = planShunt();
+        if (!train.shunt) buildConsist();           // would not fit — run a plain train
+      }
+    }
     train.head = train.dir > 0 ? -(420) : W + 420;
     train.active = true;
     train.whistled = false;
@@ -1261,7 +1417,15 @@
   }
 
   function setTrainVisible(on) {
-    train.els.forEach(g => g.setAttribute('visibility', on ? 'visible' : 'hidden'));
+    const s = train.shunt;
+    train.els.forEach((g, i) => {
+      // The wagon still standing on the siding is not part of the train yet.
+      // This used to be hidden by hand at launch and then un-hidden half a line
+      // later by this very function; it only stayed out of sight because
+      // placeTrain happened to leave it parked off-frame. One place decides.
+      const notYet = s && !s.picked && i === s.pickIndex;
+      g.setAttribute('visibility', (on && !notYet) ? 'visible' : 'hidden');
+    });
   }
 
   /** Is the train sitting on the crossing right now? Cars must not drive
@@ -1286,7 +1450,8 @@
       }
       return;
     }
-    train.head += train.dir * TRAIN_SPEED * dt / 1000;
+    updateShunt(dt);
+    train.head += train.dir * TRAIN_SPEED * shuntSpeed(dt) * dt / 1000;
     const dist = placeTrain();
 
     if (!train.whistled && Math.abs(train.head - ROAD_CX) < 320) { train.whistled = true; CC.audio.whistle(); }
@@ -1303,7 +1468,18 @@
     }
 
     const done = train.dir > 0 ? train.head > W + train.span + 80 : train.head < -train.span - 80;
-    if (done) { train.active = false; setTrainVisible(false); idleTrainTimer = 0; }
+    if (done) {
+      train.active = false;
+      setTrainVisible(false);
+      idleTrainTimer = 0;
+      // Put the siding back and drop the borrowed wagon. Off-screen, so free.
+      if (train.shunt) {
+        train.shunt.rack.el.setAttribute('visibility', 'visible');
+        train.shunt = null;
+        buildConsist();
+        setTrainVisible(false);
+      }
+    }
   }
 
   function emitPuff(head) {

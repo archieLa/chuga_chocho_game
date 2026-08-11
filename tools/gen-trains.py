@@ -456,6 +456,60 @@ def boxcar():
          'BOXCAR with sliding door', L, L / 2, 'wagon', 'Boxcar')
 
 
+def autorack():
+    """AUTO-RACK — the longest wagon in the set, and the only one whose load you can
+    see. Detroit is the reason it exists: a car plant loads new cars onto trains, and
+    a wagon that visibly carries little cars is a far better payoff for a small child
+    than one more brown van.
+
+    Open bi-level, because an enclosed one is a featureless box. The yellow cage is
+    what says 'auto-rack' at a glance — real ones are a frame, not a wall.
+
+    Vertical scheme follows the boxcar so it sits in a consist without looking like a
+    different game: floor at -52, underframe at -44, wheels r=16, top at -134 against
+    the boxcar's -128.
+    """
+    L = 290; h = L / 2
+    DECK_LO, DECK_HI, ROOF = -52, -104, -134
+    CARS = ['#c9382e', '#2f6f9e', '#e8b02a', '#4f8f5a', '#e6e2d8', '#7a4f9e']
+
+    def minicar(x, base, colour):
+        """A car riding on a deck. Tiny, so it is a silhouette with a window band —
+        any more detail turns to mush at 0.55 scale and costs nothing but bytes."""
+        return (f'<g transform="translate({x},{base})">'
+                f'<rect x="-21" y="-15" width="42" height="11" rx="4" fill="{colour}"/>'
+                f'<rect x="-14" y="-22" width="27" height="9" rx="4" fill="{colour}"/>'
+                f'<rect x="-11" y="-20" width="21" height="5" rx="2" fill="#cfe4f2"/>'
+                f'<circle cx="-12" cy="-3" r="4" fill="#23262b"/>'
+                f'<circle cx="12" cy="-3" r="4" fill="#23262b"/></g>')
+
+    b = [shadow(-h, h)]
+    # the two decks and the eight cars riding on them
+    for k, base in enumerate((DECK_HI, DECK_LO)):
+        b.append(f'<rect class="cc-wagon2" x="{-h+6}" y="{base}" width="{L-12}" height="7" '
+                 f'fill="#8f8a80"/>')
+        for i in range(4):
+            b.append(minicar(-h + 44 + i * 68, base, CARS[(i + k * 3) % len(CARS)]))
+    # the cage — end posts full height, roof rail ABOVE the upper cars (they top out
+    # at DECK_HI-22, so a rail at DECK_HI-14 ran straight through them), and light
+    # uprights between.
+    b.append(f'<rect class="cc-wagon" x="{-h}" y="{ROOF}" width="{L}" height="9" rx="3" fill="#c9a83a"/>')
+    for s in (-1, 1):
+        b.append(f'<rect class="cc-wagon" x="{s*h - (7 if s > 0 else 0):.0f}" y="{ROOF}" '
+                 f'width="7" height="{DECK_LO + 7 - ROOF}" fill="#c9a83a"/>')
+    b.append('<g class="cc-trim" stroke="#c9a83a" stroke-width="3.2" fill="none">'
+             + ''.join(f'<path d="M{-h + 24 + i*40:.0f},{DECK_LO+7} v{ROOF-DECK_LO-7}"/>'
+                       for i in range(1, int(L / 40)))
+             + '</g>')
+    # floor, frame, bogies, couplers — the same furniture as every other wagon
+    b.append(f'<rect class="cc-wagon" x="{-h}" y="{DECK_LO}" width="{L}" height="8" rx="2" fill="#7d4a35"/>')
+    b.append(underframe(L, h - 58))
+    b.append(truck(-h + 58, r=16, n=2, spacing=42) + truck(h - 58, r=16, n=2, spacing=42))
+    b.append(coupler(-h) + coupler(h))
+    emit('wagon-autorack', '-170 -160 340 175', '  ' + ''.join(b),
+         'AUTO-RACK, open bi-level, carrying eight cars', L, L / 2, 'wagon', 'Auto-rack')
+
+
 def tanker():
     L = 250; h = L / 2
     b = [shadow(-h, h)]
@@ -750,7 +804,7 @@ def monorail_car():
 diesel(); electric_hs(); commuter(); streetcar(); cable_car()
 cane_tank(); monorail()
 coach_old(); caboose(); coach_modern(); hs_coach()
-boxcar(); tanker(); hopper(); container(); cane_car(); monorail_car()
+boxcar(); tanker(); hopper(); container(); cane_car(); monorail_car(); autorack()
 
 # steam is hand-authored; record it in the manifest so consists can use it
 VEHICLES['steam'] = dict(file='steam.svg', kind='engine', label='Steam locomotive (coal)',
