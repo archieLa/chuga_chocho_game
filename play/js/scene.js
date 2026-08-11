@@ -771,10 +771,14 @@
   // the top of the picture. Ending at 0.3 leaves it a plausible near neighbour
   // of the drifting ones. They sit in `scenery-back`, which is painted before
   // the road, so the whole climb happens BEHIND the crossing.
+  // The cadence is idle + burn + rise, and because only one goes at a time that
+  // sum IS the gap between take-offs. 33s felt like waiting; 20s is often enough
+  // that a child sees one without it becoming wallpaper. The rise is the big
+  // term — shortening it is what actually speeds the scene up.
   const LAUNCH = {
-    idle: 6,        // sitting on the pitch, burner ticking over
-    burn: 3.6,      // burner up, before she unsticks
-    rise: 24,       // to the top of the frame
+    idle: 2,        // sitting on the pitch, burner ticking over
+    burn: 2.5,      // burner up, before she unsticks
+    rise: 16,       // to the top of the frame
     top: -20,       // y at the end of the climb — the envelope is clear by then
     shrink: 0.30,   // final scale as a fraction of her size on the ground
     sway: 26,       // how far she wanders sideways on the way up

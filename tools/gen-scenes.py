@@ -13332,21 +13332,31 @@ def albuquerque():
         f = -1 if flip else 1
         tilt = (rr() * 7 + 2) * f
         idattr = f' id="{gid}"' if gid else ''
-        return (f'<g{idattr} transform="translate({x},{base}) scale({s:.3f})">'
-                f'{shadow(0, 3, 40, 7, 0.18)}'
-                f'<g transform="rotate({tilt:.1f})">'
-                + balloon(0, -4, 1.0, seed, True) + '</g>'
-                # The fan and the crew are drawn at the size of the CROWD around them, not
-                # at the balloon's size. Because they sit inside the balloon's transform,
-                # their scale has to be divided back out — otherwise inflating the balloon
-                # inflates the people standing next to it, which is exactly what happened:
-                # a crew member ended up three times the height of the spectators behind.
-                + (f'<g transform="scale({crew / s:.3f})">'
-                   f'<g transform="translate({f * 44 / (crew / s):.0f},0)">'
-                   f'<rect x="-9" y="-12" width="18" height="12" rx="2" fill="#3f4a52"/>'
-                   f'<circle cx="0" cy="-6" r="4.4" fill="#8f9aa0"/></g>'
-                   + person(f * -52 / (crew / s), 0, 1.0, '#c9382e') + '</g>'
-                   if crew else '') + '</g>')
+        # THREE SIBLINGS, and only the middle one carries the id — because that is
+        # the one the engine flies. The shadow, the fan and the crew member all
+        # used to live INSIDE the id'd group, so when a balloon launched it took
+        # its ground shadow and a man with it, both hanging in the sky under the
+        # basket. Anything that belongs to the field has to be outside the thing
+        # that leaves the field.
+        #
+        # The crew is drawn at the size of the CROWD around them, not at the
+        # balloon's, or inflating the balloon inflates the people standing next
+        # to it — a crew member once came out three times the height of the
+        # spectators behind him. Their local offsets are unchanged: they used to
+        # be scale(crew/s) inside scale(s), and are now scale(crew) on their own,
+        # which lands every part in exactly the same place.
+        ground = (f'<g transform="translate({x},{base}) scale({s:.3f})">'
+                  f'{shadow(0, 3, 40, 7, 0.18)}</g>')
+        gcrew = (f'<g transform="translate({x},{base}) scale({crew:.3f})">'
+                 f'<g transform="translate({f * 44 * s / crew:.0f},0)">'
+                 f'<rect x="-9" y="-12" width="18" height="12" rx="2" fill="#3f4a52"/>'
+                 f'<circle cx="0" cy="-6" r="4.4" fill="#8f9aa0"/></g>'
+                 + person(f * -52 * s / crew, 0, 1.0, '#c9382e') + '</g>') if crew else ''
+        return (ground
+                + f'<g{idattr} transform="translate({x},{base}) scale({s:.3f})">'
+                  f'<g transform="rotate({tilt:.1f})">'
+                + balloon(0, -4, 1.0, seed, True) + '</g></g>'
+                + gcrew)
 
     def chase_van(x, base, s=1.0, body='#e8e2d2'):
         return (f'<g transform="translate({x},{base}) scale({s})">{shadow(0, 3, 28, 5, 0.2)}'
