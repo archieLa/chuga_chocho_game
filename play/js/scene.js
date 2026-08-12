@@ -302,13 +302,14 @@
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
     const crawls = buildCrawls(svg);
+    const halt = buildHalt(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1024,6 +1025,97 @@
   // machine picking something up. Kept tight on purpose — the train stands still
   // for the whole of it, and about seven seconds is the limit before a small
   // child stops watching and starts pressing buttons.
+  // =======================================================================
+  // Calling at a station (.cc-platform + .cc-passenger).
+  //
+  // The same shape as the shunt, and for the same reason: the train's speed is
+  // already a 0..1 factor, so stopping it is a factor, not a second way to move
+  // a train. And like the shunt it is GATE-BLIND — the gate is the game, and a
+  // child who cannot work their toy while a train sits at a platform has been
+  // given a cutscene instead.
+  //
+  // The boarding side faces the viewer, so the passengers walk in FRONT of the
+  // coaches and stay visible the whole way. They step aboard by reaching the
+  // coach and fading; the ones getting off fade in there and walk away.
+  const HALT = {
+    lead: 1.0,       // stand still a beat before anyone moves
+    walk: 2.6,       // seconds to cross the platform
+    bob: 1.6,        // px they rise and fall, so they walk rather than slide
+    steps: 3.4,      // bobs per second
+  };
+
+  function buildHalt(svg) {
+    const mark = svg.querySelector('.cc-platform');
+    if (!mark) return null;
+    const stop = parseFloat(mark.getAttribute('data-stop'));
+    if (isNaN(stop)) { console.warn('cc-platform has no usable data-stop'); return null; }
+    const people = [];
+    svg.querySelectorAll('.cc-passenger').forEach(el => {
+      const a = (el.getAttribute('data-stand') || '').split(',').map(Number);
+      const b = (el.getAttribute('data-door') || '').split(',').map(Number);
+      if (a.length !== 2 || b.length !== 2 || a.concat(b).some(isNaN)) return;
+      people.push({ el: el, sx: a[0], sy: a[1], dx: b[0], dy: b[1],
+                    board: el.getAttribute('data-role') !== 'alight',
+                    s: parseFloat(el.getAttribute('data-scale')) || 1,
+                    // staggered, so five people do not move as one block
+                    delay: people.length * 0.45 });
+    });
+    return { stopHead: stop, dwell: parseFloat(mark.getAttribute('data-dwell')) || 6,
+             people: people };
+  }
+
+  /** Put everyone back where they started: boarders on the platform, the ones
+      who got off waiting invisibly at the coach side for the next train. */
+  function resetPlatform(h) {
+    if (!h) return;
+    h.people.forEach(p => {
+      const x = p.board ? p.sx : p.dx, y = p.board ? p.sy : p.dy;
+      p.el.setAttribute('transform', 'translate(' + x + ',' + y + ') scale(' + p.s + ')');
+      p.el.setAttribute('opacity', p.board ? '1' : '0');
+    });
+  }
+
+  function haltSpeed() {
+    const s = train.halt;
+    if (!s) return 1;
+    if (s.phase === 'run') {
+      // Signed, because a halt can run either way: the coaches trail BEHIND the
+      // loco, so which direction the train comes from decides whether they end
+      // up over the platform or a hundred metres short of it.
+      const togo = (s.stopHead - train.head) * train.dir;
+      if (togo <= 0) { s.phase = 'stand'; s.t = 0; return 0; }
+      return Math.max(0.04, Math.min(1, togo / SHUNT.brake));
+    }
+    if (s.phase === 'away') return Math.min(1, s.t / SHUNT.accel);
+    return 0;
+  }
+
+  function updateHalt(dt) {
+    const s = train.halt;
+    if (!s || s.phase === 'run') return;
+    s.t += dt / 1000;
+    if (s.phase === 'stand' && s.t >= s.dwell) { s.phase = 'away'; s.t = 0; }
+    if (s.phase !== 'stand') return;
+
+    s.people.forEach(p => {
+      const u = Math.max(0, Math.min(1, (s.t - HALT.lead - p.delay) / HALT.walk));
+      // Boarders go platform -> coach and fade out as they step up; the ones
+      // getting off appear at the coach and walk out onto the platform.
+      // k is "how far toward the platform", so it runs 1->0 for someone getting
+      // ON and 0->1 for someone getting OFF. Written the other way round first,
+      // which teleported the boarders to the coach and walked them backwards.
+      const k = p.board ? 1 - u : u;
+      const x = p.dx + (p.sx - p.dx) * k;
+      const y = p.dy + (p.sy - p.dy) * k;
+      const moving = u > 0 && u < 1;
+      const bob = moving ? -Math.abs(Math.sin(s.t * HALT.steps * Math.PI)) * HALT.bob : 0;
+      p.el.setAttribute('transform',
+        'translate(' + x.toFixed(1) + ',' + (y + bob).toFixed(1) + ') scale(' + p.s + ')');
+      p.el.setAttribute('opacity',
+        (p.board ? Math.min(1, (1 - u) / 0.18) : Math.min(1, u / 0.18)).toFixed(2));
+    });
+  }
+
   const SHUNT = {
     brake: 300,     // px over which the train slows to a stand
     accel: 1.8,     // s back up to line speed
@@ -1803,6 +1895,19 @@
     // the place feel like a cutscene; never would mean a child waits for a coin
     // flip to show them the best thing in the scene. The shunt only works left
     // to right, so those runs take the direction they need.
+    // Where there is a platform, every other train calls at it — same
+    // reasoning as the siding, and the same left-to-right constraint, because
+    // the waiting passengers are drawn for a train arriving from the left.
+    train.halt = null;
+    if (currentScene.halt) {
+      currentScene.haltTurn = !currentScene.haltTurn;
+      resetPlatform(currentScene.halt);
+      if (currentScene.haltTurn) {
+        train.dir = 1;
+        train.halt = { stopHead: currentScene.halt.stopHead, dwell: currentScene.halt.dwell,
+                       people: currentScene.halt.people, phase: 'run', t: 0 };
+      }
+    }
     train.shunt = null;
     if (currentScene.racks) {
       currentScene.shuntTurn = !currentScene.shuntTurn;
@@ -1856,7 +1961,8 @@
       return;
     }
     updateShunt(dt);
-    train.head += train.dir * TRAIN_SPEED * shuntSpeed(dt) * dt / 1000;
+    updateHalt(dt);
+    train.head += train.dir * TRAIN_SPEED * shuntSpeed(dt) * haltSpeed() * dt / 1000;
     const dist = placeTrain();
 
     if (!train.whistled && Math.abs(train.head - ROAD_CX) < 320) { train.whistled = true; CC.audio.whistle(); }
@@ -1878,6 +1984,7 @@
       setTrainVisible(false);
       idleTrainTimer = 0;
       // Put the siding back and drop the borrowed wagon. Off-screen, so free.
+      if (train.halt) { resetPlatform(train.halt); train.halt = null; }
       if (train.shunt) {
         train.shunt.rack.el.setAttribute('visibility', 'visible');
         train.shunt = null;

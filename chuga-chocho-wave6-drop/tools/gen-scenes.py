@@ -85,7 +85,7 @@ def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe06
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="{surface}"/><stop offset="1" stop-color="{surface2}"/>
     </linearGradient></defs>
-    <polygon class="cc-road" points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
+    <polygon points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
     <polygon points="510,720 528,720 {lsh:.0f},{top} {lx:.0f},{top}" fill="{shoulder}" opacity="0.45"/>
     {right_verge}
     <g fill="{dash}">
@@ -292,28 +292,11 @@ def sf():
            + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2.5" rx="1"/>'
                      for x, y, w in [(120, 262, 70), (360, 278, 90), (620, 256, 66),
                                      (840, 282, 84), (1080, 266, 74), (240, 286, 60)]) + '</g>'
-            # A sailboat and a ferry, because the bay is always busy — and they
-            # SAIL it. Both are .cc-ship shuttles, drawn where their run begins so
-            # nothing jumps on the first frame and the static art still shows two
-            # boats in the middle of the bay. The Golden Gate's towers stop at
-            # y=252 and the bay runs to 294, so the water is clear all the way
-            # across; both pass behind the bridge, which is the right way round.
-            #
-            # Their speeds are deliberately different. At the same speed two boats
-            # in one bay read as a single mechanism rather than as two boats going
-            # about their own business. A sailboat is slow; a ferry has a timetable.
-            #
-            # The sailboat is drawn nose-RIGHT (the jib is forward of the mast, to
-            # the right), so the default nose is correct and it mirrors when it
-            # comes about.
-            '<g class="cc-ship" data-sail="430,1330,290" data-speed="24" '
-            'transform="translate(430,290)">'
-            '<path d="M0,-34 L0,-2 L-20,-2 Z" fill="#f6f1e4"/>'
+            # a sailboat and a ferry, because the bay is always busy
+            '<g transform="translate(430,290)"><path d="M0,-34 L0,-2 L-20,-2 Z" fill="#f6f1e4"/>'
             '<path d="M3,-30 L16,-2 L3,-2 Z" fill="#dfe8ee"/>'
             '<path d="M-24,-2 L24,-2 L18,4 L-18,4 Z" fill="#2f3a44"/></g>'
-            '<g class="cc-ship" data-sail="880,-60,288" data-speed="46" '
-            'transform="translate(880,288)">'
-            '<rect x="-30" y="-12" width="60" height="9" rx="2" fill="#e8edf0"/>'
+            '<g transform="translate(880,288)"><rect x="-30" y="-12" width="60" height="9" rx="2" fill="#e8edf0"/>'
             '<rect x="-22" y="-20" width="44" height="8" rx="2" fill="#f4f7f9"/>'
             '<rect x="-4" y="-28" width="5" height="9" fill="#41474f"/></g>')
 
@@ -784,20 +767,16 @@ def chicago():
         spokes = ''.join(f'<line x1="0" y1="0" x2="{r*math.cos(a):.1f}" y2="{r*math.sin(a):.1f}"/>'
                          for a in [i * math.pi / 8 for i in range(16)])
         cols = ['#e8574a', '#f2b134', '#4fb8d6', '#7bc86c', '#b47fd0', '#f28c34']
-        pods = ''.join(f'<g class="cc-pod" data-px="{r*math.cos(i*2*math.pi/cabins):.1f}" '
-                       f'data-py="{r*math.sin(i*2*math.pi/cabins):.1f}" '
-                       f'transform="translate({r*math.cos(i*2*math.pi/cabins):.1f},'
+        pods = ''.join(f'<g transform="translate({r*math.cos(i*2*math.pi/cabins):.1f},'
                        f'{r*math.sin(i*2*math.pi/cabins):.1f})">'
                        f'<rect x="-3.6" y="-1" width="7.2" height="7" rx="2.4" fill="{cols[i%6]}"/>'
                        f'<rect x="-3.6" y="-2.4" width="7.2" height="2.4" rx="1.2" fill="#f6f6f0"/></g>'
                        for i in range(cabins))
         return (f'<g transform="translate({cx},{cy})">'
-                f'<g class="cc-ferris" data-secs="16">'
                 f'<g stroke="#dfe6ea" stroke-width="2.6" fill="none"><circle cx="0" cy="0" r="{r}"/>'
                 f'<circle cx="0" cy="0" r="{r-7}"/></g>'
                 f'<g stroke="#cfd8de" stroke-width="1.3">{spokes}</g>'
-                f'{pods}</g>'
-                f'<circle cx="0" cy="0" r="5" fill="#e8eef2"/>'
+                f'{pods}<circle cx="0" cy="0" r="5" fill="#e8eef2"/>'
                 f'<circle cx="0" cy="0" r="2" fill="#8e9daa"/>'
                 f'<g stroke="#b9c4cc" stroke-width="3.5" fill="none">'
                 f'<path d="M-{r*0.62:.0f},{r*0.92:.0f} L0,2 L{r*0.62:.0f},{r*0.92:.0f}"/></g></g>')
@@ -872,10 +851,7 @@ def chicago():
                     f'<path d="M{x+11},338 L{x+56},398 M{x+56},338 L{x+11},398" stroke="#69727d" stroke-width="3"/>'
                     f'<rect x="{x-4}" y="398" width="79" height="8" rx="2" fill="#4b535d"/></g>'
                     for x in range(30, 1260, 132))
-    # Tagged so scene.js can run it along the deck. data-run is "x0,x1,y": it
-    # travels between those two x, turns round at each end and comes back, which
-    # is what a terminating L service does.
-    ltrain = ('<g class="cc-el-train" data-run="-210,1290,318" transform="translate(150,318)">'
+    ltrain = ('<g transform="translate(150,318)">'
               '<rect x="0" y="-38" width="196" height="38" rx="5" fill="#c9d2da"/>'
               '<rect x="0" y="-38" width="196" height="9" rx="4" fill="#aab5c0"/>'
               '<rect x="0" y="-18" width="196" height="5" fill="#1f6f3d"/>'
@@ -962,15 +938,7 @@ def chicago():
              '<rect x="-38" y="-6" width="8" height="18" fill="#41474f"/>'
              '<rect x="30" y="-6" width="8" height="18" fill="#41474f"/></g>')
 
-    # Tagged for scene.js: it patrols above the lake and banks round at each end.
-    # data-nose="-1" because this aircraft is drawn NOSE-LEFT: the blue nose is at
-    # x=-40 and the tail fin at x=+30..48. Without it the engine mirrors the wrong
-    # way and it flies backwards in both directions.
-    #
-    # It turns at x=948, which is out over Lake Michigan (the water runs x=884 to
-    # the frame edge). The earlier 700 put the turn inland over the skyline, and
-    # aircraft do not bank over a downtown.
-    plane = ('    <g class="cc-plane" data-fly="1330,948,126" data-nose="-1" transform="translate(1330,126)">'
+    plane = ('    <g transform="translate(1090,126) rotate(-9)">'
              '<ellipse cx="0" cy="0" rx="46" ry="7" fill="#eef2f6"/>'
              '<path d="M-30,0 L-4,-4 L14,-26 L26,-26 L18,-2 L26,26 L14,26 L-4,4 Z" fill="#e2e8ee"/>'
              '<path d="M30,-2 L44,-10 L48,-2 L44,6 Z" fill="#cfd7df"/>'
@@ -980,12 +948,6 @@ def chicago():
              '<ellipse cx="-30" cy="1" rx="6" ry="4" fill="#cfd7df"/></g>')
 
     scene('chicago', 'CHICAGO — skyline, the elevated L, Lake Michigan, city streets', {
-        # The street passes UNDER the elevated railway, so the carriageway stops
-        # just below the deck (which occupies y 312-337) instead of being painted
-        # across it. The L can then run the full width without the road cutting
-        # it in half, and cars appear and leave at the underpass — which is what
-        # a road does when it goes under a bridge.
-        'roadkw': {'top': 340},
         'sky': (sky('', '', '', sun=(1150, 88, 145)) + '\n' + clouds([(300, 74, 48), (760, 60, 40)], op=0.75)
                 + '\n' + birds([(880, 178), (932, 202)]) + '\n' + plane),
         'far': lake + '\n' + skyline + '\n' + willis + '\n' + hancock + '\n' + navy_pier,
@@ -1751,11 +1713,8 @@ def seattle():
             + ''.join(f'<rect x="{x}" y="264" width="5" height="16" rx="2" fill="#6b5942"/>'
                       for x in (34, 176, 318, 460, 582)))
 
-    def ferry(x, y, s=1.0, cls='', attrs=''):
-        # A Washington State ferry is DOUBLE-ENDED — no bow, no stern, a
-        # wheelhouse at each end — which is why she can be mirrored at the end of
-        # a run without looking wrong. That is not luck, it is what the boat is.
-        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
+    def ferry(x, y, s=1.0):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
                 f'<g opacity="0.16" transform="translate(0,6) scale(1,-0.4)">'
                 f'<rect x="-40" y="-16" width="80" height="16" fill="#f2f2ec"/></g>'
                 f'<path d="M-44,-8 L44,-8 L38,4 L-38,4 Z" fill="#e8e8e0"/>'
@@ -1766,16 +1725,11 @@ def seattle():
                 f'<rect x="-4" y="-40" width="5" height="11" fill="#41474f"/>'
                 f'<rect x="-44" y="-9" width="88" height="3" fill="#2f6f4f"/></g>')
 
-    # The ferry goes FIRST so she passes behind the moored houseboats and the
-    # dinghy rather than ploughing through them. She turns at x=580, short of the
-    # houseboat row, because that is the head of the bay — beyond it is moorings.
-    boats = ('    ' + dock
-             + ferry(1250, 280, 0.95, cls=' class="cc-ship"',
-                     attrs=' data-sail="1250,580,280" data-scale="0.95"')
-             + houseboat(96, 283, 0.86, '#d98f4f', '#4f6f5f', '#fbf6ea', '#e8574a')
+    boats = ('    ' + dock + houseboat(96, 283, 0.86, '#d98f4f', '#4f6f5f', '#fbf6ea', '#e8574a')
              + houseboat(222, 285, 0.9, '#6fa8bf', '#5a5f7a', '#fbf6ea', '#f2b134')
              + houseboat(352, 283, 0.86, '#d9736b', '#4f6f5f', '#fbf6ea', '#7bc86c')
              + houseboat(478, 285, 0.9, '#8fbf7f', '#6a5f4a', '#fbf6ea', '#4fb8d6')
+             + ferry(1160, 280, 0.95)
              # a little dinghy out on the open water
              + '<g transform="translate(662,286)"><path d="M-16,0 L16,0 L12,6 L-12,6 Z" fill="#f2ede0"/>'
              '<rect x="-2" y="-15" width="3" height="15" fill="#7a6350"/>'
@@ -1954,11 +1908,7 @@ def new_orleans():
              '<g fill="#c9c9a8" opacity="0.45"><ellipse cx="240" cy="296" rx="140" ry="3"/>'
              '<ellipse cx="900" cy="290" rx="170" ry="3"/><ellipse cx="560" cy="283" rx="110" ry="2.5"/>'
              '<ellipse cx="1150" cy="298" rx="120" ry="3"/></g>')
-    # A sternwheeler on the Mississippi. The hull is a plain shuttle; the wheel
-    # is a spinner about its own hub. Mirroring at the end of a run is CORRECT
-    # here even though she is asymmetric — the wheel swaps to the other side, and
-    # a rotation that pushed her right appears reversed and pushes her left.
-    boat = ('    <g class="cc-ship" data-sail="1400,-140,300" transform="translate(1010,300)">'
+    boat = ('    <g transform="translate(1010,300)">'
             '<rect x="-78" y="-30" width="156" height="16" rx="3" fill="#f4efe4"/>'
             '<rect x="-68" y="-44" width="136" height="15" rx="3" fill="#fbf7ee"/>'
             '<rect x="-52" y="-56" width="104" height="13" rx="3" fill="#f4efe4"/>'
@@ -1967,8 +1917,7 @@ def new_orleans():
             '<g fill="#2f3a44"><rect x="-16" y="-78" width="7" height="24"/><rect x="6" y="-78" width="7" height="24"/></g>'
             '<rect x="-20" y="-82" width="15" height="5" rx="2" fill="#a63a2c"/>'
             '<rect x="2" y="-82" width="15" height="5" rx="2" fill="#a63a2c"/>'
-            '<g class="cc-spin" data-secs="2.4" data-cx="-84" data-cy="-20">'
-            '<circle cx="-84" cy="-20" r="17" fill="#a63a2c"/><circle cx="-84" cy="-20" r="8" fill="#c05040"/>'
+            '<g><circle cx="-84" cy="-20" r="17" fill="#a63a2c"/><circle cx="-84" cy="-20" r="8" fill="#c05040"/>'
             '<g stroke="#8e2f22" stroke-width="3"><line x1="-101" y1="-20" x2="-67" y2="-20"/>'
             '<line x1="-84" y1="-37" x2="-84" y2="-3"/><line x1="-96" y1="-32" x2="-72" y2="-8"/>'
             '<line x1="-72" y1="-32" x2="-96" y2="-8"/></g></g>'
@@ -2327,11 +2276,7 @@ def austin():
     for k in range(120):
         bat(380 + rnd() * 560, DECK_BOT + 2 + rnd() * rnd() * 22, 0.24 + rnd() * 0.3, 2 + (k % 2))
 
-    # Roughly 1,700 bats, in four opacity bands with the individuals INTERLEAVED
-    # between them. Drifting the four bands against each other at different rates
-    # therefore makes the whole column shimmer and boil — every bat moves relative
-    # to its neighbours — for four attribute writes a frame instead of 1,700.
-    bats = ('    <g id="bats" class="cc-swarm">'
+    bats = ('    <g id="bats">'
             + ''.join(f'<g opacity="{op}">' + ''.join(b) + '</g>'
                       for op, b in zip((0.96, 0.82, 0.6, 0.4), bands))
             + '</g>')
@@ -3084,17 +3029,10 @@ def cape_canaveral():
            '<polygon points="790,286 996,286 1016,304 770,304" fill="#c6c9c4"/>'
            '<polygon points="790,286 996,286 1000,292 792,292" fill="#dcdfda"/>'
            + tower(958, 292, 0.82)
-           + f'<circle class="cc-rocket-glow" cx="{PAD_X}" cy="{PAD_Y-LIFT}" r="190" fill="url(#sung)"/>'
-           # Tagged for the engine. She is DRAWN mid-climb, and data-pad-dy says
-           # how far below that the pad is, so scene.js can set her back down,
-           # hold, light the flame and fly her out of frame on a loop. A scene
-           # without .cc-rocket simply has nothing to launch.
-           + f'<g class="cc-rocket" data-pad-dy="{LIFT}">'
+           + f'<circle cx="{PAD_X}" cy="{PAD_Y-LIFT}" r="190" fill="url(#sung)"/>'
            + rocket(PAD_X, PAD_Y - LIFT - 26, 0.62)
-           + f'<g class="cc-flame">' + flame(PAD_X, PAD_Y - LIFT - 28, 1.05) + '</g>'
-           + '</g>'
-           + f'<g class="cc-rocket-smoke">' + smoke(PAD_X - 10, PAD_Y - 16) + '</g>'
-           + f'<g class="cc-rocket-puffs" data-pad="{PAD_X},{PAD_Y - 10}"></g>'
+           + flame(PAD_X, PAD_Y - LIFT - 28, 1.05)
+           + smoke(PAD_X - 10, PAD_Y - 16)
            + '</g>')
 
     # ---- ground: sand, saltmarsh grass, and a tidal creek ----
@@ -3357,27 +3295,14 @@ def oahu():
              '    <g fill="#c6bda4">'
              + ''.join(f'<polygon points="{x},{SURF} {x+9},{SURF} {x+5},{264} {x+2},{264}"/>'
                        for x in (352, 596, 848)) + '</g>\n'
-             # Catamarans out on the water, and they SAIL it. The ocean band runs
-             # y=245..288 and the road does not begin until the horizon at 300, so
-             # the whole width is open water — nothing here can slide behind the
-             # carriageway, which is the trap in every scene whose road reaches
-             # the horizon.
-             #
-             # Drawn bow-LEFT: the mainsail is aft of the mast (x 1..16) and the
-             # jib forward of it (x -1..-12), so data-nose is -1 or they sail
-             # backwards. Each has its own range and pace — three boats crossing
-             # in step read as one mechanism.
-             + '    ' + ''.join(f'<g class="cc-ship" data-sail="{run}" data-nose="-1" '
-                                f'data-scale="{s}" data-speed="{sp}" '
-                                f'transform="translate({x},{y}) scale({s})">'
+             # catamarans and an outrigger out on the water
+             + '    ' + ''.join(f'<g transform="translate({x},{y}) scale({s})">'
                                 f'<path d="M-20,0 L20,0 L15,5 L-15,5 Z" fill="#f2f2ea"/>'
                                 f'<rect x="-1" y="-26" width="2" height="26" fill="#8a7f6c"/>'
                                 f'<path d="M1,-25 L1,-3 L16,-3 Z" fill="{c}"/>'
                                 f'<path d="M-1,-22 L-1,-3 L-12,-3 Z" fill="#f7f4e8"/></g>'
-                                for x, y, s, c, run, sp in
-                                [(196, 272, 0.9, '#e8574a', '196,1340,272', 18),
-                                 (760, 268, 0.8, '#f2b134', '760,-70,268', 26),
-                                 (1024, 276, 0.95, '#4fb8d6', '1024,-70,276', 22)]))
+                                for x, y, s, c in [(196, 272, 0.9, '#e8574a'), (760, 268, 0.8, '#f2b134'),
+                                                   (1024, 276, 0.95, '#4fb8d6')]))
 
     # ---- the beach: white crescent, wet sand, foam ----
     beach = (f'    <path d="M0,{SURF} Q 220,{SURF+8} 460,{SURF+3} T 900,{SURF+6} T 1280,{SURF+2} '
@@ -3651,10 +3576,7 @@ def denali():
                        f'fill="url(#{grad})" opacity="{ray_op * (0.5 + rnd()):.2f}"/>')
         return f'<g>{body}{"".join(out)}</g>'
 
-    # Tagged so the engine can breathe it. Each direct child drifts and fades on
-    # its own slow cycle: the two curtains, the bright ray, and the pink flecks all
-    # moving together at one rate would read as a single sheet sliding about.
-    aurora = ('    <g id="aurora" class="cc-aurora">'
+    aurora = ('    <g id="aurora">'
               + curtain('-60,2 130,22 320,48 500,68 660,52 820,26 1000,10 1180,28 1300,52 '
                         '1300,112 1180,88 1000,72 820,88 660,114 500,130 320,110 130,84 -60,62',
                         'aurora', 34, 0.42)
@@ -4093,7 +4015,7 @@ def las_vegas():
                 f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="#1a1a26"/>'
                 f'<rect x="{-w/2}" y="{-h - 6}" width="{w}" height="{h*0.72:.0f}" rx="4" fill="none" '
                 f'stroke="{col}" stroke-width="2.6"/>'
-                f'<g class="cc-chase" data-rate="7">{bulbs}</g><g>{letters}</g>'
+                f'<g>{bulbs}</g><g>{letters}</g>'
                 f'<path d="M{-w/2 - 10},{-h*0.2:.0f} l{w*0.4:.0f},-12 l0,6 l{w*0.5:.0f},0 l0,12 '
                 f'l{-w*0.5:.0f},0 l0,6 Z" fill="{col}" opacity="0.9"/></g>')
 
@@ -4117,7 +4039,7 @@ def las_vegas():
                 f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="#f4f2ea"/>'
                 f'<path d="M-96,-24 L0,-72 L96,-24 L96,4 L0,32 L-96,4 Z" fill="none" '
                 f'stroke="#2f4d8f" stroke-width="3"/>'
-                f'<g class="cc-chase" data-rate="9">{bulbs}</g><g>{letters}</g>'
+                f'<g>{bulbs}</g><g>{letters}</g>'
                 f'<text x="0" y="-16" text-anchor="middle" font-family="Georgia,serif" '
                 f'font-size="17" font-style="italic" fill="#2f4d8f">to Fabulous</text>'
                 f'<text x="0" y="4" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" '
@@ -4675,33 +4597,8 @@ def moab():
                 f'<g stroke="{c}" stroke-width="2.4" opacity="0.4" fill="none">'
                 f'<path d="M-30,-4 L30,0 M-34,6 L26,10 M-24,-24 L-14,4"/></g></g>')
 
-    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0, route=None, speed=30,
-             crawl=None):
-        # `route` turns one of them into a .cc-route wanderer. The bench right of
-        # the carriageway is the only clear run: the road spans 589..691 at this
-        # height and the jeep reaches 21 either side of its origin, so it stays
-        # east of 790 and never crosses. Offroaders potter and stop to look, which
-        # is what the dwells are for — a vehicle at constant speed reads as traffic.
-        # `crawl` walks a polyline and takes its pitch from the ground under it —
-        # for the one up on the block, which is what people actually come to Moab
-        # to do. The points are read straight off rock(178,706,2.4): its crest is
-        # (-18,-44)->(14,-42) and its right face falls to (40,-22), which at that
-        # translate and scale is (134.8,600.4) -> (211.6,605.2) -> (274,653.2).
-        # Plus 3 so the wheels bite into the rock rather than hovering over it.
-        cls = (' class="cc-tractor cc-crawl"' if crawl else
-               ' class="cc-tractor cc-route"' if route else '')
-        # data-nose="-1": drawn facing LEFT. The headlight is at x=-52 and the
-        # windscreen rakes back toward +x, so without this it drives backwards
-        # on the outward leg — which is exactly what the first run looked like.
-        if crawl:
-            data = (f' data-crawl="{crawl}" data-scale="{s}" data-speed="{speed}"'
-                    f' data-nose="-1"')
-        elif route:
-            data = (f' data-route="{route}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
-                    f' data-nose="-1"')
-        else:
-            data = ''
-        return (f'<g{cls}{data} transform="translate({x},{y}) rotate({rot}) scale({s})">'
+    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0):
+        return (f'<g transform="translate({x},{y}) rotate({rot}) scale({s})">'
                 + (shadow(0, 7, 58, 8, 0.26) if not rot else '')
                 + f'<rect x="-50" y="-30" width="100" height="20" rx="4" fill="{body}"/>'
                 f'<path d="M-22,-30 L-16,-50 L28,-50 L36,-30 Z" fill="{body}"/>'
@@ -4736,7 +4633,7 @@ def moab():
                       [(130, 430, 0.5), (176, 424, 0.4), (330, 432, 0.46), (420, 428, 0.4),
                        (664, 432, 0.44), (776, 428, 0.5), (830, 434, 0.42),
                        (1140, 440, 0.5), (1216, 434, 0.44), (1012, 436, 0.4)])
-            + jeep(880, 424, 0.4, '#c0392b', route='1300:1.6 810:2.2 880:1.0', speed=26)
+            + jeep(880, 424, 0.4, '#c0392b')
             + ''.join(raven(x, y, s) for x, y, s in
                       [(392, 168, 0.68), (452, 196, 0.48), (330, 210, 0.4)]))
 
@@ -4777,11 +4674,7 @@ def moab():
              # one jeep up on the block, tilted to the rock's own slope — this is what
              # people actually come to Moab to do, and it gives the block a use
              + '<ellipse cx="188" cy="612" rx="31" ry="5" fill="#000" opacity="0.2"/>'
-             + jeep(186, 606, 0.56, '#c0392b', '#2f2f36', 17,
-                    # up over the crest and down the right face, slowly, the way it is
-                    # actually done. The drawn 17-degree pose is kept for the gallery;
-                    # the engine takes over on the first frame.
-                    crawl='140,603 211.6,608 262,647', speed=13)
+             + jeep(186, 606, 0.56, '#c0392b', '#2f2f36', 17)
              + rock(1104, 700, 1.8)
              + rock(292, 592, 1.15) + rock(880, 704, 1.35)
              + rock(384, 646, 0.8) + rock(842, 668, 0.62) + rock(1252, 612, 0.46)
@@ -6167,13 +6060,7 @@ def yellowstone():
                         for cx, cy, r, op in [(58, -300, 38, 0.4), (96, -262, 30, 0.28),
                                               (-52, -348, 34, 0.36), (128, -206, 24, 0.2),
                                               (-88, -292, 26, 0.24), (70, -392, 28, 0.3)])
-        # The cone is permanent; everything above the mouth is not. Wrapped so the
-        # engine can grow it out of the vent and let it fall back — a geyser that
-        # is always at full height is a fountain, and the WAITING is most of what
-        # makes a geyser a geyser. data-origin is the mouth, the point it all
-        # scales about.
-        return (f'<g id="old-faithful" transform="translate({x},{base}) scale({s})">{cone}'
-                f'<g class="cc-geyser" data-origin="0,-66">{plume}{drift}</g></g>')
+        return f'<g id="old-faithful" transform="translate({x},{base}) scale({s})">{cone}{plume}{drift}</g>'
 
     # ----------------------------------------------- ground: sinter, not grass ----
     def mats(cx, cy, rx, ry):
@@ -7448,10 +7335,10 @@ def duluth():
                 + '</g>')
 
     # ---------------------------------------------------------- the ore boat ----
-    def laker(x, y, s=1.0, cls='', attrs=''):
+    def laker(x, y, s=1.0):
         """A thousand-footer. The proportion IS the point: absurdly long and low, a small
         white house forward, the big one aft, and a red hull that goes on forever."""
-        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
+        return (f'<g transform="translate({x},{y}) scale({s})">'
                 f'<path d="M-300,0 L286,0 C 304,0 314,-6 316,-16 L316,-30 L-300,-30 Z" '
                 f'fill="#a8342c"/>'
                 f'<rect x="-300" y="-30" width="616" height="7" fill="#8f2a24"/>'
@@ -7480,11 +7367,7 @@ def duluth():
                 f'fill="#ffffff" opacity="0.8"/></g>')
 
     far_l = (lake + '\n' + far_shore + '\n'
-             # She crosses the far water behind the bridge portal, well above the
-             # deck, so nothing has to lift for her.
-             + '    ' + laker(1020, 330, 0.46,
-                              cls=' class="cc-ship"',
-                              attrs=' data-sail="1560,-380,330" data-scale="0.46"') + '\n'
+             + '    ' + laker(1020, 330, 0.46) + '\n'
              + hillside)
 
     # ---------------------------------------------- the ship canal and its piers ----
@@ -7506,29 +7389,6 @@ def duluth():
              '</g>')
 
     # ------------------------------------------- THE AERIAL LIFT BRIDGE ----
-    def tug(x, y, s=1.0, cls='', attrs=''):
-        """A harbour workboat. Deliberately LOW: her wheelhouse tops out about 24
-        above the waterline, so at y=430 she reaches y=406 — inside the span's
-        396..426 band. Drawn before the bridge, so the deck passes in front of
-        her and she reads as going under it."""
-        hull, deck_c, house, dark = '#b8342c', '#8f2a22', '#eef2f4', '#2f3a42'
-        return (f'<g{cls}{attrs} transform="translate({x},{y}) scale({s})">'
-                # bow wave, so she reads as moving even in a still frame
-                f'<path d="M52,-2 C 66,-4 78,-1 86,3 C 74,4 62,3 52,1 Z" '
-                f'fill="#ffffff" opacity="0.7"/>'
-                # hull, with a rounded bow to the right
-                f'<path d="M-46,0 L40,0 C 52,0 60,-5 62,-12 L62,-17 L-46,-17 Z" '
-                f'fill="{hull}"/>'
-                f'<path d="M-46,-17 L62,-17 L62,-20 L-46,-20 Z" fill="{deck_c}"/>'
-                # wheelhouse and funnel — the tallest thing on her, and still low
-                f'<rect x="-22" y="-36" width="34" height="16" rx="2" fill="{house}"/>'
-                f'<rect x="-18" y="-32" width="8" height="7" rx="1" fill="#cfe4f2"/>'
-                f'<rect x="-6" y="-32" width="8" height="7" rx="1" fill="#cfe4f2"/>'
-                f'<rect x="16" y="-30" width="9" height="10" rx="2" fill="{dark}"/>'
-                f'<rect x="16" y="-30" width="9" height="3" rx="1" fill="{hull}"/>'
-                f'<rect x="-40" y="-26" width="3" height="9" fill="{dark}"/>'
-                f'</g>')
-
     def lift_bridge():
         # The towers are placed so the gap between them is centred on the ROAD, not on the
         # canvas. The road's vanishing point sits at x≈634, not 640, so a symmetric bridge
@@ -7594,15 +7454,6 @@ def duluth():
                  f'</g>')
 
         # the lifting deck: a through-girder carrying the roadway, sitting DOWN
-        # The span does NOT lift, deliberately. Raising the girder while the
-        # roadway stayed painted on the road below read as a grey box sliding up
-        # and down, because a lift bridge only reads as one when the ROAD goes up
-        # with it and leaves a gap. Doing that properly means the deck and its
-        # carriageway have to be one group drawn AFTER road() with a patch to
-        # punch the gap, and the bridge currently sits in the `water` layer,
-        # behind the road. That is a scene rebuild, not an engine tweak — it is
-        # written up in AMBIENT.md for the art side. Meanwhile the ships move,
-        # and a small boat passing under a closed bridge is what actually happens.
         deck = (f'<g id="lift-span">'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="30" fill="{steel}"/>'
                 f'<rect x="{LT-4}" y="396" width="{RT+TW-LT+8}" height="7" fill="{lit}"/>'
@@ -7791,11 +7642,18 @@ def duluth():
             # sat on the waterline and the ore boat ran straight through them; Park Point is
             # sand and pine anyway, and the city itself is up the hill behind.
             + lighthouse(438, 338, 0.5) + lighthouse(838, 338, 0.5, '#f2f2ec', '#2f6f4f')
-            # There WAS a second, static workboat parked here at (300,404). She has
-            # gone: the canal now has a tug that actually sails it (see 'water'),
-            # and two near-identical tugs — one moving, one frozen — only drew the
-            # eye to the frozen one. She was also floating at y=404, inside the
-            # span's own 396..426 band, so she read as sitting on the roadway.
+            # a harbour tug working the canal, so the water isn't a dead band
+            + '<g transform="translate(300,404) scale(0.5)">'
+            '<path d="M-52,0 L44,0 C 56,0 62,-6 64,-14 L64,-22 L-52,-22 Z" fill="#2f4a5c"/>'
+            '<rect x="-52" y="-22" width="116" height="6" fill="#c0392b"/>'
+            '<rect x="-34" y="-52" width="46" height="30" rx="3" fill="#f2f2ec"/>'
+            '<rect x="-26" y="-66" width="30" height="16" rx="2" fill="#f2f2ec"/>'
+            '<g fill="#3f4a52"><rect x="-28" y="-46" width="11" height="10"/>'
+            '<rect x="-12" y="-46" width="11" height="10"/></g>'
+            '<rect x="16" y="-64" width="10" height="18" rx="2" fill="#c0392b"/>'
+            '<rect x="16" y="-70" width="10" height="7" rx="2" fill="#2f3038"/>'
+            '<path d="M60,-2 C 78,2 88,6 94,10 C 74,10 58,6 52,2 Z" fill="#ffffff" '
+            'opacity="0.8"/></g>'
             + ''.join(gull(x, y, s) for x, y, s in
                       [(360, 180, 1.0), (430, 214, 0.8), (280, 232, 0.7),
                        (960, 196, 0.9), (1046, 168, 0.75)]))
@@ -7858,14 +7716,7 @@ def duluth():
         'sky': sky_l,
         'far': far_l,
         'ground': ground_l,
-        # A workboat in the canal, drawn BEFORE the bridge so the deck paints over
-        # her wheelhouse as she goes by: she passes under the closed span, which
-        # is exactly what a boat that size does at a real lift bridge.
-        'water': (canal + '\n    '
-                  + tug(1360, 430, 1.0,
-                        cls=' class="cc-ship"',
-                        attrs=' data-sail="1360,-140,430"')
-                  + '\n' + lift_bridge()),
+        'water': canal + '\n' + lift_bridge(),
         'scenery-back': back,
         'scenery-front': front,
         'foreground': '    <g fill="#3f5f38" opacity="0.3"><rect x="0" y="712" width="1280" height="8"/></g>',
@@ -8095,50 +7946,6 @@ def kansas():
                 f'<circle cx="0" cy="0" r="3.4" fill="#8a8478"/></g>'
                 f'<path d="M2,-92 L26,-86 L26,-98 Z" fill="#8a8478"/></g>')
 
-    def tractor(s=1.0):
-        """A tractor pulling a heaped grain trailer, drawn NOSE-RIGHT so the engine's
-        default facing applies. Origin is on the ground between the tractor's wheels;
-        the trailer trails off to -x behind it."""
-        tyre, rim, body, dark = '#2b2f34', '#c9ced4', '#c2362c', '#96271f'
-        def wheel(cx, cy, r):
-            return (f'<g><circle cx="{cx}" cy="{cy}" r="{r}" fill="{tyre}"/>'
-                    f'<circle cx="{cx}" cy="{cy}" r="{r*0.45:.1f}" fill="{rim}"/>'
-                    f'<circle cx="{cx}" cy="{cy}" r="{r*0.16:.1f}" fill="#8b9199"/></g>')
-        # the trailer: a flat bed on two wheels, heaped with grain
-        heap = ('<path d="M-98,-26 Q-88,-42 -74,-34 Q-64,-46 -52,-35 Q-40,-44 -32,-27 Z" '
-                'fill="#e3c469"/>'
-                '<path d="M-98,-26 Q-88,-42 -74,-34 Q-68,-38 -64,-30 Z" fill="#efd88b"/>')
-        trailer = (f'<g>{heap}'
-                   f'<rect x="-100" y="-27" width="70" height="12" rx="2" fill="#7c6a52"/>'
-                   f'<rect x="-100" y="-27" width="70" height="3" fill="#95826a"/>'
-                   f'<rect x="-30" y="-22" width="14" height="4" rx="2" fill="#5c5f66"/>'
-                   + wheel(-84, -10, 9) + wheel(-52, -10, 9) + '</g>')
-        # The rig is 140 long at 1:1 — trailer back to x=-100, bonnet out to +40 —
-        # so at s=0.62 it reaches 62 behind its origin and 25 ahead. AND WHEN IT
-        # TURNS, THAT SWAPS: mirrored, the trailer is 62 AHEAD of the origin. So
-        # a turn-round has to clear the road by the longer of the two, not the
-        # shorter — the first attempt parked at 550, which is fine facing right
-        # and puts the trailer 22 units into the carriageway facing left.
-        # The road spans 589..691 at this y, hence 515 and 775.
-        #
-        # It used to run -150 to 1420 in one straight sweep, which took it
-        # through the level crossing and under the road surface. It now works the
-        # two fields either side and turns back at the verge, calling at the
-        # grain elevator (x=838) on the right-hand round.
-        return (f'<g class="cc-tractor cc-route" data-scale="{s}" data-y="422" data-speed="34"'
-                f' data-route="900:1.6 1380 @-120 515:1.0 -120 @1380 775:1.0"'
-                f' transform="translate(775,422) scale({s})">'
-                + trailer
-                + f'<rect x="-18" y="-30" width="40" height="14" rx="3" fill="{dark}"/>'
-                + f'<rect x="14" y="-34" width="26" height="16" rx="3" fill="{body}"/>'
-                + f'<rect x="14" y="-34" width="26" height="4" rx="2" fill="#d9584c"/>'
-                + f'<rect x="-16" y="-56" width="30" height="26" rx="4" fill="{body}"/>'
-                + f'<rect x="-11" y="-51" width="20" height="13" rx="2" fill="#cfe7f7"/>'
-                + f'<rect x="-18" y="-60" width="36" height="5" rx="2.5" fill="{dark}"/>'
-                + f'<rect x="26" y="-52" width="5" height="20" rx="2.5" fill="#4a4e55"/>'
-                + wheel(-4, -16, 16) + wheel(34, -9, 9)
-                + '</g>')
-
     def bale(x, y, s=1.0, a='#d9bc62', b='#e6cd7c', c='#b89a48'):
         """A round bale is a short fat CYLINDER lying on its side: a barrel of straw with one
         rolled end face turned towards you. Drawn as concentric rings on a flat disc it reads
@@ -8199,7 +8006,7 @@ def kansas():
                 f'stroke-width="2.4" stroke-linecap="round">'
                 f'<path d="M-12,0 q6,-7 12,0 q6,-7 12,0"/></g>')
 
-    back = ('    ' + tractor(0.62) + barn(214, 430, 0.66) + windmill(322, 428, 0.62)
+    back = ('    ' + barn(214, 430, 0.66) + windmill(322, 428, 0.62)
             + ''.join(cottonwood(x, 428, s) for x, s in
                       [(552, 0.52), (588, 0.46), (620, 0.56), (652, 0.44),
                        (1146, 0.5), (1184, 0.58), (1218, 0.46)])
@@ -8890,23 +8697,15 @@ def smokies():
     def skylift(x0, y0, x1, y1, n=6):
         """The SkyLift: an orange tower, a cable up the hillside, and bright yellow chairs
         hanging off it. Nothing else in the set has anything crossing the sky like this."""
-        # Chairs alternate between the two cables — even ones ride the upper
-        # cable up the hill, odd ones the lower cable back down — so the lift
-        # reads as a loop rather than a row of chairs all going the same way.
-        # class/data-* are the engine's hook: scene.js slides them along and
-        # wraps them. A scene without .cc-cablecar simply has nothing to move.
         chairs = ''.join(
-            f'<g class="cc-chair" data-t="{t:.4f}" data-lane="{i % 2}" '
-            f'transform="translate({x0 + (x1-x0)*t:.0f},'
-            f'{y0 + (y1-y0)*t + (22 if i % 2 else 0):.0f})">'
+            f'<g transform="translate({x0 + (x1-x0)*t:.0f},{y0 + (y1-y0)*t:.0f})">'
             f'<path d="M0,0 L0,10" stroke="#c8871f" stroke-width="2.4"/>'
             f'<rect x="-9" y="10" width="18" height="4" rx="1.5" fill="#f2c23c"/>'
             f'<rect x="-9" y="0" width="3" height="12" fill="#f2c23c"/>'
             f'<rect x="6" y="0" width="3" height="12" fill="#f2c23c"/>'
             f'<rect x="-9" y="14" width="18" height="3" rx="1.5" fill="#e07a2c"/></g>'
-            for i, t in enumerate((i + 0.5) / n for i in range(n)))
-        return (f'<g id="skylift" class="cc-cablecar" '
-                f'data-cable="{x0},{y0} {x1},{y1}" data-lane-dy="22">'
+            for t in [(i + 0.5) / n for i in range(n)])
+        return (f'<g id="skylift">'
                 f'<path d="M{x0},{y0} L{x1},{y1}" stroke="#4a4a52" stroke-width="2"/>'
                 f'<path d="M{x0},{y0+22} L{x1},{y1+22}" stroke="#4a4a52" stroke-width="1.6"/>'
                 f'<g><polygon points="{x0-13},{y0+96} {x0-5},{y0-6} {x0+5},{y0-6} '
@@ -9134,7 +8933,7 @@ def smokies():
                       for x in range(-10, 1290, 17)) + '</g>'
             + space_needle(214, 352, 0.7)
             + ''.join(strip_unit(i, *u) for i, u in enumerate(STRIP))
-            + skylift(1152, 344, 1276, 196, 6)
+            + skylift(1152, 344, 1276, 196, 4)
             + ''.join(lamp(x, 412, 0.5, b) for x, b in
                       [(96, '#5f3f8c'), (268, '#2f6f8c'), (446, '#5f3f8c'),
                        (830, '#2f6f8c'), (1006, '#5f3f8c'), (1188, '#2f6f8c')])
@@ -9472,7 +9271,7 @@ def bluegrass():
 
     # -------------------------------------------------------------- horses ----
     def horse(x, y, s=1.0, coat='#8a5230', shade='#6f3f24', point='#2b2119',
-              sock=None, grazing=False, facing=1, run=None, speed=74):
+              sock=None, grazing=False, facing=1):
         """A thoroughbred, drawn 100 units tall at the withers so every other measurement
         can be read off that.
 
@@ -9491,28 +9290,23 @@ def bluegrass():
         most of what makes the silhouette read as a horse rather than a brown shape."""
         sock = sock or []
 
-        # Each leg is its own group with the joint it swings from, so a horse can
-        # be made to gallop instead of sliding. Harmless on the standing ones —
-        # the engine only drives the legs inside a .cc-canter.
         def foreleg(lx, lean=0.0):
-            return (f'<g class="cc-leg" data-pivot="{lx},-62">'
-                    f'<path d="M{lx-6},-62 L{lx+6},-62 L{lx+4+lean},-34 '
+            return (f'<path d="M{lx-6},-62 L{lx+6},-62 L{lx+4+lean},-34 '
                     f'L{lx+3.5+lean*2},-5 L{lx-3.5+lean*2},-5 L{lx-4+lean},-34 Z" '
                     f'fill="{coat}"/>'
                     f'<path d="M{lx-4+lean},-34 L{lx+4+lean},-34 L{lx+3.5+lean*2},-5 '
                     f'L{lx-3.5+lean*2},-5 Z" fill="{point}"/>'
                     f'<path d="M{lx-4.5+lean*2},-5 L{lx+4.5+lean*2},-5 L{lx+4+lean*2},0 '
-                    f'L{lx-4+lean*2},0 Z" fill="#3a332c"/></g>')
+                    f'L{lx-4+lean*2},0 Z" fill="#3a332c"/>')
 
         def hindleg(lx):
-            return (f'<g class="cc-leg" data-pivot="{lx},-84">'
-                    f'<path d="M{lx-14},-88 C {lx+6},-90 {lx+14},-78 {lx+12},-58 '
+            return (f'<path d="M{lx-14},-88 C {lx+6},-90 {lx+14},-78 {lx+12},-58 '
                     f'L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 L{lx-1},-34 L{lx-4},-56 '
                     f'C {lx-12},-62 {lx-16},-74 {lx-14},-88 Z" fill="{coat}"/>'
                     f'<path d="M{lx-1},-34 L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 Z" '
                     f'fill="{point}"/>'
                     f'<path d="M{lx-3},-5 L{lx+7},-5 L{lx+6.5},0 L{lx-2.5},0 Z" '
-                    f'fill="#3a332c"/></g>')
+                    f'fill="#3a332c"/>')
 
         socks = ''.join(f'<rect x="{lx-4.5}" y="-16" width="9" height="11" rx="2" '
                         f'fill="#efe9dc"/>' for lx in sock)
@@ -9541,17 +9335,8 @@ def bluegrass():
                     f'<path d="M-58,-126 L-56,-140 L-49,-129 Z" fill="{coat}"/>'
                     f'<path d="M-50,-128 L-47,-141 L-42,-130 Z" fill="{coat}"/>')
 
-        # A cantering horse is a .cc-canter: the root carries it along the field,
-        # and .cc-canter-body inside it takes the bob and the rock — so the SHADOW,
-        # which is outside that group, stays flat on the grass instead of bouncing
-        # around with the horse. Drawn head-LEFT (head at x=-94, tail at +56), so
-        # data-nose is -1 or it gallops backwards.
-        cls = ' class="cc-canter"' if run else ''
-        data = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
-                f' data-nose="-1"' if run else '')
-        return (f'<g{cls}{data} transform="translate({x},{y}) scale({s * facing},{s})">'
+        return (f'<g transform="translate({x},{y}) scale({s * facing},{s})">'
                 f'{shadow(0, 2, 46, 7, 0.2)}'
-                + ('<g class="cc-canter-body">' if run else '')
                 # far side legs first
                 + hindleg(20) + foreleg(-32, 1.5)
                 # the barrel: withers high at the front, croup a touch lower, belly at −56
@@ -9567,7 +9352,7 @@ def bluegrass():
                 # the tail falls from the top of the croup, well behind the hip
                 + f'<path d="M42,-84 C 54,-78 56,-58 52,-38 C 50,-26 47,-18 44,-12 '
                 f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/>'
-                + ('</g>' if run else '') + '</g>')
+                + '</g>')
 
     def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119'):
         """A foal is not a small horse. The legs are already almost full length, the barrel
@@ -9662,11 +9447,7 @@ def bluegrass():
              + shade_tree(74, 700, 1.35) + shade_tree(1216, 712, 1.45)
              + cedar(392, 640, 0.85) + cedar(918, 646, 0.9)
              # the hero horses, close enough to count the legs
-             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119',
-                     # No socks on this one: they are drawn at fixed x OUTSIDE the leg
-                     # groups, so on a moving horse they stay behind and hang in the
-                     # air between her legs. Not worth re-rigging for two white marks.
-                     run='250,-140,706', speed=78)
+             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119', sock=[-20, 34])
              + horse(1046, 700, 0.52, '#5c3a22', '#472b18', '#241c14', grazing=True)
              + foal(1140, 700, 0.36, '#a8703f')
              + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
@@ -10033,10 +9814,7 @@ def crater_lake():
           honest reason for a road to stop at a lake, and it is what Rim Drive's pull-outs
           actually are.
         """
-        # 56px deep, not 30. A car on Rim Drive is 24px tall at this depth, so the
-        # old 15px lanes had traffic driving through each other. Sized off the
-        # vehicle rather than picked by eye.
-        JY0, JY1 = 376, 432           # Rim Drive's near and far edges — parallel, always
+        JY0, JY1 = 382, 412           # Rim Drive's near and far edges — parallel, always
         X0 = 664                      # it meets our carriageway here and runs right
         rail = ''.join(
             f'<rect x="{x}" y="{JY0 - 11}" width="4" height="11" fill="#6b5a44"/>'
@@ -10072,11 +9850,9 @@ def crater_lake():
                 f'<rect x="{X0 + 54}" y="{JY0 - 5}" width="{1276 - X0}" height="3" '
                 f'rx="1.5" fill="#6b5a44"/>'
                 + dashes
-                # No parked cars drawn here any more: the game's own traffic turns
-                # onto Rim Drive and drives along it, so painted ones sat frozen
-                # while live ones flowed past them. The engine reads .cc-road-exit
-                # below to know where to turn and which lane to use.
-                + f'<g class="cc-road-exit" data-exit="{JY0},{JY1},{X0}"></g>'
+                + crossing_car(900, JY1 - 4, 0.62, '#b8342c')
+                + crossing_car(1180, JY1 - 6, 0.58, '#e8e2d2')
+                + crossing_car(760, JY0 + 12, 0.54, '#2f5f9e')
                 + '</g>')
 
     def overlook():
@@ -10371,7 +10147,7 @@ def crater_lake():
         'scenery-front': front,
         'foreground': '    <g fill="#6f665a" opacity="0.28"><rect x="0" y="712" width="1280" height="8"/></g>',
         'roadkw': dict(surface='#5f5a54', surface2='#4d4842', shoulder='#aaa290',
-                       dash='#f0e3a8', top=ROADTOP, junction=(376, 432)),
+                       dash='#f0e3a8', top=ROADTOP, junction=(382, 412)),
         'trackkw': dict(ballast='#9c9382', ballast_hi='#aea795', tie='#4a3a2e',
                         rail='#d3d7dc'),
     }, d + '\n    <clipPath id="lakeclip"><path d="' + LAKE + '"/></clipPath>')
@@ -10768,12 +10544,7 @@ def horseshoe_curve():
             + f'<path id="curve-path" d="M'
             + ' L'.join(f'{x:.0f},{y:.1f}' for x, y in offset_curve(-6.0))
             + '" fill="none" stroke="none"/>'
-            # consist() is NOT drawn any more. It was a train painted standing
-            # still round the bowl; the engine now animates a real one along
-            # #curve-path, and two trains on one track looked like a mistake.
-            # The function is left defined so the still version can be brought
-            # back by adding `+ consist()` here if the animation is ever dropped.
-            + roadbed() + '</g>\n'
+            + roadbed() + consist() + '</g>\n'
             # The road STOPS at the car park; it never crosses the line. Earlier drafts ran
             # it to the horizon, so the carriageway was painted over the railway at the apex
             # — no bridge, no underpass, and a moving train would have driven straight
@@ -11061,17 +10832,8 @@ def mt_washington():
         sc = line_scale(t) * s
         idattr = f' id="{tid}"' if tid else ''
         return (f'<g{idattr} '
-                # LINE_ANG is about -125deg — the line climbs up and to the LEFT — and
-                # rotating an upright vehicle by that swings it past vertical, so it
-                # ends up hanging under the rail with its roof pointing downhill.
-                # Turning to the DOWNHILL angle instead keeps it the right way up,
-                # and mirroring then points it back up the mountain. The engine stays
-                # BELOW the coach in both directions and pushes it up — it never runs
-                # round, and on Mount Washington the coach is not even coupled to it,
-                # just resting against it with its own brakes. Draw it pulling and it
-                # is simply the wrong railway.
-                f'transform="translate({x:.0f},{y:.0f}) rotate({LINE_ANG + 180:.1f}) '
-                f'scale({-sc:.2f},{sc:.2f})">'
+                f'transform="translate({x:.0f},{y:.0f}) rotate({LINE_ANG:.1f}) '
+                f'scale({sc:.2f})">'
                 # the coach, upslope of the engine
                 f'<g transform="translate(30,0)">'
                 f'<rect x="-24" y="-19" width="48" height="17" rx="2" fill="{coach}"/>'
@@ -11080,35 +10842,24 @@ def mt_washington():
                 + ''.join(f'<rect x="{-20 + i*8}" y="-16" width="5" height="7" rx="1"/>'
                           for i in range(5)) + '</g>'
                 f'<rect x="-24" y="-4" width="48" height="3" fill="#3a352f"/></g>'
-                # The locomotive, downslope of the coach, FACING UPHILL — smokebox and
-                # chimney at the +x end, hard against the coach it is pushing, cab and
-                # tender at the downhill end. That is the way round the real one is
-                # built and it was drawn back to front here: chimney at the far
-                # downhill end, cab against the coach.
-                #
-                # The boiler is tilted so it sits LEVEL while the frame follows the
-                # grade, which means its uphill end drops relative to the frame — a
-                # positive rotation, not the negative one that was here. Get the sign
-                # wrong and the boiler is steeper than the track instead of flatter.
+                # the locomotive, downslope, boiler tilted back to sit level on the grade
                 f'<g transform="translate(-18,0)">'
                 f'<rect x="-19" y="-5" width="38" height="4" fill="#3a352f"/>'
-                f'<g transform="rotate(8)">'
-                f'<rect x="-10" y="-17" width="26" height="12" rx="3" fill="#22262b"/>'
-                f'<rect x="-10" y="-17" width="26" height="3" rx="1.5" fill="#333941"/>'
-                f'<rect x="13" y="-24" width="6" height="8" fill="#22262b"/>'
-                f'<path d="M21,-24 L11,-24 L13,-30 L19,-30 Z" fill="#22262b"/>'
-                f'<rect x="-17" y="-25" width="13" height="10" rx="1.5" fill="#1a1e22"/>'
-                f'<rect x="-10" y="-23" width="4" height="4" fill="#cfe4f2"/>'
-                f'<rect x="0" y="-21" width="4" height="5" fill="#c0392b"/></g>'
-                + '<g fill="#1b1f25"><circle cx="10" cy="-2" r="4"/>'
-                f'<circle cx="-2" cy="-2" r="4"/><circle cx="-13" cy="-2" r="4"/></g></g>'
+                f'<g transform="rotate(-8)">'
+                f'<rect x="-16" y="-17" width="26" height="12" rx="3" fill="#22262b"/>'
+                f'<rect x="-16" y="-17" width="26" height="3" rx="1.5" fill="#333941"/>'
+                f'<rect x="-19" y="-24" width="6" height="8" fill="#22262b"/>'
+                f'<path d="M-21,-24 L-11,-24 L-13,-30 L-19,-30 Z" fill="#22262b"/>'
+                f'<rect x="4" y="-25" width="13" height="10" rx="1.5" fill="#1a1e22"/>'
+                f'<rect x="6" y="-23" width="4" height="4" fill="#cfe4f2"/>'
+                f'<rect x="-4" y="-21" width="4" height="5" fill="#c0392b"/></g>'
+                + '<g fill="#1b1f25"><circle cx="-10" cy="-2" r="4"/>'
+                f'<circle cx="2" cy="-2" r="4"/><circle cx="13" cy="-2" r="4"/></g></g>'
                 # the exhaust, blowing back down the hill
                 # a thin trail of exhaust, not a cloud. Drawn any bigger it pools into a
                 # pale blob beside the line and reads as a hole in the mountain.
                 + '<g fill="#dfe4e7" opacity="0.42">'
-                # From the chimney's NEW place — train-local x=-2, just downhill of
-                # the coach — and blowing back down the mountain behind her.
-                + ''.join(f'<ellipse cx="{-2 - i*9}" cy="{-30 - i*6}" '
+                + ''.join(f'<ellipse cx="{-18 - i*9}" cy="{-30 - i*6}" '
                           f'rx="{4 + i*1.6:.1f}" ry="{3 + i*1.1:.1f}"/>' for i in range(4))
                 + '</g>'
                 + '</g>')
@@ -11822,53 +11573,7 @@ def cedar_point():
             + child(258, 412, 0.36) + child(760, 412, 0.36, '#2f7a5f'))
 
     # ------------------------------------------------- in front of the rails ----
-    # ---------------------------------------- the boarding platform ----
-    # The depot is behind the rails, but a platform there would be hidden by the
-    # train the moment it pulled in — which is the whole point of the thing. So
-    # the boarding side faces the viewer: a boardwalk in the clear band between
-    # the bottom of the track (516) and the near midway furniture (566+), with
-    # people who walk up to the coaches and step aboard IN FRONT of them.
-    # It has to ABUT the track. Set 10px lower with a strip of grass showing
-    # between it and the ballast, the passengers read as crossing a lawn to get
-    # to the train rather than stepping off a platform onto it. The track band
-    # ends at 516, so the deck starts there and is deep enough to cover the
-    # grass down to the midway.
-    def platform(x0, x1, y, h=32):
-        return (f'<g id="cp-platform">'
-                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="{h}" rx="3" fill="#c9a77e"/>'
-                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="5" rx="2" fill="#dcbd95"/>'
-                f'<rect x="{x0}" y="{y + h - 3}" width="{x1 - x0}" height="4" fill="#a4835c"/>'
-                + ''.join(f'<rect x="{gx}" y="{y + 5}" width="2" height="{h - 9}" fill="#b8946a"/>'
-                          for gx in range(x0 + 14, x1, 26))
-                + '</g>')
-
-    # Where the train pulls up, and who is waiting. data-stop is the HEAD
-    # position; it is tuned so a coach stands against the boardwalk.
-    def passenger(sx, sy, dx, dy, role, s, top, bottom):
-        at = (sx, sy) if role == 'board' else (dx, dy)
-        return (f'<g class="cc-passenger" data-role="{role}" data-scale="{s}"'
-                f' data-stand="{sx},{sy}" data-door="{dx},{dy}"'
-                f' transform="translate({at[0]},{at[1]}) scale({s})"'
-                + (' opacity="0"' if role == 'alight' else '') + '>'
-                + person(0, 0, 1.0, top, bottom) + '</g>')
-
-    # data-stop is the HEAD, and the head is the LOCOMOTIVE. The consist is one
-    # loco and three wagons, whose origins sit 118/303/454/606 behind the head,
-    # so stopping at 1283 puts the first coach at 980 — the middle of the
-    # boardwalk — instead of parking the engine there for people to climb into,
-    # which is what 1146 did.
-    #
-    # Feet go on the deck's TOP edge (526), not its bottom: in a flat side-on
-    # view a figure whose feet are at 546 is standing in FRONT of the platform.
-    boarding = ('<g class="cc-platform" data-stop="1283" data-dwell="6.5"></g>'
-                + platform(846, 1114, 516)
-                + passenger(884, 522, 962, 508, 'board', 0.74, '#c9382e', '#3f4650')
-                + passenger(1074, 520, 1030, 508, 'board', 0.72, '#2f5f9e', '#4a4a52')
-                + passenger(930, 524, 996, 508, 'board', 0.5, '#e8b02a', '#4a6f8f')
-                + passenger(866, 524, 920, 508, 'alight', 0.76, '#7a4f9e', '#2f3440')
-                + passenger(1100, 522, 1058, 508, 'alight', 0.7, '#2f7a5f', '#3f4650'))
-
-    front = ('    ' + boarding
+    front = ('    '
              + ''.join(lamp(x, y, s) for x, y, s in
                        [(96, 606, 1.0), (1188, 612, 1.05), (306, 566, 0.78),
                         (990, 570, 0.8)])
@@ -13335,7 +13040,6 @@ def stonington():
                         rail='#d3d7dc'),
     }, d)
 
-
 def albuquerque():
     """ALBUQUERQUE — the mass ascension over the Rio Grande, with the Sandias behind.
 
@@ -13464,39 +13168,21 @@ def albuquerque():
         f = -1 if flip else 1
         tilt = (rr() * 7 + 2) * f
         idattr = f' id="{gid}"' if gid else ''
-        # THREE SIBLINGS, and only the middle one carries the id — because that is
-        # the one the engine flies. The shadow, the fan and the crew member all
-        # used to live INSIDE the id'd group, so when a balloon launched it took
-        # its ground shadow and a man with it, both hanging in the sky under the
-        # basket. Anything that belongs to the field has to be outside the thing
-        # that leaves the field.
-        #
-        # The crew is drawn at the size of the CROWD around them, not at the
-        # balloon's, or inflating the balloon inflates the people standing next
-        # to it — a crew member once came out three times the height of the
-        # spectators behind him. Their local offsets are unchanged: they used to
-        # be scale(crew/s) inside scale(s), and are now scale(crew) on their own,
-        # which lands every part in exactly the same place.
-        # Tagged so the engine can take the shadow away with the balloon. A shadow
-        # left lying on an empty pitch is the thing that gives the trick away —
-        # once she is up there is nothing to cast it. data-pad carries the gid
-        # rather than the id, because ids get namespaced by inline-assets.py and
-        # this attribute does not.
-        ground = (f'<g class="cc-launch-shade" data-pad="{gid}" '
-                  f'transform="translate({x},{base}) scale({s:.3f})">'
-                  f'{shadow(0, 3, 40, 7, 0.18)}</g>') if gid else (
-                  f'<g transform="translate({x},{base}) scale({s:.3f})">'
-                  f'{shadow(0, 3, 40, 7, 0.18)}</g>')
-        gcrew = (f'<g transform="translate({x},{base}) scale({crew:.3f})">'
-                 f'<g transform="translate({f * 44 * s / crew:.0f},0)">'
-                 f'<rect x="-9" y="-12" width="18" height="12" rx="2" fill="#3f4a52"/>'
-                 f'<circle cx="0" cy="-6" r="4.4" fill="#8f9aa0"/></g>'
-                 + person(f * -52 * s / crew, 0, 1.0, '#c9382e') + '</g>') if crew else ''
-        return (ground
-                + f'<g{idattr} transform="translate({x},{base}) scale({s:.3f})">'
-                  f'<g transform="rotate({tilt:.1f})">'
-                + balloon(0, -4, 1.0, seed, True) + '</g></g>'
-                + gcrew)
+        return (f'<g{idattr} transform="translate({x},{base}) scale({s:.3f})">'
+                f'{shadow(0, 3, 40, 7, 0.18)}'
+                f'<g transform="rotate({tilt:.1f})">'
+                + balloon(0, -4, 1.0, seed, True) + '</g>'
+                # The fan and the crew are drawn at the size of the CROWD around them, not
+                # at the balloon's size. Because they sit inside the balloon's transform,
+                # their scale has to be divided back out — otherwise inflating the balloon
+                # inflates the people standing next to it, which is exactly what happened:
+                # a crew member ended up three times the height of the spectators behind.
+                + (f'<g transform="scale({crew / s:.3f})">'
+                   f'<g transform="translate({f * 44 / (crew / s):.0f},0)">'
+                   f'<rect x="-9" y="-12" width="18" height="12" rx="2" fill="#3f4a52"/>'
+                   f'<circle cx="0" cy="-6" r="4.4" fill="#8f9aa0"/></g>'
+                   + person(f * -52 / (crew / s), 0, 1.0, '#c9382e') + '</g>'
+                   if crew else '') + '</g>')
 
     def chase_van(x, base, s=1.0, body='#e8e2d2'):
         return (f'<g transform="translate({x},{base}) scale({s})">{shadow(0, 3, 28, 5, 0.2)}'
@@ -14476,7 +14162,6 @@ def cape_hatteras():
                         rail='#d3d7dc'),
     }, d)
 
-
 def quechee():
     """QUECHEE, VERMONT — the mill and the falls, under a hillside in October.
 
@@ -14633,53 +14318,25 @@ def quechee():
         # the glassy top third, still river-coloured
         glass = crest + (' L' + ' L'.join(f'{x},{y + (bottom - y) * 0.34:.0f}'
                                           for x, y in reversed(pts)) + ' Z')
-        # THE STREAKS SCROLL. Water going over an edge is the one thing in this
-        # scene that has to move, and the cheapest honest way is a band of
-        # streaks that TILES vertically: draw it twice, one copy a band-height
-        # above the other, and slide the pair down by exactly one band. At the
-        # end of the slide the second copy is where the first began, so it loops
-        # with no seam and costs one transform a frame.
-        #
-        # So the streaks are laid out inside a band rather than at fractions of
-        # the drop — they need to be periodic, or the tile does not meet itself.
-        BAND = 58
         streaks = []
         x = x0 + 4
         while x < x1 - 4:
             w = 1.2 + rr() * 4.4
-            top = lip + rr() * BAND
-            # Longer and closer together than the static version was. Only the
-            # lower 70% of the face is inside the clip, so a streak that read
-            # well as a 14px mark on a 52px drop is a dash on a 36px window —
-            # the sheet came out more gap than water.
+            top = lip_y(x) + (bottom - lip_y(x)) * (0.18 + rr() * 0.3)
             streaks.append(f'<rect x="{x:.0f}" y="{top:.0f}" width="{w:.1f}" '
-                           f'height="{26 + rr() * 32:.0f}" rx="{w / 2:.1f}" '
+                           f'height="{bottom - top - rr() * 8:.0f}" rx="{w / 2:.1f}" '
                            f'fill="#ffffff" opacity="{0.5 + rr() * 0.45:.2f}"/>')
-            x += w + 1.0 + rr() * 3.2
-        band = ''.join(streaks)
-        # Clipped to the BROKEN part of the sheet, not the whole face. At the lip
-        # the water is still glassy and unbroken — let the streaks scroll up over
-        # that and the edge stops reading as an edge.
-        brk = ('M' + ' L'.join(f'{x},{y + (bottom - y) * 0.30:.0f}' for x, y in pts)
-               + f' L{x1},{bottom} L{x0},{bottom} Z')
-        # The foam is split in three so the boil at the base can churn out of
-        # step with itself instead of breathing as one lump.
-        foam = ['', '', '']
-        for k in range(40):
-            foam[k % 3] += (
-                f'<ellipse cx="{x0 + rr() * (x1 - x0):.0f}" cy="{bottom - 6 + rr() * 16:.0f}" '
-                f'rx="{10 + rr() * 20:.0f}" ry="{4 + rr() * 6:.0f}" fill="#ffffff" '
-                f'opacity="{0.55 + rr() * 0.45:.2f}"/>')
+            x += w + 1.5 + rr() * 5
+        foam = ''.join(
+            f'<ellipse cx="{x0 + rr() * (x1 - x0):.0f}" cy="{bottom - 6 + rr() * 16:.0f}" '
+            f'rx="{10 + rr() * 20:.0f}" ry="{4 + rr() * 6:.0f}" fill="#ffffff" '
+            f'opacity="{0.55 + rr() * 0.45:.2f}"/>' for _ in range(40))
         return (f'<g id="falls">'
-                f'<defs><clipPath id="fallsclip"><path d="{brk}"/></clipPath></defs>'
                 f'<path d="{sheet}" fill="#a8c6c4"/>'
                 f'<path d="{glass}" fill="#6f9a94"/>'
-                f'<g clip-path="url(#fallsclip)">'
-                f'<g class="cc-fall" data-band="{BAND}" data-secs="0.75">'
-                f'<g>{band}</g><g transform="translate(0,{-BAND})">{band}</g>'
-                f'</g></g>'
+                + ''.join(streaks)
                 + f'<path d="{crest}" fill="none" stroke="#eef6f6" stroke-width="3.4"/>'
-                + ''.join(f'<g class="cc-foam">{g}</g>' for g in foam) + '</g>')
+                + f'<g>{foam}</g></g>')
 
     def ledge(x, y, s=1.0, seed=1):
         """Quechee's riverbed is a shelf of grey schist, split into flat angular slabs —
@@ -15286,84 +14943,6 @@ def detroit():
                  f'height="{2 * s:.1f}" fill="#8f9498"/>')
         return f'<g transform="translate(0,{base})">{mesh}{posts}{rails}</g>'
 
-    def gantry():
-        """A rail-mounted gantry over the loading siding — the thing that actually
-        puts a loaded rack on the train, instead of the rack drifting down on its
-        own like a ghost was carrying it.
-
-        Drawn from the real article: a DEEP blue box girder with a walkway along
-        the top, the machinery house riding on top of it, and two portal legs
-        standing on bogies. The first attempt was a thin grey beam, which against
-        a grey plant read as a canopy on the building rather than a machine.
-        Colour and depth are what make it a crane — not height.
-
-        THE LEGS STAND CLEAR OF THE CROSSING, which is the constraint that shapes
-        everything. A gantry has to straddle both the siding (y=418) and the main
-        line (y=500), and the road, the crossing and both gates all live between
-        x=552 and x=728. At x=96 and x=1184 the legs stand on bare apron, fully in
-        frame, with nothing important behind them.
-
-        The girder underside clears the top of a parked rack (y=366) by enough for
-        the hook to get above it."""
-        # Height is set by the LOAD, not by taste. A parked rack's roof is at
-        # y=363, and the hook has to get above it with enough rope left to read as
-        # rope: at a girder of 336 the lifted wagon's roof came out at 333, i.e.
-        # ABOVE the girder, with the spreader inside the beam. 302 leaves 30px of
-        # cable at the top of the lift and 120px when it is down on the rail.
-        GY, TOP, FY = 302, 272, 436     # girder underside, girder top, foot of the legs
-        LX, RX = 96, 1184
-        blue, lit, dark = '#2f6fae', '#4d8fd0', '#1e4a78'
-        pale = '#dfe8ef'
-
-        def leg(x):
-            w, wf = 17, 27              # tapers outward toward the foot
-            return (f'<g><path d="M{x - w},{GY} L{x + w},{GY} L{x + wf},{FY} L{x - wf},{FY} Z" '
-                    f'fill="{blue}"/>'
-                    f'<path d="M{x - w},{GY} L{x - w + 7},{GY} L{x - wf + 8},{FY} L{x - wf},{FY} Z" '
-                    f'fill="{lit}"/>'
-                    + f'<g stroke="{dark}" stroke-width="2.6" fill="none">'
-                    + ''.join(f'<path d="M{x - w - i},{GY + 14 + i * 26} '
-                              f'L{x + w + i},{GY + 36 + i * 26}"/>'
-                              for i in range(3)) + '</g>'
-                    # bogie: the crane rolls along its own rails
-                    f'<rect x="{x - 34}" y="{FY - 4}" width="68" height="12" rx="3" fill="{dark}"/>'
-                    + '<g fill="#2b3138">'
-                    + ''.join(f'<circle cx="{x + dx}" cy="{FY + 12}" r="6"/>' for dx in (-22, -8, 8, 22))
-                    + '</g>'
-                    f'<rect x="{x - 40}" y="{FY + 17}" width="80" height="4" rx="2" fill="#8c9298"/></g>')
-
-        # The trolley rides ON TOP of the girder, as in the reference. Its cables
-        # and hook are drawn by scene.js into the TRAIN's layer instead, because
-        # they have to share depth with the wagon they are carrying — up here they
-        # would be behind the rails while the wagon was in front of them.
-        trolley = (f'<g class="cc-crane-trolley" transform="translate(180,0)">'
-                   f'<rect x="-34" y="{TOP - 26}" width="68" height="28" rx="3" fill="#e8a81f"/>'
-                   f'<rect x="-34" y="{TOP - 26}" width="68" height="8" rx="3" fill="#f7cf62"/>'
-                   f'<rect x="-22" y="{TOP - 42}" width="30" height="17" rx="3" fill="#33414c"/>'
-                   f'<rect x="-17" y="{TOP - 38}" width="14" height="9" rx="1.5" fill="#cfe4f2"/>'
-                   f'<rect x="-10" y="{TOP + 1}" width="20" height="{GY - TOP + 2}" fill="{dark}"/>'
-                   f'</g>')
-
-        # class as well as id: inline-assets.py namespaces ids, so #crane is
-        # s-detroit-crane by the time the game sees it and a plain lookup finds
-        # nothing. Classes are never namespaced.
-        return (f'<g id="crane" class="cc-crane" data-girder="{GY}">'
-                + leg(LX) + leg(RX)
-                # the box girder: deep, with a bright top flange and a walkway
-                # handrail above it — the handrail is what stops it reading as a
-                # plain bar
-                + f'<rect x="{LX - 42}" y="{TOP}" width="{RX - LX + 84}" height="{GY - TOP}" fill="{blue}"/>'
-                + f'<rect x="{LX - 42}" y="{TOP}" width="{RX - LX + 84}" height="8" fill="{lit}"/>'
-                + f'<rect x="{LX - 42}" y="{GY - 7}" width="{RX - LX + 84}" height="7" fill="{dark}"/>'
-                + f'<g stroke="{pale}" stroke-width="2.2" fill="none" opacity="0.85">'
-                + f'<path d="M{LX - 42},{TOP - 15} L{RX + 42},{TOP - 15}"/>'
-                + ''.join(f'<path d="M{x},{TOP - 15} v15"/>' for x in range(LX - 30, RX + 42, 58))
-                + '</g>'
-                # a machinery house at the far end, like the real thing
-                + f'<rect x="{RX - 96}" y="{TOP - 30}" width="86" height="30" rx="3" fill="{dark}"/>'
-                + f'<rect x="{RX - 90}" y="{TOP - 24}" width="26" height="14" rx="2" fill="#8fb6d8"/>'
-                + trolley + '</g>')
-
     def gatehouse(x, base, s=1.0):
         """The gate the road stops at: a little cabin, a boom, and a sliding gate across
         the entrance. You do not drive onto a shipping lot."""
@@ -15374,15 +14953,11 @@ def detroit():
                 f'<rect x="34" y="-46" width="13" height="46" rx="2" fill="#eeeeea"/>'
                 f'<rect x="30" y="-52" width="52" height="8" rx="2" fill="#8f9498"/>'
                 f'<rect x="40" y="-40" width="32" height="18" rx="2" fill="#41505a"/>'
-                # The boom LIFTS. It hung permanently down across the road while the
-                # works traffic drove up to it and vanished through it, which is the
-                # sort of thing a three-year-old notices before anyone else does.
-                # data-pivot is the hinge, at the foot of its post.
-                + '<g class="cc-plant-boom" data-pivot="26,-24">'
-                + f'<rect x="-96" y="-26" width="122" height="5" rx="2.5" fill="#c9382e"/>'
+                # the boom across the road, and a sign
+                f'<rect x="-96" y="-26" width="122" height="5" rx="2.5" fill="#c9382e"/>'
                 + '<g fill="#f2f0ea">'
                 + ''.join(f'<rect x="{-88 + i * 26}" y="-26" width="13" height="5"/>'
-                          for i in range(5)) + '</g></g>'
+                          for i in range(5)) + '</g>'
                 f'<rect x="24" y="-34" width="7" height="34" fill="#5f6a72"/>'
                 f'<rect x="-112" y="-34" width="7" height="34" fill="#5f6a72"/></g>')
 
@@ -15438,14 +15013,9 @@ def detroit():
                 + '</g>')
 
     # ------------------------------------------------- behind the rails ----
-    # NOTHING STANDS ON THE CROSSING. The road meets the siding at x 591..689,
-    # and the rack that used to sit at 604 was parked squarely across it — the
-    # works traffic drove up to a wagon. check-scenes.py did not catch it because
-    # it tests the road POLYGON, and the siding at y=418 is above the road's far
-    # edge at y=436; the corridor continues past the tarmac even though the
-    # drawing does not.
     SIDING = [(180, 'cc-autorack-0', '#7d4a35', False),
               (392, 'cc-autorack-1', '#6f5a48', True),
+              (604, 'cc-autorack-2', '#7d4a35', False),
               (816, 'cc-autorack-3', '#8a5540', False),
               (1028, 'cc-autorack-4', '#6f5a48', True)]
 
@@ -15481,7 +15051,6 @@ def detroit():
                        (1224, 0.48, 45)])
             + chain_fence(-20, 1300, GATE_Y + 6, 0.62)
             + gatehouse(634, GATE_Y + 8, 0.86)
-            + gantry()
             + ''.join(person(x, GATE_Y + 10, 0.3) for x in (404, 468, 872)))
 
     # ------------------------------------------------- in front of the rails ----
@@ -15520,8 +15089,1391 @@ def detroit():
                         rail='#d3d7dc'),
     }, d)
 
+# ================================================= 36. SUN VALLEY, IDAHO
+def sun_valley():
+    """SUN VALLEY, IDAHO — Bald Mountain, the gondola, and Ketchum under snow.
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit()
+    **The first winter scene in the game.** Thirty-five destinations and not one flake of
+    snow. That mattered more than any single landmark, because snow changes every colour in
+    the picture at once: the ground goes white, the shadows go *blue* — not grey, which is
+    the mistake — the conifers go almost black against it, and the sky goes a deeper blue
+    than anywhere else in the set.
+
+    It is also the right place historically: Sun Valley built the world's first chairlift in
+    1936, so a scene about riding up a mountain belongs here more than anywhere.
+
+    What the reference photographs insist on:
+
+    * **The Idaho ranges are whalebacks.** Big rounded masses worn smooth, with long
+      shoulders and shallow saddles — nothing like the Sandias behind Albuquerque. Drawn
+      as a polyline between summits they come out as a row of triangles, which is exactly
+      wrong, so the crest here is a smooth curve through the summits (`crest_path`).
+    * **The runs are cut through the forest.** The face reads as pale corridors fanning
+      down between dark timber. And the timber is not a shape — it is thousands of
+      individual little trees, the same lesson as the autumn hillside at Quechee. Painted
+      as solid wedges it comes out as dark spikes.
+    * **Ketchum sits in the bottom of the valley** — low brick and timber buildings, two or
+      three storeys, deep snow on every roof, pines pushed in between them, and a main
+      street ploughed to bare tarmac with cars parked nose-in and a snow bank behind them.
+    * **The aspens are bare** — chalk-white trunks with black scars — and the firs carry so
+      much snow they lose their outline and become white shelves with dark edges.
+
+The vehicle the set has never had is the **highway plough**, near and large, with its
+    blade down and the snow flying. It works the verge along `#plough-path` and stops at the
+    carriageway. The mountain itself carries no machinery — a groomer parked on a slope
+    where skiers are coming down is an accident waiting to be animated — only **skiers**,
+    each on an exported run path.
+
+    Animation hooks: `#gondola-path` with `#cc-gondola-0..5`, `#chair-path` with
+    `#cc-chair-0..3`, `#run-path-0..6` with `#cc-skier-<run>-<n>`, `#cc-plough` with
+    `#plough-path`, `#cc-plough-far`, and the town traffic on `#street-path`."""
+    VALLEY = 346          # where the mountains meet the valley floor
+    TOWN_Y = 358          # baseline of the Ketchum buildings
+    STREET_T, STREET_B = 358, 382
+    ROAD_TOP = 378
+
+    SNOW, SNOW2 = '#f6fafe', '#e6eef9'
+    SHADE, SHADE2 = '#c6d7ec', '#aec5e2'
+    FARSNOW, FARSHADE = '#e0eaf6', '#c2d4e8'
+    FIR, FIR2, FIR3 = '#2b4740', '#33564a', '#203934'
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f74bd"/><stop offset="0.55" stop-color="#78afdb"/>
+      <stop offset="1" stop-color="#cfe3f4"/>
+    </linearGradient>
+    <linearGradient id="svsnow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9f1fb"/><stop offset="0.4" stop-color="#f4f9fe"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>''')
+
+    # ------------------------------------------------------------------ sky ----
+    def cloud(x, y, r):
+        return (f'<g fill="#ffffff" opacity="0.9"><ellipse cx="{x}" cy="{y}" rx="{r}" '
+                f'ry="{r * 0.34:.0f}"/>'
+                f'<ellipse cx="{x - r * 0.58:.0f}" cy="{y + r * 0.14:.0f}" '
+                f'rx="{r * 0.5:.0f}" ry="{r * 0.24:.0f}"/>'
+                f'<ellipse cx="{x + r * 0.6:.0f}" cy="{y + r * 0.12:.0f}" '
+                f'rx="{r * 0.46:.0f}" ry="{r * 0.22:.0f}"/></g>')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="360" fill="url(#skyg)"/>\n'
+             + '    ' + ''.join(cloud(x, y, r) for x, y, r in
+                                [(180, 44, 58), (620, 30, 44), (1010, 52, 62)]))
+
+    # ================================================== THE RANGES ====
+    def crest_path(pts):
+        """The crest as a SMOOTH curve, not a polyline.
+
+        Straight lines between summits give a row of triangles, which is the one thing an
+        Idaho whaleback is not. Each summit becomes a quadratic control point and the
+        curve passes through the midpoints between them, so every top comes out round and
+        every saddle a shallow bowl."""
+        mid = lambda a, b: ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+        d = f'M{pts[0][0]},{pts[0][1]}'
+        for i in range(1, len(pts) - 1):
+            mx, my = mid(pts[i], pts[i + 1])
+            d += f' Q{pts[i][0]},{pts[i][1]} {mx:.0f},{my:.0f}'
+        d += f' L{pts[-1][0]},{pts[-1][1]}'
+        return d
+
+    def crest_at(pts, x):
+        """Linear read-off of the crest height, for deciding where the treeline is."""
+        if x <= pts[0][0]:
+            return pts[0][1]
+        for i in range(len(pts) - 1):
+            x0, y0 = pts[i]
+            x1, y1 = pts[i + 1]
+            if x0 <= x <= x1:
+                f = (x - x0) / float(x1 - x0)
+                return y0 + (y1 - y0) * f
+        return pts[-1][1]
+
+    def ridge(pts, fill, shade=None, seed=3):
+        d = (f'M{pts[0][0]},{VALLEY} ' + crest_path(pts).replace('M', 'L', 1)
+             + f' L{pts[-1][0]},{VALLEY} Z')
+        out = [f'<path d="{d}" fill="{fill}"/>']
+        if shade:
+            rr = rnd(seed)
+            for i in range(1, len(pts) - 1, 2):
+                x, y = pts[i]
+                w = 50 + rr() * 70
+                out.append(f'<path d="M{x},{y} Q{x + w * 0.6:.0f},{y + 30:.0f} '
+                           f'{x + w:.0f},{VALLEY} L{x - w * 0.25:.0f},{VALLEY} Z" '
+                           f'fill="{shade}" opacity="0.65"/>')
+        return ''.join(out)
+
+    FAR_RIDGE = [(-80, 268), (60, 214), (150, 246), (240, 198), (330, 230), (430, 186),
+                 (520, 222), (610, 194), (700, 228), (800, 190), (890, 226), (980, 200),
+                 (1080, 234), (1170, 206), (1270, 238), (1360, 218)]
+
+    # --- Bald Mountain: the hero, centre-left, big and rounded -------------------
+    # A whaleback needs points CLOSE TOGETHER over the summit, or the smoothing has
+    # nothing to round off and you are back to a cone. The top here is four points inside
+    # 100px, so it comes out as a dome with long shoulders falling away either side.
+    BALD = [(-80, 316), (30, 254), (118, 272), (196, 232), (262, 214), (318, 178),
+            (372, 156), (424, 148), (478, 156), (536, 172), (596, 190), (664, 180),
+            (742, 216), (830, 262), (900, 302), (960, 332)]
+    RIGHT = [(600, 300), (690, 250), (786, 262), (884, 208), (976, 180), (1070, 214),
+             (1162, 196), (1258, 226), (1360, 208)]
+
+    # ski runs: (x at the top, x at the bottom, half-width at the top, at the bottom)
+    RUNS_BALD = [(300, 150, 12, 54), (392, 330, 13, 62), (404, 520, 12, 56),
+                 (472, 686, 11, 50)]
+    RUNS_RIGHT = [(884, 830, 11, 48), (976, 1020, 12, 54), (1162, 1210, 11, 46)]
+    SKI_COLS = [('#c1443a', '#2f5f9e'), ('#f0c02b', '#c1443a'), ('#2f5f9e', '#f0c02b'),
+                ('#3f7a4a', '#e8e6e2'), ('#e8721f', '#2b3036'), ('#5a4a6f', '#f0c02b')]
+
+    def in_run(runs, x, y, top):
+        t = (y - top) / max(6.0, VALLEY - top)
+        for a, b, wt, wb in runs:
+            cx = a + (b - a) * t
+            w = wt + (wb - wt) * t
+            if abs(x - cx) < w:
+                return True
+        return False
+
+    def minifir(x, y, sz, col):
+        return (f'<path d="M{x:.0f},{y - sz * 2.2:.0f} L{x + sz:.0f},{y:.0f} '
+                f'L{x - sz:.0f},{y:.0f} Z" fill="{col}"/>')
+
+    def timber(pts, runs, x0, x1, seed, cols, drop=30, step=12):
+        """The forest on the mountain face: thousands of individual little trees, not a
+        shape. Scattered from just below the crest down to the valley, skipping the run
+        corridors — so the runs are the gaps the timber leaves, exactly as they are cut."""
+        rr = rnd(seed)
+        out = []
+        x = x0
+        while x < x1:
+            top = crest_at(pts, x) + drop + rr() * 16
+            y = top
+            while y < VALLEY + 4:
+                jx = x + rr() * step * 1.4 - step * 0.2
+                jy = y + rr() * 7
+                if jy > VALLEY + 4 or jy < crest_at(pts, jx) + 14:
+                    y += 7 + rr() * 5
+                    continue
+                if in_run(runs, jx, jy, crest_at(pts, jx)):
+                    y += 7 + rr() * 5
+                    continue
+                t = (jy - top) / max(8.0, VALLEY - top)
+                sz = 2.2 + t * 4.2 + rr() * 1.2
+                out.append(minifir(jx, jy, sz, cols[int(rr() * len(cols))]))
+                y += 7 + rr() * 5
+            x += step
+        return '<g>' + ''.join(out) + '</g>'
+
+    def corduroy(runs, pts, which, top_t=0.42, bot_t=0.98, col='#d7e4f3'):
+        """Groomed corduroy — fine lines down the fall line, and only inside a run."""
+        a, b, wt, wb = runs[which]
+        out = []
+        for i in range(9):
+            f = i / 8.0
+            t0, t1 = top_t, bot_t
+            def pt(t):
+                top = crest_at(pts, a + (b - a) * t)
+                cx = a + (b - a) * t
+                w = wt + (wb - wt) * t
+                return (cx - w * 0.85 + 1.7 * w * 0.85 * f,
+                        top + (VALLEY - top) * t)
+            x0, y0 = pt(t0)
+            x1, y1 = pt(t1)
+            out.append(f'<line x1="{x0:.0f}" y1="{y0:.0f}" x2="{x1:.0f}" y2="{y1:.0f}"/>')
+        return (f'<g stroke="{col}" stroke-width="1.6" opacity="0.85">'
+                + ''.join(out) + '</g>')
+
+    # ================================================== THE LIFTS ====
+    def sheave_tower(x, y, s, h=34):
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'<rect x="-2.5" y="0" width="5" height="{h}" fill="#4a5560"/>'
+                f'<rect x="-16" y="-4" width="32" height="5" rx="2.5" fill="#4a5560"/>'
+                f'<circle cx="-12" cy="-1" r="3" fill="#5f6b76"/>'
+                f'<circle cx="12" cy="-1" r="3" fill="#5f6b76"/></g>')
+
+    def gondola_cabin(x, y, s, gid=''):
+        """An enclosed cabin: a hanger arm off the rope, a band of window all the way
+        round, and a door line down the middle."""
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr} class="cc-gondola" transform="translate({x:.0f},{y:.0f}) '
+                f'scale({s:.2f})">'
+                f'<path d="M0,-20 L0,-6" stroke="#3d4750" stroke-width="2.5" fill="none"/>'
+                f'<rect x="-3" y="-24" width="6" height="6" rx="2" fill="#3d4750"/>'
+                f'<rect x="-11" y="-6" width="22" height="24" rx="7" fill="#eff3f7"/>'
+                f'<rect x="-11" y="-6" width="22" height="6" rx="3" fill="#c3ccd4"/>'
+                f'<rect x="-8.5" y="-1" width="17" height="11" rx="4" fill="#31536b"/>'
+                f'<line x1="0" y1="-1" x2="0" y2="17" stroke="#b8c2cb" stroke-width="1.5"/>'
+                f'<rect x="-11" y="14" width="22" height="4" rx="2" fill="#c3ccd4"/>'
+                f'<rect x="-11" y="-6" width="22" height="24" rx="7" fill="none" '
+                f'stroke="#8e9aa5" stroke-width="1"/></g>')
+
+    def chair(x, y, s, gid=''):
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr} class="cc-chair" transform="translate({x:.0f},{y:.0f}) '
+                f'scale({s:.2f})">'
+                f'<path d="M0,-22 L0,-4" stroke="#3d4750" stroke-width="2.5" fill="none"/>'
+                f'<path d="M-13,-4 L13,-4 L13,4 L-13,4 Z" fill="#c1443a"/>'
+                f'<path d="M-13,-4 L-13,-16 L-9,-16 L-9,-4 Z" fill="#c1443a"/>'
+                f'<g fill="#2f5f9e"><rect x="-9" y="-14" width="8" height="12" rx="3"/>'
+                f'<rect x="2" y="-14" width="8" height="12" rx="3"/></g>'
+                f'<g fill="#f0c9a8"><circle cx="-5" cy="-17" r="3"/>'
+                f'<circle cx="6" cy="-17" r="3"/></g>'
+                f'<g stroke="#3d4750" stroke-width="1.6">'
+                f'<line x1="-5" y1="4" x2="-5" y2="13"/><line x1="6" y1="4" x2="6" y2="13"/>'
+                f'</g></g>')
+
+    def lift(x0, y0, x1, y1, n_tow, cars, kind, path_id, sep=9.0):
+        """One aerial lift — and a lift is a **loop**, not a line.
+
+        Every gondola and every chairlift runs two ropes side by side: cabins climb on one
+        and come back down the other, which is why a lift tower carries a *pair* of sheave
+        assemblies rather than one. The first version of this scene drew a single rope with
+        everything travelling the same way, which is the sort of thing that looks fine until
+        somebody who has been on a chairlift looks at it.
+
+        So the rope is drawn twice, offset perpendicular to the line: the **up** side on the
+        far rope and the **down** side on the near one, each exported with its own `id`. The
+        two sets of cabins are staggered against each other so they pass rather than march
+        in step."""
+        dx, dy = x1 - x0, y1 - y0
+        ln = max(1.0, (dx * dx + dy * dy) ** 0.5)
+        nx, ny = -dy / ln, dx / ln          # unit normal to the line
+        out = []
+        for side, name, rope in ((-1, 'up', f'{path_id}-up'),
+                                 (1, 'down', f'{path_id}-down')):
+            ax, ay = x0 + nx * sep * side, y0 + ny * sep * side
+            bx, by = x1 + nx * sep * side, y1 + ny * sep * side
+            out.append(f'<path id="{rope}" d="M{ax:.0f},{ay:.0f} L{bx:.0f},{by:.0f}" '
+                       f'fill="none" stroke="#3d4750" stroke-width="2"/>')
+        # the towers stand on the centreline between the two ropes, and each carries a
+        # sheave head for each of them
+        for i in range(1, n_tow + 1):
+            t = i / (n_tow + 1.0)
+            out.append(sheave_tower(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t,
+                                    0.95 - 0.45 * t))
+        draw = gondola_cabin if kind == 'gondola' else chair
+        for side, name, off in ((-1, 'up', 0.0), (1, 'down', 0.5)):
+            for i, t0 in enumerate(cars):
+                t = (t0 + off) % 1.0
+                x = x0 + dx * t + nx * sep * side
+                y = y0 + dy * t + ny * sep * side
+                sc = 0.95 - 0.5 * t
+                g = draw(x, y, sc, f'cc-{kind}-{name}-{i}')
+                out.append(g.replace('class="cc-%s"' % kind,
+                                     'class="cc-%s" data-dir="%s" data-i="%d" '
+                                     'data-t="%.3f" data-s="%.3f"' % (kind, name, i, t, sc)))
+        return ''.join(out)
+
+    def terminal(x, y, s, col='#3a4750'):
+        """A summit terminal: the bullwheel the rope turns round, on its frame, under a
+        small roof. A haul rope that simply stops in mid-air is the single most obviously
+        wrong thing that can happen in a ski scene — a lift is a *loop*, and both ends of
+        it have to be a building with a wheel in it."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 4, 44, 7, 0.16)}'
+                f'<rect x="-34" y="-10" width="68" height="12" rx="3" fill="#8d949b"/>'
+                f'<g fill="#6d757d"><rect x="-27" y="-30" width="7" height="22"/>'
+                f'<rect x="20" y="-30" width="7" height="22"/></g>'
+                f'<circle cx="0" cy="-34" r="18" fill="#c9d2da" stroke="#8e9aa5" '
+                f'stroke-width="2.5"/>'
+                f'<circle cx="0" cy="-34" r="7" fill="#6d757d"/>'
+                f'<path d="M-42,-48 L42,-48 L34,-64 L-34,-64 Z" fill="{col}"/>'
+                f'<rect x="-45" y="-52" width="90" height="7" rx="3" fill="#eef4fb"/>'
+                f'<rect x="-24" y="-30" width="48" height="6" rx="3" fill="#5c6a76"/></g>')
+
+    def base_station(x, y, s, col='#3a4750'):
+        """The base terminal: a long low curved canopy on legs, cabins ducking under it."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 2, 62, 8, 0.18)}'
+                f'<rect x="-56" y="-10" width="112" height="12" rx="3" fill="#8d949b"/>'
+                f'<g fill="#6d757d"><rect x="-48" y="-30" width="7" height="22"/>'
+                f'<rect x="-4" y="-30" width="7" height="22"/>'
+                f'<rect x="40" y="-30" width="7" height="22"/></g>'
+                f'<path d="M-62,-30 Q-62,-56 -34,-56 L38,-56 Q64,-56 64,-30 Z" '
+                f'fill="{col}"/>'
+                f'<path d="M-62,-30 Q-62,-56 -34,-56 L-10,-56 Q-34,-56 -34,-30 Z" '
+                f'fill="#55626d"/>'
+                f'<rect x="-62" y="-32" width="126" height="6" rx="3" fill="#eef4fb"/>'
+                f'<rect x="-30" y="-24" width="54" height="14" rx="4" fill="#5c6a76"/>'
+                f'</g>')
+
+    # ================================================== TREES ====
+    def snowfir(x, y, s, dark=FIR, load='#eaf2fc'):
+        """A fir with snow on it. The shape is the thing I always get wrong: the load
+        sits on the branch *shelves* and sags at the tips, so the tree reads as a stack of
+        white shelves with a dark edge under each, not a green triangle with sprinkles."""
+        out = [f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">',
+               shadow(0, 2, 22, 5, 0.14),
+               f'<rect x="-4" y="24" width="8" height="16" rx="2" fill="#4a3a2c"/>']
+        for w, yy in [(26, 26), (21, 8), (16, -8), (10, -22)]:
+            out.append(f'<path d="M0,{yy - 22} L{w},{yy} L{-w},{yy} Z" fill="{dark}"/>')
+            out.append(f'<path d="M0,{yy - 18} L{w * 0.7:.0f},{yy - 6} '
+                       f'Q{w * 0.33:.0f},{yy - 1} 0,{yy - 3} '
+                       f'Q{-w * 0.33:.0f},{yy - 1} {-w * 0.7:.0f},{yy - 6} Z" '
+                       f'fill="{load}"/>')
+        out.append(f'<path d="M0,-46 L5,-40 L-5,-40 Z" fill="{load}"/></g>')
+        return ''.join(out)
+
+    def aspen(x, y, s, h=110, seed=5):
+        """A bare aspen: chalk-white trunk, black scars, a spray of fine twigs. In winter
+        these are almost the only vertical dark marks in a white picture, so they carry a
+        grey edge — a pure white trunk on pure white snow is invisible."""
+        rr = rnd(seed)
+        scars = ''.join(f'<ellipse cx="{rr() * 8 - 4:.1f}" cy="{-h * (0.2 + rr() * 0.7):.0f}" '
+                        f'rx="{2 + rr() * 2:.1f}" ry="{2.5 + rr() * 3:.1f}" fill="#3f4a44" '
+                        f'opacity="0.85"/>' for _ in range(4))
+        twigs = ''.join(
+            f'<path d="M0,{-h * 0.68:.0f} Q{(rr() - 0.5) * 34:.0f},{-h * 0.9:.0f} '
+            f'{(rr() - 0.5) * 66:.0f},{-h * (0.98 + rr() * 0.18):.0f}" stroke="#8a978f" '
+            f'stroke-width="1.6" fill="none"/>' for _ in range(8))
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'{shadow(0, 2, 14, 4, 0.12)}'
+                f'<path d="M-5,0 L-3.2,{-h} L3.2,{-h} L5,0 Z" fill="#f2f5f2" '
+                f'stroke="#b9c4bd" stroke-width="1"/>'
+                f'<path d="M1,0 L1.6,{-h} L3.2,{-h} L5,0 Z" fill="#cfd7d0"/>'
+                f'{scars}{twigs}</g>')
+
+    # ================================================== KETCHUM ====
+    def building(x, y, w, h, wall, roof='#eef5fd', storeys=2, shop=None, seed=3):
+        """One Ketchum building. Two or three storeys, brick or board or stone, and a
+        thick wedge of snow on the roof with an icicle fringe under the eave."""
+        rr = rnd(seed)
+        out = [f'<g transform="translate({x:.0f},{y:.0f})">',
+               f'<rect x="0" y="{-h}" width="{w}" height="{h}" fill="{wall}"/>',
+               f'<rect x="0" y="{-h}" width="{w * 0.22:.0f}" height="{h}" fill="#ffffff" '
+               f'opacity="0.12"/>']
+        for r in range(storeys):
+            wy = -h + 9 + r * ((h - 16) / max(1, storeys))
+            if wy > -20:
+                continue
+            for c in range(max(1, int(w // 17))):
+                out.append(f'<rect x="{6 + c * 17}" y="{wy:.0f}" width="9" height="11" '
+                           f'rx="1.5" fill="#5b7286" opacity="0.9"/>')
+        if shop:
+            out.append(f'<rect x="4" y="-17" width="{w - 8:.0f}" height="17" rx="2" '
+                       f'fill="{shop}"/>')
+            out.append(f'<rect x="4" y="-17" width="{w - 8:.0f}" height="4" rx="2" '
+                       f'fill="#ffffff" opacity="0.32"/>')
+        out.append(f'<path d="M-3,{-h} L{w + 3},{-h} L{w + 1},{-h - 8:.0f} '
+                   f'Q{w / 2:.0f},{-h - 16:.0f} -1,{-h - 8:.0f} Z" fill="{roof}"/>')
+        out.append('<g fill="#dbe8f6">' + ''.join(
+            f'<path d="M{2 + i * 11},{-h} l2.5,0 l-1.2,{4 + rr() * 5:.0f} Z"/>'
+            for i in range(max(1, int(w // 11)))) + '</g>')
+        out.append('</g>')
+        return ''.join(out)
+
+    def driving(x, y, s, col, flip=False, gid=''):
+        """A car seen side-on, travelling. Snow on the roof and a slushy wash under it,
+        because nothing in this town has been clean since November.
+
+        These are the ones the engine moves: each carries its own id so it can be walked
+        along `#street-path`, and a car arriving up the main road can be turned onto the
+        street with `#turn-left-path` / `#turn-right-path`."""
+        idattr = f' id="{gid}"' if gid else ''
+        body = (f'{shadow(0, 2, 30, 4, 0.22)}'
+                f'<path d="M-30,-9 L-24,-19 Q-20,-23 -12,-23 L10,-23 Q17,-23 21,-19 '
+                f'L30,-9 L30,-2 L-30,-2 Z" fill="{col}"/>'
+                f'<path d="M-21,-11 L-17,-19 Q-15,-21 -10,-21 L-2,-21 L-2,-11 Z" '
+                f'fill="#5b7d95"/>'
+                f'<path d="M2,-21 L9,-21 Q15,-21 18,-18 L23,-11 L2,-11 Z" fill="#5b7d95"/>'
+                f'<path d="M-25,-20 Q-8,-26 20,-19 L21,-16 Q-6,-22 -24,-17 Z" '
+                f'fill="#f2f7fd"/>'
+                f'<rect x="-30" y="-6" width="60" height="3" fill="#ffffff" '
+                f'opacity="0.22"/>'
+                f'<g fill="#22262b"><circle cx="-17" cy="-2" r="6"/>'
+                f'<circle cx="18" cy="-2" r="6"/></g>'
+                f'<g fill="#6b737b"><circle cx="-17" cy="-2" r="2.2"/>'
+                f'<circle cx="18" cy="-2" r="2.2"/></g>'
+                f'<circle cx="30" cy="-11" r="2.4" fill="#ffe9a8"/>')
+        fl = ' scale(-1,1)' if flip else ''
+        return (f'<g{idattr} class="cc-car" data-x="{x}" data-y="{y}" data-s="{s}" '
+                f'transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'<g transform="scale(1,1){fl}">{body}</g></g>')
+
+    def parked(x, y, s, col):
+        """A car parked nose-in at the kerb with snow across the roof — the single most
+        Ketchum-in-February thing in the reference photographs."""
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'{shadow(0, 2, 21, 4, 0.22)}'
+                f'<rect x="-20" y="-16" width="40" height="16" rx="5" fill="{col}"/>'
+                f'<rect x="-14" y="-27" width="28" height="13" rx="5" fill="{col}"/>'
+                f'<rect x="-11" y="-24" width="22" height="9" rx="3" fill="#40525f"/>'
+                f'<rect x="-15" y="-29" width="30" height="4" rx="2" fill="#f2f7fd"/>'
+                f'<rect x="-20" y="-8" width="40" height="3" fill="#ffffff" opacity="0.25"/>'
+                f'<g fill="#22262b"><circle cx="-12" cy="0" r="4.5"/>'
+                f'<circle cx="12" cy="0" r="4.5"/></g></g>')
+
+    # ================================================== THE MACHINES ====
+    def plough(x, y, s, gid='cc-plough'):
+        """A highway plough, side-on and facing left so the blade cannot be mistaken for
+        anything else. Everything about the machine is the blade: it is wider than the
+        truck, angled to throw everything to one side, and it carries a rubber deflector
+        along the top which is what actually makes the snow fly.
+
+        The plume is drawn with a pale blue edge — pure white snow spray against pure
+        white snow is invisible, which is the winter version of the bare-canvas bug."""
+        return (f'<g id="{gid}" transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 4, 104, 12, 0.2)}'
+                # the plume, thrown forward and left off the blade
+                f'<path d="M-78,2 Q-116,-8 -132,-34 Q-158,-30 -172,-52 '
+                f'Q-206,-46 -216,-74 Q-244,-72 -252,-96 Q-226,-112 -206,-102 '
+                f'Q-198,-130 -172,-124 Q-166,-98 -148,-92 Q-136,-70 -112,-64 '
+                f'Q-96,-36 -70,-26 Z" fill="#cadef4"/>'
+                f'<path d="M-84,0 Q-118,-12 -130,-36 Q-152,-34 -166,-54 '
+                f'Q-196,-52 -206,-76 Q-224,-80 -230,-94 Q-206,-102 -190,-92 '
+                f'Q-186,-116 -166,-112 Q-160,-92 -142,-86 Q-130,-62 -106,-56 '
+                f'Q-92,-32 -70,-22 Z" fill="#eaf3fd"/>'
+                f'<g fill="#ffffff">'
+                f'<ellipse cx="-142" cy="-58" rx="30" ry="20"/>'
+                f'<ellipse cx="-186" cy="-88" rx="20" ry="14"/>'
+                f'<ellipse cx="-108" cy="-28" rx="24" ry="13"/></g>'
+                # chassis, rear tipper body
+                f'<rect x="10" y="-64" width="104" height="40" rx="4" fill="#c1443a"/>'
+                f'<rect x="10" y="-64" width="104" height="8" rx="3" fill="#f2f7fd"/>'
+                f'<rect x="14" y="-30" width="100" height="10" rx="3" fill="#3b444c"/>'
+                # cab
+                f'<rect x="-56" y="-86" width="66" height="62" rx="7" fill="#f4f7fa"/>'
+                f'<rect x="-50" y="-80" width="52" height="28" rx="4" fill="#4a6b82"/>'
+                f'<rect x="-50" y="-80" width="20" height="28" rx="4" fill="#6289a1"/>'
+                f'<rect x="-60" y="-92" width="72" height="9" rx="3" fill="#e2e8ee"/>'
+                f'<g fill="#f0b429"><rect x="-48" y="-100" width="12" height="8" rx="2"/>'
+                f'<rect x="-18" y="-100" width="12" height="8" rx="2"/></g>'
+                f'<rect x="-58" y="-48" width="14" height="20" rx="3" fill="#e6ecf2"/>'
+                f'<circle cx="-51" cy="-40" r="5" fill="#ffd873"/>'
+                f'<rect x="16" y="-116" width="9" height="34" rx="3" fill="#8b939b"/>'
+                # the blade, hinged off the front and angled to throw left
+                f'<g transform="translate(-56,-2)">'
+                # the mouldboard: a curved plate standing on the road surface, leaning
+                # forward, wider than the truck and turned to throw everything left
+                f'<path d="M-4,0 L-96,-14 Q-104,-44 -86,-62 L-2,-48 Q6,-24 -4,0 Z" '
+                f'fill="#3a444d"/>'
+                f'<path d="M-6,-46 L-86,-60 Q-98,-44 -96,-22 L-8,-10 Q0,-28 -6,-46 Z" '
+                f'fill="#5d6874"/>'
+                f'<path d="M-8,-52 L-86,-66 Q-90,-70 -84,-72 L-6,-58 Z" fill="#2b3036"/>'
+                f'<path d="M-96,-14 Q-104,-44 -86,-62 L-98,-66 Q-118,-44 -108,-12 Z" '
+                f'fill="#c1443a"/>'
+                f'<path d="M-4,0 L-96,-14" stroke="#e6ecf2" stroke-width="5" fill="none" '
+                f'stroke-linecap="round"/>'
+                f'<rect x="-14" y="-40" width="13" height="42" rx="4" fill="#3b444c"/>'
+                f'</g>'
+                # wheels
+                f'<g fill="#22262b"><circle cx="-34" cy="-20" r="18"/>'
+                f'<circle cx="58" cy="-20" r="18"/><circle cx="96" cy="-20" r="18"/></g>'
+                f'<g fill="#6b737b"><circle cx="-34" cy="-20" r="7"/>'
+                f'<circle cx="58" cy="-20" r="7"/><circle cx="96" cy="-20" r="7"/></g>'
+                f'</g>')
+
+    def skier(x, y, s, col='#e8721f', hat='#2f5f9e', gid='', lean=0):
+        """Someone skiing. Knees bent, leaning into the turn, poles trailing — a figure
+        standing bolt upright on two sticks reads as a lamp post.
+
+        These are the things that move on this mountain now. Each carries an id and a
+        `data-run` so the engine knows which run path it belongs to."""
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr} class="cc-skier" transform="translate({x:.0f},{y:.0f}) '
+                f'scale({s:.2f}) rotate({lean})">'
+                f'{shadow(1, 2, 13, 3, 0.14)}'
+                f'<path d="M-14,1 L13,-2" stroke="#c1443a" stroke-width="2.6" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M-12,4 L15,1" stroke="#d99a2b" stroke-width="2.6" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M-2,-9 L-5,1" stroke="#2b3036" stroke-width="4" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M3,-9 L5,-1" stroke="#2b3036" stroke-width="4" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M-6,-20 Q0,-24 6,-19 L4,-8 L-4,-8 Z" fill="{col}"/>'
+                f'<path d="M-6,-18 L-13,-8" stroke="{col}" stroke-width="3.4" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M6,-18 L12,-10" stroke="{col}" stroke-width="3.4" '
+                f'stroke-linecap="round"/>'
+                f'<g stroke="#4a5560" stroke-width="1.4" stroke-linecap="round">'
+                f'<line x1="-13" y1="-8" x2="-20" y2="3"/>'
+                f'<line x1="12" y1="-10" x2="18" y2="2"/></g>'
+                f'<circle cx="0" cy="-24" r="4.6" fill="#f0c9a8"/>'
+                f'<path d="M-4.6,-25 a4.6,4.6 0 0 1 9.2,0 Z" fill="{hat}"/>'
+                f'<rect x="-4.6" y="-26" width="9.2" height="3.4" rx="1.5" '
+                f'fill="#3d4750"/></g>')
+
+    def run_path(runs, pts, i, t0=0.14, t1=1.0, n=10, gid=''):
+        """The centreline of one ski run, wobbled from side to side inside the corridor
+        so it reads as a line of turns rather than a ruled fall line. Exported with an id
+        so the engine can walk a skier down it."""
+        a, b, wt, wb = runs[i]
+        SWING = [0.0, 0.55, -0.5, 0.45, -0.6, 0.5, -0.45, 0.55, -0.5, 0.4, 0.0]
+        out = []
+        for k in range(n + 1):
+            t = t0 + (t1 - t0) * k / float(n)
+            cx = a + (b - a) * t
+            top = crest_at(pts, cx)
+            w = wt + (wb - wt) * t
+            out.append((cx + SWING[k % len(SWING)] * w * 0.55,
+                        top + (VALLEY - top) * t))
+        d = ('M%.0f,%.0f' % out[0]) + ''.join(' L%.0f,%.0f' % p for p in out[1:])
+        idattr = f' id="{gid}"' if gid else ''
+        return f'<path{idattr} d="{d}" fill="none" stroke="none"/>', out
+
+    def run_skiers(runs, pts, i, ts, cols, first):
+        """Place skiers down one run. Scale grows as they descend, because the bottom of
+        the run is nearer the viewer than the top."""
+        path, poly = run_path(runs, pts, i, gid=f'run-path-{i + first}')
+        out = [path]
+        for k, t in enumerate(ts):
+            idx = min(len(poly) - 1, int(t * (len(poly) - 1)))
+            x, y = poly[idx]
+            sc = 0.34 + t * 0.34
+            g = skier(x, y, sc, cols[k % len(cols)][0], cols[k % len(cols)][1],
+                      f'cc-skier-{i + first}-{k}', -8 + (k % 3) * 8)
+            out.append(g.replace('class="cc-skier"',
+                                 f'class="cc-skier" data-run="{i + first}" '
+                                 f'data-t="{t:.2f}" data-s="{sc:.2f}"'))
+        return ''.join(out)
+
+    def snowman(x, y, s, scarf='#c1443a', hat='#2f5f9e'):
+        """Three balls, a carrot and a scarf. It is the only thing in the picture a
+        three-year-old could have built themselves, which is exactly why it earns its
+        place in the near field."""
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 2, 26, 6, 0.16)}'
+                f'<circle cx="0" cy="-16" r="20" fill="#ffffff" stroke="#cfdff0" '
+                f'stroke-width="1.5"/>'
+                f'<circle cx="0" cy="-44" r="15" fill="#ffffff" stroke="#cfdff0" '
+                f'stroke-width="1.5"/>'
+                f'<circle cx="0" cy="-66" r="11" fill="#ffffff" stroke="#cfdff0" '
+                f'stroke-width="1.5"/>'
+                f'<path d="M-11,-56 Q0,-50 11,-56 L13,-48 Q0,-42 -13,-48 Z" fill="{scarf}"/>'
+                f'<path d="M9,-50 l7,16 l-6,2 l-6,-16 Z" fill="{scarf}"/>'
+                f'<path d="M-11,-72 L11,-72 L11,-76 L-11,-76 Z" fill="{hat}"/>'
+                f'<rect x="-8" y="-88" width="16" height="13" rx="2" fill="{hat}"/>'
+                f'<path d="M2,-68 L14,-65 L2,-64 Z" fill="#e8721f"/>'
+                f'<g fill="#2b3036"><circle cx="-4" cy="-69" r="1.6"/>'
+                f'<circle cx="4" cy="-69" r="1.6"/>'
+                f'<circle cx="0" cy="-44" r="2"/><circle cx="0" cy="-36" r="2"/></g>'
+                f'<g stroke="#6f5b45" stroke-width="2.5" stroke-linecap="round">'
+                f'<path d="M-14,-48 L-30,-60"/><path d="M14,-48 L31,-58"/>'
+                f'<path d="M-30,-60 l-6,-5"/><path d="M31,-58 l6,-6"/></g></g>')
+
+    # ================================================== ASSEMBLY ====
+    rr = rnd(101)
+
+    far_l = ('    ' + ridge(FAR_RIDGE, FARSNOW, FARSHADE, 7)
+             + ''.join(minifir(x, 302 + (x * 7 % 11), 2.6 + (x * 3 % 5) * 0.5, FARSHADE)
+                       for x in range(-40, 1330, 17) if (x * 13 % 100) > 34)
+             + ridge(RIGHT, SNOW2, SHADE, 5)
+             + f'<path d="{crest_path(RIGHT)}" fill="none" stroke="{SHADE2}" '
+             f'stroke-width="2" opacity="0.7"/>'
+             + timber(RIGHT, RUNS_RIGHT, 606, 1360, 43, [FIR, FIR2, FIR3], 26, 11)
+             + corduroy(RUNS_RIGHT, RIGHT, 1)
+             + ridge(BALD, SNOW, None)
+             # the shadow side, off the summit down the right shoulder
+             # the light: the two flanks are separated by a BROAD soft band, not by a hard
+             # line meeting at the top. A crisp lit/shade split running to a single point
+             # is what makes a rounded mountain read as a pyramid.
+             + f'<path d="M470,152 Q590,178 690,220 Q800,274 900,{VALLEY} L500,{VALLEY} Z" '
+             f'fill="{SHADE}" opacity="0.42"/>'
+             + f'<path d="M560,176 Q660,206 750,246 Q830,290 900,{VALLEY} L640,{VALLEY} Z" '
+             f'fill="{SHADE2}" opacity="0.3"/>'
+             + f'<path d="M330,168 Q230,206 150,246 Q50,296 -80,{VALLEY} L280,{VALLEY} Z" '
+             f'fill="#ffffff" opacity="0.5"/>'
+             + timber(BALD, RUNS_BALD, -80, 962, 11, [FIR, FIR2, FIR3], 30, 11)
+             + corduroy(RUNS_BALD, BALD, 1)
+             + corduroy(RUNS_BALD, BALD, 2, 0.5)
+             # the mountain's moving parts: skiers coming down the runs
+             + run_skiers(RUNS_BALD, BALD, 0, [0.30, 0.72], SKI_COLS, 0)
+             + run_skiers(RUNS_BALD, BALD, 1, [0.22, 0.52, 0.86], SKI_COLS, 0)
+             + run_skiers(RUNS_BALD, BALD, 2, [0.40, 0.78], SKI_COLS, 0)
+             + run_skiers(RUNS_BALD, BALD, 3, [0.34, 0.68], SKI_COLS, 0)
+             + run_skiers(RUNS_RIGHT, RIGHT, 0, [0.36, 0.74], SKI_COLS, 4)
+             + run_skiers(RUNS_RIGHT, RIGHT, 1, [0.26, 0.60, 0.88], SKI_COLS, 4)
+             + run_skiers(RUNS_RIGHT, RIGHT, 2, [0.44], SKI_COLS, 4))
+
+    ground_l = (f'    <rect x="0" y="{VALLEY - 2}" width="1280" height="{722 - VALLEY}" '
+                f'fill="url(#svsnow)"/>')
+
+    # ---- the lifts, the treeline, the town, the street -------------------------
+    # Both lifts run between two real terminals. The cabins are drawn between them, so
+    # a cabin at t=0 or t=1 is *inside* its station rather than hanging off the end of a
+    # wire, which is what a lift actually looks like.
+    lifts = ('<g id="lifts">'
+             # each terminal SITS ON the slope: its base is on the crest line, and the
+             # rope stops a few pixels short so it disappears into the building
+             + lift(206, 334, 392, 142, 4, [0.08, 0.34, 0.60, 0.86],
+                    'gondola', 'gondola-path', sep=10.0)
+             + base_station(206, 348, 0.62)
+             + terminal(394, 156, 0.5)
+             + lift(1000, 330, 1194, 200, 3, [0.12, 0.44, 0.76], 'chair',
+                    'chair-path', sep=8.0)
+             + terminal(998, 344, 0.44)
+             + terminal(1198, 214, 0.36)
+             + '</g>')
+
+    treeline = ('<g id="treeline">' + ''.join(
+        snowfir(x, VALLEY + 9 + (i % 3) * 3, 0.42 + (i % 4) * 0.05, FIR if i % 2 else FIR2)
+        for i, x in enumerate(range(-20, 1320, 47))) + '</g>')
+
+    WALLS = ['#a9634a', '#8f5742', '#d9cdb4', '#8b9095', '#7d6047', '#e2ded6',
+             '#b8705a', '#9aa0a4', '#c6b79c', '#6f6157']
+    SHOPS = ['#2f5f9e', '#3f7a4a', '#c1443a', '#d99a2b', '#5a4a6f', None, None]
+    town = []
+    x = -30
+    i = 0
+    while x < 1300:
+        w = 40 + rr() * 52
+        h = 34 + rr() * 40
+        if 460 < x < 820:
+            h += 12
+        town.append(building(x, TOWN_Y, w, h, WALLS[i % len(WALLS)],
+                             storeys=2 + (i % 2), shop=SHOPS[i % len(SHOPS)], seed=7 + i))
+        if rr() > 0.72:
+            town.append(snowfir(x + w + 11, TOWN_Y + 2, 0.5 + rr() * 0.2))
+            x += 26
+        x += w + 6 + rr() * 14
+        i += 1
+    town_l = '<g id="ketchum">' + ''.join(town) + '</g>'
+
+    # the ploughed cross street the road runs into, its bank, and its parked cars
+    mid_y = (STREET_T + STREET_B) // 2
+    STREET_Y = STREET_T + 13          # the wheels of the traffic on the cross street
+    street = ('<g id="cross-street">'
+              # the bank of ploughed snow on the FAR side, drawn before the tarmac
+              + f'<path d="M-20,{STREET_T + 2} L1300,{STREET_T + 2} L1300,{STREET_T - 6} '
+              + ' '.join(f'Q{x + 18},{STREET_T - 14} {x + 40},{STREET_T - 6}'
+                         for x in range(1260, -40, -40))
+              + f' Z" fill="#eef5fd" stroke="#d3e0ee" stroke-width="1"/>'
+              + f'<rect x="0" y="{STREET_T}" width="1280" height="{STREET_B - STREET_T}" '
+              f'fill="#5d636b"/>'
+              + f'<rect x="0" y="{STREET_T}" width="1280" height="4" fill="#4d535b"/>'
+              + '<g stroke="#e8d69a" stroke-width="2" opacity="0.65">'
+              + ''.join(f'<line x1="{x}" y1="{mid_y}" x2="{x + 14}" y2="{mid_y}"/>'
+                        for x in range(-10, 1290, 40))
+              + '</g>'
+              # the traffic, and the geometry the engine needs to drive it
+              + f'<path id="street-path" d="M-80,{STREET_Y} L1360,{STREET_Y}" '
+              f'fill="none" stroke="none"/>'
+              + f'<path id="road-approach-path" d="M704,730 Q690,520 668,388" '
+              f'fill="none" stroke="none"/>'
+              + f'<path id="turn-right-path" d="M668,388 Q702,380 752,{STREET_Y}" '
+              f'fill="none" stroke="none"/>'
+              + f'<path id="turn-left-path" d="M668,388 Q636,378 588,{STREET_Y}" '
+              f'fill="none" stroke="none"/>'
+              + ''.join(driving(x, STREET_Y, 0.34, c, fl, f'cc-car-{i}')
+                        for i, (x, c, fl) in enumerate(
+                            [(148, '#c1443a', False), (432, '#2f5f9e', True),
+                             (612, '#e8e6e2', True), (912, '#3f4a52', False),
+                             (1176, '#6f6157', False)]))
+              + plough(756, STREET_B - 2, 0.14, 'cc-plough-far')
+              + f'<rect x="0" y="{STREET_B - 3}" width="1280" height="8" fill="#f2f8fe"/>'
+              + '</g>')
+
+    # snow banks along the road: the berm the plough left along each verge
+    def bank(side, y0, y1, amp=1.0):
+        def ex(y):
+            t = (y - HORIZON) / 420.0
+            return (622 - 112 * t - 3) if side < 0 else (658 + 112 * t + 3)
+        ys = list(range(int(y0), int(y1) + 1, 10))
+        d = f'M{ex(ys[0]):.0f},{ys[0]}'
+        for yy in ys[1:]:
+            d += f' L{ex(yy):.0f},{yy}'
+        for yy in reversed(ys):
+            t = (yy - HORIZON) / 420.0
+            w = (9 + 42 * t) * amp
+            d += f' L{ex(yy) + side * w:.0f},{yy}'
+        d += ' Z'
+        # the shadow the berm throws goes down FIRST, then the berm on top of it — the
+        # other way round and the bank has a halo instead of a shadow
+        scallop = ''.join(
+            f'<ellipse cx="{ex(yy) + side * (9 + 42 * (yy - HORIZON) / 420.0) * amp * 0.5:.0f}" '
+            f'cy="{yy}" rx="{(7 + 22 * (yy - HORIZON) / 420.0) * amp:.0f}" '
+            f'ry="{(3 + 6 * (yy - HORIZON) / 420.0) * amp:.0f}" fill="#ffffff" '
+            f'opacity="0.75"/>' for yy in ys[::4])
+        return (f'<path d="{d}" fill="{SHADE2}" opacity="0.45" '
+                f'transform="translate({side * 5},6)"/>'
+                f'<path d="{d}" fill="#f0f7ff" stroke="#c3d8ee" stroke-width="1.5"/>'
+                f'{scallop}')
+
+    # The lifts go in FRONT of the town: their base stations stand at the edge of
+    # Ketchum, and drawn behind it the ropes appeared to disappear into a rooftop.
+    back = ('    ' + treeline + town_l + lifts + street
+            + bank(-1, 386, 448) + bank(1, 386, 448)
+            + ''.join(aspen(x, VALLEY + 62 + (i % 3) * 9, 0.34 + (i % 3) * 0.05, 96, 9 + i)
+                      for i, x in enumerate([54, 88, 122, 152, 186,
+                                             1104, 1138, 1170, 1204, 1240]))
+            + ''.join(snowfir(x, y, s) for x, y, s in
+                      [(238, 406, 0.72), (292, 396, 0.58), (352, 414, 0.62),
+                       (966, 398, 0.56), (1024, 412, 0.7), (1076, 400, 0.6),
+                       (430, 428, 0.5), (846, 424, 0.54), (140, 432, 0.66),
+                       (1188, 430, 0.62)])
+            + '<g fill="' + SHADE + '" opacity="0.4">'
+            + '<path d="M-20,428 Q160,410 330,430 Q470,446 470,462 L-20,462 Z"/>'
+            + '<path d="M820,434 Q1000,412 1160,432 Q1290,444 1300,462 L820,462 Z"/></g>'
+            # the ski-tracks and footpaths that say people walk here
+            + '<g stroke="#d7e4f3" stroke-width="2" fill="none" opacity="0.9">'
+            + '<path d="M60,446 Q180,424 300,432"/><path d="M1240,442 Q1120,420 1000,430"/>'
+            + '</g>')
+
+    # fence posts with snow caps: the one thing that gives a white field a scale
+    def postrow(x0, x1, y0, y1, step, s0, s1):
+        out = []
+        n = max(2, int((x1 - x0) / step))
+        for i in range(n + 1):
+            f = i / float(n)
+            x = x0 + (x1 - x0) * f
+            y = y0 + (y1 - y0) * f
+            sc = s0 + (s1 - s0) * f
+            out.append(f'<g transform="translate({x:.0f},{y:.0f}) scale({sc:.2f})">'
+                       f'<rect x="-3" y="-30" width="6" height="30" rx="2" fill="#6f5b45"/>'
+                       f'<path d="M-6,-30 L6,-30 L4,-36 Q0,-40 -4,-36 Z" fill="#f4f9fe"/>'
+                       f'</g>')
+        wire = (f'<g stroke="#8a7a66" stroke-width="1.4" opacity="0.8">'
+                f'<line x1="{x0}" y1="{y0 - 22 * s0:.0f}" x2="{x1}" '
+                f'y2="{y1 - 22 * s1:.0f}"/>'
+                f'<line x1="{x0}" y1="{y0 - 12 * s0:.0f}" x2="{x1}" '
+                f'y2="{y1 - 12 * s1:.0f}"/></g>')
+        return wire + ''.join(out)
+
+    front = ('    ' + bank(-1, 524, 720, 1.15) + bank(1, 524, 720, 1.15)
+             + '<g fill="' + SHADE + '" opacity="0.38">'
+             + '<path d="M-20,560 Q120,540 260,566 Q380,590 300,626 Q160,652 -20,624 Z"/>'
+             + '<path d="M860,548 Q1030,530 1180,556 Q1300,578 1300,612 L900,606 Z"/>'
+             + '<path d="M60,690 Q220,672 360,700 Q420,714 380,720 L20,720 Z"/></g>'
+             + '<g fill="#ffffff" opacity="0.9">'
+             + '<ellipse cx="150" cy="596" rx="152" ry="32"/>'
+             + '<ellipse cx="1094" cy="582" rx="140" ry="28"/>'
+             + '<ellipse cx="1180" cy="662" rx="120" ry="26"/></g>'
+             + postrow(-10, 470, 556, 604, 62, 0.75, 1.0)
+             + postrow(806, 1290, 600, 552, 62, 1.0, 0.75)
+             + '<g stroke="#cfdff0" stroke-width="2.5" fill="none" opacity="0.9">'
+             + '<path d="M-10,690 Q120,660 250,668 Q360,676 440,704"/>'
+             + '<path d="M-10,700 Q120,670 250,678 Q360,686 440,714"/>'
+             + '<path d="M1290,656 Q1160,632 1040,644 Q950,654 900,684"/>'
+             + '<path d="M1290,668 Q1160,644 1040,656 Q950,666 900,696"/></g>')
+
+    fg = ('    '
+          # the berm the near plough has just thrown, so it is clearly *doing* something
+          + '<path d="M-20,640 Q60,606 150,614 Q230,622 300,646 Q220,668 100,672 '
+            'Q10,674 -20,664 Z" fill="#ffffff" stroke="#cfdff0" stroke-width="2"/>'
+          # the line the plough is working: it clears the verge up to the carriageway
+          # and no further, so an animated pass never crosses the road
+          + '<path id="plough-path" d="M-180,706 Q60,672 300,678 Q400,682 452,690" '
+            'fill="none" stroke="none"/>'
+          + plough(322, 678, 1.0)
+          + ''.join(aspen(x, y, s, h, 21 + i) for i, (x, y, s, h) in enumerate(
+              [(30, 712, 0.9, 132), (1256, 708, 1.02, 142), (1198, 690, 0.84, 122),
+               (1146, 720, 0.96, 138), (1092, 700, 0.78, 116)]))
+          + snowfir(452, 718, 1.05)
+          + snowfir(398, 700, 0.82, FIR2)
+          + snowfir(880, 706, 0.92, FIR2)
+          + snowfir(936, 720, 1.06)
+          + skier(1010, 646, 0.85, '#c1443a')
+          + skier(1042, 660, 0.8, '#f0b429')
+          + snowman(506, 654, 0.9)
+          + snowman(806, 690, 1.15, '#3f7a4a', '#5a4a6f'))
+
+    scene('sun-valley',
+          'SUN VALLEY, IDAHO — Bald Mountain, the gondola and Ketchum in the snow', {
+        'sky': sky_l,
+        'far': far_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': fg,
+        'roadkw': dict(surface='#5d636b', surface2='#4a5058', shoulder='#eef5fd',
+                       dash='#e8d69a', top=ROAD_TOP),
+        'trackkw': dict(ballast='#9aa2a8', ballast_hi='#b4bcc2', tie='#4a3a2c',
+                        rail='#dfe4e9'),
+    }, d)
+
+
+def indianapolis():
+    """THE INDIANAPOLIS MOTOR SPEEDWAY, INDIANA — the main straight on race day.
+
+    The set's **first motorsport** scene, and about the most direct appeal to a small child
+    the game has: cars going very fast round a circle.
+
+    The composition problem is that an oval is two and a half miles round and the canvas is
+    1280 wide, so drawing "the oval" gets you a grey ring in a green field and no sense of
+    speed at all. So this is the view along the **main straight**, from *outside* the track
+    — which is where a level crossing could plausibly be, and which puts the pieces in the
+    only order that is both readable and true:
+
+        the grandstand across the way · the Pagoda · the garages · the pit lane ·
+        the pit wall · the racing surface · the catch fence · the grass we are standing on
+
+    Getting that order wrong is the whole ball game. The first attempt had the pit lane in
+    front of the track, which only happens if you are standing in the infield — and then
+    the Pagoda, which is on the infield side, would be behind your head.
+
+    What the reference photographs insist on:
+
+    * **The grandstands are enormous, and they are the crowd.** Drawn as empty seating a
+      grandstand reads as scaffolding; it is the speckle of tens of thousands of little
+      coloured dots that says *race day*. But it must still read as a raked structure, so
+      the row lines stay visible through it.
+    * **The catch fencing** stands between the viewer and the track everywhere along the
+      straight. It reads as a fine grid, and without it a bit of tarmac is just a road.
+    * **The yard of bricks** — a narrow strip of old paving across the whole width of the
+      track at start-finish, with a white line either side of it. It is a *metre* wide, not
+      a plaza; drawn too wide it looks like a patio someone left on the circuit.
+    * **The pit lane is its own road**, behind a low white wall, with the painted stalls,
+      the tyre stacks and the crews. This is where the requested wheel change happens.
+    * **A lot of it is grass.** Wide green aprons, mown stripes, trees round the grounds.
+
+    **No badges, no logos, no wordmarks, no real car shapes, no team liveries.** Trademarks
+    matter for a free, open-source project — the same reasoning that ruled out the Rocky
+    statue in Philadelphia. Everything here is generic: bright flat open-wheel cars, a
+    plain tiered tower where the Pagoda stands, an abstract column of amber cells where the
+    scoring pylon stands.
+
+    Animation hooks, so a car can run the straight and then pull in for a wheel change:
+    `#racing-line`, `#pit-in-path`, `#pit-lane-path`, `#pit-out-path`, `#pit-box-stop`,
+    and `#cc-racer-0..5`, plus `#cc-racer-pit` in the box and `#cc-racer-entering`
+    coming out through the access gate."""
+    STAND_BASE = 244                 # the far grandstand stands on this
+    GARAGE_T, GARAGE_B = 246, 292    # the garages behind the lane
+    PIT_T, PIT_B = 292, 338          # the pit lane itself
+    WALL_Y = 338                     # the low white pit wall
+    TRACK_T, TRACK_B = 346, 428      # the racing surface, nearest of the three roads
+    APRON = 428
+    ROAD_TOP = 432
+
+    GRASS, GRASS2 = '#5e9a4a', '#4d8a3c'
+    BRICK_X = 968                    # start-finish
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    d = ('''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d90cd"/><stop offset="0.6" stop-color="#9ec6e2"/>
+      <stop offset="1" stop-color="#d8e8f3"/>
+    </linearGradient>
+    <linearGradient id="imstar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f5357"/><stop offset="0.5" stop-color="#63676c"/>
+      <stop offset="1" stop-color="#75797e"/>
+    </linearGradient>
+    <linearGradient id="imsgrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d8a3c"/><stop offset="1" stop-color="#78b45c"/>
+    </linearGradient>''')
+
+    def cloud(x, y, r):
+        return (f'<g fill="#ffffff" opacity="0.92"><ellipse cx="{x}" cy="{y}" rx="{r}" '
+                f'ry="{r * 0.38:.0f}"/>'
+                f'<ellipse cx="{x - r * 0.6:.0f}" cy="{y + r * 0.15:.0f}" '
+                f'rx="{r * 0.52:.0f}" ry="{r * 0.26:.0f}"/>'
+                f'<ellipse cx="{x + r * 0.62:.0f}" cy="{y + r * 0.13:.0f}" '
+                f'rx="{r * 0.48:.0f}" ry="{r * 0.24:.0f}"/></g>')
+
+    sky_l = ('    <rect x="0" y="0" width="1280" height="260" fill="url(#skyg)"/>\n'
+             + '    ' + ''.join(cloud(x, y, r) for x, y, r in
+                                [(150, 50, 58), (430, 30, 40), (760, 56, 52),
+                                 (1090, 34, 46)]))
+
+    # ================================================== TREES ====
+    def tree(x, y, s, a='#3f7a4a', b='#4c8f58', trunk='#6b4a2a'):
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'{shadow(0, 3, 30, 7, 0.16)}'
+                f'<path d="M-4,2 C -5,-14 -12,-22 -16,-30 L-6,-27 C -3,-34 -1,-40 0,-48 '
+                f'C 1,-40 4,-34 7,-27 L18,-31 C 11,-22 5,-14 4,2 Z" fill="{trunk}"/>'
+                f'<ellipse cx="0" cy="-52" rx="34" ry="24" fill="{a}"/>'
+                f'<ellipse cx="-19" cy="-62" rx="20" ry="15" fill="{b}"/>'
+                f'<ellipse cx="17" cy="-60" rx="19" ry="14" fill="{b}"/>'
+                f'<ellipse cx="2" cy="-72" rx="22" ry="15" fill="{b}"/></g>')
+
+    # ================================================== GRANDSTANDS ====
+    def crowd(x0, x1, y, h, seed=5, gap=7):
+        """The crowd. Regularly spaced enough to keep the raked rows readable, jittered
+        enough not to be a grid. Confetti scattered at random reads as noise; people sit
+        in rows."""
+        rr = rnd(seed)
+        # mostly pale: a crowd at distance is a haze of skin, shirt and hat, with only
+        # a scattering of saturated colour through it. All-bright reads as confetti.
+        COLS = ['#e2ddd2', '#d8cfc0', '#cfc8bc', '#c2bcb2', '#9aa0a4', '#e8e2d8',
+                '#d0c6b6', '#c1443a', '#2f5f9e', '#f0d16a', '#5a4a6f', '#3f7a4a',
+                '#d99a2b', '#b8705a']
+        rows = max(3, int(h / 6.5))
+        out = []
+        for r in range(rows):
+            cy = y + 3 + r * (h - 5) / rows
+            x = x0 + rr() * gap
+            while x < x1:
+                out.append(f'<circle cx="{x:.0f}" cy="{cy + rr() * 1.6:.0f}" '
+                           f'r="{1.3 + rr() * 0.7:.1f}" '
+                           f'fill="{COLS[int(rr() * len(COLS))]}"/>')
+                x += gap * (0.7 + rr() * 0.7)
+        return '<g opacity="0.92">' + ''.join(out) + '</g>'
+
+    def grandstand(x0, x1, base, h, seed=5, sid=''):
+        """A bank of seating: a raked block, the row lines showing through the crowd, a
+        deep shadow under the roof and the roof itself on its line of columns."""
+        top = base - h
+        out = [f'<g id="{sid}">' if sid else '<g>']
+        out.append(f'<rect x="{x0}" y="{top}" width="{x1 - x0}" height="{h}" '
+                   f'fill="#9aa2a8"/>')
+        out.append(f'<rect x="{x0}" y="{base - 12}" width="{x1 - x0}" height="12" '
+                   f'fill="#7f868c"/>')
+        out.append('<g stroke="#868e95" stroke-width="1.1" opacity="0.85">'
+                   + ''.join(f'<line x1="{x0}" y1="{top + 6 + i * (h - 14) / 12:.0f}" '
+                             f'x2="{x1}" y2="{top + 6 + i * (h - 14) / 12:.0f}"/>'
+                             for i in range(12)) + '</g>')
+        out.append(crowd(x0 + 3, x1 - 3, top + 5, h - 18, seed))
+        # the roof: a fascia band on columns, with the dark under-side showing
+        out.append(f'<rect x="{x0 - 5}" y="{top - 16}" width="{x1 - x0 + 10}" height="11" '
+                   f'fill="#8b9298"/>')
+        out.append(f'<rect x="{x0 - 5}" y="{top - 20}" width="{x1 - x0 + 10}" height="5" '
+                   f'fill="#b9c0c5"/>')
+        out.append(f'<rect x="{x0 - 5}" y="{top - 6}" width="{x1 - x0 + 10}" height="4" '
+                   f'fill="#5f666c"/>')
+        out.append('<g fill="#6c7278">'
+                   + ''.join(f'<rect x="{x}" y="{top - 6}" width="5" '
+                             f'height="{h * 0.62:.0f}"/>'
+                             for x in range(int(x0) + 12, int(x1), 58)) + '</g>')
+        out.append('</g>')
+        return ''.join(out)
+
+    # ================================================== THE PAGODA ====
+    def pagoda(x, base):
+        """The tower at start-finish: a slim glazed shaft with four overhanging tiered
+        roofs and a mast. Generic — no emblem, no mark, no wordmark of any kind."""
+        out = [f'<g id="control-tower" transform="translate({x},{base})">',
+               f'{shadow(0, 2, 46, 8, 0.2)}',
+               '<rect x="-40" y="-34" width="80" height="34" fill="#8f959b"/>',
+               '<rect x="-40" y="-34" width="80" height="6" fill="#b9c0c5"/>',
+               '<g fill="#39566b"><rect x="-32" y="-27" width="18" height="20" rx="2"/>'
+               '<rect x="-8" y="-27" width="18" height="20" rx="2"/>'
+               '<rect x="16" y="-27" width="18" height="20" rx="2"/></g>',
+               '<rect x="-22" y="-206" width="44" height="176" fill="#a8adb2"/>',
+               '<rect x="-22" y="-206" width="12" height="176" fill="#c6cbcf"/>']
+        for w, y, hh in [(54, -76, 30), (56, -118, 30), (58, -160, 30), (50, -200, 28)]:
+            out.append(f'<rect x="{-w // 2}" y="{y}" width="{w}" height="{hh}" rx="2" '
+                       f'fill="#e2e7ea"/>')
+            out.append(f'<rect x="{-w // 2 + 4}" y="{y + 5}" width="{w - 8}" '
+                       f'height="{hh - 13}" rx="2" fill="#31536b"/>')
+            out.append(f'<rect x="{-w // 2 + 4}" y="{y + 5}" width="{(w - 8) // 3}" '
+                       f'height="{hh - 13}" rx="2" fill="#4a7291"/>')
+            # the overhanging roof, with its eaves turned up at the ends
+            out.append(f'<path d="M{-w // 2 - 16},{y} L{w // 2 + 16},{y} '
+                       f'L{w // 2 + 8},{y - 8} L{-w // 2 - 8},{y - 8} Z" fill="#6f767c"/>')
+            out.append(f'<path d="M{-w // 2 - 16},{y} q-7,-2 -9,-7 l7,1 Z" fill="#8b9298"/>')
+            out.append(f'<path d="M{w // 2 + 16},{y} q7,-2 9,-7 l-7,1 Z" fill="#8b9298"/>')
+        out.append('<rect x="-3" y="-248" width="6" height="46" fill="#8b939a"/>')
+        for i, c in enumerate(['#c1443a', '#f0d16a', '#2f5f9e']):
+            out.append(f'<path d="M3,{-246 + i * 14} L28,{-240 + i * 14} '
+                       f'L3,{-234 + i * 14} Z" fill="{c}"/>')
+        out.append('</g>')
+        return ''.join(out)
+
+    def pylon(x, base):
+        """The scoring pylon: a slim column of lit amber cells. Abstract on purpose — the
+        real one carries running numbers, and numbers are the one thing a three-year-old
+        will try to read off a picture."""
+        rr = rnd(77)
+        out = [f'<g id="scoring-pylon" transform="translate({x},{base})">',
+               '<rect x="-11" y="-14" width="22" height="14" fill="#7f868c"/>',
+               '<rect x="-7" y="-196" width="14" height="184" fill="#2f3439"/>',
+               '<rect x="-7" y="-196" width="4" height="184" fill="#474d53"/>']
+        for i in range(21):
+            out.append(f'<rect x="-4.5" y="{-190 + i * 8.4:.0f}" width="9" height="5" '
+                       f'rx="1" fill="{"#f0c02b" if rr() > 0.28 else "#5a5f64"}"/>')
+        out.append('<rect x="-12" y="-208" width="24" height="13" rx="3" fill="#4a5058"/>')
+        out.append('</g>')
+        return ''.join(out)
+
+    # ================================================== GARAGES ====
+    def garages():
+        """The garage block behind the pit lane: one long low building with roller doors,
+        which is what gives the pit lane something to stand in front of."""
+        rr = rnd(23)
+        out = [f'<rect x="-20" y="{GARAGE_T}" width="1320" height="{GARAGE_B - GARAGE_T}" '
+               f'fill="#c9ccce"/>',
+               f'<rect x="-20" y="{GARAGE_T}" width="1320" height="7" fill="#9aa0a4"/>',
+               f'<rect x="-20" y="{GARAGE_T + 7}" width="1320" height="4" fill="#e2e5e7"/>']
+        for i in range(40):
+            x = -14 + i * 33
+            out.append(f'<rect x="{x}" y="{GARAGE_T + 14}" width="24" '
+                       f'height="{GARAGE_B - GARAGE_T - 14}" rx="2" fill="#8d949a"/>')
+            out.append(f'<g stroke="#a2a8ad" stroke-width="1">'
+                       + ''.join(f'<line x1="{x}" y1="{GARAGE_T + 18 + k * 6}" '
+                                 f'x2="{x + 24}" y2="{GARAGE_T + 18 + k * 6}"/>'
+                                 for k in range(5)) + '</g>')
+        # timing stands standing up above the garage roof
+        for x in range(40, 1280, 152):
+            out.append(f'<g><rect x="{x}" y="{GARAGE_T - 22}" width="46" height="22" '
+                       f'rx="3" fill="#5f666c"/>'
+                       f'<rect x="{x + 3}" y="{GARAGE_T - 19}" width="40" height="9" '
+                       f'rx="2" fill="#8fb4cc"/>'
+                       f'<rect x="{x + 8}" y="{GARAGE_T - 30}" width="30" height="8" '
+                       f'rx="2" fill="{"#c1443a" if (x // 152) % 2 else "#2f5f9e"}"/></g>')
+        return '<g id="garages">' + ''.join(out) + '</g>'
+
+    # ================================================== THE CARS ====
+    def racer(x, y, s, body='#c1443a', trim='#f0d16a', gid=''):
+        """A generic open-wheel car, side-on: low and long, wings front and rear, four
+        exposed wheels, a halo over the cockpit. The shape is deliberately not any real
+        car, and it carries no number and no livery."""
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr} class="cc-racer" transform="translate({x:.0f},{y:.0f}) '
+                f'scale({s:.3f})">'
+                f'{shadow(0, 3, 60, 6, 0.24)}'
+                f'<path d="M-58,-4 L56,-4 L56,-12 L28,-14 L10,-26 L-16,-26 L-28,-14 '
+                f'L-58,-12 Z" fill="{body}"/>'
+                f'<path d="M-32,-14 L20,-14 L20,-24 L-12,-24 L-26,-16 Z" fill="{trim}"/>'
+                f'<path d="M-16,-26 L6,-26 L2,-38 L-10,-38 Z" fill="{body}"/>'
+                f'<path d="M-32,-24 L-6,-24 L-10,-36 L-28,-32 Z" fill="{body}"/>'
+                f'<ellipse cx="-18" cy="-26" rx="9" ry="5" fill="#2b3036"/>'
+                f'<circle cx="-18" cy="-30" r="5" fill="#e8e2d8"/>'
+                f'<path d="M-30,-28 Q-18,-40 -6,-28" stroke="#2b3036" stroke-width="3" '
+                f'fill="none"/>'
+                f'<rect x="-76" y="-10" width="22" height="5" rx="2" fill="{trim}"/>'
+                f'<rect x="-73" y="-15" width="15" height="4" rx="2" fill="{body}"/>'
+                f'<rect x="52" y="-46" width="28" height="6" rx="2" fill="{trim}"/>'
+                f'<rect x="54" y="-40" width="22" height="4" rx="2" fill="{body}"/>'
+                f'<rect x="61" y="-42" width="5" height="30" fill="{body}"/>'
+                f'<g fill="#22262b"><circle cx="-42" cy="-11" r="16"/>'
+                f'<circle cx="40" cy="-11" r="18"/></g>'
+                f'<g fill="#4a5058"><circle cx="-42" cy="-11" r="6"/>'
+                f'<circle cx="40" cy="-11" r="7"/></g>'
+                f'<g fill="#9aa0a4" opacity="0.7"><circle cx="-42" cy="-11" r="2.5"/>'
+                f'<circle cx="40" cy="-11" r="3"/></g></g>')
+
+    def crewman(x, y, s, shirt='#f0c02b', trouser='#2f5f9e', arms_up=False):
+        arm = ('<path d="M-6,-19 L-14,-30" stroke="%s" stroke-width="4" '
+               'stroke-linecap="round"/>'
+               '<path d="M6,-19 L14,-30" stroke="%s" stroke-width="4" '
+               'stroke-linecap="round"/>' % (shirt, shirt)) if arms_up else (
+            '<path d="M-6,-18 L-11,-8" stroke="%s" stroke-width="4" '
+            'stroke-linecap="round"/>'
+            '<path d="M6,-18 L11,-8" stroke="%s" stroke-width="4" '
+            'stroke-linecap="round"/>' % (shirt, shirt))
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'{shadow(0, 1, 9, 3, 0.2)}'
+                f'<path d="M-4,-9 L-4,0" stroke="{trouser}" stroke-width="4.5" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M4,-9 L4,0" stroke="{trouser}" stroke-width="4.5" '
+                f'stroke-linecap="round"/>'
+                f'<rect x="-6" y="-24" width="12" height="16" rx="4" fill="{shirt}"/>'
+                f'{arm}'
+                f'<circle cx="0" cy="-28" r="5" fill="#f0c9a8"/>'
+                f'<path d="M-5,-29 a5,5 0 0 1 10,0 Z" fill="{trouser}"/></g>')
+
+    # ================================================== ASSEMBLY ====
+    rr = rnd(19)
+
+    # trees and a hint of the city beyond the far grandstand
+    far_l = ('    <g fill="#8fb0c8" opacity="0.5">'
+             + ''.join(f'<rect x="{x}" y="{206 - h}" width="{w}" height="{h}"/>'
+                       for x, w, h in [(150, 26, 30), (192, 20, 20), (224, 34, 40),
+                                       (272, 22, 24), (556, 24, 26), (592, 30, 36),
+                                       (1096, 28, 26), (1140, 22, 34)])
+             + '</g>'
+             + ''.join(tree(x, 250, s) for x, s in
+                       [(354, 1.0), (372, 0.8), (824, 1.05), (842, 0.85),
+                        (1206, 0.95), (1252, 1.1)])
+             + grandstand(-40, 340, STAND_BASE, 104, 5, 'stand-a')
+             + grandstand(392, 806, STAND_BASE, 126, 9, 'stand-b')
+             + grandstand(858, 1180, STAND_BASE, 98, 13, 'stand-c')
+             + pagoda(1224, GARAGE_B)
+             + pylon(830, GARAGE_B - 4))
+
+    ground_l = (f'    <rect x="0" y="{APRON}" width="1280" height="{722 - APRON}" '
+                f'fill="url(#imsgrass)"/>'
+                # mown stripes: an oval's infield and verges are always striped
+                + '<g fill="#569142" opacity="0.35">'
+                + ''.join(f'<path d="M{-40 + i * 150},{APRON} L{100 + i * 150},{APRON} '
+                          f'L{160 + i * 240},722 L{-140 + i * 240},722 Z"/>'
+                          for i in range(10)) + '</g>')
+
+    # --- the racing surface ---------------------------------------------------
+    track_svg = (
+        f'<rect x="-20" y="{TRACK_T}" width="1320" height="{TRACK_B - TRACK_T}" '
+        f'fill="url(#imstar)"/>'
+        f'<rect x="-20" y="{TRACK_T}" width="1320" height="3" fill="#e8ebee"/>'
+        f'<rect x="-20" y="{TRACK_B - 3}" width="1320" height="3" fill="#e8ebee"/>'
+        # the groove — the rubbered-in line the cars actually use
+        f'<rect x="-20" y="{TRACK_T + 30}" width="1320" height="26" fill="#54585c" '
+        f'opacity="0.55"/>'
+        # THE YARD OF BRICKS: one narrow strip, white line either side
+        + '<g id="yard-of-bricks" >'
+        + f'<rect x="{BRICK_X - 6}" y="{TRACK_T + 4}" width="5" '
+        f'height="{TRACK_B - TRACK_T - 8}" fill="#e8ebee"/>'
+        + f'<rect x="{BRICK_X}" y="{TRACK_T + 4}" width="46" '
+        f'height="{TRACK_B - TRACK_T - 8}" fill="#7d6f69"/>'
+        + '<g fill="#8d7b73">'
+        + ''.join(f'<rect x="{BRICK_X + 2 + (i % 4) * 11 + (i // 4 % 2) * 5:.0f}" '
+                  f'y="{TRACK_T + 6 + (i // 4) * 8}" width="9" height="6" rx="1"/>'
+                  for i in range(4 * 9))
+        + '</g>'
+        + f'<rect x="{BRICK_X + 47}" y="{TRACK_T + 4}" width="5" '
+        f'height="{TRACK_B - TRACK_T - 8}" fill="#e8ebee"/></g>')
+
+    stop_x = 430          # where the car in the box is standing
+    HOOKS = (
+        f'<path id="racing-line" d="M-80,{TRACK_T + 44} L1360,{TRACK_T + 40}" fill="none" '
+        f'stroke="none"/>'
+        f'<path id="pit-in-path" d="M1060,{TRACK_T + 42} Q1200,{TRACK_T + 20} '
+        f'1280,{PIT_T + 26}" fill="none" stroke="none"/>'
+        f'<path id="pit-lane-path" d="M1280,{PIT_T + 26} L-60,{PIT_T + 26}" fill="none" '
+        f'stroke="none"/>'
+        f'<path id="pit-out-path" d="M-60,{PIT_T + 26} Q40,{PIT_T + 34} '
+        f'160,{TRACK_T + 44}" fill="none" stroke="none"/>'
+        f'<circle id="pit-box-stop" cx="{stop_x}" cy="{PIT_T + 26}" r="1" fill="none" '
+        f'stroke="none"/>')
+
+    # --- the pit lane ---------------------------------------------------------
+    def pit_box(x, w, seed=3):
+        rr = rnd(seed)
+        out = [f'<rect x="{x}" y="{PIT_T + 6}" width="{w}" height="{PIT_B - PIT_T - 6}" '
+               f'fill="#75797e"/>',
+               f'<rect x="{x}" y="{PIT_T + 6}" width="3" height="{PIT_B - PIT_T - 6}" '
+               f'fill="#e8ebee"/>',
+               f'<rect x="{x + 10}" y="{PIT_B - 7}" width="{w - 20}" height="4" rx="2" '
+               f'fill="#f0c02b" opacity="0.85"/>']
+        for i in range(1 + int(rr() * 3)):
+            tx = x + 16 + i * (24 + rr() * 14)
+            hh = 8 + rr() * 8
+            out.append(f'<g>{shadow(tx, PIT_T + 15, 10, 3, 0.25)}'
+                       f'<rect x="{tx - 10}" y="{PIT_T + 14 - hh:.0f}" width="20" '
+                       f'height="{hh:.0f}" rx="3" fill="#2b3036"/>'
+                       f'<rect x="{tx - 10}" y="{PIT_T + 14 - hh:.0f}" width="20" '
+                       f'height="4" rx="2" fill="#454b51"/></g>')
+        out.append(f'<rect x="{x + w - 24}" y="{PIT_T - 2}" width="15" height="18" rx="3" '
+                   f'fill="#8b939a"/>')
+        # a plain awning in a flat colour over the back of the box, and a couple of
+        # people standing about in it: the lane is grey enough already
+        awn = ['#c1443a', '#2f5f9e', '#3f7a4a', '#f0c02b', '#5a4a6f'][int(rr() * 5)]
+        out.append(f'<rect x="{x + 6}" y="{PIT_T - 8}" width="{w - 40}" height="7" rx="3" '
+                   f'fill="{awn}"/>')
+        out.append(crewman(x + 62 + rr() * 30, PIT_B - 4, 0.5, awn, '#2b3036'))
+        out.append(crewman(x + 96 + rr() * 26, PIT_B - 7, 0.46, '#e8e2d8', awn))
+        return '<g>' + ''.join(out) + '</g>'
+
+    pit_l = ['<g id="pit-lane">',
+             f'<rect x="-20" y="{PIT_T}" width="1320" height="{PIT_B - PIT_T}" '
+             f'fill="#6f7276"/>',
+             f'<rect x="-20" y="{PIT_T}" width="1320" height="3" fill="#8b8f93"/>']
+    for i in range(8):
+        pit_l.append(pit_box(-40 + i * 172, 140, 3 + i))
+    pit_l.append('</g>')
+    pit_svg = ''.join(pit_l)
+
+    # --- the wheel change -----------------------------------------------------
+    pit_stop = ('<g id="pit-stop">'
+                + racer(stop_x, PIT_B - 5, 0.62, '#f0c02b', '#2f5f9e', 'cc-racer-pit')
+                + ''.join(crewman(stop_x + dx, PIT_B - 3, 0.76, s, t, up) for dx, s, t, up in
+                          [(-52, '#f0c02b', '#2f5f9e', False),
+                           (-34, '#2f5f9e', '#f0c02b', False),
+                           (34, '#f0c02b', '#2f5f9e', False),
+                           (54, '#2f5f9e', '#f0c02b', False),
+                           (76, '#c1443a', '#2b3036', True)])
+                # the spare wheel waiting, and the fuel hose
+                + f'<g>{shadow(stop_x + 88, PIT_B - 2, 11, 3, 0.25)}'
+                f'<rect x="{stop_x + 77}" y="{PIT_B - 19}" width="22" height="16" rx="4" '
+                f'fill="#2b3036"/>'
+                f'<rect x="{stop_x + 77}" y="{PIT_B - 19}" width="22" height="5" rx="2" '
+                f'fill="#454b51"/></g>'
+                + f'<path d="M{stop_x + 62},{PIT_B - 16} Q{stop_x + 86},{PIT_B - 30} '
+                f'{stop_x + 104},{PIT_T + 10}" stroke="#2b3036" stroke-width="3.5" '
+                f'fill="none" stroke-linecap="round"/>'
+                + '</g>')
+
+    # --- the pit wall, in front of the lane ------------------------------------
+    wall_svg = (f'<g id="pit-wall">'
+                f'<rect x="-20" y="{WALL_Y}" width="1320" height="8" fill="#f2f4f6"/>'
+                f'<rect x="-20" y="{WALL_Y + 6}" width="1320" height="3" fill="#c6cbd0"/>'
+                + '<g>' + ''.join(
+                    f'<rect x="{x}" y="{WALL_Y - 3}" width="30" height="4" rx="2" '
+                    f'fill="{"#c1443a" if (x // 104) % 2 else "#2f5f9e"}"/>'
+                    for x in range(-16, 1300, 104)) + '</g></g>')
+
+    # --- cars running the straight --------------------------------------------
+    RACE = [(120, '#c1443a', '#f0d16a'), (300, '#2f5f9e', '#e8ebee'),
+            (452, '#e8e6e2', '#c1443a'), (626, '#3f7a4a', '#f0d16a'),
+            (782, '#f0c02b', '#2b3036'), (1104, '#5a4a6f', '#e8ebee')]
+    racers = '<g id="pack">' + ''.join(
+        racer(x, TRACK_T + 48 + (i % 3) * 13, 0.62 + (i % 3) * 0.03, b, t, f'cc-racer-{i}')
+        for i, (x, b, t) in enumerate(RACE)) + '</g>'
+
+    # --- the catch fence, standing between us and the track --------------------
+    def catch_fence(y_base, h, x0=-20, x1=1300, step=54, gap=None):
+        """The fence has to be *suggested*. Drawn at full strength the mesh turns into a
+        cage over the whole picture and the cars behind it go grey — which is exactly what
+        a camera sees and exactly what an illustration must not do."""
+        inside = (lambda x: gap and gap[0] - step < x < gap[1])
+        posts = ''.join(f'<rect x="{x}" y="{y_base - h}" width="3" height="{h}" '
+                        f'fill="#98a0a6" opacity="0.85"/>'
+                        for x in range(x0, x1, step) if not inside(x))
+        mesh = ('<g stroke="#c6ced3" stroke-width="0.7" opacity="0.22">'
+                + ''.join(f'<line x1="{x0}" y1="{y_base - h + i * h / 4:.0f}" x2="{x1}" '
+                          f'y2="{y_base - h + i * h / 4:.0f}"/>' for i in range(1, 4))
+                + ''.join(f'<line x1="{x}" y1="{y_base - h}" x2="{x}" y2="{y_base}"/>'
+                          for x in range(x0, x1, 26) if not inside(x)) + '</g>')
+        if gap:
+            # the gate the road runs up to: heavier posts, a top rail across, and the
+            # mesh interrupted between them. A road has to END at something.
+            g0, g1 = gap
+            mesh = mesh.replace('x1="%d"' % x0, 'x1="%d"' % x0)
+            gatework = (f'<g id="spectator-gate">'
+                        f'<rect x="{g0 - 5}" y="{y_base - h - 6}" width="10" '
+                        f'height="{h + 6}" rx="3" fill="#7f868c"/>'
+                        f'<rect x="{g1 - 5}" y="{y_base - h - 6}" width="10" '
+                        f'height="{h + 6}" rx="3" fill="#7f868c"/>'
+                        f'<rect x="{g0 - 8}" y="{y_base - h - 14}" width="{g1 - g0 + 16}" '
+                        f'height="11" rx="4" fill="#6c7278"/>'
+                        f'<rect x="{g0 - 8}" y="{y_base - h - 14}" width="{g1 - g0 + 16}" '
+                        f'height="4" rx="2" fill="#9aa0a4"/>'
+                        f'<g stroke="#98a0a6" stroke-width="2.5">'
+                        f'<line x1="{g0 + 6}" y1="{y_base - 12}" x2="{g0 + 46}" '
+                        f'y2="{y_base - 12}"/>'
+                        f'<line x1="{g1 - 46}" y1="{y_base - 12}" x2="{g1 - 6}" '
+                        f'y2="{y_base - 12}"/></g></g>')
+        else:
+            gatework = ''
+        cap = (f'<rect x="{x0}" y="{y_base - h - 5}" width="{x1 - x0}" height="5" '
+               f'rx="2" fill="#7f868c"/>' if not gap else
+               f'<rect x="{x0}" y="{y_base - h - 5}" width="{gap[0] - x0}" height="5" '
+               f'rx="2" fill="#7f868c"/>'
+               f'<rect x="{gap[1]}" y="{y_base - h - 5}" width="{x1 - gap[1]}" height="5" '
+               f'rx="2" fill="#7f868c"/>')
+        return f'<g id="catch-fence">{mesh}{posts}{cap}{gatework}</g>'
+
+    # --- where the road ends: the spectator gate in the perimeter fence --------
+    def perimeter(y, gap0, gap1):
+        """The fence round the outside of the grounds. It runs along the top of the
+        near lawn, so the road ends AT it rather than trailing off into grass."""
+        out = ['<g id="perimeter">']
+        for x0, x1 in [(-20, gap0), (gap1, 1300)]:
+            out.append('<g stroke="#c6ced3" stroke-width="0.9" opacity="0.55">'
+                       + ''.join(f'<line x1="{x0}" y1="{y - 30 + i * 7}" x2="{x1}" '
+                                 f'y2="{y - 30 + i * 7}"/>' for i in range(5)) + '</g>')
+            out.append('<g fill="#98a0a6">'
+                       + ''.join(f'<rect x="{x}" y="{y - 33}" width="3.5" height="33"/>'
+                                 for x in range(int(x0), int(x1), 46)) + '</g>')
+            out.append(f'<rect x="{x0}" y="{y - 36}" width="{x1 - x0}" height="4" rx="2" '
+                       f'fill="#7f868c"/>')
+        out.append('</g>')
+        return ''.join(out)
+
+    def gate(cx, y):
+        """The road has to end at something. Here it ends at a gate in the perimeter
+        fence — two ticket booths, a swing gate and a line of people queueing, which is
+        exactly what an oval's outer boundary looks like on race morning."""
+        out = ['<g id="spectator-gate">']
+        for dx in (-172, 168):
+            out.append(f'<g transform="translate({cx + dx},{y})">'
+                       f'{shadow(0, 2, 26, 6, 0.2)}'
+                       f'<rect x="-24" y="-40" width="48" height="40" rx="3" '
+                       f'fill="#e2ded2"/>'
+                       f'<rect x="-24" y="-40" width="48" height="7" fill="#c1443a"/>'
+                       f'<rect x="-28" y="-47" width="56" height="8" rx="3" '
+                       f'fill="#8b939a"/>'
+                       f'<rect x="-16" y="-30" width="32" height="14" rx="2" '
+                       f'fill="#39566b"/></g>')
+        out.append(f'<g stroke="#8b939a" stroke-width="4">'
+                   f'<line x1="{cx - 74}" y1="{y}" x2="{cx - 74}" y2="{y - 44}"/>'
+                   f'<line x1="{cx + 72}" y1="{y}" x2="{cx + 72}" y2="{y - 44}"/></g>')
+        out.append(f'<rect x="{cx - 78}" y="{y - 52}" width="154" height="9" rx="4" '
+                   f'fill="#6c7278"/>')
+        out.append(f'<rect x="{cx - 78}" y="{y - 52}" width="154" height="3" rx="1.5" '
+                   f'fill="#9aa0a4"/>')
+        out.append('</g>')
+        return ''.join(out)
+
+    def access_road(cx=640):
+        """Where the road actually goes.
+
+        A road that stops at a gate in a fence begs the question, and the honest answer at
+        a circuit is that this is the **track access road**: the gate is how cars get out
+        onto the tarmac. So the carriageway carries on through the opening as a paved apron
+        running up onto the racing surface, chevrons down its edges, with the barrier arm
+        currently up and a car already half way out onto the circuit."""
+        top, bot = TRACK_B - 24, ROAD_TOP + 2
+        out = ['<g id="access-road">',
+               f'<path d="M{cx - 88},{bot} L{cx + 88},{bot} L{cx + 50},{top} '
+               f'L{cx - 50},{top} Z" fill="#6a6d71"/>',
+               f'<path d="M{cx - 88},{bot} L{cx - 76},{bot} L{cx - 43},{top} '
+               f'L{cx - 50},{top} Z" fill="#e8ebee" opacity="0.85"/>',
+               f'<path d="M{cx + 88},{bot} L{cx + 76},{bot} L{cx + 43},{top} '
+               f'L{cx + 50},{top} Z" fill="#e8ebee" opacity="0.85"/>']
+        out.append(crewman(cx - 118, ROAD_TOP + 8, 1.0, '#f0c02b', '#2b3036', True))
+        out.append(f'<g transform="translate({cx + 26},{TRACK_B - 14})">'
+                   + racer(0, 0, 0.46, '#e8e6e2', '#c1443a', 'cc-racer-entering')
+                   + '</g>')
+        out.append('</g>')
+        return ''.join(out)
+
+    back = ('    ' + garages() + pit_svg + pit_stop + wall_svg
+            + track_svg + HOOKS + racers
+            + f'<rect x="-20" y="{TRACK_B}" width="1320" height="{APRON - TRACK_B}" '
+            f'fill="{GRASS2}"/>'
+            + access_road()
+            + catch_fence(TRACK_B + 2, 56, gap=(556, 726))
+            )
+
+    # the near side: the spectator lawn outside the fence
+    def paddock(x, y, s, body, trim, face_right=False, gid=''):
+        """A race car waiting in the queue for the access gate. Drawn at the SAME depth
+        rule as the people standing next to it: an open-wheel car is about two and a half
+        times a person long and a little over half a person tall, and the first version of
+        this scene got that badly wrong — the spectators towered over the cars."""
+        inner = racer(0, 0, s, body, trim, gid)
+        flip = ' scale(-1,1)' if face_right else ''
+        return f'<g transform="translate({x},{y}){flip}">{inner}</g>'
+
+    LINEUP = [(134, 594, '#c1443a', '#f0d16a'), (290, 594, '#2f5f9e', '#e8ebee'),
+              (438, 596, '#3f7a4a', '#f0d16a'), (158, 674, '#f0c02b', '#2b3036'),
+              (348, 678, '#e8e6e2', '#c1443a')]
+    LINEUP_R = [(848, 596, '#5a4a6f', '#e8ebee'), (998, 594, '#c1443a', '#e8ebee'),
+                (1150, 594, '#2f5f9e', '#f0d16a'), (952, 678, '#3f7a4a', '#e8ebee'),
+                (1140, 674, '#f0c02b', '#2b3036')]
+    front = ('    <g fill="#4d8a3c" opacity="0.4">'
+             '<path d="M-20,556 Q140,536 300,562 Q420,584 340,614 Q180,636 -20,612 Z"/>'
+             '<path d="M900,548 Q1060,530 1220,556 Q1300,572 1300,606 L920,600 Z"/></g>'
+             # the two queues waiting their turn, noses toward the gate
+             + '<g id="paddock-left">'
+             + ''.join(paddock(x, y, 0.72 + (y - 596) / 500.0, b, t, True)
+                       for x, y, b, t in LINEUP) + '</g>'
+             + '<g id="paddock-right">'
+             + ''.join(paddock(x, y, 0.72 + (y - 596) / 500.0, b, t, False)
+                       for x, y, b, t in LINEUP_R) + '</g>'
+             # the crews standing about with them
+             + ''.join(crewman(x, y, sc, sh, tr, up) for x, y, sc, sh, tr, up in
+                       [(218, 602, 0.95, '#f0c02b', '#2f5f9e', False),
+                        (372, 602, 0.9, '#2f5f9e', '#e8e6e2', True),
+                        (252, 682, 1.05, '#c1443a', '#2b3036', False),
+                        (930, 602, 0.95, '#e8e6e2', '#c1443a', False),
+                        (1076, 600, 0.9, '#f0c02b', '#2f5f9e', True),
+                        (1046, 684, 1.05, '#2f5f9e', '#e8e6e2', False)]))
+
+    fg = ('    ' + ''.join(tree(x, y, s) for x, y, s in
+                           [(34, 720, 1.55), (1248, 720, 1.55)])
+          + ''.join(crewman(x, y, s, sh, tr, up) for x, y, s, sh, tr, up in
+                    [(330, 660, 1.25, '#c1443a', '#2b3036', False),
+                     (372, 676, 1.2, '#f0c02b', '#2f5f9e', True),
+                     (404, 662, 0.95, '#2f5f9e', '#e8e6e2', False),
+                     (884, 664, 1.25, '#2f5f9e', '#e8e6e2', False),
+                     (930, 682, 1.3, '#e8e6e2', '#c1443a', True),
+                     (962, 664, 1.0, '#f0c02b', '#2b3036', False)]))
+
+    scene('indianapolis',
+          'INDIANAPOLIS, INDIANA — the main straight, the pit lane and the yard of bricks', {
+        'sky': sky_l,
+        'far': far_l,
+        'ground': ground_l,
+        'scenery-back': back,
+        'scenery-front': front,
+        'foreground': fg,
+        'roadkw': dict(surface='#6a6a6f', surface2='#54545a', shoulder='#d8d2b4',
+                       dash='#ffe066', top=ROAD_TOP),
+        'trackkw': dict(ballast='#a98c68', ballast_hi='#bb9d76', tie='#6b4a2a',
+                        rail='#d3d7dc'),
+    }, d)
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')
