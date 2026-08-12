@@ -16878,8 +16878,18 @@ def indianapolis():
     # lane was sliced in half every time it passed the gate — the apron runs up
     # onto the racing surface and simply covered it. The catch fence stays last,
     # because that genuinely is in front of everything.
+    # WHERE THE ROAD GOES NEXT: onto the circuit. The access road is not a dead
+    # end — it is how cars get onto the tarmac — so traffic turns out onto the
+    # middle racing lane (407) and runs east with the pack, and cars joining come
+    # along the track from the west and turn down the access road. "east"
+    # because both share the one lane, same as Ketchum's cross street.
+    # y1 must sit ON the tarmac. The road ends at 432, and a car is removed the
+    # moment it passes that, so a trigger at 428 fired one pixel too late and
+    # every car was deleted before it could turn. 440 is safely on the road.
+    EXIT_MARK = '<g class="cc-road-exit" data-exit="386,440,640,east"></g>'
+
     back = ('    ' + garages() + pit_svg + pit_stop + wall_svg
-            + track_svg + HOOKS
+            + track_svg + HOOKS + EXIT_MARK
             + f'<rect x="-20" y="{TRACK_B}" width="1320" height="{APRON - TRACK_B}" '
             f'fill="{GRASS2}"/>'
             + access_road()

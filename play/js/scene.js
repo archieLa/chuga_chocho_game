@@ -80,11 +80,55 @@
     return g;
   }
 
+  /** The SAME car seen from the side, for when it leaves the access road and
+      joins the circuit. Two reasons it cannot just be the top-down sprite turned
+      a quarter, the way Crater Lake's side road does it: the track is drawn in
+      profile, so a plan view among side-on cars reads as a different game; and
+      the pack is 101px long on screen where a road car is only 44, so it has to
+      be drawn about 280 units long to arrive the right size.
+
+      Origin is the WHEEL LINE, not the middle, so a car placed at the lane's y
+      stands on the same ground as the pack. */
+  function buildRaceCarSide(colour) {
+    const g = el('g', { class: 'cc-car-side' });
+    const dark = colour === '#e8e8ee' ? '#c9c9d4' : colour;
+    g.appendChild(el('ellipse', { cx: 0, cy: -2, rx: 118, ry: 11, fill: '#000', opacity: 0.22 }));
+    // floor and sidepods
+    g.appendChild(el('path', { fill: colour,
+      d: 'M-116,-22 L112,-22 L112,-38 L56,-42 L20,-64 L-32,-64 L-56,-42 L-116,-38 Z' }));
+    g.appendChild(el('path', { fill: dark, opacity: 0.55, d: 'M-64,-42 L40,-42 L40,-60 L-24,-60 L-52,-46 Z' }));
+    // airbox and halo
+    g.appendChild(el('path', { fill: colour, d: 'M-32,-64 L12,-64 L4,-88 L-20,-88 Z' }));
+    g.appendChild(el('ellipse', { cx: -36, cy: -64, rx: 18, ry: 10, fill: '#2b3036' }));
+    g.appendChild(el('circle', { cx: -36, cy: -72, r: 10, fill: '#e8e2d8' }));
+    g.appendChild(el('path', { d: 'M-60,-68 Q-36,-92 -12,-68', stroke: '#2b3036', 'stroke-width': 6, fill: 'none' }));
+    // wings: front low at the right, rear tall at the left
+    g.appendChild(el('rect', { x: 108, y: -30, width: 44, height: 10, rx: 4, fill: dark }));
+    g.appendChild(el('rect', { x: -152, y: -96, width: 52, height: 12, rx: 4, fill: dark }));
+    g.appendChild(el('rect', { x: -128, y: -94, width: 10, height: 62, fill: colour }));
+    [[-84, 32], [80, 36]].forEach(([cx, r]) => {
+      g.appendChild(el('circle', { cx: cx, cy: -r + 2, r: r, fill: '#22262b' }));
+      g.appendChild(el('circle', { cx: cx, cy: -r + 2, r: r * 0.38, fill: '#4a5058' }));
+    });
+    return g;
+  }
+
   function buildCar(colour, dir) {
     // Some roads carry something other than saloons. Indianapolis's is the
     // circuit access road, and the art says so with data-cars on the
     // carriageway; everything downstream of here is identical either way.
-    if (currentScene && currentScene.carStyle === 'race') return buildRaceCar(colour, dir);
+    if (currentScene && currentScene.carStyle === 'race') {
+      // Both sprites live in the car from the start and one is shown at a time —
+      // cheaper and far less fiddly than rebuilding the element mid-journey.
+      const g = el('g', { class: 'cc-car' });
+      const top = buildRaceCar(colour, dir);
+      top.setAttribute('class', 'cc-car-top');
+      g.appendChild(top);
+      const side = buildRaceCarSide(colour);
+      side.setAttribute('visibility', 'hidden');
+      g.appendChild(side);
+      return g;
+    }
     // data-dir is for testing as much as anything: "no car may cross a closed
     // gate" is only checkable from outside if you can tell the two lanes apart.
     const g = el('g', { class: 'cc-car', 'data-dir': dir });
@@ -325,9 +369,11 @@
         // easily; Ketchum's cross street is barely 30 and does not, so the two
         // streams drove through each other. Where they will not fit, the street
         // runs one way and nothing arrives along it.
-        const sep = roadExit.laneOut - roadExit.laneIn;
-        // 89, not 72: a car's widest points are its wheels.
-        roadExit.twoWay = sameDir || sep > 89 * depthScale(roadExit.laneOut);
+        // The engine used to MEASURE whether two lanes fit and quietly drop to
+        // one where they did not. It was a stopgap for Ketchum, which now says
+        // "east" outright — and it silently broke Rim Drive the moment the car
+        // width was corrected from 72 to 89, taking its inbound traffic away
+        // with no error anywhere. The art decides; the engine does not guess.
       }
     }
 
@@ -2375,7 +2421,7 @@
     const at = down ? top + 4 : H + 120;
     // Where the road turns, traffic coming toward us has driven in along the side
     // road rather than materialising at the end of ours.
-    if (down && ex && ex.twoWay) {
+    if (down && ex) {
       const car = newCar(1, ex.laneIn);
       // 'approach' comes in from the WEST and drives east to the junction;
       // 'enter' comes from the east and drives west to it.
@@ -2419,7 +2465,16 @@
     // quarter. Both directions want the SAME +90: an outbound car carries a
     // nose-up sprite and ends up pointing east, an inbound one carries nose-down
     // and ends up pointing west, which is exactly right.
-    const turn = car.phase === 'road' ? '' : ' rotate(90)';
+    // A car on the circuit is drawn in profile, so it must NOT be turned a
+    // quarter the way a car on an ordinary side road is.
+    const onTrack = car.phase !== 'road' && currentScene && currentScene.carStyle === 'race';
+    if (currentScene && currentScene.carStyle === 'race') {
+      const top = car.el.querySelector('.cc-car-top');
+      const side = car.el.querySelector('.cc-car-side');
+      if (top) top.setAttribute('visibility', onTrack ? 'hidden' : 'visible');
+      if (side) side.setAttribute('visibility', onTrack ? 'visible' : 'hidden');
+    }
+    const turn = (car.phase === 'road' || onTrack) ? '' : ' rotate(90)';
     car.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + car.y.toFixed(1) + ')' + turn + ' scale(' + s.toFixed(3) + ')');
     // Fade over the last stretch before the road's far end. At the horizon a car
     // is tiny and this is invisible; on a truncated road it is what stops a

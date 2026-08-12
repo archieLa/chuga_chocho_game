@@ -52,6 +52,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Spinner** — a wheel turning about its own hub | `.cc-spin` with `data-secs` and `data-cx`/`data-cy` (the hub, in the vehicle's OWN local coordinates, so it survives its parent being moved or mirrored). Unlike `.cc-ferris` it keeps nothing level — turning is the point. | the New Orleans paddlewheel |
 | **Swarm** — a cloud that boils | `.cc-swarm` on a parent whose direct `<g>` children are opacity bands with the individuals **interleaved** between them. The engine drifts the bands against each other, so every individual moves relative to its neighbours. | the Austin bats |
 | **Chase** — bulbs lighting in sequence | `.cc-chase` with `data-rate` (bulbs per second) on a group of bulb elements | the Las Vegas neon |
+| **Where the road goes next** | `.cc-road-exit` with `data-exit="farEdgeY,nearEdgeY,junctionX"`, plus an optional 4th token `east`. Without it the side road runs two opposed lanes (Rim Drive). With it BOTH streams run east in one lane — off the carriageway and away, and in from the far west then right onto the carriageway — which is the only way a narrow street can carry two directions. `nearEdgeY` must sit ON the tarmac, or the car is deleted at the road's end before it can turn. | Crater Lake, Sun Valley, Indianapolis |
 | **Where the road ends** | `class="cc-road"` on the carriageway polygon — the engine reads its far edge | every scene |
 
 Two traps, both already paid for once:
@@ -80,6 +81,14 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **Let the ART decide, not a measurement.** The engine used to work out whether
+  two lanes would fit and quietly drop to one where they would not. It was a
+  stopgap, and the moment the car's assumed width was corrected from 72 to 89 it
+  silently took Rim Drive's inbound traffic away — no error, nothing in the
+  console, just a scene quietly doing less than it used to. Scenes say what they
+  are; the engine does what it is told.
+- **A car's widest point is its WHEELS**, at ±44, not the 72 of its body. That is
+  what has to fit on a side road, and what made Ketchum's 24px street too narrow.
 - **Two lanes only if two lanes fit.** A car on a side road is turned a quarter,
   so what has to clear is its WIDTH. Rim Drive is a 56px band and clears it;
   Ketchum's cross street is barely 30 and does not, so the two streams drove
