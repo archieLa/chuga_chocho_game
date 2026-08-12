@@ -16194,11 +16194,13 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
               f'fill="none" stroke="none"/>'
               + f'<path id="turn-left-path" d="M668,388 Q636,378 588,{STREET_Y}" '
               f'fill="none" stroke="none"/>'
-              + ''.join(driving(x, STREET_Y, 0.34, c, fl, f'cc-car-{i}')
-                        for i, (x, c, fl) in enumerate(
-                            [(148, '#c1443a', False), (432, '#2f5f9e', True),
-                             (612, '#e8e6e2', True), (912, '#3f4a52', False),
-                             (1176, '#6f6157', False)]))
+              # No parked traffic on the cross street any more. Five static cars sat
+              # on it while live ones drove up to the junction and vanished, which is
+              # the same thing that looked like a bug at Crater Lake. The engine turns
+              # real cars onto it instead: data-exit is "farEdgeY,nearEdgeY,junctionX",
+              # and 380 is just short of where the tarmac stops (378) so a car turns
+              # rather than fading a few pixels later.
+              + f'<g class="cc-road-exit" data-exit="364,380,668"></g>'
               + plough(756, STREET_B - 2, 0.14, 'cc-plough-far')
               + f'<rect x="0" y="{STREET_B - 3}" width="1280" height="8" fill="#f2f8fe"/>'
               + '</g>')
@@ -16292,7 +16294,10 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
             'Q10,674 -20,664 Z" fill="#ffffff" stroke="#cfdff0" stroke-width="2"/>'
           # the line the plough is working: it clears the verge up to the carriageway
           # and no further, so an animated pass never crosses the road
-          + '<path id="plough-path" d="M-180,706 Q60,672 300,678 Q400,682 452,690" '
+          # It used to run to 452, and the plough is wide enough that it climbed
+          # onto the carriageway at that end. The road spans 517..763 at this
+          # height; stopping at 300 keeps the whole machine clear of it.
+          + '<path id="plough-path" d="M-180,706 Q60,672 300,678" '
             'fill="none" stroke="none"/>'
           + plough(322, 678, 1.0)
           + ''.join(aspen(x, y, s, h, 21 + i) for i, (x, y, s, h) in enumerate(
@@ -16839,7 +16844,9 @@ def indianapolis():
                f'L{cx + 50},{top} Z" fill="#e8ebee" opacity="0.85"/>']
         out.append(crewman(cx - 118, ROAD_TOP + 8, 1.0, '#f0c02b', '#2b3036', True))
         out.append(f'<g transform="translate({cx + 26},{TRACK_B - 14})">'
-                   + racer(0, 0, 0.46, '#e8e6e2', '#c1443a', 'cc-racer-entering')
+                   # No car parked in the gateway. It read as abandoned rather than
+                   # as arriving, and the live traffic now drives out through here.
+                   + ''
                    + '</g>')
         out.append('</g>')
         return ''.join(out)

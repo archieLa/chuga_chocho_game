@@ -1649,7 +1649,12 @@
   // FURTHER from the viewer than the racing line, so the car shrinks on the way
   // in and grows on the way out; interpolate the scale with the position or it
   // appears to swell as it drives away.
+  // The cars are drawn NOSE-LEFT: the front wing sits at x=-76 and the rear
+  // wing and its endplate at x=52..80. Everything here runs them left to right,
+  // so they are mirrored — without it the whole field drives backwards, which is
+  // exactly how it shipped.
   const RACE = { lo: -140, hi: 1420 };
+  const faceX = (s, goingRight) => (goingRight ? -s : s);
   const PIT = {
     entry: 1060,      // where it peels off the racing line
     lane: 0.50,       // scale in the pit lane, against 0.62 on the track
@@ -1709,7 +1714,7 @@
       c.x += c.speed * secs;
       if (c.x > RACE.hi) c.x = RACE.lo;
       c.el.setAttribute('transform',
-        'translate(' + c.x.toFixed(1) + ',' + c.y + ') scale(' + c.s + ')');
+        'translate(' + c.x.toFixed(1) + ',' + c.y + ') scale(' + faceX(c.s, true) + ',' + c.s + ')');
     });
     if (!pit) return;
 
@@ -1752,8 +1757,12 @@
           step[0] === 'off' ? (1 - u).toFixed(2) : step[0] === 'on' ? u.toFixed(2) : '1');
       }
     }
+    // Down the slip road and back out again it is going right; up the lane and
+    // standing in the box it faces left, which is the way it will leave.
+    const goingRight = step[0] === 'in' || step[0] === 'out';
     c.el.setAttribute('transform',
-      'translate(' + x.toFixed(1) + ',' + (y + lift).toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+      'translate(' + x.toFixed(1) + ',' + (y + lift).toFixed(1) + ') scale(' +
+      faceX(s, goingRight).toFixed(3) + ',' + s.toFixed(3) + ')');
 
     if (u >= 1) {
       pit.step++;
@@ -2397,8 +2406,15 @@
     // Fade only applies to the carriageway. A car that has turned onto the side
     // road sits just above the road's end by y, and would otherwise be dimmed
     // for its whole run along a road it is legitimately driving on.
+    // And where the road HAS somewhere to go, there is nothing to fade for: every
+    // car either turns off at the junction or arrives from it, so none of them
+    // ever reaches the end. Sun Valley's cross street sits 7px past the tarmac,
+    // well inside the 46px fade, so cars were turning onto it at 7% opacity and
+    // running the street invisible. Crater Lake never showed this because its
+    // junction is 64px clear of the road's end.
+    const fades = car.phase === 'road' && !(currentScene && currentScene.roadExit);
     car.el.setAttribute('opacity',
-      car.phase === 'road' ? clamp((car.y - top) / CAR_FADE, 0, 1).toFixed(2) : '1');
+      fades ? clamp((car.y - top) / CAR_FADE, 0, 1).toFixed(2) : '1');
     // A car past the middle of the tracks is in front of the train; before it,
     // behind. Reparent only when that actually changes.
     const near = car.y > CROSS_MID;
@@ -2518,8 +2534,15 @@
       placeCar(car);
       // Gone once it reaches the end of the tarmac (it has already faded to
       // nothing by then) or has driven off the bottom of the frame.
+      //
+      // ONLY ON THE CARRIAGEWAY. A car that has turned onto a side road is not
+      // finished with, and at Sun Valley the cross street lies ABOVE the road's
+      // far end, so this deleted every car the moment it turned — the junction
+      // worked perfectly and nothing was ever seen using it. A side-road car
+      // ends on car.dead instead, when it runs off the frame.
       const top = currentScene ? currentScene.roadTop : HORIZON;
-      if (car.dead || car.y < top || car.y > H + 170) {
+      const offTarmac = car.phase === 'road' && car.y < top;
+      if (car.dead || offTarmac || car.y > H + 170) {
         if (car.el.parentNode) car.el.parentNode.removeChild(car.el);
         cars.splice(i, 1);
       }

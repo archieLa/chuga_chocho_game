@@ -80,6 +80,13 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **Two things kill a car that has turned off a truncated road.** The fade over
+  the last 46px before the road's end, and the removal at `y < roadTop`. Sun
+  Valley's cross street is 7px PAST the tarmac, so cars turned onto it at 7%
+  opacity and were then deleted on the same frame — the junction worked
+  perfectly and nothing was ever seen using it. Both now apply only while a car
+  is still on the carriageway. Crater Lake never showed either because its
+  junction is 64px clear of the end.
 - **A class can be worn by more things than you think.** `.cc-racer` is on
   eighteen cars at Indianapolis, not the six on the straight: ten queue on the
   grass and one sits in the pit box. Animating on the class alone sent the whole
@@ -146,7 +153,7 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
-| Sun Valley | gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
+| Sun Valley | the game's own traffic turns onto the cross street at the junction · gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
 | Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
 | Moab | one jeep crawls up over the block and down its far face · another potters the bench |
 | Bluegrass | a thoroughbred canters the near paddock and pulls up at the fence |
