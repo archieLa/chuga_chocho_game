@@ -31,6 +31,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Canter** — an animal that runs on its own legs | `.cc-canter` with `data-run="from,to,y"`, `data-scale`, `data-speed`, `data-nose`; `.cc-canter-body` inside takes the bob so the shadow stays flat on the ground; each leg is a `.cc-leg` with `data-pivot="x,y"` at the joint it swings from. Stride is measured in DISTANCE, so the legs cannot pedal independently of the speed. | the Bluegrass thoroughbred |
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
 | **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
 | **Falling water** — a sheet that never stops | `.cc-fall` with `data-band` (the tile height) and `data-secs`. The art draws a band of streaks that TILES vertically and emits it twice, the second copy one band above the first; the engine slides the pair down by exactly one band and it loops with no seam. Clip it to the BROKEN part of the sheet, not the whole face — streaks scrolling over the glassy lip stop it reading as an edge. `.cc-foam` groups churn out of step at the base. | Quechee |
@@ -74,6 +75,15 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **Rigid legs need a SMALL swing.** The thoroughbred's knee and hock are drawn
+  into the path, so rotating a whole leg at the shoulder is a pendulum, not a
+  stride. 24 degrees read as a rocking horse; 13 reads as a horse. And no two
+  legs may sit near each other in phase — 0/0.5/0.12/0.62 put the near pair an
+  eighth of a stride behind the far pair, which the eye takes as both sides
+  moving together. Four beats, properly spread.
+- **Anything drawn at a fixed x inside a moving thing gets left behind.** The
+  horse's white socks are painted outside the leg groups, so on the runner they
+  hung in the air between her legs. She goes without them.
 - **A rising thing should shrink.** The Albuquerque launch balloons are 86×127px
   on the pitch. Carried up the frame at that size one would sit on top of the
   crossing; shrinking her to 0.3 over the climb is both what a balloon going away
@@ -110,7 +120,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (21 scenes)
+## What moves today (23 scenes)
 
 | Scene | What |
 |---|---|
@@ -122,6 +132,8 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
+| Moab | a jeep potters the slickrock bench, stopping to look |
+| Bluegrass | a thoroughbred canters the near paddock and pulls up at the fence |
 | Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
 | Oʻahu | three catamarans work the reef, each at its own pace |
@@ -140,15 +152,10 @@ Two traps, both already paid for once:
 
 ## Queued, best first
 
+The original queue is empty — everything on it has been built. What is left is
+the below-the-line list, and whatever the next scenes bring.
 
-**1. Moab — the jeep.** Moab is about offroading and the jeeps are drawn. Shuttle
-along the slickrock track. (Listed as "skip" in an earlier pass — wrong call, a
-vehicle is exactly what lands with the audience.)
 
-**2. Bluegrass — a thoroughbred canters** the paddock. Most of the horses are
-drawn grazing; the three with their heads up are the candidates. Mind the road —
-at the paddock's y the carriageway is 170px wide and anything crossing it slides
-BEHIND the tarmac.
 
 
 ---
