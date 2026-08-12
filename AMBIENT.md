@@ -85,6 +85,13 @@ Two traps, both already paid for once:
   sprite's nose follows `dir` — +1 faces the viewer, -1 faces away — so the
   quarter-turn has to be signed by both. A fixed `rotate(90)` was right for the
   only two cases that existed and sent the third down the street in reverse.
+- **`nearEdgeY` threads a 4px gap at Indianapolis.** Below the road's end the car
+  is deleted before it can turn; above its own stop line it cannot be held, so it
+  drives through a closed crossing. It has to be turnable AND stoppable.
+- **Traffic joining a circuit has to change speed.** It leaves the access road at
+  about 65px/s where the pack runs 210 and up, so it winds up to racing speed
+  going on and sheds it coming off. And it gets a lane of its own: the pack was
+  moved off the near lane, which is the one the access road arrives at.
 - **A car joining a road has to give way.** Turning onto the carriageway without
   looking put it straight on top of traffic already there.
 - **Let the ART decide, not a measurement.** The engine used to work out whether

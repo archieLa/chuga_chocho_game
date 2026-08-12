@@ -16760,7 +16760,10 @@ def indianapolis():
             (452, '#e8e6e2', '#c1443a'), (626, '#3f7a4a', '#f0d16a'),
             (782, '#f0c02b', '#2b3036'), (1104, '#5a4a6f', '#e8ebee')]
     racers = '<g id="pack">' + ''.join(
-        racer(x, TRACK_T + 48 + (i % 3) * 13, 0.62 + (i % 3) * 0.03, b, t, f'cc-racer-{i}')
+        # TWO LANES, NOT THREE. The near lane belongs to the traffic coming on and
+        # off the circuit through the access gate — that arrives from the near side,
+        # so the near lane is where it belongs — and the pack was running through it.
+        racer(x, TRACK_T + 48 + (i % 2) * 13, 0.62 + (i % 2) * 0.03, b, t, f'cc-racer-{i}')
         for i, (x, b, t) in enumerate(RACE)) + '</g>'
 
     # --- the catch fence, standing between us and the track --------------------
@@ -16883,10 +16886,12 @@ def indianapolis():
     # middle racing lane (407) and runs east with the pack, and cars joining come
     # along the track from the west and turn down the access road. "east"
     # because both share the one lane, same as Ketchum's cross street.
-    # y1 must sit ON the tarmac. The road ends at 432, and a car is removed the
-    # moment it passes that, so a trigger at 428 fired one pixel too late and
-    # every car was deleted before it could turn. 440 is safely on the road.
-    EXIT_MARK = '<g class="cc-road-exit" data-exit="386,440,640,east"></g>'
+    # y1 has to thread a 4px gap. Below 432 the car is deleted at the road's end
+    # before it can turn; above 436 it is past its own stop line, so a car coming
+    # OFF the circuit sailed through a closed crossing. 436 is both turnable and
+    # stoppable. The midpoint of the band is the lane, so y0 puts it on 420 — the
+    # near lane, which the pack has just vacated.
+    EXIT_MARK = '<g class="cc-road-exit" data-exit="404,436,640,east"></g>'
 
     back = ('    ' + garages() + pit_svg + pit_stop + wall_svg
             + track_svg + HOOKS + EXIT_MARK

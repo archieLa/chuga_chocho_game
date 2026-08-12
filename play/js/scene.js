@@ -2517,12 +2517,25 @@
       Rim Drive runs at a constant depth, so a car on it keeps one size and one
       y and simply tracks across — which is exactly how it looks from the rim.
       Returns true if it handled this car and the carriageway logic should skip it. */
+  // Joining a circuit is not like joining a lane of shops. A car comes off the
+  // access road at road pace — about 65px/s at that depth — where the pack runs
+  // at 210 and up, so it has to wind up to speed rather than trundle among them.
+  // Coming the other way it arrives at racing speed and has to shed it before
+  // the turn, which is what a slip road is for.
+  const RACE_JOIN = { top: 220, accel: 90, brakeOver: 340 };
+
   function driveSideRoad(car, secs) {
     const ex = currentScene && currentScene.roadExit;
     if (!ex) return false;
+    const onCircuit = currentScene.carStyle === 'race';
 
     if (car.phase === 'exit') {
-      car.x += car.speed * depthScale(car.y) * secs;
+      let v = car.speed * depthScale(car.y);
+      if (onCircuit) {                                   // wind up to racing speed
+        car.v = (car.v == null ? v : Math.min(RACE_JOIN.top, car.v + RACE_JOIN.accel * secs));
+        v = car.v;
+      }
+      car.x += v * secs;
       if (car.x > ex.toX) car.dead = true;
       return true;
     }
@@ -2536,7 +2549,13 @@
       // straight on top of anything coming up from the bottom of the frame; now
       // it holds at the junction until there is room, which is what the queue
       // behind it is for.
-      const want = car.x + car.speed * depthScale(car.y) * secs;
+      let v = car.speed * depthScale(car.y);
+      if (onCircuit) {                                   // arrive fast, brake for the turn
+        const togo = ROAD_CX - car.x;
+        const k = Math.max(0, Math.min(1, togo / RACE_JOIN.brakeOver));
+        v = v + (RACE_JOIN.top - v) * k;
+      }
+      const want = car.x + v * secs;
       if (want < ROAD_CX) { car.x = want; return true; }
       const blocked = cars.some(c => c.phase === 'road' &&
                                      Math.abs(c.y - ex.y1) < carGap(ex.y1));
