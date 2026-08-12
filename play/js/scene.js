@@ -2569,13 +2569,37 @@
       if (car.x <= ex.jx + 16) { car.phase = 'road'; car.x = null; car.y = ex.y1; }
       return true;
     }
-    // Going away from the viewer and has reached the junction: turn right.
+    // Going away from the viewer and has reached the junction: turn right —
+    // but only into a space. It used to appear on the side road regardless, and
+    // where a car was already sitting at the junction waiting to turn down, the
+    // new one materialised about 19px in front of it while the queue wants 47.
+    // The gap was then made by moving the one BEHIND, so both slid west for a
+    // moment before the waiting one turned. It gives way instead.
     if (car.dir < 0 && car.y <= ex.y1) {
+      // It used to appear on the side road at a fixed spot regardless, and where
+      // a car was already sitting at the junction waiting to turn down, the new
+      // one materialised about 19px in front of it while the queue wants 47 —
+      // and the gap was then made by moving the one BEHIND, so both slid west
+      // for a moment.
+      //
+      // Refusing to turn until the junction was clear deadlocked it instead: the
+      // waiting car cannot turn down until the carriageway clears, and it was
+      // blocking the only way off the carriageway. So it pulls out AHEAD of
+      // anything stationary there, which is what a car turning right past a
+      // queue actually does.
+      const gap = carGap(ex.laneOut);
+      let spot = ROAD_CX + roadHalf(ex.laneOut) * 0.5;
+      cars.forEach(c => {
+        if (c === car || (c.phase !== 'exit' && c.phase !== 'approach')) return;
+        if (c.x > spot - gap && c.x < spot + gap * 2) spot = Math.max(spot, c.x + gap);
+      });
+      car.holdY = null;
       car.phase = 'exit';
       car.y = ex.laneOut;
-      car.x = ROAD_CX + roadHalf(car.y) * 0.5;
+      car.x = spot;
       return true;
     }
+    car.holdY = null;
     return false;
   }
 
@@ -2609,6 +2633,9 @@
     // has to stop behind — the gate for the leader, the car ahead for the rest.
     // Side-road traffic first: a car that has turned off is no longer part of
     // the carriageway queue and must not be given a stop line on it.
+    // Where everything was before this frame moved it. The queue uses it to
+    // hold a car rather than shove it backwards — see below.
+    cars.forEach(car => { car.x0 = car.x; });
     cars.forEach(car => { car.offRoad = driveSideRoad(car, secs); });
     // Rim Drive is a queue too. Without this, two cars released together at the
     // gate turn together and then sit 7px apart the whole way across.
@@ -2623,6 +2650,11 @@
       lane.forEach(c => {
         const gap = 150 * depthScale(c.y);
         if (limit != null) c.x = east ? Math.min(c.x, limit) : Math.max(c.x, limit);
+        // KEEPING A GAP CAN HOLD A CAR, NEVER SHOVE IT BACKWARDS. If the one in
+        // front appeared closer than the gap — which is exactly what a car
+        // turning out of the junction does — capping the follower dragged it the
+        // wrong way up the street for a frame or two.
+        if (c.x0 != null) c.x = east ? Math.max(c.x, c.x0) : Math.min(c.x, c.x0);
         limit = east ? c.x - gap : c.x + gap;
       });
     });
@@ -2644,6 +2676,8 @@
           want = dir > 0 ? Math.min(want, stopLine) : Math.max(want, stopLine);
         }
         if (limit != null) want = dir > 0 ? Math.min(want, limit) : Math.max(want, limit);
+        // A car held at the junction for a gap on the side road.
+        if (car.holdY != null) want = dir > 0 ? Math.min(want, car.holdY) : Math.max(want, car.holdY);
         car.stopped = Math.abs(want - car.y) < step * 0.4;
         car.y = want;
         limit = car.y - dir * carGap(car.y);

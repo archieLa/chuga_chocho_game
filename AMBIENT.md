@@ -92,6 +92,13 @@ Two traps, both already paid for once:
   about 65px/s where the pack runs 210 and up, so it winds up to racing speed
   going on and sheds it coming off. And it gets a lane of its own: the pack was
   moved off the near lane, which is the one the access road arrives at.
+- **Keeping a gap may HOLD a car, never shove it backwards.** If the one in front
+  appears closer than the gap — which is exactly what a car turning out of a
+  junction does — capping the follower drags it the wrong way up the street.
+- **Give way by going round, not by stopping.** Refusing to turn out until the
+  junction cleared deadlocked it: the car waiting to turn down cannot move until
+  the carriageway clears, and it was blocking the only way off the carriageway.
+  A car turning right pulls out AHEAD of stationary traffic instead.
 - **A car joining a road has to give way.** Turning onto the carriageway without
   looking put it straight on top of traffic already there.
 - **Let the ART decide, not a measurement.** The engine used to work out whether
