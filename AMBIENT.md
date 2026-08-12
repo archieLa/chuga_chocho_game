@@ -31,6 +31,9 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Ropeway** — a lift is a loop, not a line | Two ropes side by side, `#…-path-up` / `#…-path-down`, with cabins `#cc-<lift>-up-N` / `-down-N` carrying `data-t`. Driven in OPPOSITE directions or it reads as a one-way conveyor, and everything shrinks as it climbs — `0.95 − 0.5t`, which is exactly the rule the art was drawn to. | Sun Valley's gondola and chairlift |
+| **Ski run** — a line of turns, not a fall line | `.cc-skier` with `data-run`, `data-t`, `data-s`; the run itself is `<path id="run-path-N">` wandering inside its corridor. Scale `0.34 + 0.34t` because the bottom of a run is nearer, and the lean comes from the tangent. | Sun Valley |
+| **Race** — a pack that keeps its lanes, and a pit stop | `.cc-racer` ids `cc-racer-<n>` on the straight (the class alone also matches the paddock — select on the number); `<path id="pit-in-path">` / `pit-lane-path` / `pit-out-path`, `#pit-box-stop`, `.cc-racer-wheels` so they can come off, and `#cc-racer-pit` hidden while another car is in the stall. | Indianapolis |
 | **Station stop** — the train calls, people get on and off | `.cc-platform` with `data-stop` (the HEAD position — the head is the ENGINE, so aim it so a coach and not the loco ends up at the deck) and `data-dwell`; `.cc-passenger` figures with `data-stand="x,y"`, `data-door="x,y"`, `data-role="board"`/`"alight"`, `data-scale`. Every other train calls. **Not ambient** — it stops the gameplay train — but gate-blind like the shunt. | Cedar Point |
 | **Crawl** — a vehicle that follows the ground | `.cc-crawl` with `data-crawl="x,y x,y ..."` in scene coordinates, plus `data-scale`, `data-speed`, `data-nose`. Walks the polyline and takes its PITCH from the segment under it, measured left-to-right because the ground does not care which way you are driving. Read the points straight off the silhouette of whatever it climbs. | Moab's jeep on the block |
 | **Canter** — an animal that runs on its own legs | `.cc-canter` with `data-run="from,to,y"`, `data-scale`, `data-speed`, `data-nose`; `.cc-canter-body` inside takes the bob so the shadow stays flat on the ground; each leg is a `.cc-leg` with `data-pivot="x,y"` at the joint it swings from. Stride is measured in DISTANCE, so the legs cannot pedal independently of the speed. | the Bluegrass thoroughbred |
@@ -77,6 +80,10 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **A class can be worn by more things than you think.** `.cc-racer` is on
+  eighteen cars at Indianapolis, not the six on the straight: ten queue on the
+  grass and one sits in the pit box. Animating on the class alone sent the whole
+  paddock driving off across the infield. Select on what you actually mean.
 - **A platform has to ABUT the track.** Ten pixels of grass showing between the
   deck and the ballast and the passengers read as crossing a lawn rather than
   stepping off a platform onto a train. The track band ends at 516, so that is
@@ -127,7 +134,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (23 scenes)
+## What moves today (25 scenes)
 
 | Scene | What |
 |---|---|
@@ -139,6 +146,8 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
+| Sun Valley | gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
+| Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
 | Moab | one jeep crawls up over the block and down its far face · another potters the bench |
 | Bluegrass | a thoroughbred canters the near paddock and pulls up at the fence |
 | Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |

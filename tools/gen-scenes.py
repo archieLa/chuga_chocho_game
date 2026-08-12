@@ -28,7 +28,7 @@ TRACK_TOP, TRACK_BOT = 450, 516
 # ============================================================== FURNITURE ====
 
 def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe066',
-         top=HORIZON, junction=None):
+         top=HORIZON, junction=None, cars=None):
     """Perspective road: vanishing point on the horizon, so it recedes INTO the scene
     rather than slicing through it.
 
@@ -73,6 +73,10 @@ def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe06
         right_verge = (f'<polygon points="752,720 770,720 {rx:.0f},{top} {rsh:.0f},{top}" '
                        f'fill="{shoulder}" opacity="0.45"/>')
 
+    # A scene can say what KIND of traffic uses its road. Indianapolis's is the
+    # circuit access road, so what drives up it is race cars — see buildCar().
+    carsattr = f' data-cars="{cars}"' if cars else ''
+
     dashes = [(704, 660), (626, 590), (560, 532), (392, 368), (352, 336)]
     coords = {704: (634, 646, 645, 635), 626: (636, 644, 643, 637),
               560: (637, 643, 642, 638), 392: (638, 642, 641, 639),
@@ -85,7 +89,7 @@ def road(surface='#6a6a6f', surface2='#54545a', shoulder='#e8e2c9', dash='#ffe06
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="{surface}"/><stop offset="1" stop-color="{surface2}"/>
     </linearGradient></defs>
-    <polygon class="cc-road" points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
+    <polygon class="cc-road"{carsattr} points="510,720 770,720 {rx:.0f},{top} {lx:.0f},{top}" fill="url(#roadg)"/>
     <polygon points="510,720 528,720 {lsh:.0f},{top} {lx:.0f},{top}" fill="{shoulder}" opacity="0.45"/>
     {right_verge}
     <g fill="{dash}">
@@ -16902,7 +16906,7 @@ def indianapolis():
         'scenery-front': front,
         'foreground': fg,
         'roadkw': dict(surface='#6a6a6f', surface2='#54545a', shoulder='#d8d2b4',
-                       dash='#ffe066', top=ROAD_TOP),
+                       dash='#ffe066', top=ROAD_TOP, cars='race'),
         'trackkw': dict(ballast='#a98c68', ballast_hi='#bb9d76', tie='#6b4a2a',
                         rail='#d3d7dc'),
     }, d)

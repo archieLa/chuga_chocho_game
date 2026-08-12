@@ -38,7 +38,7 @@
     <defs><linearGradient id="roadg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#6a6a6f"/><stop offset="1" stop-color="#54545a"/>
     </linearGradient></defs>
-    <polygon class="cc-road" points="510,720 770,720 693,432 587,432" fill="url(#roadg)"/>
+    <polygon class="cc-road" data-cars="race" points="510,720 770,720 693,432 587,432" fill="url(#roadg)"/>
     <polygon points="510,720 528,720 602,432 587,432" fill="#d8d2b4" opacity="0.45"/>
     <polygon points="752,720 770,720 693,432 678,432" fill="#d8d2b4" opacity="0.45"/>
     <g fill="#ffe066">

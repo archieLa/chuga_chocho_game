@@ -56,7 +56,35 @@
   // A car. Drawn here rather than authored as art because it is a game
   // object: it has to be recoloured, mirrored and scaled by the engine.
   // =======================================================================
+  /** An open-wheel car seen from ABOVE, for a road that feeds a circuit. Same
+      contract as buildCar — same length, nose toward `dir` — so the queueing,
+      the stop lines and the depth scaling all work unchanged. Narrower body and
+      four wheels standing off it: at road-car size the exposed wheels ARE the
+      silhouette, and without them it just reads as a thin saloon. */
+  function buildRaceCar(colour, dir) {
+    const g = el('g', { class: 'cc-car' });
+    const nose = dir > 0 ? 1 : -1;
+    const dark = colour === '#e8e8ee' ? '#c9c9d4' : colour;
+    g.appendChild(el('ellipse', { cx: 4, cy: 60, rx: 34, ry: 8, fill: '#000', opacity: 0.2 }));
+    [[-40, -44], [26, -44], [-40, 14], [26, 14]].forEach(([x, y]) => {
+      g.appendChild(el('rect', { x: x, y: y, width: 14, height: 32, rx: 5, fill: '#22262b' }));
+    });
+    g.appendChild(el('rect', { x: -30, y: 46 * nose - 5, width: 60, height: 11, rx: 3, fill: dark }));
+    g.appendChild(el('rect', { x: -34, y: -58 * nose - 4, width: 68, height: 9, rx: 3, fill: colour }));
+    g.appendChild(el('path', { fill: colour,
+      d: nose > 0 ? 'M-10,-58 L10,-58 L16,-6 L-16,-6 Z' : 'M-10,58 L10,58 L16,6 L-16,6 Z' }));
+    g.appendChild(el('rect', { x: -17, y: -30, width: 34, height: 62, rx: 12, fill: colour }));
+    g.appendChild(el('rect', { x: -13, y: -10 * nose - 8, width: 26, height: 22, rx: 9, fill: '#2b3036' }));
+    g.appendChild(el('circle', { cx: 0, cy: -14 * nose, r: 7, fill: '#e8e2d8' }));
+    g.appendChild(el('rect', { x: -15, y: -3, width: 30, height: 5, rx: 2, fill: '#fff', opacity: 0.22 }));
+    return g;
+  }
+
   function buildCar(colour, dir) {
+    // Some roads carry something other than saloons. Indianapolis's is the
+    // circuit access road, and the art says so with data-cars on the
+    // carriageway; everything downstream of here is identical either way.
+    if (currentScene && currentScene.carStyle === 'race') return buildRaceCar(colour, dir);
     // data-dir is for testing as much as anything: "no car may cross a closed
     // gate" is only checkable from outside if you can tell the two lanes apart.
     const g = el('g', { class: 'cc-car', 'data-dir': dir });
@@ -169,11 +197,13 @@
     // the road polygon's own far edge IS the answer, so a scene that truncates
     // says so just by being drawn that way, and future ones need no code.
     let roadTop = HORIZON;
+    let carStyle = null;
     const roadPoly = svg.querySelector('.cc-road');
     if (roadPoly) {
       const ys = (roadPoly.getAttribute('points') || '').trim().split(/\s+/)
         .map(p => parseFloat(p.split(',')[1])).filter(v => !isNaN(v));
       if (ys.length) roadTop = Math.max(HORIZON, Math.min.apply(null, ys));
+      carStyle = roadPoly.getAttribute('data-cars') || null;
     }
 
     // Chicago's three moving parts. Same contract as everything else: the art
@@ -304,13 +334,16 @@
     const crawls = buildCrawls(svg);
     const halt = buildHalt(svg);
     const race = buildRace(svg);
+    const lifts = buildLifts(svg);
+    const skiers = buildSkiers(svg);
+    const ploughs = buildPloughs(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
-                roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
+                roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1735,6 +1768,134 @@
     }
   }
 
+  // =======================================================================
+  // Sun Valley: the mountain works.
+  //
+  // The art carries the contract on IDS rather than classes here — the handoff
+  // documents it that way and every cabin, chair and skier already ships with
+  // data-t and data-s — so these are found by id substring. Ids are namespaced
+  // per scene by inline-assets.py, hence [id*=] rather than [id=].
+  //
+  // A LIFT IS A LOOP, NOT A LINE. Each has two ropes side by side: cabins climb
+  // the far one and come back down the near one. Drive them in opposite
+  // directions or the whole thing reads as a one-way conveyor.
+  //
+  // Everything shrinks as it climbs. The drawn scales confirm the rule exactly —
+  // gondola-up-0 sits at t=0.081 and was authored at 0.91, and 0.95 - 0.5t gives
+  // 0.910 — so a cabin that keeps its size looks like it is sliding along a wire
+  // drawn on the sky instead of going up a mountain.
+  const LIFT = { near: 0.95, far: 0.5 };
+
+  function buildLifts(svg) {
+    const out = [];
+    [['cc-gondola-', 'gondola-path-', 30], ['cc-chair-', 'chair-path-', 22]].forEach(([car, path, secs]) => {
+      ['up', 'down'].forEach(dir => {
+        const rope = svg.querySelector('[id*="' + path + dir + '"]');
+        if (!rope) return;
+        const cars = [].map.call(svg.querySelectorAll('[id*="' + car + dir + '-"]'), el => ({
+          el: el, t0: parseFloat(el.getAttribute('data-t')) || 0,
+        }));
+        if (cars.length) out.push({ rope: rope, len: rope.getTotalLength(), cars: cars,
+                                    secs: secs, sign: dir === 'up' ? 1 : -1 });
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  function updateLifts(t) {
+    const list = currentScene && currentScene.lifts;
+    if (!list) return;
+    const secs = t / 1000;
+    list.forEach(L => {
+      L.cars.forEach(c => {
+        let u = (c.t0 + L.sign * secs / L.secs) % 1;
+        if (u < 0) u += 1;
+        const p = L.rope.getPointAtLength(L.len * u);
+        c.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
+          ') scale(' + (LIFT.near - LIFT.far * u).toFixed(3) + ')');
+      });
+    });
+  }
+
+  // The skiers. Each run is drawn as a path that wanders inside its corridor, so
+  // one walked along it comes down in a line of TURNS rather than straight down
+  // the fall line — which is the whole reason the runs are paths and not lines.
+  // They grow as they descend, because the bottom of a run is nearer.
+  const SKI = { near: 0.34, grow: 0.34, secs: 15, lean: 22 };
+
+  function buildSkiers(svg) {
+    const runs = {};
+    const out = [];
+    svg.querySelectorAll('.cc-skier').forEach(el => {
+      const n = el.getAttribute('data-run');
+      if (!runs[n]) {
+        const path = svg.querySelector('[id*="run-path-' + n + '"]');
+        if (!path) return;
+        runs[n] = { path: path, len: path.getTotalLength() };
+      }
+      out.push({ el: el, run: runs[n], t: parseFloat(el.getAttribute('data-t')) || 0,
+                 // a spread of paces, so a run is not a conveyor of identical skiers
+                 speed: 1 / (SKI.secs * (0.8 + (out.length % 5) * 0.11)) });
+    });
+    return out.length ? out : null;
+  }
+
+  function updateSkiers(dt) {
+    const list = currentScene && currentScene.skiers;
+    if (!list) return;
+    const secs = dt / 1000;
+    list.forEach(s => {
+      s.t += s.speed * secs;
+      if (s.t > 1) s.t -= 1;                       // back to the top of the same run
+      const L = s.run.len;
+      const p = s.run.path.getPointAtLength(L * s.t);
+      // Lean into the turn: the heading is mostly downward, so the angle off
+      // vertical is what tells you which way they are cutting across the fall line.
+      const a = s.run.path.getPointAtLength(Math.min(L, L * s.t + 6));
+      const lean = Math.max(-SKI.lean, Math.min(SKI.lean,
+        Math.atan2(a.x - p.x, Math.max(0.001, a.y - p.y)) * 180 / Math.PI));
+      s.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
+        ') scale(' + (SKI.near + SKI.grow * s.t).toFixed(3) + ') rotate(' + (-lean).toFixed(1) + ')');
+    });
+  }
+
+  // The ploughs. #cc-plough clears the verge on a path that STOPS at the
+  // carriageway, so a pass can never drive across the road or the crossing;
+  // #cc-plough-far works the town street. Both are drawn facing left.
+  const PLOUGH = { secs: 22, dwell: 1.6 };
+
+  function buildPloughs(svg) {
+    const out = [];
+    [['cc-plough', 'plough-path'], ['cc-plough-far', 'street-path']].forEach(([id, pid]) => {
+      const el = svg.querySelector('[id$="' + id + '"]');
+      const path = svg.querySelector('[id*="' + pid + '"]');
+      if (!el || !path) return;
+      const m = /scale\(\s*([\d.]+)/.exec(el.getAttribute('transform') || '');
+      out.push({ el: el, path: path, len: path.getTotalLength(),
+                 s: m ? +m[1] : 1, t: 0, dir: 1, wait: 0 });
+    });
+    return out.length ? out : null;
+  }
+
+  function updatePloughs(dt) {
+    const list = currentScene && currentScene.ploughs;
+    if (!list) return;
+    const secs = dt / 1000;
+    list.forEach(q => {
+      if (q.wait > 0) { q.wait -= secs; }
+      else {
+        q.t += q.dir * secs / PLOUGH.secs;
+        if (q.t >= 1) { q.t = 1; q.dir = -1; q.wait = PLOUGH.dwell; }
+        else if (q.t <= 0) { q.t = 0; q.dir = 1; q.wait = PLOUGH.dwell; }
+      }
+      const p = q.path.getPointAtLength(q.len * q.t);
+      // Drawn facing LEFT, so it is mirrored on the outward pass.
+      const sx = q.dir > 0 ? -q.s : q.s;
+      q.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) +
+        ') scale(' + sx + ',' + q.s + ')');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2465,6 +2626,9 @@
     updateCanters(dt);
     updateCrawls(dt);
     updateRace(dt);
+    updateLifts(t);
+    updateSkiers(dt);
+    updatePloughs(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
