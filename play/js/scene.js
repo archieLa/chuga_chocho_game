@@ -301,13 +301,14 @@
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
+    const crawls = buildCrawls(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1445,6 +1446,70 @@
     });
   }
 
+  // =======================================================================
+  // Rock-crawling (.cc-crawl). A vehicle that walks a drawn polyline and takes
+  // its PITCH from the ground under it — Moab's jeep going up over the block
+  // and down the far face, which is what people actually go there to do.
+  //
+  // Unlike .cc-route, which only knows about x, this needs the two dimensions
+  // and the slope between them. The pitch is the angle of the segment measured
+  // left-to-right, because the ground does not care which way you are driving;
+  // the mirror is applied inside the rotate, so the vehicle turns round to face
+  // its direction and is THEN tilted onto the rock.
+  //
+  //   data-crawl   "x,y x,y ..." in scene coordinates, read straight off the
+  //                silhouette of whatever it is climbing.
+  const CRAWL = { dwell: 2.2 };
+
+  function buildCrawls(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-crawl').forEach(node => {
+      const pts = (node.getAttribute('data-crawl') || '').trim().split(/\s+/)
+        .map(q => q.split(',').map(Number)).filter(q => q.length === 2 && !q.some(isNaN));
+      if (pts.length < 2) { console.warn('cc-crawl has no usable data-crawl'); return; }
+      const segs = [];
+      let total = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1];
+        const len = Math.sqrt(dx * dx + dy * dy);
+        segs.push({ x: pts[i - 1][0], y: pts[i - 1][1], dx: dx, dy: dy, len: len,
+                    at: total, deg: Math.atan2(dy, dx) * 180 / Math.PI });
+        total += len;
+      }
+      out.push({ el: node, segs: segs, total: total, d: 0, dir: 1, wait: 0,
+                 s: parseFloat(node.getAttribute('data-scale')) || 1,
+                 nose: parseFloat(node.getAttribute('data-nose')) || 1,
+                 speed: parseFloat(node.getAttribute('data-speed')) || 14 });
+    });
+    return out;
+  }
+
+  function updateCrawls(dt) {
+    const list = currentScene && currentScene.crawls;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    list.forEach(c => {
+      if (c.wait > 0) {
+        c.wait -= secs;
+      } else {
+        c.d += c.speed * c.dir * secs;
+        if (c.d >= c.total) { c.d = c.total; c.dir = -1; c.wait = CRAWL.dwell; }
+        else if (c.d <= 0) { c.d = 0; c.dir = 1; c.wait = CRAWL.dwell; }
+      }
+      let seg = c.segs[c.segs.length - 1];
+      for (let i = 0; i < c.segs.length; i++) {
+        if (c.d <= c.segs[i].at + c.segs[i].len) { seg = c.segs[i]; break; }
+      }
+      const u = seg.len ? (c.d - seg.at) / seg.len : 0;
+      const x = seg.x + seg.dx * u, y = seg.y + seg.dy * u;
+      const facing = c.dir > 0 ? 1 : -1;
+      const sx = (facing !== c.nose ? -c.s : c.s);
+      c.el.setAttribute('transform',
+        'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate(' + seg.deg.toFixed(1) +
+        ') scale(' + sx + ',' + c.s + ')');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2158,6 +2223,7 @@
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);
+    updateCrawls(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);

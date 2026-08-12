@@ -4675,18 +4675,32 @@ def moab():
                 f'<g stroke="{c}" stroke-width="2.4" opacity="0.4" fill="none">'
                 f'<path d="M-30,-4 L30,0 M-34,6 L26,10 M-24,-24 L-14,4"/></g></g>')
 
-    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0, route=None, speed=30):
+    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0, route=None, speed=30,
+             crawl=None):
         # `route` turns one of them into a .cc-route wanderer. The bench right of
         # the carriageway is the only clear run: the road spans 589..691 at this
         # height and the jeep reaches 21 either side of its origin, so it stays
         # east of 790 and never crosses. Offroaders potter and stop to look, which
         # is what the dwells are for — a vehicle at constant speed reads as traffic.
-        cls = ' class="cc-tractor cc-route"' if route else ''
+        # `crawl` walks a polyline and takes its pitch from the ground under it —
+        # for the one up on the block, which is what people actually come to Moab
+        # to do. The points are read straight off rock(178,706,2.4): its crest is
+        # (-18,-44)->(14,-42) and its right face falls to (40,-22), which at that
+        # translate and scale is (134.8,600.4) -> (211.6,605.2) -> (274,653.2).
+        # Plus 3 so the wheels bite into the rock rather than hovering over it.
+        cls = (' class="cc-tractor cc-crawl"' if crawl else
+               ' class="cc-tractor cc-route"' if route else '')
         # data-nose="-1": drawn facing LEFT. The headlight is at x=-52 and the
         # windscreen rakes back toward +x, so without this it drives backwards
         # on the outward leg — which is exactly what the first run looked like.
-        data = (f' data-route="{route}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
-                f' data-nose="-1"' if route else '')
+        if crawl:
+            data = (f' data-crawl="{crawl}" data-scale="{s}" data-speed="{speed}"'
+                    f' data-nose="-1"')
+        elif route:
+            data = (f' data-route="{route}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                    f' data-nose="-1"')
+        else:
+            data = ''
         return (f'<g{cls}{data} transform="translate({x},{y}) rotate({rot}) scale({s})">'
                 + (shadow(0, 7, 58, 8, 0.26) if not rot else '')
                 + f'<rect x="-50" y="-30" width="100" height="20" rx="4" fill="{body}"/>'
@@ -4763,7 +4777,11 @@ def moab():
              # one jeep up on the block, tilted to the rock's own slope — this is what
              # people actually come to Moab to do, and it gives the block a use
              + '<ellipse cx="188" cy="612" rx="31" ry="5" fill="#000" opacity="0.2"/>'
-             + jeep(186, 606, 0.56, '#c0392b', '#2f2f36', 17)
+             + jeep(186, 606, 0.56, '#c0392b', '#2f2f36', 17,
+                    # up over the crest and down the right face, slowly, the way it is
+                    # actually done. The drawn 17-degree pose is kept for the gallery;
+                    # the engine takes over on the first frame.
+                    crawl='140,603 211.6,608 262,647', speed=13)
              + rock(1104, 700, 1.8)
              + rock(292, 592, 1.15) + rock(880, 704, 1.35)
              + rock(384, 646, 0.8) + rock(842, 668, 0.62) + rock(1252, 612, 0.46)

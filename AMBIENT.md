@@ -31,6 +31,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Crawl** — a vehicle that follows the ground | `.cc-crawl` with `data-crawl="x,y x,y ..."` in scene coordinates, plus `data-scale`, `data-speed`, `data-nose`. Walks the polyline and takes its PITCH from the segment under it, measured left-to-right because the ground does not care which way you are driving. Read the points straight off the silhouette of whatever it climbs. | Moab's jeep on the block |
 | **Canter** — an animal that runs on its own legs | `.cc-canter` with `data-run="from,to,y"`, `data-scale`, `data-speed`, `data-nose`; `.cc-canter-body` inside takes the bob so the shadow stays flat on the ground; each leg is a `.cc-leg` with `data-pivot="x,y"` at the joint it swings from. Stride is measured in DISTANCE, so the legs cannot pedal independently of the speed. | the Bluegrass thoroughbred |
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
 | **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
@@ -132,7 +133,7 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
-| Moab | a jeep potters the slickrock bench, stopping to look |
+| Moab | one jeep crawls up over the block and down its far face · another potters the bench |
 | Bluegrass | a thoroughbred canters the near paddock and pulls up at the fence |
 | Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
