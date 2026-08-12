@@ -984,3 +984,76 @@ All from empty states: **West Virginia's New River Gorge**, **the South Dakota B
 (framed as the Badlands, *not* Mount Rushmore — that carving is from 1941 and its copyright
 status isn't clean enough for this project), **the Mississippi Delta**, and **the
 Indianapolis Speedway**.
+
+---
+
+## Wave 6 — decided
+
+Two states that currently have **zero** locations.
+
+| Destination | State | Why this one |
+|---|---|---|
+| **Sun Valley — Bald Mountain in winter** | Idaho | The first **winter** scene in the game — thirty-five destinations and no snow anywhere. Also the first **aerial lift** (gondola and chairlifts) and the first **big working vehicles**: snowplough trucks and a piste groomer |
+| **The Indianapolis Motor Speedway** | Indiana | The first **motorsport**: the oval, the Pagoda, the grandstands, the yard of bricks — with race cars actually running the track |
+
+Reference-photo prompts: `REFERENCE_PROMPT_wave6.md`.
+
+**Snow is the point of the Idaho pick, not the ski resort.** A winter palette changes every
+colour in the picture at once, which is a bigger gap than any single landmark. Sun Valley is
+the right named place for it: it built the world's first chairlift in 1936, and Bald Mountain
+has both an enclosed gondola and open chairs.
+
+**The Speedway follows Detroit by one wave**, which is a deliberate exception to the usual
+"vary the kind" instinct — motorsport is a different subject from manufacturing, and the
+brief here is explicit: cars zipping round the oval.
+
+**No liveries, no sponsor markings, no wordmarks, no real car shapes** at the Speedway.
+Generic open-wheel cars in bright flat colours — same reasoning as the Rocky statue.
+
+Both scenes are planned for **animation** from the start rather than retrofitted: gondola
+cabins climbing the haul rope and a plough working the road at Sun Valley; cars running an
+exported racing line at the Speedway, the same way Horseshoe Curve exports `#curve-path`.
+
+After this wave the set stands at **37 destinations across 32 states plus DC**, leaving
+**18 states** empty.
+
+### Reserves for Wave 7
+
+All from empty states: **West Virginia's New River Gorge** (the great steel arch, with the
+railway running the gorge below it), **the Mississippi at Vicksburg** (a towboat pushing a
+raft of barges — the set still has no Mississippi and no river traffic), **the South Dakota
+Badlands**, and **Newport, Rhode Island** (the set has no sail).
+
+---
+
+## Wave 6 — built
+
+Both scenes are in. `sun-valley` and `indianapolis` bring the set to **37 destinations
+across 32 states plus DC**, leaving **18 states** empty.
+
+| Scene id | State | What it is | Engine |
+|---|---|---|---|
+| `sun-valley` | Idaho | Bald Mountain under snow, the gondola, Ketchum ploughed out below | `diesel` |
+| `indianapolis` | Indiana | The main straight, the pit lane, the Pagoda, the yard of bricks | `diesel` |
+
+Three firsts in one wave: the first **winter** palette, the first **aerial lift**, the first
+**motorsport** — plus the first big working vehicles, a highway plough and a piste groomer.
+
+Animation hooks exported by both are listed in `HANDOFF.md`.
+
+### Wave 7 — the ordering rule is unchanged
+
+**A state with 0 locations beats a state with 1, and a state with 1 beats a state with 2. No
+state gets a third until every state has at least one.** Eighteen states still have nothing,
+so Wave 7 comes entirely from that column.
+
+Reserves, all from empty states: **West Virginia's New River Gorge** (the great steel arch,
+with the railway running the gorge below it), **the Mississippi at Vicksburg** (a towboat
+pushing a raft of barges — the set still has no Mississippi and no river traffic), **the
+South Dakota Badlands** (framed as the Badlands, *not* Mount Rushmore — that carving is from
+1941 and its copyright status isn't clean enough for this project), and **Newport, Rhode
+Island** (the set has no sail).
+
+Still held at the front of the queue but blocked by the rule rather than rejected:
+**Philadelphia** (the Art Museum steps, *not* the Rocky statue), **Portland**, and
+**Louisville**.

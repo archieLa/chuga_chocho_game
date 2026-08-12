@@ -303,13 +303,14 @@
     const canters = buildCanters(svg);
     const crawls = buildCrawls(svg);
     const halt = buildHalt(svg);
+    const race = buildRace(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1602,6 +1603,138 @@
     });
   }
 
+  // =======================================================================
+  // The Speedway (.cc-racer + the pit sequence).
+  //
+  // The pack: six cars, each keeping its OWN lane and scale. They are drawn at
+  // three depths (y 394/407/420 at 0.62/0.65/0.68), which is what makes it read
+  // as a track rather than a conveyor, so nothing here moves them off their
+  // line — only along it, at their own pace, so they overtake.
+  //
+  // The stop: one car leaves the pack at the pit entry, runs the lane, is jacked
+  // up in the box with its wheels off, and goes back out. The lane is 72px
+  // FURTHER from the viewer than the racing line, so the car shrinks on the way
+  // in and grows on the way out; interpolate the scale with the position or it
+  // appears to swell as it drives away.
+  const RACE = { lo: -140, hi: 1420 };
+  const PIT = {
+    entry: 1060,      // where it peels off the racing line
+    lane: 0.50,       // scale in the pit lane, against 0.62 on the track
+    steps: [          // name, seconds
+      ['in',    2.0],   // down the slip road into the lane
+      ['along', 2.6],   // right to left up the lane to the box
+      ['jack',  0.5],   // nose lifts
+      ['off',   1.1],   // wheels off
+      ['on',    1.1],   // wheels on
+      ['drop',  0.4],
+      ['leave', 2.2],   // on down the lane to the exit
+      ['out',   1.8],   // slip road back onto the track
+    ],
+  };
+
+  function buildRace(svg) {
+    const cars = [];
+    svg.querySelectorAll('.cc-racer').forEach(node => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
+        .exec(node.getAttribute('transform') || '');
+      // ONLY the six on the straight. .cc-racer is also worn by the ten cars
+      // queueing on the grass and by the one in the box — animating those sent
+      // the paddock driving off across the infield.
+      if (!m || !/cc-racer-\d+$/.test(node.id)) return;
+      cars.push({ el: node, x: +m[1], y: +m[2], s: +m[3],
+                  wheels: node.querySelector('.cc-racer-wheels'),
+                  // A spread of speeds, from the id, so they overtake each other
+                  // and the order on the straight keeps changing.
+                  speed: 210 + (cars.length % 4) * 26 });
+    });
+    if (!cars.length) return null;
+    const paths = {};
+    ['pit-in-path', 'pit-lane-path', 'pit-out-path'].forEach(id => {
+      paths[id] = svg.querySelector('[id$="' + id + '"]');
+    });
+    if (!paths['pit-in-path']) return { cars: cars, pit: null };
+    const box = svg.querySelector('[id$="pit-box-stop"]');
+    return {
+      cars: cars, parked: svg.querySelector('[id$="cc-racer-pit"]'),
+      pit: { inP: paths['pit-in-path'], laneP: paths['pit-lane-path'],
+             outP: paths['pit-out-path'],
+             boxX: box ? parseFloat(box.getAttribute('cx')) : 430,
+             car: null, step: 0, t: 0, cooldown: 6 },
+    };
+  }
+
+  function ptOn(path, u) { return path.getPointAtLength(path.getTotalLength() * u); }
+
+  function updateRace(dt) {
+    const r = currentScene && currentScene.race;
+    if (!r) return;
+    const secs = dt / 1000;
+    const pit = r.pit;
+
+    r.cars.forEach(c => {
+      if (pit && pit.car === c) return;               // it is in the lane, not the pack
+      c.x += c.speed * secs;
+      if (c.x > RACE.hi) c.x = RACE.lo;
+      c.el.setAttribute('transform',
+        'translate(' + c.x.toFixed(1) + ',' + c.y + ') scale(' + c.s + ')');
+    });
+    if (!pit) return;
+
+    // Nobody in the lane? Wait a while, then take whichever car is nearest the
+    // pit entry — so the one that peels off is one you were just watching.
+    if (!pit.car) {
+      pit.cooldown -= secs;
+      if (pit.cooldown > 0) return;
+      const near = r.cars.filter(c => c.x > PIT.entry - 90 && c.x < PIT.entry + 40)[0];
+      if (!near) return;
+      pit.car = near; pit.step = 0; pit.t = 0;
+      if (r.parked) r.parked.setAttribute('visibility', 'hidden');   // one car per stall
+      return;
+    }
+
+    pit.t += secs;
+    const step = PIT.steps[pit.step];
+    const u = Math.min(1, pit.t / step[1]);
+    const c = pit.car;
+    let x = c.x, y = c.y, s = c.s, lift = 0;
+
+    if (step[0] === 'in') {
+      const p = ptOn(pit.inP, u); x = p.x; y = p.y; s = c.s + (PIT.lane - c.s) * u;
+    } else if (step[0] === 'along') {
+      const total = pit.laneP.getTotalLength();
+      const startU = 0, endU = (1280 - pit.boxX) / 1340;
+      const p = ptOn(pit.laneP, startU + (endU - startU) * u);
+      x = p.x; y = p.y; s = PIT.lane;
+    } else if (step[0] === 'leave') {
+      const p = ptOn(pit.laneP, (1280 - pit.boxX) / 1340 + (1 - (1280 - pit.boxX) / 1340) * u);
+      x = p.x; y = p.y; s = PIT.lane;
+    } else if (step[0] === 'out') {
+      const p = ptOn(pit.outP, u); x = p.x; y = p.y; s = PIT.lane + (c.s - PIT.lane) * u;
+    } else {
+      x = pit.boxX; y = 318; s = PIT.lane;
+      // jacked up, then held there while the wheels are off
+      lift = step[0] === 'jack' ? -5 * u : step[0] === 'drop' ? -5 * (1 - u) : -5;
+      if (c.wheels) {
+        c.wheels.setAttribute('opacity',
+          step[0] === 'off' ? (1 - u).toFixed(2) : step[0] === 'on' ? u.toFixed(2) : '1');
+      }
+    }
+    c.el.setAttribute('transform',
+      'translate(' + x.toFixed(1) + ',' + (y + lift).toFixed(1) + ') scale(' + s.toFixed(3) + ')');
+
+    if (u >= 1) {
+      pit.step++;
+      pit.t = 0;
+      if (pit.step >= PIT.steps.length) {
+        // back on the racing line at the exit, in its own lane again
+        c.x = 160; 
+        if (c.wheels) c.wheels.setAttribute('opacity', '1');
+        pit.car = null; pit.step = 0; pit.cooldown = 9;
+        if (r.parked) r.parked.setAttribute('visibility', 'visible');
+      }
+    }
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2331,6 +2464,7 @@
     updateAurora(t);
     updateCanters(dt);
     updateCrawls(dt);
+    updateRace(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);

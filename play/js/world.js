@@ -272,6 +272,24 @@
       scenery:{ theme:'industrial', features:['assemblyplant','shippinglot','autoracks','skyline'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'sunvalley', state:'Idaho', city:'Sun Valley',
+      say:{ en:'Sun Valley', pl:'Sun Valley' },
+      scene:'sun-valley',
+      // Viewpoint: the road into Ketchum, which STOPS at the main street. The set's first
+      // winter scene and its first aerial lift — Bald Mountain is a whaleback, and the ski
+      // runs are the gaps the timber leaves, which is how runs are actually cut.
+      scenery:{ theme:'winter', features:['baldmountain','gondola','chairlift','skiers','ketchum'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'indianapolis', state:'Indiana', city:'Indianapolis',
+      say:{ en:'Indianapolis', pl:'Indianapolis' },
+      scene:'indianapolis',
+      // Viewpoint: outside the main straight, which is the only place a level crossing could
+      // plausibly be. The road is the track ACCESS road — it carries on through the gate as a
+      // paved apron onto the racing surface, so the traffic has somewhere to be going.
+      scenery:{ theme:'motorsport', features:['mainstraight','pitlane','pagoda','grandstand'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
