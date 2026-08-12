@@ -300,13 +300,14 @@
     const boom = buildBoom(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
+    const canters = buildCanters(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1354,6 +1355,96 @@
     });
   }
 
+  // =======================================================================
+  // A horse that actually gallops (.cc-canter).
+  //
+  // This only exists because the art draws each leg as its own path. Sliding a
+  // horse across a field looks worse than leaving it standing, so the legs are
+  // wrapped in .cc-leg with the joint they swing from and the engine turns them.
+  //
+  // The root carries the horse along the field; .cc-canter-body inside it takes
+  // the bob and the pitch, so the shadow — which sits OUTSIDE that group — stays
+  // flat on the grass instead of bouncing along with her.
+  //
+  // Stride is measured in DISTANCE, not seconds, so the legs cannot pedal
+  // independently of how fast she is actually going. That mismatch is what makes
+  // most walk cycles look wrong.
+  const CANTER = {
+    // SMALL. These legs are rigid — the knee and hock are drawn into the path —
+    // so a big swing pivoting at the shoulder is a pendulum, not a stride. The
+    // first attempt used 24 degrees and the horse read as a rocking horse.
+    swing: 13,      // degrees each leg swings through
+    stride: 78,     // local units per stride — the length of her own barrel
+    bob: 2.4,       // local units the body lifts
+    rock: 1.8,      // degrees it pitches
+    hold: 1.4,      // pause at the fence before turning back
+    // FOUR beats, properly spread. DOM order is far-hind, far-fore, near-hind,
+    // near-fore, and no two may be in step: at 0/0.5/0.12/0.62 the near pair
+    // lagged the far pair by an eighth of a stride, which the eye reads as both
+    // sides moving together.
+    phase: [0, 0.38, 0.19, 0.57],
+  };
+
+  function buildCanters(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-canter').forEach(node => {
+      const v = (node.getAttribute('data-run') || '').split(',').map(Number);
+      if (v.length !== 3 || v.some(isNaN)) { console.warn('cc-canter has no usable data-run'); return; }
+      out.push({
+        el: node,
+        body: node.querySelector('.cc-canter-body'),
+        legs: [].map.call(node.querySelectorAll('.cc-leg'), (el, i) => {
+          const p = (el.getAttribute('data-pivot') || '0,0').split(',').map(Number);
+          return { el: el, px: p[0] || 0, py: p[1] || 0,
+                   ph: CANTER.phase[i % CANTER.phase.length] };
+        }),
+        x0: Math.min(v[0], v[1]), x1: Math.max(v[0], v[1]),
+        x: v[0], dir: v[1] > v[0] ? 1 : -1,
+        y: parseFloat(node.getAttribute('data-y')) || 0,
+        s: parseFloat(node.getAttribute('data-scale')) || 1,
+        nose: parseFloat(node.getAttribute('data-nose')) || 1,
+        speed: parseFloat(node.getAttribute('data-speed')) || 74,
+        gait: 0, turn: 0,
+      });
+    });
+    return out;
+  }
+
+  function updateCanters(dt) {
+    const list = currentScene && currentScene.canters;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    list.forEach(h => {
+      if (h.turn > 0) {
+        h.turn -= secs;
+        if (h.turn <= 0) { h.dir = -h.dir; h.turn = 0; }
+      } else {
+        const step = h.speed * secs;
+        h.x += step * h.dir;
+        h.gait += step / (CANTER.stride * h.s);       // strides covered, not time elapsed
+        if (h.x > h.x1) { h.x = h.x1; h.turn = CANTER.hold; }
+        else if (h.x < h.x0) { h.x = h.x0; h.turn = CANTER.hold; }
+      }
+      const facing = h.dir > 0 ? 1 : -1;
+      const sx = (facing !== h.nose ? -h.s : h.s);
+      h.el.setAttribute('transform',
+        'translate(' + h.x.toFixed(1) + ',' + h.y + ') scale(' + sx + ',' + h.s + ')');
+      // Pulled up at the fence she stands still, legs and all.
+      const g = h.gait * TAU;
+      const moving = h.turn <= 0;
+      if (h.body) {
+        const bob = moving ? -Math.abs(Math.sin(g)) * CANTER.bob : 0;
+        const rock = moving ? Math.sin(g) * CANTER.rock : 0;
+        h.body.setAttribute('transform',
+          'translate(0,' + bob.toFixed(2) + ') rotate(' + rock.toFixed(2) + ',0,-70)');
+      }
+      h.legs.forEach(L => {
+        const a = moving ? CANTER.swing * Math.sin(g + L.ph * TAU) : 0;
+        L.el.setAttribute('transform', 'rotate(' + a.toFixed(1) + ',' + L.px + ',' + L.py + ')');
+      });
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2066,6 +2157,7 @@
     updateBoom(dt);
     updateGeysers(t);
     updateAurora(t);
+    updateCanters(dt);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);

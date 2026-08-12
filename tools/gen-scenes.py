@@ -4675,8 +4675,19 @@ def moab():
                 f'<g stroke="{c}" stroke-width="2.4" opacity="0.4" fill="none">'
                 f'<path d="M-30,-4 L30,0 M-34,6 L26,10 M-24,-24 L-14,4"/></g></g>')
 
-    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0):
-        return (f'<g transform="translate({x},{y}) rotate({rot}) scale({s})">'
+    def jeep(x, y, s=1.0, body='#3f7d4a', top='#2f2f36', rot=0, route=None, speed=30):
+        # `route` turns one of them into a .cc-route wanderer. The bench right of
+        # the carriageway is the only clear run: the road spans 589..691 at this
+        # height and the jeep reaches 21 either side of its origin, so it stays
+        # east of 790 and never crosses. Offroaders potter and stop to look, which
+        # is what the dwells are for — a vehicle at constant speed reads as traffic.
+        cls = ' class="cc-tractor cc-route"' if route else ''
+        # data-nose="-1": drawn facing LEFT. The headlight is at x=-52 and the
+        # windscreen rakes back toward +x, so without this it drives backwards
+        # on the outward leg — which is exactly what the first run looked like.
+        data = (f' data-route="{route}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                f' data-nose="-1"' if route else '')
+        return (f'<g{cls}{data} transform="translate({x},{y}) rotate({rot}) scale({s})">'
                 + (shadow(0, 7, 58, 8, 0.26) if not rot else '')
                 + f'<rect x="-50" y="-30" width="100" height="20" rx="4" fill="{body}"/>'
                 f'<path d="M-22,-30 L-16,-50 L28,-50 L36,-30 Z" fill="{body}"/>'
@@ -4711,7 +4722,7 @@ def moab():
                       [(130, 430, 0.5), (176, 424, 0.4), (330, 432, 0.46), (420, 428, 0.4),
                        (664, 432, 0.44), (776, 428, 0.5), (830, 434, 0.42),
                        (1140, 440, 0.5), (1216, 434, 0.44), (1012, 436, 0.4)])
-            + jeep(880, 424, 0.4, '#c0392b')
+            + jeep(880, 424, 0.4, '#c0392b', route='1300:1.6 810:2.2 880:1.0', speed=26)
             + ''.join(raven(x, y, s) for x, y, s in
                       [(392, 168, 0.68), (452, 196, 0.48), (330, 210, 0.4)]))
 
@@ -9443,7 +9454,7 @@ def bluegrass():
 
     # -------------------------------------------------------------- horses ----
     def horse(x, y, s=1.0, coat='#8a5230', shade='#6f3f24', point='#2b2119',
-              sock=None, grazing=False, facing=1):
+              sock=None, grazing=False, facing=1, run=None, speed=74):
         """A thoroughbred, drawn 100 units tall at the withers so every other measurement
         can be read off that.
 
@@ -9462,23 +9473,28 @@ def bluegrass():
         most of what makes the silhouette read as a horse rather than a brown shape."""
         sock = sock or []
 
+        # Each leg is its own group with the joint it swings from, so a horse can
+        # be made to gallop instead of sliding. Harmless on the standing ones —
+        # the engine only drives the legs inside a .cc-canter.
         def foreleg(lx, lean=0.0):
-            return (f'<path d="M{lx-6},-62 L{lx+6},-62 L{lx+4+lean},-34 '
+            return (f'<g class="cc-leg" data-pivot="{lx},-62">'
+                    f'<path d="M{lx-6},-62 L{lx+6},-62 L{lx+4+lean},-34 '
                     f'L{lx+3.5+lean*2},-5 L{lx-3.5+lean*2},-5 L{lx-4+lean},-34 Z" '
                     f'fill="{coat}"/>'
                     f'<path d="M{lx-4+lean},-34 L{lx+4+lean},-34 L{lx+3.5+lean*2},-5 '
                     f'L{lx-3.5+lean*2},-5 Z" fill="{point}"/>'
                     f'<path d="M{lx-4.5+lean*2},-5 L{lx+4.5+lean*2},-5 L{lx+4+lean*2},0 '
-                    f'L{lx-4+lean*2},0 Z" fill="#3a332c"/>')
+                    f'L{lx-4+lean*2},0 Z" fill="#3a332c"/></g>')
 
         def hindleg(lx):
-            return (f'<path d="M{lx-14},-88 C {lx+6},-90 {lx+14},-78 {lx+12},-58 '
+            return (f'<g class="cc-leg" data-pivot="{lx},-84">'
+                    f'<path d="M{lx-14},-88 C {lx+6},-90 {lx+14},-78 {lx+12},-58 '
                     f'L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 L{lx-1},-34 L{lx-4},-56 '
                     f'C {lx-12},-62 {lx-16},-74 {lx-14},-88 Z" fill="{coat}"/>'
                     f'<path d="M{lx-1},-34 L{lx+7},-34 L{lx+6},-5 L{lx-2},-5 Z" '
                     f'fill="{point}"/>'
                     f'<path d="M{lx-3},-5 L{lx+7},-5 L{lx+6.5},0 L{lx-2.5},0 Z" '
-                    f'fill="#3a332c"/>')
+                    f'fill="#3a332c"/></g>')
 
         socks = ''.join(f'<rect x="{lx-4.5}" y="-16" width="9" height="11" rx="2" '
                         f'fill="#efe9dc"/>' for lx in sock)
@@ -9507,8 +9523,17 @@ def bluegrass():
                     f'<path d="M-58,-126 L-56,-140 L-49,-129 Z" fill="{coat}"/>'
                     f'<path d="M-50,-128 L-47,-141 L-42,-130 Z" fill="{coat}"/>')
 
-        return (f'<g transform="translate({x},{y}) scale({s * facing},{s})">'
+        # A cantering horse is a .cc-canter: the root carries it along the field,
+        # and .cc-canter-body inside it takes the bob and the rock — so the SHADOW,
+        # which is outside that group, stays flat on the grass instead of bouncing
+        # around with the horse. Drawn head-LEFT (head at x=-94, tail at +56), so
+        # data-nose is -1 or it gallops backwards.
+        cls = ' class="cc-canter"' if run else ''
+        data = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                f' data-nose="-1"' if run else '')
+        return (f'<g{cls}{data} transform="translate({x},{y}) scale({s * facing},{s})">'
                 f'{shadow(0, 2, 46, 7, 0.2)}'
+                + ('<g class="cc-canter-body">' if run else '')
                 # far side legs first
                 + hindleg(20) + foreleg(-32, 1.5)
                 # the barrel: withers high at the front, croup a touch lower, belly at −56
@@ -9524,7 +9549,7 @@ def bluegrass():
                 # the tail falls from the top of the croup, well behind the hip
                 + f'<path d="M42,-84 C 54,-78 56,-58 52,-38 C 50,-26 47,-18 44,-12 '
                 f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/>'
-                + '</g>')
+                + ('</g>' if run else '') + '</g>')
 
     def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119'):
         """A foal is not a small horse. The legs are already almost full length, the barrel
@@ -9619,7 +9644,11 @@ def bluegrass():
              + shade_tree(74, 700, 1.35) + shade_tree(1216, 712, 1.45)
              + cedar(392, 640, 0.85) + cedar(918, 646, 0.9)
              # the hero horses, close enough to count the legs
-             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119', sock=[-20, 34])
+             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119',
+                     # No socks on this one: they are drawn at fixed x OUTSIDE the leg
+                     # groups, so on a moving horse they stay behind and hang in the
+                     # air between her legs. Not worth re-rigging for two white marks.
+                     run='250,-140,706', speed=78)
              + horse(1046, 700, 0.52, '#5c3a22', '#472b18', '#241c14', grazing=True)
              + foal(1140, 700, 0.36, '#a8703f')
              + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
