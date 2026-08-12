@@ -31,6 +31,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Station stop** — the train calls, people get on and off | `.cc-platform` with `data-stop` (the HEAD position — the head is the ENGINE, so aim it so a coach and not the loco ends up at the deck) and `data-dwell`; `.cc-passenger` figures with `data-stand="x,y"`, `data-door="x,y"`, `data-role="board"`/`"alight"`, `data-scale`. Every other train calls. **Not ambient** — it stops the gameplay train — but gate-blind like the shunt. | Cedar Point |
 | **Crawl** — a vehicle that follows the ground | `.cc-crawl` with `data-crawl="x,y x,y ..."` in scene coordinates, plus `data-scale`, `data-speed`, `data-nose`. Walks the polyline and takes its PITCH from the segment under it, measured left-to-right because the ground does not care which way you are driving. Read the points straight off the silhouette of whatever it climbs. | Moab's jeep on the block |
 | **Canter** — an animal that runs on its own legs | `.cc-canter` with `data-run="from,to,y"`, `data-scale`, `data-speed`, `data-nose`; `.cc-canter-body` inside takes the bob so the shadow stays flat on the ground; each leg is a `.cc-leg` with `data-pivot="x,y"` at the joint it swings from. Stride is measured in DISTANCE, so the legs cannot pedal independently of the speed. | the Bluegrass thoroughbred |
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
@@ -76,6 +77,11 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **A platform has to ABUT the track.** Ten pixels of grass showing between the
+  deck and the ballast and the passengers read as crossing a lawn rather than
+  stepping off a platform onto a train. The track band ends at 516, so that is
+  where the deck starts. Feet go on the deck's TOP edge too — in a flat side-on
+  view a figure standing at the bottom edge is standing in FRONT of it.
 - **Rigid legs need a SMALL swing.** The thoroughbred's knee and hock are drawn
   into the path, so rotating a whole leg at the shoulder is a pendulum, not a
   stride. 24 degrees read as a rocking horse; 13 reads as a horse. And no two
@@ -143,7 +149,7 @@ Two traps, both already paid for once:
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
-| Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop |
+| Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop · every other train calls at the depot platform, three get on and two get off |
 | Seattle | the ferry crosses Elliott Bay and turns at the houseboat moorings |
 | New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |
 | Austin | the bat column boils out from under the Congress Avenue Bridge |
