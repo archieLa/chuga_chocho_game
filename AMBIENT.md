@@ -31,6 +31,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
+| **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
 | **Falling water** — a sheet that never stops | `.cc-fall` with `data-band` (the tile height) and `data-secs`. The art draws a band of streaks that TILES vertically and emits it twice, the second copy one band above the first; the engine slides the pair down by exactly one band and it loops with no seam. Clip it to the BROKEN part of the sheet, not the whole face — streaks scrolling over the glassy lip stop it reading as an edge. `.cc-foam` groups churn out of step at the base. | Quechee |
 | **Route** — stops in order, dwelling, looping | `.cc-route` with `data-route` = stops separated by spaces: `"x"`, `"x:dwell"` (seconds held) or `"@x"` (jump there instantly — only ever off-screen, so a thing can leave one side and reappear on the other without crossing what is between). Plus `data-y`, `data-speed`, `data-scale`, `data-nose`. | the Kansas tractor |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
@@ -108,7 +110,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (18 scenes)
+## What moves today (21 scenes)
 
 | Scene | What |
 |---|---|
@@ -120,6 +122,9 @@ Two traps, both already paid for once:
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
+| Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |
+| Denali | the aurora breathes — each curtain on its own drift and fade |
+| Oʻahu | three catamarans work the reef, each at its own pace |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
@@ -140,15 +145,11 @@ Two traps, both already paid for once:
 along the slickrock track. (Listed as "skip" in an earlier pass — wrong call, a
 vehicle is exactly what lands with the audience.)
 
-**2. Yellowstone — the geyser erupts**, and the bison amble. The rocket's plume
-machinery is most of the eruption already.
+**2. Bluegrass — a thoroughbred canters** the paddock. Most of the horses are
+drawn grazing; the three with their heads up are the candidates. Mind the road —
+at the paddock's y the carriageway is 170px wide and anything crossing it slides
+BEHIND the tarmac.
 
-**3. Bluegrass — a thoroughbred canters** the paddock. Shuttle.
-
-**4. Oʻahu — an outrigger on the reef.** Shuttle.
-
-**5. Denali — the aurora shimmers.** Cheap, atmospheric, and it is the only
-scene where it would read.
 
 ---
 

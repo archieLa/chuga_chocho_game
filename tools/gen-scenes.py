@@ -3357,14 +3357,27 @@ def oahu():
              '    <g fill="#c6bda4">'
              + ''.join(f'<polygon points="{x},{SURF} {x+9},{SURF} {x+5},{264} {x+2},{264}"/>'
                        for x in (352, 596, 848)) + '</g>\n'
-             # catamarans and an outrigger out on the water
-             + '    ' + ''.join(f'<g transform="translate({x},{y}) scale({s})">'
+             # Catamarans out on the water, and they SAIL it. The ocean band runs
+             # y=245..288 and the road does not begin until the horizon at 300, so
+             # the whole width is open water — nothing here can slide behind the
+             # carriageway, which is the trap in every scene whose road reaches
+             # the horizon.
+             #
+             # Drawn bow-LEFT: the mainsail is aft of the mast (x 1..16) and the
+             # jib forward of it (x -1..-12), so data-nose is -1 or they sail
+             # backwards. Each has its own range and pace — three boats crossing
+             # in step read as one mechanism.
+             + '    ' + ''.join(f'<g class="cc-ship" data-sail="{run}" data-nose="-1" '
+                                f'data-scale="{s}" data-speed="{sp}" '
+                                f'transform="translate({x},{y}) scale({s})">'
                                 f'<path d="M-20,0 L20,0 L15,5 L-15,5 Z" fill="#f2f2ea"/>'
                                 f'<rect x="-1" y="-26" width="2" height="26" fill="#8a7f6c"/>'
                                 f'<path d="M1,-25 L1,-3 L16,-3 Z" fill="{c}"/>'
                                 f'<path d="M-1,-22 L-1,-3 L-12,-3 Z" fill="#f7f4e8"/></g>'
-                                for x, y, s, c in [(196, 272, 0.9, '#e8574a'), (760, 268, 0.8, '#f2b134'),
-                                                   (1024, 276, 0.95, '#4fb8d6')]))
+                                for x, y, s, c, run, sp in
+                                [(196, 272, 0.9, '#e8574a', '196,1340,272', 18),
+                                 (760, 268, 0.8, '#f2b134', '760,-70,268', 26),
+                                 (1024, 276, 0.95, '#4fb8d6', '1024,-70,276', 22)]))
 
     # ---- the beach: white crescent, wet sand, foam ----
     beach = (f'    <path d="M0,{SURF} Q 220,{SURF+8} 460,{SURF+3} T 900,{SURF+6} T 1280,{SURF+2} '
@@ -3638,7 +3651,10 @@ def denali():
                        f'fill="url(#{grad})" opacity="{ray_op * (0.5 + rnd()):.2f}"/>')
         return f'<g>{body}{"".join(out)}</g>'
 
-    aurora = ('    <g id="aurora">'
+    # Tagged so the engine can breathe it. Each direct child drifts and fades on
+    # its own slow cycle: the two curtains, the bright ray, and the pink flecks all
+    # moving together at one rate would read as a single sheet sliding about.
+    aurora = ('    <g id="aurora" class="cc-aurora">'
               + curtain('-60,2 130,22 320,48 500,68 660,52 820,26 1000,10 1180,28 1300,52 '
                         '1300,112 1180,88 1000,72 820,88 660,114 500,130 320,110 130,84 -60,62',
                         'aurora', 34, 0.42)
@@ -6122,7 +6138,13 @@ def yellowstone():
                         for cx, cy, r, op in [(58, -300, 38, 0.4), (96, -262, 30, 0.28),
                                               (-52, -348, 34, 0.36), (128, -206, 24, 0.2),
                                               (-88, -292, 26, 0.24), (70, -392, 28, 0.3)])
-        return f'<g id="old-faithful" transform="translate({x},{base}) scale({s})">{cone}{plume}{drift}</g>'
+        # The cone is permanent; everything above the mouth is not. Wrapped so the
+        # engine can grow it out of the vent and let it fall back — a geyser that
+        # is always at full height is a fountain, and the WAITING is most of what
+        # makes a geyser a geyser. data-origin is the mouth, the point it all
+        # scales about.
+        return (f'<g id="old-faithful" transform="translate({x},{base}) scale({s})">{cone}'
+                f'<g class="cc-geyser" data-origin="0,-66">{plume}{drift}</g></g>')
 
     # ----------------------------------------------- ground: sinter, not grass ----
     def mats(cx, cy, rx, ry):

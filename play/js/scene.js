@@ -298,13 +298,15 @@
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
+    const geysers = buildGeysers(svg);
+    const aurora = buildAurora(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1279,6 +1281,79 @@
     }
   }
 
+  // =======================================================================
+  // A geyser (.cc-geyser). The cone is permanent; the column is not.
+  //
+  // The WAITING is most of what makes a geyser a geyser — one that is always at
+  // full height is a fountain. So it sits quiet with a wisp at the vent for a
+  // good while, climbs, stands, and falls back. data-origin is the mouth, and
+  // everything scales about that point so the column grows OUT of the vent
+  // rather than inflating around its own middle.
+  const GEYSER = { quiet: 15, rise: 2.6, hold: 6, fall: 3.4, low: 0.13 };
+
+  function buildGeysers(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-geyser').forEach(node => {
+      const o = (node.getAttribute('data-origin') || '').split(',').map(Number);
+      if (o.length !== 2 || o.some(isNaN)) { console.warn('cc-geyser has no usable data-origin'); return; }
+      out.push({ el: node, ox: o[0], oy: o[1] });
+    });
+    return out;
+  }
+
+  function updateGeysers(t) {
+    const list = currentScene && currentScene.geysers;
+    if (!list || !list.length) return;
+    const span = GEYSER.quiet + GEYSER.rise + GEYSER.hold + GEYSER.fall;
+    list.forEach((g, i) => {
+      // Offset by index so two geysers in one scene would never go together.
+      let u = (t / 1000 + i * span * 0.37) % span;
+      let k;
+      if (u < GEYSER.quiet) k = GEYSER.low;
+      else if ((u -= GEYSER.quiet) < GEYSER.rise) {
+        const r = u / GEYSER.rise;                       // ease out: it leaves fast, then eases
+        k = GEYSER.low + (1 - GEYSER.low) * (1 - (1 - r) * (1 - r));
+      } else if ((u -= GEYSER.rise) < GEYSER.hold) k = 1;
+      else {
+        const r = Math.min(1, (u - GEYSER.hold) / GEYSER.fall);
+        k = GEYSER.low + (1 - GEYSER.low) * (1 - r) * (1 - r);
+      }
+      g.el.setAttribute('transform',
+        'translate(' + g.ox + ',' + g.oy + ') scale(' + k.toFixed(3) + ') translate(' + (-g.ox) + ',' + (-g.oy) + ')');
+      g.el.setAttribute('opacity', (0.45 + 0.55 * k).toFixed(2));
+    });
+  }
+
+  // =======================================================================
+  // The aurora (.cc-aurora). Each direct child — the two curtains, the bright
+  // ray, the pink flecks — drifts and fades on its own slow cycle. Moved
+  // together at one rate the whole thing reads as a single sheet sliding
+  // sideways, which is the one thing an aurora never looks like.
+  function buildAurora(svg) {
+    const root = svg.querySelector('.cc-aurora');
+    if (!root) return null;
+    const bands = [];
+    [].forEach.call(root.children, (el, i) => {
+      const o = parseFloat(el.getAttribute('opacity'));
+      bands.push({ el: el, base: isNaN(o) ? 1 : o,
+                   ax: 12 + (i % 4) * 7, tx: 19 + (i % 5) * 4.3, px: (i % 7) / 7,
+                   to: 13 + (i % 3) * 5.1, po: (i % 5) / 5 });
+    });
+    return bands.length ? bands : null;
+  }
+
+  function updateAurora(t) {
+    const bands = currentScene && currentScene.aurora;
+    if (!bands) return;
+    const secs = t / 1000;
+    bands.forEach(b => {
+      const dx = b.ax * Math.sin((secs / b.tx + b.px) * TAU);
+      const k = 0.58 + 0.42 * (0.5 + 0.5 * Math.sin((secs / b.to + b.po) * TAU));
+      b.el.setAttribute('transform', 'translate(' + dx.toFixed(1) + ',0)');
+      b.el.setAttribute('opacity', (b.base * k).toFixed(3));
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -1989,6 +2064,8 @@
     updateBalloons(t, dt);
     updateFalls(t);
     updateBoom(dt);
+    updateGeysers(t);
+    updateAurora(t);
     updateCableCars(dt);
     updateRocket(dt);
     updateFerris(dt);
