@@ -201,7 +201,11 @@
         // for the second, so the art can say which side it enters from.
         const lo = Math.min(v[0], v[1]), hi = Math.max(v[0], v[1]);
         shuttles.push({ el: node, x0: lo, x1: hi, y: v[2],
-                        x: v[0], dir: v[1] > v[0] ? 1 : -1, speed: speed,
+                        x: v[0], dir: v[1] > v[0] ? 1 : -1,
+                        // The per-selector figure is the default; a single vehicle
+                        // can say otherwise. A sailboat and a ferry sharing a bay
+                        // at the same speed read as one mechanism, not two boats.
+                        speed: parseFloat(node.getAttribute('data-speed')) || speed,
                         // Which way the ARTWORK points. +1 nose-right (the L),
                         // -1 nose-left (the plane). Mirror only when the two
                         // disagree, or it flies backwards.

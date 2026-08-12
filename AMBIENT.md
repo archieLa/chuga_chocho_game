@@ -27,7 +27,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 
 | Contract | Tag it | Used by |
 |---|---|---|
-| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, and `data-scale` if it is drawn at another size. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
+| **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, `data-scale` if it is drawn at another size, and `data-speed` to override the per-class default — two boats in one bay at the same speed read as one mechanism. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
@@ -108,7 +108,7 @@ Two traps, both already paid for once:
 
 ---
 
-## What moves today (17 scenes)
+## What moves today (18 scenes)
 
 | Scene | What |
 |---|---|
@@ -119,6 +119,7 @@ Two traps, both already paid for once:
 | Horseshoe Curve | 25-wagon freight round the bowl |
 | Crater Lake | traffic turns onto Rim Drive |
 | Wheat Country | the tractor works both fields, calls at the grain elevator, and turns at the verge — it never crosses the road |
+| San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |

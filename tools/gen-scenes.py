@@ -292,11 +292,28 @@ def sf():
            + ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="2.5" rx="1"/>'
                      for x, y, w in [(120, 262, 70), (360, 278, 90), (620, 256, 66),
                                      (840, 282, 84), (1080, 266, 74), (240, 286, 60)]) + '</g>'
-            # a sailboat and a ferry, because the bay is always busy
-            '<g transform="translate(430,290)"><path d="M0,-34 L0,-2 L-20,-2 Z" fill="#f6f1e4"/>'
+            # A sailboat and a ferry, because the bay is always busy — and they
+            # SAIL it. Both are .cc-ship shuttles, drawn where their run begins so
+            # nothing jumps on the first frame and the static art still shows two
+            # boats in the middle of the bay. The Golden Gate's towers stop at
+            # y=252 and the bay runs to 294, so the water is clear all the way
+            # across; both pass behind the bridge, which is the right way round.
+            #
+            # Their speeds are deliberately different. At the same speed two boats
+            # in one bay read as a single mechanism rather than as two boats going
+            # about their own business. A sailboat is slow; a ferry has a timetable.
+            #
+            # The sailboat is drawn nose-RIGHT (the jib is forward of the mast, to
+            # the right), so the default nose is correct and it mirrors when it
+            # comes about.
+            '<g class="cc-ship" data-sail="430,1330,290" data-speed="24" '
+            'transform="translate(430,290)">'
+            '<path d="M0,-34 L0,-2 L-20,-2 Z" fill="#f6f1e4"/>'
             '<path d="M3,-30 L16,-2 L3,-2 Z" fill="#dfe8ee"/>'
             '<path d="M-24,-2 L24,-2 L18,4 L-18,4 Z" fill="#2f3a44"/></g>'
-            '<g transform="translate(880,288)"><rect x="-30" y="-12" width="60" height="9" rx="2" fill="#e8edf0"/>'
+            '<g class="cc-ship" data-sail="880,-60,288" data-speed="46" '
+            'transform="translate(880,288)">'
+            '<rect x="-30" y="-12" width="60" height="9" rx="2" fill="#e8edf0"/>'
             '<rect x="-22" y="-20" width="44" height="8" rx="2" fill="#f4f7f9"/>'
             '<rect x="-4" y="-28" width="5" height="9" fill="#41474f"/></g>')
 
