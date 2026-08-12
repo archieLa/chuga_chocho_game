@@ -16200,8 +16200,10 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
               # real cars onto it instead: data-exit is "farEdgeY,nearEdgeY,junctionX",
               # and 380 is just short of where the tarmac stops (378) so a car turns
               # rather than fading a few pixels later.
-              + f'<g class="cc-road-exit" data-exit="364,380,668"></g>'
-              + plough(756, STREET_B - 2, 0.14, 'cc-plough-far')
+              + f'<g class="cc-road-exit" data-exit="356,388,668"></g>'
+              # The little street plough is gone. Once real traffic started turning
+              # onto the cross street it simply drove over the top of it, and a
+              # second ploughing machine was never worth much anyway.
               + f'<rect x="0" y="{STREET_B - 3}" width="1280" height="8" fill="#f2f8fe"/>'
               + '</g>')
 
@@ -16294,10 +16296,13 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
             'Q10,674 -20,664 Z" fill="#ffffff" stroke="#cfdff0" stroke-width="2"/>'
           # the line the plough is working: it clears the verge up to the carriageway
           # and no further, so an animated pass never crosses the road
-          # It used to run to 452, and the plough is wide enough that it climbed
-          # onto the carriageway at that end. The road spans 517..763 at this
-          # height; stopping at 300 keeps the whole machine clear of it.
-          + '<path id="plough-path" d="M-180,706 Q60,672 300,678" '
+          # BOTH ends are set by the machine's own reach, and it is NOT symmetric:
+          # the art runs -252..+114 about its origin, so mirrored on the outward
+          # pass it sticks out 252 to the RIGHT. At 300 the blade still crossed
+          # the carriageway (521..759 at this height) and at -180 the return leg
+          # went entirely off frame, which is why it looked like it stopped or
+          # vanished. -60 to 240 keeps the whole run visible and clear of the road.
+          + '<path id="plough-path" d="M-60,700 Q90,678 240,679" '
             'fill="none" stroke="none"/>'
           + plough(322, 678, 1.0)
           + ''.join(aspen(x, y, s, h, 21 + i) for i, (x, y, s, h) in enumerate(
@@ -16658,12 +16663,20 @@ def indianapolis():
     HOOKS = (
         f'<path id="racing-line" d="M-80,{TRACK_T + 44} L1360,{TRACK_T + 40}" fill="none" '
         f'stroke="none"/>'
-        f'<path id="pit-in-path" d="M1060,{TRACK_T + 42} Q1200,{TRACK_T + 20} '
-        f'1280,{PIT_T + 26}" fill="none" stroke="none"/>'
-        f'<path id="pit-lane-path" d="M1280,{PIT_T + 26} L-60,{PIT_T + 26}" fill="none" '
+        # A PIT LANE RUNS THE SAME WAY AS THE TRACK. These were authored entering
+        # at the right and running back to the left, which only works if the cars
+        # circulate right to left — and they do not; they are drawn nose-left and
+        # run left to right. A car took the slip road, drove up the lane against
+        # its own direction of travel, and rejoined behind where it started.
+        #
+        # So the slip roads swap ends: in from the left before the boxes, out to
+        # the right after them, and the lane itself is travelled left to right.
+        f'<path id="pit-in-path" d="M120,{TRACK_T + 46} Q210,{TRACK_T + 6} '
+        f'300,{PIT_T + 26}" fill="none" stroke="none"/>'
+        f'<path id="pit-lane-path" d="M-60,{PIT_T + 26} L1280,{PIT_T + 26}" fill="none" '
         f'stroke="none"/>'
-        f'<path id="pit-out-path" d="M-60,{PIT_T + 26} Q40,{PIT_T + 34} '
-        f'160,{TRACK_T + 44}" fill="none" stroke="none"/>'
+        f'<path id="pit-out-path" d="M1180,{PIT_T + 26} Q1280,{PIT_T + 36} '
+        f'1370,{TRACK_T + 42}" fill="none" stroke="none"/>'
         f'<circle id="pit-box-stop" cx="{stop_x}" cy="{PIT_T + 26}" r="1" fill="none" '
         f'stroke="none"/>')
 
@@ -16851,11 +16864,17 @@ def indianapolis():
         out.append('</g>')
         return ''.join(out)
 
+    # THE PACK GOES ON TOP OF THE TARMAC IT DRIVES ON. The access apron and the
+    # grass verge used to be painted after the racers, so a car in the nearest
+    # lane was sliced in half every time it passed the gate — the apron runs up
+    # onto the racing surface and simply covered it. The catch fence stays last,
+    # because that genuinely is in front of everything.
     back = ('    ' + garages() + pit_svg + pit_stop + wall_svg
-            + track_svg + HOOKS + racers
+            + track_svg + HOOKS
             + f'<rect x="-20" y="{TRACK_B}" width="1320" height="{APRON - TRACK_B}" '
             f'fill="{GRASS2}"/>'
             + access_road()
+            + racers
             + catch_fence(TRACK_B + 2, 56, gap=(556, 726))
             )
 

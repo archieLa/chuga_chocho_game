@@ -80,6 +80,18 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **Two lanes only if two lanes fit.** A car on a side road is turned a quarter,
+  so what has to clear is its WIDTH. Rim Drive is a 56px band and clears it;
+  Ketchum's cross street is barely 30 and does not, so the two streams drove
+  through each other. The engine measures it and runs the street one way where
+  they will not fit, rather than shoving a lane onto the verge.
+- **A mirrored thing's overhang is not symmetric either.** Sun Valley's plough
+  runs -252..+114 about its origin, so mirrored on the outward pass it reaches
+  252 to the RIGHT. Bounding its path by the -252 end alone put the blade on the
+  carriageway at one end and the whole machine off frame at the other.
+- **Anything a vehicle drives ON must be painted BEFORE it.** Indianapolis's
+  access apron and grass verge came after the pack, so a car in the nearest lane
+  was sliced in half every time it passed the gate.
 - **Two things kill a car that has turned off a truncated road.** The fade over
   the last 46px before the road's end, and the removal at `y < roadTop`. Sun
   Valley's cross street is 7px PAST the tarmac, so cars turned onto it at 7%

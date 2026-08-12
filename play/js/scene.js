@@ -308,6 +308,14 @@
           laneIn: v[0] + (v[1] - v[0]) * 0.25,    // inbound the far one
           toX: 1340,
         };
+        // TWO LANES ONLY IF TWO LANES FIT. A car on the side road is turned a
+        // quarter, so what has to clear is its WIDTH — 72 at full size — against
+        // the gap between the lanes. Rim Drive is a 56px band and clears it
+        // easily; Ketchum's cross street is barely 30 and does not, so the two
+        // streams drove through each other. Where they will not fit, the street
+        // runs one way and nothing arrives along it.
+        const sep = roadExit.laneOut - roadExit.laneIn;
+        roadExit.twoWay = sep > 72 * depthScale(roadExit.laneOut);
       }
     }
 
@@ -1656,16 +1664,17 @@
   const RACE = { lo: -140, hi: 1420 };
   const faceX = (s, goingRight) => (goingRight ? -s : s);
   const PIT = {
-    entry: 1060,      // where it peels off the racing line
+    entry: 120,       // where it peels off the racing line — BEFORE the boxes
     lane: 0.50,       // scale in the pit lane, against 0.62 on the track
+    laneY: 318,       // the lane's centre — 72px further from the viewer than the track
     steps: [          // name, seconds
-      ['in',    2.0],   // down the slip road into the lane
-      ['along', 2.6],   // right to left up the lane to the box
+      ['in',    2.0],   // up the slip road into the lane
+      ['along', 1.6],   // along the lane to the box, the way the track runs
       ['jack',  0.5],   // nose lifts
       ['off',   1.1],   // wheels off
       ['on',    1.1],   // wheels on
       ['drop',  0.4],
-      ['leave', 2.2],   // on down the lane to the exit
+      ['leave', 3.0],   // on along the lane to the exit
       ['out',   1.8],   // slip road back onto the track
     ],
   };
@@ -1723,7 +1732,7 @@
     if (!pit.car) {
       pit.cooldown -= secs;
       if (pit.cooldown > 0) return;
-      const near = r.cars.filter(c => c.x > PIT.entry - 90 && c.x < PIT.entry + 40)[0];
+      const near = r.cars.filter(c => c.x > PIT.entry - 60 && c.x < PIT.entry + 60)[0];
       if (!near) return;
       pit.car = near; pit.step = 0; pit.t = 0;
       if (r.parked) r.parked.setAttribute('visibility', 'hidden');   // one car per stall
@@ -1739,17 +1748,15 @@
     if (step[0] === 'in') {
       const p = ptOn(pit.inP, u); x = p.x; y = p.y; s = c.s + (PIT.lane - c.s) * u;
     } else if (step[0] === 'along') {
-      const total = pit.laneP.getTotalLength();
-      const startU = 0, endU = (1280 - pit.boxX) / 1340;
-      const p = ptOn(pit.laneP, startU + (endU - startU) * u);
-      x = p.x; y = p.y; s = PIT.lane;
+      // The lane is a straight line, so drive it by x. Fractions of a path that
+      // runs off both sides of the frame were only ever arithmetic to get wrong.
+      x = 300 + (pit.boxX - 300) * u; y = PIT.laneY; s = PIT.lane;
     } else if (step[0] === 'leave') {
-      const p = ptOn(pit.laneP, (1280 - pit.boxX) / 1340 + (1 - (1280 - pit.boxX) / 1340) * u);
-      x = p.x; y = p.y; s = PIT.lane;
+      x = pit.boxX + (1180 - pit.boxX) * u; y = PIT.laneY; s = PIT.lane;
     } else if (step[0] === 'out') {
       const p = ptOn(pit.outP, u); x = p.x; y = p.y; s = PIT.lane + (c.s - PIT.lane) * u;
     } else {
-      x = pit.boxX; y = 318; s = PIT.lane;
+      x = pit.boxX; y = PIT.laneY; s = PIT.lane;
       // jacked up, then held there while the wheels are off
       lift = step[0] === 'jack' ? -5 * u : step[0] === 'drop' ? -5 * (1 - u) : -5;
       if (c.wheels) {
@@ -1757,9 +1764,10 @@
           step[0] === 'off' ? (1 - u).toFixed(2) : step[0] === 'on' ? u.toFixed(2) : '1');
       }
     }
-    // Down the slip road and back out again it is going right; up the lane and
-    // standing in the box it faces left, which is the way it will leave.
-    const goingRight = step[0] === 'in' || step[0] === 'out';
+    // The whole stop now runs left to right — in, along, out — so the car never
+    // turns round at any point, which is the entire reason for re-authoring the
+    // slip roads.
+    const goingRight = true;
     c.el.setAttribute('transform',
       'translate(' + x.toFixed(1) + ',' + (y + lift).toFixed(1) + ') scale(' +
       faceX(s, goingRight).toFixed(3) + ',' + s.toFixed(3) + ')');
@@ -1769,7 +1777,7 @@
       pit.t = 0;
       if (pit.step >= PIT.steps.length) {
         // back on the racing line at the exit, in its own lane again
-        c.x = 160; 
+        c.x = 1370; 
         if (c.wheels) c.wheels.setAttribute('opacity', '1');
         pit.car = null; pit.step = 0; pit.cooldown = 9;
         if (r.parked) r.parked.setAttribute('visibility', 'visible');
@@ -2355,7 +2363,7 @@
     const at = down ? top + 4 : H + 120;
     // Where the road turns, traffic coming toward us has driven in along the side
     // road rather than materialising at the end of ours.
-    if (down && ex) {
+    if (down && ex && ex.twoWay) {
       const car = newCar(1, ex.laneIn);
       car.phase = 'enter';
       car.x = ex.toX;
