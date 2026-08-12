@@ -2474,7 +2474,15 @@
       if (top) top.setAttribute('visibility', onTrack ? 'hidden' : 'visible');
       if (side) side.setAttribute('visibility', onTrack ? 'visible' : 'hidden');
     }
-    const turn = (car.phase === 'road' || onTrack) ? '' : ' rotate(90)';
+    // WHICH WAY IT IS POINTING. The sprite's nose follows `dir`: +1 is drawn
+    // facing the viewer (+y), -1 facing away (-y). A fixed rotate(90) happened
+    // to be right for the two cases that existed — 'exit' (drawn facing away,
+    // driving east) and 'enter' (drawn facing us, driving west) — and is wrong
+    // for 'approach', which is drawn facing us and drives EAST. Those cars ran
+    // down the street in reverse.
+    const eastbound = car.phase === 'exit' || car.phase === 'approach';
+    const deg = (eastbound ? -1 : 1) * (car.dir > 0 ? 90 : -90);
+    const turn = (car.phase === 'road' || onTrack) ? '' : ' rotate(' + deg + ')';
     car.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + car.y.toFixed(1) + ')' + turn + ' scale(' + s.toFixed(3) + ')');
     // Fade over the last stretch before the road's far end. At the horizon a car
     // is tiny and this is invisible; on a truncated road it is what stops a
@@ -2519,9 +2527,21 @@
       return true;
     }
     if (car.phase === 'approach') {
-      car.x += car.speed * depthScale(car.y) * secs;
-      // At the junction it turns right, down onto the carriageway toward us.
-      if (car.x >= ex.jx) { car.phase = 'road'; car.x = null; car.y = ex.y1; }
+      // It turns down over the CARRIAGEWAY'S CENTRE, not over the junction
+      // marker. jx is where the side road meets the main one, which at Ketchum
+      // is 668 — 28px right of the road's centre at 640 — so the car drove past
+      // the turn and then snapped backwards onto the lane to make it.
+      //
+      // And it gives way. Dropping onto the carriageway without looking put it
+      // straight on top of anything coming up from the bottom of the frame; now
+      // it holds at the junction until there is room, which is what the queue
+      // behind it is for.
+      const want = car.x + car.speed * depthScale(car.y) * secs;
+      if (want < ROAD_CX) { car.x = want; return true; }
+      const blocked = cars.some(c => c.phase === 'road' &&
+                                     Math.abs(c.y - ex.y1) < carGap(ex.y1));
+      if (blocked) { car.x = ROAD_CX; return true; }        // wait for a gap
+      car.phase = 'road'; car.x = null; car.y = ex.y1;
       return true;
     }
     if (car.phase === 'enter') {

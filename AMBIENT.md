@@ -81,6 +81,12 @@ Two traps, both already paid for once:
   next one left meant the pitch was never actually empty, so it read as three
   balloons taking turns rather than as an ascension. All three go, then all
   three return.
+- **A car on a side road points where it is GOING, not where it was drawn.** The
+  sprite's nose follows `dir` — +1 faces the viewer, -1 faces away — so the
+  quarter-turn has to be signed by both. A fixed `rotate(90)` was right for the
+  only two cases that existed and sent the third down the street in reverse.
+- **A car joining a road has to give way.** Turning onto the carriageway without
+  looking put it straight on top of traffic already there.
 - **Let the ART decide, not a measurement.** The engine used to work out whether
   two lanes would fit and quietly drop to one where they would not. It was a
   stopgap, and the moment the car's assumed width was corrected from 72 to 89 it
