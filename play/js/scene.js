@@ -297,16 +297,27 @@
     let roadExit = null;
     const exitEl = svg.querySelector('.cc-road-exit');
     if (exitEl) {
-      const v = (exitEl.getAttribute('data-exit') || '').split(',').map(Number);
+      const raw = (exitEl.getAttribute('data-exit') || '').split(',');
+      // An optional 4th token, "east", says both streams run the SAME way along
+      // the side road: traffic off the carriageway turns right and heads east,
+      // and traffic joining comes in from the far west, drives east along the
+      // street and turns right down onto the carriageway. One lane serves both,
+      // so they queue behind each other instead of passing — which is the only
+      // way a street this narrow can carry two directions at all.
+      const sameDir = raw[3] === 'east';
+      const v = raw.slice(0, 3).map(Number);
       if (v.length === 3 && !v.some(isNaN)) {
         roadExit = {
           y0: v[0], y1: v[1], jx: v[2],
           // Pushed to the outer thirds so the two streams clear each other: a car
           // is ~24px tall here and the band is 56px, so 0.75/0.25 leaves a full
           // car's height between them.
-          laneOut: v[0] + (v[1] - v[0]) * 0.75,   // outbound keeps the near lane
-          laneIn: v[0] + (v[1] - v[0]) * 0.25,    // inbound the far one
-          toX: 1340,
+          sameDir: sameDir,
+          // One lane down the middle when both streams share it; otherwise the
+          // outer thirds, so the two can pass.
+          laneOut: sameDir ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.75,
+          laneIn: sameDir ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.25,
+          toX: 1340, fromX: -90,
         };
         // TWO LANES ONLY IF TWO LANES FIT. A car on the side road is turned a
         // quarter, so what has to clear is its WIDTH — 72 at full size — against
@@ -315,7 +326,8 @@
         // streams drove through each other. Where they will not fit, the street
         // runs one way and nothing arrives along it.
         const sep = roadExit.laneOut - roadExit.laneIn;
-        roadExit.twoWay = sep > 72 * depthScale(roadExit.laneOut);
+        // 89, not 72: a car's widest points are its wheels.
+        roadExit.twoWay = sameDir || sep > 89 * depthScale(roadExit.laneOut);
       }
     }
 
@@ -2365,8 +2377,10 @@
     // road rather than materialising at the end of ours.
     if (down && ex && ex.twoWay) {
       const car = newCar(1, ex.laneIn);
-      car.phase = 'enter';
-      car.x = ex.toX;
+      // 'approach' comes in from the WEST and drives east to the junction;
+      // 'enter' comes from the east and drives west to it.
+      car.phase = ex.sameDir ? 'approach' : 'enter';
+      car.x = ex.sameDir ? ex.fromX : ex.toX;
       cars.push(car); placeCar(car);
       return;
     }
@@ -2449,6 +2463,12 @@
       if (car.x > ex.toX) car.dead = true;
       return true;
     }
+    if (car.phase === 'approach') {
+      car.x += car.speed * depthScale(car.y) * secs;
+      // At the junction it turns right, down onto the carriageway toward us.
+      if (car.x >= ex.jx) { car.phase = 'road'; car.x = null; car.y = ex.y1; }
+      return true;
+    }
     if (car.phase === 'enter') {
       car.x -= car.speed * depthScale(car.y) * secs;
       // Reached the junction: swing onto our carriageway and head down.
@@ -2498,14 +2518,18 @@
     cars.forEach(car => { car.offRoad = driveSideRoad(car, secs); });
     // Rim Drive is a queue too. Without this, two cars released together at the
     // gate turn together and then sit 7px apart the whole way across.
-    ['exit', 'enter'].forEach(ph => {
-      const lane = cars.filter(c => c.phase === ph)
-        .sort((a, b) => ph === 'exit' ? b.x - a.x : a.x - b.x);   // front first
+    // 'exit' and 'approach' share one eastbound lane where the street is
+    // one-way, so they queue as a single line — otherwise a car turning out of
+    // the junction lands on top of one already driving past it.
+    [['exit', 'approach'], ['enter']].forEach(group => {
+      const east = group[0] !== 'enter';
+      const lane = cars.filter(c => group.indexOf(c.phase) >= 0)
+        .sort((a, b) => east ? b.x - a.x : a.x - b.x);           // front first
       let limit = null;
       lane.forEach(c => {
         const gap = 150 * depthScale(c.y);
-        if (limit != null) c.x = ph === 'exit' ? Math.min(c.x, limit) : Math.max(c.x, limit);
-        limit = ph === 'exit' ? c.x - gap : c.x + gap;
+        if (limit != null) c.x = east ? Math.min(c.x, limit) : Math.max(c.x, limit);
+        limit = east ? c.x - gap : c.x + gap;
       });
     });
 

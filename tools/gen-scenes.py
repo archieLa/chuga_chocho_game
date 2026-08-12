@@ -15564,7 +15564,11 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
     `#plough-path`, `#cc-plough-far`, and the town traffic on `#street-path`."""
     VALLEY = 346          # where the mountains meet the valley floor
     TOWN_Y = 358          # baseline of the Ketchum buildings
-    STREET_T, STREET_B = 358, 382
+    # WIDE ENOUGH FOR WHAT DRIVES ON IT. A game car is 89 wide at its widest —
+    # the wheels stand out to +-44, not the 72 of the body — which at this depth
+    # is 27px across. On a 24px street its wheels hung over both kerbs into the
+    # snow. 38 gives a lane with a margin either side.
+    STREET_T, STREET_B = 356, 394
     ROAD_TOP = 378
 
     SNOW, SNOW2 = '#f6fafe', '#e6eef9'
@@ -16200,7 +16204,7 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
               # real cars onto it instead: data-exit is "farEdgeY,nearEdgeY,junctionX",
               # and 380 is just short of where the tarmac stops (378) so a car turns
               # rather than fading a few pixels later.
-              + f'<g class="cc-road-exit" data-exit="356,388,668"></g>'
+              + f'<g class="cc-road-exit" data-exit="356,394,668,east"></g>'
               # The little street plough is gone. Once real traffic started turning
               # onto the cross street it simply drove over the top of it, and a
               # second ploughing machine was never worth much anyway.
@@ -16237,7 +16241,12 @@ The vehicle the set has never had is the **highway plough**, near and large, wit
     # Ketchum, and drawn behind it the ropes appeared to disappear into a rooftop.
     back = ('    ' + treeline + town_l + lifts + street
             + bank(-1, 386, 448) + bank(1, 386, 448)
-            + ''.join(aspen(x, VALLEY + 62 + (i % 3) * 9, 0.34 + (i % 3) * 0.05, 96, 9 + i)
+            # Down into the snow field BELOW the street. Based at 408..426 they
+            # were 42 tall and reached up to y=366, standing right across the
+            # carriageway with the traffic passing behind their trunks. Based at
+            # 440..448 the tallest tops out at 398, clear of the street's 394 and
+            # well above the ballast at 450.
+            + ''.join(aspen(x, VALLEY + 94 + (i % 3) * 4, 0.34 + (i % 3) * 0.05, 96, 9 + i)
                       for i, x in enumerate([54, 88, 122, 152, 186,
                                              1104, 1138, 1170, 1204, 1240]))
             + ''.join(snowfir(x, y, s) for x, y, s in
