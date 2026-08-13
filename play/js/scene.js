@@ -1484,7 +1484,11 @@
   // good while, climbs, stands, and falls back. data-origin is the mouth, and
   // everything scales about that point so the column grows OUT of the vent
   // rather than inflating around its own middle.
-  const GEYSER = { quiet: 15, rise: 2.6, hold: 6, fall: 3.4, low: 0.13 };
+  // A 27-second cycle spent 15 of them doing nothing, so most of the time a
+  // child looked at Yellowstone the hero of the scene was off. Now ~16, and the
+  // rise is quicker because that is what a geyser does — it jets, it does not
+  // inflate.
+  const GEYSER = { quiet: 6, rise: 1.8, hold: 5, fall: 3, low: 0.13 };
 
   function buildGeysers(svg) {
     const out = [];

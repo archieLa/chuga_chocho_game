@@ -87,6 +87,10 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **Check which way a thing FACES from its eye, not from a guess.** I read the
+  elk's neck path as starting at +26 and assumed it looked right; its eye is at
+  x=-41. It walked backwards. The eye, or the nose, is the one part that cannot
+  be ambiguous.
 - **Pair the parts of a leg before you swing it.** An elk's leg is an upper and
   a lower rect; grouped separately, the dark hoof stays behind while the leg
   swings away from it.
