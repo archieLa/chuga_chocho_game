@@ -17269,14 +17269,22 @@ def new_river_gorge():
                  (654, '#e8e6e2', False), (840, '#3f7a4a', True),
                  (1044, '#c1443a', False), (1216, '#6f6157', False)]):
             if truck:
-                out.append(f'<g id="cc-gorge-car-{i}" class="cc-gorge-car" '
+                # 876 feet up and deliberately minute. Slowly, and both ways.
+                out.append(f'<g id="cc-gorge-car-{i}" class="cc-gorge-car cc-drift" '
+                           f'data-path="bridge-road-path" data-t="{(x + 80) / 1440.0:.3f}" '
+                           f'data-speed="{17 + (i % 3) * 5 if i % 2 else -(15 + (i % 3) * 4)}" '
+                           f'data-scale="1" '
                            f'transform="translate({x},{ROAD_Y})">'
                            f'<rect x="-7" y="-5" width="14" height="5" rx="1" '
                            f'fill="#e8e6e2"/>'
                            f'<rect x="-7" y="-5" width="4" height="5" rx="1" '
                            f'fill="{col}"/></g>')
             else:
-                out.append(f'<g id="cc-gorge-car-{i}" class="cc-gorge-car" '
+                # 876 feet up and deliberately minute. Slowly, and both ways.
+                out.append(f'<g id="cc-gorge-car-{i}" class="cc-gorge-car cc-drift" '
+                           f'data-path="bridge-road-path" data-t="{(x + 80) / 1440.0:.3f}" '
+                           f'data-speed="{17 + (i % 3) * 5 if i % 2 else -(15 + (i % 3) * 4)}" '
+                           f'data-scale="1" '
                            f'transform="translate({x},{ROAD_Y})">'
                            f'<rect x="-4.5" y="-3.5" width="9" height="3.5" rx="1.2" '
                            f'fill="{col}"/>'
@@ -17320,7 +17328,14 @@ def new_river_gorge():
     def raft(x, y, s, col='#e8a02a', gid=''):
         """An inflatable raft with paddlers — the gorge's whole modern life."""
         idattr = f' id="{gid}"' if gid else ''
-        return (f'<g{idattr} class="cc-raft" transform="translate({x:.0f},{y:.0f}) '
+        # Rafts bob more than they travel — a couple of pixels at a couple of
+        # cycles a second sells a rapid better than speed does. Each rides its own
+        # offset off #river-path, which is one line where the river is a band.
+        n = int(gid[-1]) if gid and gid[-1].isdigit() else 0
+        drift = (f' class="cc-raft cc-drift" data-path="river-path" '
+                 f'data-t="{0.1 + n * 0.27:.2f}" data-speed="{26 + n * 5}" '
+                 f'data-scale="{s:.2f}" data-bob="2.4,{0.5 + n * 0.12:.2f}"')
+        return (f'<g{idattr}{drift} transform="translate({x:.0f},{y:.0f}) '
                 f'scale({s:.2f})">'
                 f'<ellipse cx="0" cy="5" rx="34" ry="7" fill="#ffffff" opacity="0.6"/>'
                 f'<path d="M-28,0 Q-33,-10 -20,-11 L20,-11 Q33,-10 28,0 Q15,6 0,6 '
@@ -18584,8 +18599,13 @@ def vicksburg():
         short hood, cab set back, two three-axle trucks. No reporting marks, no numbers,
         no livery."""
         BODY, BODY2, DK = '#3f5a6e', '#4d6c82', '#252b30'
-        o = [f'<g id="{gid}" class="cc-bridge-train" transform="translate({x},{y}) '
-             f'scale({s:.2f})">']
+        # Independent of the player's train down at the crossing: two trains at
+        # two depths and two speeds. This one is far away, so it is slow — the
+        # deck is 1600 long and 66px/s crosses it in about twenty-five seconds.
+        o = [f'<g id="{gid}" class="cc-bridge-train cc-drift" '
+             f'data-path="bridge-rail-path" data-t="0.35" data-speed="66" '
+             f'data-scale="{s:.2f}" data-nose="1" data-turn="1" '
+             f'transform="translate({x},{y}) scale({s:.2f})">']
         # the locomotive
         o.append('<g>'
                  '<path d="M-96,-6 L34,-6 L34,-30 L18,-30 L14,-40 L-30,-40 L-34,-30 '
@@ -18675,7 +18695,18 @@ def vicksburg():
         Drawn with a big boat and a few barges it turns into a tugboat, which is a
         different machine on a different river."""
         BARGE, BARGE2, RUST = '#6f5a44', '#836b50', '#8a4f36'
-        o = [f'<g id="{gid}" class="cc-tow" transform="translate({x},{y}) scale({s:.2f})">',
+        # A loaded tow does about 6mph and the whole charm is that it barely
+        # appears to move — 14px/s takes it two and a half minutes to cross, and
+        # #river-path runs off both edges so the wrap is never seen.
+        #
+        # It is drawn bow-LEFT: the raft is at -x and the boat behind it at +x,
+        # because a towboat PUSHES. So it travels left, and is not mirrored — sent
+        # right it shunted its own barges backwards. That is also upstream, which
+        # is what a loaded tow is doing at 6mph, and it means the driftwood coming
+        # down on the current passes it the other way.
+        o = [f'<g id="{gid}" class="cc-tow cc-drift" data-path="river-path" '
+             f'data-t="0.62" data-speed="-14" data-scale="{s:.2f}" data-nose="-1" '
+             f'transform="translate({x},{y}) scale({s:.2f})">',
              '<ellipse cx="-110" cy="15" rx="250" ry="11" fill="#3f4a47" opacity="0.5"/>',
              '<path d="M-350,13 L104,13 L124,21 L-360,21 Z" fill="#39443f" '
              'opacity="0.4"/>',
@@ -18791,11 +18822,18 @@ def vicksburg():
                + f'<path id="river-path" d="M-360,{RIVER_T + 36} L1640,{RIVER_T + 42}" '
                f'fill="none" stroke="none"/>'
                + tow(392, RIVER_T + 38, 1.22)
-               + ''.join(f'<g id="cc-driftwood-{i}"><ellipse cx="{x}" cy="{y}" rx="{w}" '
+               # Logs on the current. They ride the same path as the tow, so each
+               # needs its own y offset back off it — the path is one line and the
+               # river is a band. Slightly faster than the tow, because they are
+               # going with the stream and it is pushing against it.
+               + ''.join(f'<g id="cc-driftwood-{i}" class="cc-drift" '
+                         f'data-path="river-path" data-t="{tt}" data-speed="{sp}" '
+                         f'data-scale="1">'
+                         f'<ellipse cx="0" cy="{y - (RIVER_T + 6)}" rx="{w}" '
                          f'ry="3" fill="#5f4c39" opacity="0.8"/></g>'
-                         for i, (x, y, w) in enumerate(
-                             [(150, RIVER_T + 30, 16), (1090, RIVER_T + 46, 12),
-                              (400, RIVER_T + 84, 20)]))
+                         for i, (tt, y, w, sp) in enumerate(
+                             [(0.08, RIVER_T + 30, 16, 20), (0.55, RIVER_T + 46, 12, 17),
+                              (0.72, RIVER_T + 84, 20, 23)]))
                # the riprap at the water's edge, just above the landing
                + f'<rect x="-20" y="{RIVER_B - 14}" width="1320" height="16" '
                f'fill="#7c7d78"/>'
@@ -19230,14 +19268,26 @@ def newport():
         for i, (x, col, truck) in enumerate(TRAF):
             y = deck_y(x)
             if truck:
-                out.append(f'<g id="cc-bridge-car-{i}" class="cc-bridge-car" '
+                # Some left, some right, and all slow — at two miles away traffic
+                # barely appears to move. data-turn keeps them on the deck where
+                # it bends up to the towers.
+                out.append(f'<g id="cc-bridge-car-{i}" class="cc-bridge-car cc-drift" '
+                           f'data-path="bridge-road-path" data-t="{(x + 80) / 1440.0:.3f}" '
+                           f'data-speed="{22 + (i % 3) * 7 if i % 2 else -(19 + (i % 3) * 6)}" '
+                           f'data-scale="1" data-turn="1" '
                            f'transform="translate({x},{y:.0f})">'
                            f'<rect x="-8" y="-6" width="16" height="6" rx="1" '
                            f'fill="#e8e6e2"/>'
                            f'<rect x="-8" y="-6" width="5" height="6" rx="1" '
                            f'fill="{col}"/></g>')
             else:
-                out.append(f'<g id="cc-bridge-car-{i}" class="cc-bridge-car" '
+                # Some left, some right, and all slow — at two miles away traffic
+                # barely appears to move. data-turn keeps them on the deck where
+                # it bends up to the towers.
+                out.append(f'<g id="cc-bridge-car-{i}" class="cc-bridge-car cc-drift" '
+                           f'data-path="bridge-road-path" data-t="{(x + 80) / 1440.0:.3f}" '
+                           f'data-speed="{22 + (i % 3) * 7 if i % 2 else -(19 + (i % 3) * 6)}" '
+                           f'data-scale="1" data-turn="1" '
                            f'transform="translate({x},{y:.0f})">'
                            f'<rect x="-5" y="-4" width="10" height="4" rx="1.4" '
                            f'fill="{col}"/>'
@@ -19253,7 +19303,14 @@ def newport():
         scene avoids the half-size fleet the first attempt shipped."""
         k = ppm(y) * hull_m / 100.0        # the drawing is 100 units on the waterline
         idattr = f' id="{gid}"' if gid else ''
-        return (f'<g{idattr} class="cc-sail" transform="translate({x:.0f},{y:.0f}) '
+        # The near ones move several times faster than the far ones or the bay
+        # reads as a conveyor belt. Speed comes from the boat's own scale, which
+        # IS its distance. Drawn bow-right.
+        n = int(gid[-1]) if gid and gid[-1].isdigit() else 0
+        drift = (f' class="cc-sail cc-drift" data-path="bay-path" '
+                 f'data-t="{0.14 + n * 0.19:.2f}" data-speed="{6 + k * 26:.1f}" '
+                 f'data-scale="{k:.3f}" data-nose="1" data-bob="1.4,{2.6 + n * 0.4:.1f}"')
+        return (f'<g{idattr}{drift} transform="translate({x:.0f},{y:.0f}) '
                 f'scale({k:.3f})">'
                 # a sloop's mast is about 1.35 times its length overall, not 1.8 —
                 # the first rig here towered over the whole harbour
@@ -19275,7 +19332,11 @@ def newport():
     def schooner(x, y, hull_m, gid=''):
         k = ppm(y) * hull_m / 150.0
         idattr = f' id="{gid}"' if gid else ''
-        return (f'<g{idattr} class="cc-sail" transform="translate({x:.0f},{y:.0f}) '
+        n = int(gid[-1]) if gid and gid[-1].isdigit() else 0
+        drift = (f' class="cc-sail cc-drift" data-path="bay-path" '
+                 f'data-t="{0.14 + n * 0.19:.2f}" data-speed="{6 + k * 26:.1f}" '
+                 f'data-scale="{k:.3f}" data-nose="1" data-bob="1.4,{2.6 + n * 0.4:.1f}"')
+        return (f'<g{idattr}{drift} transform="translate({x:.0f},{y:.0f}) '
                 f'scale({k:.3f})">'
                 f'<g stroke="#cfc9ba" stroke-width="3.5">'
                 f'<line x1="-30" y1="-10" x2="-30" y2="-134"/>'

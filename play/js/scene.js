@@ -395,6 +395,7 @@
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
     const idles = buildIdles(svg);
+    const drifts = buildDrifts(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -410,7 +411,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, drifts: drifts, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -2061,6 +2062,72 @@
     });
   }
 
+  // =======================================================================
+  // Drifters (.cc-drift) — the one that covers most of Wave 7.
+  //
+  // Follow a drawn path at a steady speed and WRAP at the end. That is a tow on
+  // the Mississippi, a freight on a bridge, rafts in a rapid, sails on a bay and
+  // traffic on two highway bridges — seven groups of things across four scenes,
+  // all of which are "go along that line and come round again".
+  //
+  // It differs from a shuttle in the two ways that matter here: it wraps instead
+  // of turning round, and it follows a real <path>, so a deck with a bend in it
+  // (Newport's Pell Bridge) works without special-casing.
+  //
+  //   data-path    the path's id (matched on the END, since ids are namespaced)
+  //   data-t       where on it to start, 0..1 — also the animation's phase, so
+  //                everything is stable across runs without a seeded random
+  //   data-speed   px/s along the path; NEGATIVE runs it backwards
+  //   data-scale   the size the art was drawn at, since the transform is rewritten
+  //   data-nose    +1 if the art faces right, -1 if left
+  //   data-bob     "amplitude,seconds" — a raft in a rapid, a boat on a swell
+  //   data-turn    present: rotate to the path's heading (a bridge that bends)
+  function buildDrifts(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-drift').forEach(node => {
+      const pid = node.getAttribute('data-path') || '';
+      const path = pid && svg.querySelector('[id$="' + pid + '"]');
+      if (!path || !path.getTotalLength) { console.warn('cc-drift has no path: ' + pid); return; }
+      const len = path.getTotalLength();
+      if (!len) { console.warn('cc-drift path has no length: ' + pid); return; }
+      const bob = (node.getAttribute('data-bob') || '').split(',').map(Number);
+      const hasBob = bob.length === 2 && !bob.some(isNaN);
+      out.push({
+        el: node, path: path, len: len,
+        t: parseFloat(node.getAttribute('data-t')) || 0,
+        speed: parseFloat(node.getAttribute('data-speed')) || 40,
+        s: parseFloat(node.getAttribute('data-scale')) || 1,
+        nose: parseFloat(node.getAttribute('data-nose')) || 1,
+        bobA: hasBob ? bob[0] : 0, bobS: hasBob ? bob[1] : 1,
+        turn: node.hasAttribute('data-turn'),
+      });
+    });
+    return out;
+  }
+
+  function updateDrifts(t, dt) {
+    const list = currentScene && currentScene.drifts;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(d => {
+      d.t += d.speed * (dt / 1000) / d.len;
+      d.t -= Math.floor(d.t);                       // wrap, either direction
+      const at = d.t * d.len;
+      const p = d.path.getPointAtLength(at);
+      const y = p.y + (d.bobA ? d.bobA * Math.sin((secs / d.bobS + d.t) * TAU) : 0);
+      let tr = 'translate(' + p.x.toFixed(1) + ',' + y.toFixed(1) + ')';
+      if (d.turn) {
+        const a = d.path.getPointAtLength(Math.max(0, at - 5));
+        const b = d.path.getPointAtLength(Math.min(d.len, at + 5));
+        tr += ' rotate(' + (Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI).toFixed(2) + ')';
+      }
+      const facing = d.speed > 0 ? 1 : -1;
+      const sx = (facing !== d.nose ? -d.s : d.s);
+      tr += ' scale(' + sx + ',' + d.s + ')';
+      d.el.setAttribute('transform', tr);
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2895,6 +2962,7 @@
     updateFalls(t);
     updateBoom(dt);
     updateIdles(t);
+    updateDrifts(t, dt);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);

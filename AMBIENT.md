@@ -41,6 +41,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
 | **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
 | **Falling water** — a sheet that never stops | `.cc-fall` with `data-band` (the tile height) and `data-secs`. The art draws a band of streaks that TILES vertically and emits it twice, the second copy one band above the first; the engine slides the pair down by exactly one band and it loops with no seam. Clip it to the BROKEN part of the sheet, not the whole face — streaks scrolling over the glassy lip stop it reading as an edge. `.cc-foam` groups churn out of step at the base. | Quechee |
+| **Drift** — follow a path and wrap | `.cc-drift` with `data-path` (matched on the END of the id, since ids are namespaced), `data-t` (start position AND phase, so it is stable across runs), `data-speed` (px/s; NEGATIVE runs it backwards), `data-scale`, `data-nose`, optional `data-bob="amp,secs"` and `data-turn` to follow the path's heading. Unlike a shuttle it wraps instead of turning, and it takes a real `<path>`, so a deck with a bend in it needs no special case. | Vicksburg's tow, driftwood and bridge freight · Newport's sails and Pell Bridge traffic · the New River Gorge's rafts and arch traffic |
 | **Route** — stops in order, dwelling, looping | `.cc-route` with `data-route` = stops separated by spaces: `"x"`, `"x:dwell"` (seconds held) or `"@x"` (jump there instantly — only ever off-screen, so a thing can leave one side and reappear on the other without crossing what is between). Plus `data-y`, `data-speed`, `data-scale`, `data-nose`. | the Kansas tractor |
 | **Cable** — chairs/cabins climbing and returning | `.cc-cablecar` with `data-cable="x0,y0 x1,y1"` and `data-lane-dy`; children `.cc-chair` with `data-t` and `data-lane` | Gatlinburg SkyLift, Colorado gondola |
 | **Rotator** — a wheel whose cars stay level | `.cc-ferris` with `data-secs`; children `.cc-pod` with `data-px`/`data-py` | Chicago Ferris wheel |
@@ -213,6 +214,9 @@ Two traps, both already paid for once:
 |---|---|
 | Rocky Mountains | Georgetown Loop train on the trestle · gondola up the peak |
 | Chicago | Ferris wheel · the L along the viaduct · airliner over the lake |
+| Vicksburg | a tow pushes fifteen barges upstream · driftwood comes down past it · a freight crosses the railroad bridge |
+| Newport | four sails drift the bay at their own speeds · traffic crosses the Pell Bridge both ways |
+| New River Gorge | three rafts run the rapids, bobbing · traffic crosses the arch 876 feet up |
 | Grand Canyon | three hikers walk the rim trail · a mule deer ambles the bench, lifting its head |
 | Cape Canaveral | rocket launches off Pad 39 with an exhaust column |
 | Gatlinburg | SkyLift chairs up the hillside |
