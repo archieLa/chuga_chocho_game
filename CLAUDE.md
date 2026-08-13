@@ -178,6 +178,17 @@ cannot be the gameplay train, because that runs the straight track band the cros
 gates and the endpoint logic are all built on — a train round the bowl has no crossing to
 close a gate against. Scenes without the path simply get no background train.
 
+### Voice — see `VOICE.md`
+
+The browser's `SpeechSynthesis` is a **release blocker**, not a finished feature:
+the voice differs on every platform and none of them sound like they are talking
+to a three-year-old. The plan is pre-recorded lines generated offline with Piper,
+keyed by the string itself, shipped as one inlined sprite per language and played
+through `audio.js`'s existing Web Audio context — with `SpeechSynthesis` kept as
+the fallback, because **silence is never an option** (decision #5). It is ~218
+lines and about 2 MB. `VOICE.md` has the architecture, the licence trap in
+Piper's voice models, and the definition of done.
+
 ### Ambient motion — see `AMBIENT.md`
 
 Seventeen scenes have things that move on their own (a train round the Horseshoe,
