@@ -9550,9 +9550,16 @@ def bluegrass():
         # which is outside that group, stays flat on the grass instead of bouncing
         # around with the horse. Drawn head-LEFT (head at x=-94, tail at +56), so
         # data-nose is -1 or it gallops backwards.
-        cls = ' class="cc-canter"' if run else ''
-        data = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
-                f' data-nose="-1"' if run else '')
+        # EVERY horse idles, not just the one that runs. Animating one member of a
+        # group makes the rest look broken — nine still horses read as a painting,
+        # but one cantering past eight frozen ones reads as eight things stuck.
+        # The head grazes and the tail swishes on all of them; only the runner
+        # also has its legs driven.
+        cls = ' class="cc-canter cc-idle"' if run else ' class="cc-idle"'
+        data = ((f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                 f' data-nose="-1"' if run else '')
+                # a stable per-animal phase, so no two graze in step
+                + f' data-i="{int(x)}"')
         return (f'<g{cls}{data} transform="translate({x},{y}) scale({s * facing},{s})">'
                 f'{shadow(0, 2, 46, 7, 0.2)}'
                 + ('<g class="cc-canter-body">' if run else '')
@@ -9564,20 +9571,24 @@ def bluegrass():
                 f'-38,-88 Z" fill="{coat}"/>'
                 + f'<path d="M-28,-56 C -10,-52 26,-52 40,-58 C 28,-48 -8,-47 -26,-52 Z" '
                 f'fill="{shade}"/>'
-                + neck + mane + head
+                # The head swings from the WITHERS, which is where a neck actually
+                # pivots — from the poll it nods like a puppet.
+                + f'<g class="cc-head" data-pivot="-34,-96">{neck}{mane}{head}</g>'
                 # near side legs on top
                 + hindleg(36) + foreleg(-17, 0.5)
                 + socks
                 # the tail falls from the top of the croup, well behind the hip
-                + f'<path d="M42,-84 C 54,-78 56,-58 52,-38 C 50,-26 47,-18 44,-12 '
-                f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/>'
+                + f'<g class="cc-tail" data-pivot="42,-84">'
+                f'<path d="M42,-84 C 54,-78 56,-58 52,-38 C 50,-26 47,-18 44,-12 '
+                f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/></g>'
                 + ('</g>' if run else '') + '</g>')
 
     def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119'):
         """A foal is not a small horse. The legs are already almost full length, the barrel
         is short and shallow, and the head looks a size too big for it. That awkwardness is
         the whole read — scale a horse down and you just get a pony."""
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 30, 5, 0.18)}'
+        return (f'<g class="cc-idle" data-i="{int(x) + 7}" '
+            f'transform="translate({x},{y}) scale({s})">{shadow(0, 2, 30, 5, 0.18)}'
                 + ''.join(f'<path d="M{lx-4},-46 L{lx+4},-46 L{lx+3},-24 L{lx+2.5},-4 '
                           f'L{lx-2.5},-4 L{lx-3},-24 Z" fill="{coat}"/>'
                           f'<path d="M{lx-3},-24 L{lx+3},-24 L{lx+2.5},-4 L{lx-2.5},-4 Z" '
@@ -9587,7 +9598,8 @@ def bluegrass():
                 + f'<path d="M-24,-66 C -22,-73 -10,-76 4,-75 C 20,-74 30,-69 33,-60 '
                 f'C 35,-53 33,-48 28,-46 C 16,-42 -8,-42 -18,-45 C -24,-48 -26,-58 '
                 f'-24,-66 Z" fill="{coat}"/>'
-                f'<path d="M-22,-70 C -30,-78 -38,-88 -42,-98 L-30,-104 C -26,-92 -18,-80 '
+                + '<g class="cc-head" data-pivot="-22,-70">'
+                + f'<path d="M-22,-70 C -30,-78 -38,-88 -42,-98 L-30,-104 C -26,-92 -18,-80 '
                 f'-12,-72 Z" fill="{coat}"/>'
                 f'<path d="M-42,-98 C -52,-100 -60,-96 -63,-90 L-58,-84 C -52,-88 -44,-90 '
                 f'-38,-92 Z" fill="{coat}"/>'
@@ -9596,9 +9608,10 @@ def bluegrass():
                 f'<path d="M-38,-100 L-37,-112 L-31,-102 Z" fill="{coat}"/>'
                 f'<path d="M-31,-102 L-29,-113 L-24,-104 Z" fill="{coat}"/>'
                 f'<path d="M-30,-104 C -38,-94 -34,-82 -22,-70 L-16,-74 C -26,-84 -30,-94 '
-                f'-25,-102 Z" fill="{point}"/>'
+                f'-25,-102 Z" fill="{point}"/></g>'
+                + f'<g class="cc-tail" data-pivot="31,-64">'
                 f'<path d="M31,-64 C 39,-58 39,-42 36,-28 L30,-31 C 33,-42 33,-52 30,-60 Z" '
-                f'fill="{point}"/></g>')
+                f'fill="{point}"/></g></g>')
 
     def person(x, y, s=1.0, top='#3f5f8c', bottom='#4a4a52', skin='#c98d63', hat=None):
         return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'

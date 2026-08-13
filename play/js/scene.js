@@ -394,6 +394,7 @@
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
+    const idles = buildIdles(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -409,7 +410,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1971,6 +1972,71 @@
     });
   }
 
+  // =======================================================================
+  // Idling animals (.cc-idle).
+  //
+  // ANIMATE ONE OF A GROUP AND THE REST LOOK BROKEN. Nine still horses in a
+  // paddock read as a painting; one cantering past eight frozen ones reads as
+  // eight things that are stuck. The first person to notice was a three-year-old,
+  // about two seconds after the cantering one shipped.
+  //
+  // So every animal grazes and swishes, whether or not it is going anywhere.
+  // This touches only `.cc-head` and `.cc-tail` INSIDE the animal, never its
+  // root, so it composes with the canter — that controller drives the root and
+  // the legs and neither knows about the other.
+  //
+  //   .cc-idle          the animal, with data-i for a stable phase
+  //   .cc-head          data-pivot="x,y" at the WITHERS, not the poll
+  //   .cc-tail          data-pivot="x,y" at the croup
+  const IDLE = { head: 2.6, tail: 9, headSecs: 4.5, tailSecs: 5.5 };
+
+  function buildIdles(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-idle').forEach(node => {
+      const i = parseFloat(node.getAttribute('data-i')) || 0;
+      const part = (sel) => {
+        const el = node.querySelector(sel);
+        if (!el) return null;
+        const p = (el.getAttribute('data-pivot') || '').split(',').map(Number);
+        return (p.length === 2 && !p.some(isNaN)) ? { el: el, px: p[0], py: p[1] } : null;
+      };
+      const head = part('.cc-head'), tail = part('.cc-tail');
+      if (!head && !tail) return;
+      out.push({
+        head: head, tail: tail,
+        // Periods and phases both come from data-i, so no two fall into step and
+        // the paddock looks the same every run without needing a seeded random.
+        hSecs: IDLE.headSecs + (i % 7) * 0.6, hPhase: (i % 11) / 11,
+        tSecs: IDLE.tailSecs + (i % 5) * 0.9, tPhase: (i % 13) / 13,
+        tDir: (i % 2) ? 1 : -1,
+      });
+    });
+    return out;
+  }
+
+  function updateIdles(t) {
+    const list = currentScene && currentScene.idles;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(o => {
+      if (o.head) {
+        // Grazing is a slow rise and fall, not a nod.
+        const a = IDLE.head * Math.sin((secs / o.hSecs + o.hPhase) * TAU);
+        o.head.el.setAttribute('transform',
+          'rotate(' + a.toFixed(2) + ',' + o.head.px + ',' + o.head.py + ')');
+      }
+      if (o.tail) {
+        // A tail is still most of the time and then flicks. A sine would wag it
+        // like a metronome, which is a dog, not a horse.
+        const u = (secs / o.tSecs + o.tPhase) % 1;
+        const k = u < 0.16 ? Math.sin(u / 0.16 * Math.PI) : 0;
+        const a = IDLE.tail * k * o.tDir;
+        o.tail.el.setAttribute('transform',
+          'rotate(' + a.toFixed(2) + ',' + o.tail.px + ',' + o.tail.py + ')');
+      }
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2804,6 +2870,7 @@
     updateBalloons(t, dt);
     updateFalls(t);
     updateBoom(dt);
+    updateIdles(t);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);
