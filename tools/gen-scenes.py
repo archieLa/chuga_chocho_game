@@ -1197,19 +1197,32 @@ def grand_canyon():
                 f'<ellipse cx="-8" cy="-62" rx="13" ry="9" fill="{c}"/>'
                 f'<ellipse cx="11" cy="-58" rx="11" ry="8" fill="{c}"/></g>')
 
-    def deer(x, y, s=1.0, coat='#a8825a', dark='#8d6a45'):
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 30, 5)}'
-                f'<g stroke="{dark}" stroke-width="4" stroke-linecap="round">'
-                f'<path d="M-16,-14 L-18,0 M-9,-14 L-6,0 M12,-14 L14,0 M19,-14 L23,0"/></g>'
+    def deer(x, y, s=1.0, coat='#a8825a', dark='#8d6a45', run=None, speed=11):
+        # A mule deer on the rim: it ambles, and it lifts its head to look about.
+        # Four legs each on their own hip, and the neck pivots at the shoulder.
+        dcls = ' class="cc-canter cc-idle"' if run else ' class="cc-idle"'
+        ddata = ((f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                  f' data-stride="46"' if run else '') + f' data-i="{int(x)}"')
+        return (f'<g{dcls}{ddata} transform="translate({x},{y}) scale({s})">{shadow(0, 3, 30, 5)}'
+                + ('<g class="cc-canter-body">' if run else '')
+                + f'<g stroke="{dark}" stroke-width="4" stroke-linecap="round">'
+                + ''.join(f'<g class="cc-leg" data-pivot="{hx},-14">'
+                          f'<path d="M{hx},-14 L{fx},0"/></g>'
+                          for hx, fx in ((-16, -18), (-9, -6), (12, 14), (19, 23)))
+                + '</g>'
                 f'<ellipse cx="0" cy="-20" rx="26" ry="12" fill="{coat}"/>'
                 f'<ellipse cx="-4" cy="-24" rx="20" ry="7" fill="#bb9468"/>'
+                + f'<g class="cc-head" data-pivot="22,-26">'
                 f'<path d="M22,-26 L32,-40 L38,-38 L30,-24 Z" fill="{coat}"/>'
                 f'<ellipse cx="38" cy="-42" rx="9" ry="6" fill="{coat}"/>'
                 f'<circle cx="44" cy="-43" r="2" fill="#3f3630"/>'
                 f'<g stroke="{dark}" stroke-width="2.2" fill="none" stroke-linecap="round">'
                 f'<path d="M36,-47 L33,-58 M33,-58 L28,-64 M33,-58 L38,-65"/>'
-                f'<path d="M41,-47 L45,-58 M45,-58 L42,-66 M45,-58 L52,-63"/></g>'
-                f'<path d="M-26,-22 L-34,-30" stroke="{coat}" stroke-width="5" stroke-linecap="round"/></g>')
+                f'<path d="M41,-47 L45,-58 M45,-58 L42,-66 M45,-58 L52,-63"/></g></g>'
+                f'<g class="cc-tail" data-pivot="-26,-22">'
+                f'<path d="M-26,-22 L-34,-30" stroke="{coat}" stroke-width="5" '
+                f'stroke-linecap="round"/></g>'
+                + ('</g>' if run else '') + '</g>')
 
     def watchtower(x, y, s=1.0):
         stones = ''.join(f'<rect x="{-15 + (r % 2) * 5 + c * 9:.0f}" y="{-16 - r * 8}" '
@@ -1234,15 +1247,26 @@ def grand_canyon():
                 f'<g fill="#ad8d64">' + ''.join(f'<rect x="{-22 + i*11}" y="-150" width="7" height="9"/>'
                                                  for i in range(5)) + '</g></g>')
 
-    def hiker(x, y, s=1.0, shirt='#c0392b', pack='#3f6b8f'):
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 11, 3)}'
-                f'<g stroke="#c98d5e" stroke-width="4.5" stroke-linecap="round" fill="none">'
-                f'<path d="M-3,-13 L-5,-1 M3,-13 L6,-1"/><path d="M5,-27 L12,-14"/></g>'
+    def hiker(x, y, s=1.0, shirt='#c0392b', pack='#3f6b8f', run=None, speed=13):
+        # Hikers hike. Same .cc-canter contract as the horses, with each leg in
+        # its own group pivoting at the hip — and data-stride, because a hiker's
+        # legs are 13 units where a horse's barrel is 78. Drawn facing RIGHT (pole
+        # in the leading hand at +x), so data-nose is +1 and the default is right.
+        hcls = ' class="cc-canter"' if run else ''
+        hdata = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                 f' data-stride="17"' if run else '')
+        return (f'<g{hcls}{hdata} transform="translate({x},{y}) scale({s})">{shadow(0, 2, 11, 3)}'
+                + ('<g class="cc-canter-body">' if run else '')
+                + f'<g stroke="#c98d5e" stroke-width="4.5" stroke-linecap="round" fill="none">'
+                f'<g class="cc-leg" data-pivot="-3,-13"><path d="M-3,-13 L-5,-1"/></g>'
+                f'<g class="cc-leg" data-pivot="3,-13"><path d="M3,-13 L6,-1"/></g>'
+                f'<path d="M5,-27 L12,-14"/></g>'
                 f'<rect x="-6" y="-30" width="13" height="18" rx="5" fill="{shirt}"/>'
                 f'<rect x="-12" y="-30" width="8" height="14" rx="3" fill="{pack}"/>'
                 f'<circle cx="0" cy="-36" r="6" fill="#c98d5e"/>'
                 f'<path d="M-8,-38 a8,5 0 0 1 16,0 z" fill="#d8c9a0"/>'
-                f'<path d="M12,-16 L13,4" stroke="#8a7050" stroke-width="2"/></g>')
+                f'<path d="M12,-16 L13,4" stroke="#8a7050" stroke-width="2"/>'
+                + ('</g>' if run else '') + '</g>')
 
     back = ('    ' + watchtower(1108, 398, 0.86)
             + juniper(110, 420, 0.72) + juniper(360, 428, 0.62) + juniper(940, 426, 0.66)
@@ -1259,10 +1283,15 @@ def grand_canyon():
             + agave(180, 402, 0.5) + agave(1000, 406, 0.46) + agave(452, 400, 0.44)
             + agave(1210, 404, 0.42) + agave(636, 434, 0.55)
             + rock(520, 434, 0.5) + rock(800, 436, 0.46) + rock(1064, 430, 0.4)
-            + deer(994, 428, 0.62)
+            + deer(994, 428, 0.62, run='994,1110,428', speed=9)
             # hikers on the rim trail, for scale
-            + hiker(262, 344, 0.62, '#c0392b', '#3f6b8f') + hiker(292, 346, 0.58, '#e8a34a', '#4f7d4a')
-            + hiker(884, 345, 0.6, '#3f6b8f', '#c0392b')
+            # The rim trail. All three stay off the road — it spans 610..670 at
+            # this height, and the rim layer is painted BEFORE the road, so a
+            # hiker who wandered across it would walk behind the tarmac and
+            # vanish. The pair keep company, offset so they do not march in step.
+            + hiker(262, 344, 0.62, '#c0392b', '#3f6b8f', run='262,120,344', speed=12)
+            + hiker(292, 346, 0.58, '#e8a34a', '#4f7d4a', run='292,150,346', speed=13)
+            + hiker(884, 345, 0.6, '#3f6b8f', '#c0392b', run='884,1120,345', speed=11)
             # trail sign
             + '<g transform="translate(452,344) scale(0.7)">'
             '<rect x="-2.5" y="-30" width="5" height="30" fill="#7a5f3f"/>'

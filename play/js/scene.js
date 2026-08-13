@@ -1598,6 +1598,10 @@
         s: parseFloat(node.getAttribute('data-scale')) || 1,
         nose: parseFloat(node.getAttribute('data-nose')) || 1,
         speed: parseFloat(node.getAttribute('data-speed')) || 74,
+        // A stride is the length of the animal, so it cannot be one number for
+        // everything that walks. A horse covers its own barrel; a hiker with
+        // 13-unit legs taking a horse's 78 would moonwalk.
+        stride: parseFloat(node.getAttribute('data-stride')) || CANTER.stride,
         gait: 0, turn: 0,
       });
     });
@@ -1615,7 +1619,7 @@
       } else {
         const step = h.speed * secs;
         h.x += step * h.dir;
-        h.gait += step / (CANTER.stride * h.s);       // strides covered, not time elapsed
+        h.gait += step / (h.stride * h.s);            // strides covered, not time elapsed
         if (h.x > h.x1) { h.x = h.x1; h.turn = CANTER.hold; }
         else if (h.x < h.x0) { h.x = h.x0; h.turn = CANTER.hold; }
       }

@@ -87,6 +87,9 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **A stride is the length of the ANIMAL.** The canter contract had one stride
+  for everything that walks; a hiker with 13-unit legs given a horse's 78-unit
+  barrel moonwalks. `data-stride` per animal.
 - **A swing is an ANGLE, so what you see is angle x distance-from-pivot x scale.**
   2.6 degrees on a horse's head moved a distant muzzle less than a pixel and was
   reported as "barely noticeable". Eight degrees on the same horse is ~3px, and
@@ -203,6 +206,7 @@ Two traps, both already paid for once:
 |---|---|
 | Rocky Mountains | Georgetown Loop train on the trestle · gondola up the peak |
 | Chicago | Ferris wheel · the L along the viaduct · airliner over the lake |
+| Grand Canyon | three hikers walk the rim trail · a mule deer ambles the bench, lifting its head |
 | Cape Canaveral | rocket launches off Pad 39 with an exhaust column |
 | Gatlinburg | SkyLift chairs up the hillside |
 | Horseshoe Curve | 25-wagon freight round the bowl |
@@ -338,5 +342,9 @@ Bridge, a boat in San Francisco Bay.
 twelve-to-fourteen limit in this file, on the theory that too much motion would
 pull attention off the crossing. In practice the animations turned out to be
 half of why the places are worth visiting, so the call is the maintainer's and
-is made scene by scene. Some places are still better still — the Grand Canyon
+is made scene by scene. Some places are still better still — though not, as it
+turns out, the Grand Canyon: hikers on the rim trail and a mule deer moving
+across it take nothing away from the canyon, because the canyon itself is what
+stays still. The rule is that the LANDSCAPE holds; what lives on it need not.
+The earlier version of this paragraph said the Grand Canyon
 is about not moving — but that is a judgement about *that* place, not a budget.
