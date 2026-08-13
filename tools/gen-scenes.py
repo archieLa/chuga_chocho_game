@@ -9573,7 +9573,9 @@ def bluegrass():
                 f'fill="{shade}"/>'
                 # The head swings from the WITHERS, which is where a neck actually
                 # pivots — from the poll it nods like a puppet.
-                + f'<g class="cc-head" data-pivot="-34,-96">{neck}{mane}{head}</g>'
+                + f'<g class="cc-head" data-pivot="-34,-96"'
+                + (' data-graze="1"' if grazing else '')
+                + f'>{neck}{mane}{head}</g>'
                 # near side legs on top
                 + hindleg(36) + foreleg(-17, 0.5)
                 + socks
@@ -9583,18 +9585,26 @@ def bluegrass():
                 f'L36,-16 C 41,-30 44,-46 42,-62 C 41,-71 42,-78 42,-84 Z" fill="{point}"/></g>'
                 + ('</g>' if run else '') + '</g>')
 
-    def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119'):
+    def foal(x, y, s=1.0, coat='#a8703f', point='#2b2119', run=None, speed=52):
         """A foal is not a small horse. The legs are already almost full length, the barrel
         is short and shallow, and the head looks a size too big for it. That awkwardness is
         the whole read — scale a horse down and you just get a pony."""
-        return (f'<g class="cc-idle" data-i="{int(x) + 7}" '
+        # A foal walks on the same .cc-canter contract as a horse, so its legs
+        # need .cc-leg groups pivoting at the top of the leg. Without them it
+        # slides across the grass with its feet nailed to the ground.
+        fcls = ' class="cc-canter cc-idle"' if run else ' class="cc-idle"'
+        fdata = ((f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                  f' data-nose="-1"' if run else '') + f' data-i="{int(x) + 7}"')
+        return (f'<g{fcls}{fdata} '
             f'transform="translate({x},{y}) scale({s})">{shadow(0, 2, 30, 5, 0.18)}'
-                + ''.join(f'<path d="M{lx-4},-46 L{lx+4},-46 L{lx+3},-24 L{lx+2.5},-4 '
+                + ('<g class="cc-canter-body">' if run else '')
+                + ''.join(f'<g class="cc-leg" data-pivot="{lx},-46">'
+                          f'<path d="M{lx-4},-46 L{lx+4},-46 L{lx+3},-24 L{lx+2.5},-4 '
                           f'L{lx-2.5},-4 L{lx-3},-24 Z" fill="{coat}"/>'
                           f'<path d="M{lx-3},-24 L{lx+3},-24 L{lx+2.5},-4 L{lx-2.5},-4 Z" '
                           f'fill="{point}"/>'
                           f'<path d="M{lx-3.5},-4 L{lx+3.5},-4 L{lx+3},0 L{lx-3},0 Z" '
-                          f'fill="#3a332c"/>' for lx in (-20, -12, 14, 24))
+                          f'fill="#3a332c"/></g>' for lx in (-20, -12, 14, 24))
                 + f'<path d="M-24,-66 C -22,-73 -10,-76 4,-75 C 20,-74 30,-69 33,-60 '
                 f'C 35,-53 33,-48 28,-46 C 16,-42 -8,-42 -18,-45 C -24,-48 -26,-58 '
                 f'-24,-66 Z" fill="{coat}"/>'
@@ -9611,7 +9621,8 @@ def bluegrass():
                 f'-25,-102 Z" fill="{point}"/></g>'
                 + f'<g class="cc-tail" data-pivot="31,-64">'
                 f'<path d="M31,-64 C 39,-58 39,-42 36,-28 L30,-31 C 33,-42 33,-52 30,-60 Z" '
-                f'fill="{point}"/></g></g>')
+                f'fill="{point}"/></g>'
+                + ('</g>' if run else '') + '</g>')
 
     def person(x, y, s=1.0, top='#3f5f8c', bottom='#4a4a52', skin='#c98d63', hat=None):
         return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
@@ -9664,7 +9675,13 @@ def bluegrass():
             + horse(430, 446, 0.23, '#3f3630', '#2f2822', '#1f1a16', grazing=True)
             + foal(468, 446, 0.17, '#8a5a34')
             + horse(890, 450, 0.25, '#c2a06a', '#a8875a', '#6b5436', grazing=True)
-            + horse(1096, 448, 0.24, '#8f8a84', '#75716c', '#3f3a36')
+            # The three with their heads up were the ones reading as stuck — a
+            # grazing horse at least looks busy. They walk instead. Slow, and well
+            # clear of the road, which spans 582..697 at y=448 and 555..725 at
+            # y=550. The gait is driven by distance covered, so a walking speed
+            # gives a walking leg cycle for nothing.
+            + horse(1096, 448, 0.24, '#8f8a84', '#75716c', '#3f3a36',
+                    run='1096,880,448', speed=15)
             + person(600, 446, 0.42, '#b8442f', '#3f4650', '#c98d63', '#e8e2d4'))
 
     front = ('    '
@@ -9685,11 +9702,13 @@ def bluegrass():
                      # air between her legs. Not worth re-rigging for two white marks.
                      run='250,-140,706', speed=78)
              + horse(1046, 700, 0.52, '#5c3a22', '#472b18', '#241c14', grazing=True)
-             + foal(1140, 700, 0.36, '#a8703f')
+             # The foal keeps to the right of its mother, who grazes at 1046.
+             + foal(1140, 700, 0.36, '#a8703f', run='1140,1246,700', speed=13)
              + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
              + horse(880, 578, 0.34, '#a8a29a', '#8c867e', '#4a443e', grazing=True)
              + horse(432, 566, 0.31, '#7a4a2c', '#623a20', '#241c14', grazing=True)
-             + horse(1078, 550, 0.3, '#5c3a22', '#472b18', '#241c14')
+             + horse(1078, 550, 0.3, '#5c3a22', '#472b18', '#241c14',
+                     run='1078,900,550', speed=17)
              + foal(470, 566, 0.22, '#a8703f')
              + person(880, 700, 0.9, '#2f6f4f', '#3f4650', '#8a5a3c', '#e8e2d4'))
 

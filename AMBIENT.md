@@ -87,6 +87,13 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **A swing is an ANGLE, so what you see is angle x distance-from-pivot x scale.**
+  2.6 degrees on a horse's head moved a distant muzzle less than a pixel and was
+  reported as "barely noticeable". Eight degrees on the same horse is ~3px, and
+  ~8px on the foreground mare. Work out the pixels before picking the number.
+- **Standing still reads as broken even when something twitches.** Head-up
+  animals were the ones that still looked stuck after they gained an idle — a
+  grazing animal at least looks busy. Give them somewhere to walk.
 - **A tail flicks, it does not wag.** A sine wave gives you a metronome, which
   is a dog. Still most of the time, then a brief swish.
 - **A car on a side road points where it is GOING, not where it was drawn.** The
@@ -205,7 +212,7 @@ Two traps, both already paid for once:
 | Sun Valley | the game's own traffic turns onto the cross street at the junction · gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
 | Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
 | Moab | one jeep crawls up over the block and down its far face · another potters the bench |
-| Bluegrass | a thoroughbred canters the paddock · every horse and the foal graze and swish their tails |
+| Bluegrass | four horses walk the paddocks, foal included · the rest graze, and every tail swishes |
 | Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
 | Oʻahu | three catamarans work the reef, each at its own pace |

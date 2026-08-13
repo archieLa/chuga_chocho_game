@@ -1988,7 +1988,21 @@
   //   .cc-idle          the animal, with data-i for a stable phase
   //   .cc-head          data-pivot="x,y" at the WITHERS, not the poll
   //   .cc-tail          data-pivot="x,y" at the croup
-  const IDLE = { head: 2.6, tail: 9, headSecs: 4.5, tailSecs: 5.5 };
+  // 2.6 degrees was invisible and it is worth understanding why: the swing is an
+  // ANGLE, so what you see is the angle times the distance from the pivot times
+  // the animal's scale. A grazing horse's muzzle is ~100 local units from its
+  // withers, and at scale 0.24 that is 100 x sin(2.6deg) x 0.24 = well under a
+  // pixel. Eight degrees on the same horse is about 3px, and on the foreground
+  // mare at 0.56 it is 8px — which reads.
+  //
+  // A head down in the grass and a head up looking about are different motions:
+  // the first is a long slow sweep as it crops along, the second a quicker,
+  // smaller turn. The art says which with data-graze.
+  const IDLE = {
+    graze: 8, grazeSecs: 6.0,     // head down: a long crop
+    look: 5, lookSecs: 3.4,       // head up: a glance about
+    tail: 9, tailSecs: 5.5,
+  };
 
   function buildIdles(svg) {
     const out = [];
@@ -2002,11 +2016,14 @@
       };
       const head = part('.cc-head'), tail = part('.cc-tail');
       if (!head && !tail) return;
+      const grazing = !!(head && head.el.getAttribute('data-graze'));
       out.push({
         head: head, tail: tail,
+        hAmp: grazing ? IDLE.graze : IDLE.look,
         // Periods and phases both come from data-i, so no two fall into step and
         // the paddock looks the same every run without needing a seeded random.
-        hSecs: IDLE.headSecs + (i % 7) * 0.6, hPhase: (i % 11) / 11,
+        hSecs: (grazing ? IDLE.grazeSecs : IDLE.lookSecs) + (i % 7) * 0.6,
+        hPhase: (i % 11) / 11,
         tSecs: IDLE.tailSecs + (i % 5) * 0.9, tPhase: (i % 13) / 13,
         tDir: (i % 2) ? 1 : -1,
       });
@@ -2020,8 +2037,7 @@
     const secs = t / 1000;
     list.forEach(o => {
       if (o.head) {
-        // Grazing is a slow rise and fall, not a nod.
-        const a = IDLE.head * Math.sin((secs / o.hSecs + o.hPhase) * TAU);
+        const a = o.hAmp * Math.sin((secs / o.hSecs + o.hPhase) * TAU);
         o.head.el.setAttribute('transform',
           'rotate(' + a.toFixed(2) + ',' + o.head.px + ',' + o.head.py + ')');
       }
