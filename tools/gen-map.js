@@ -66,6 +66,10 @@ const SUPPORTED = {
   'Michigan': ['Detroit'],
   'Idaho': ['Sun Valley'],
   'Indiana': ['Indianapolis'],
+  'West Virginia': ['New River Gorge'],
+  'South Dakota': ['Mount Rushmore'],
+  'Mississippi': ['Vicksburg'],
+  'Rhode Island': ['Newport'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

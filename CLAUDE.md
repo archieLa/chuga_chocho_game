@@ -58,7 +58,7 @@ Conventions every vehicle honours:
 ## Where the project actually is (read this first)
 
 **Phase 1 is built and playable.** The art was already finished; the engine now exists.
-Open `play/index.html` and you get the map, all thirty-seven destinations, both gates, cars, a
+Open `play/index.html` and you get the map, all forty-one destinations, both gates, cars, a
 train you can build and colour, English and Polish, and two-way sync with a real gate.
 The definition-of-done checklist in `BUILD_PLAN.md` §9 is ticked, with a note on how each
 box was actually checked. Next up is Phase 2 — the mission modes in `DESIGN.md` §11.
@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **37 done, across 32 states + DC** — Wave 5 complete: **Albuquerque** (NM), **Cape Hatteras** (NC), **Quechee** (VT) and **Detroit** (MI). All in `play/assets/scenes/`. California, Texas, Florida and Tennessee have two destinations each. Austin is the only **dusk** scene and Las Vegas the only **night** one. Hawaii and Alaska are map **insets**; DC is a 3×4px speck reachable via the north-east card. **Eleven scenes truncate the road** — see the note below, it is the thing most likely to catch you out. |
+| Locations | **41 done, across 36 states + DC** — Wave 7 adds **New River Gorge** (WV), **Mount Rushmore** (SD), **Vicksburg** (MS) and **Newport** (RI). |
 | Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
@@ -88,7 +88,7 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
 | `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
-| `world.js` | The 37 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
+| `world.js` | The 41 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
 | `map.js` | The map overlay — and the game's front door. Also **Surprise me**, the random-destination draw. |
 | `trains.js` | The consist data layer: 1 loco + 3 wagons, per-slot colours, cycling helpers, preset latch. **Was given; don't redesign it.** |
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |

@@ -981,8 +981,7 @@ After this wave the set stands at **35 destinations across 30 states plus DC**, 
 ### Reserves held for Wave 6
 
 All from empty states: **West Virginia's New River Gorge**, **the South Dakota Badlands**
-(framed as the Badlands, *not* Mount Rushmore — that carving is from 1941 and its copyright
-status isn't clean enough for this project), **the Mississippi Delta**, and **the
+(see the Rushmore note below — the Badlands now falls back to a reserve), **the Mississippi Delta**, and **the
 Indianapolis Speedway**.
 
 ---
@@ -1050,10 +1049,88 @@ so Wave 7 comes entirely from that column.
 Reserves, all from empty states: **West Virginia's New River Gorge** (the great steel arch,
 with the railway running the gorge below it), **the Mississippi at Vicksburg** (a towboat
 pushing a raft of barges — the set still has no Mississippi and no river traffic), **the
-South Dakota Badlands** (framed as the Badlands, *not* Mount Rushmore — that carving is from
-1941 and its copyright status isn't clean enough for this project), and **Newport, Rhode
+South Dakota Badlands**, and **Newport, Rhode
 Island** (the set has no sail).
 
 Still held at the front of the queue but blocked by the rule rather than rejected:
 **Philadelphia** (the Art Museum steps, *not* the Rocky statue), **Portland**, and
 **Louisville**.
+
+
+---
+
+## Correction: Mount Rushmore is cleared
+
+**Mount Rushmore is cleared, and the earlier warning in these docs was wrong.** It was
+lumped in with the Rocky statue in Philadelphia, and the two are not comparable. Rocky is
+1980 — squarely inside modern copyright with every formality handled. Rushmore was finished
+in **1941**, under the old regime, where publishing without a copyright notice put a work
+into the public domain; a six-storey carving unveiled on a mountainside and photographed
+continuously since the 1930s is about as published-without-notice as a work gets, and
+pre-1964 works also needed an affirmative renewal at 28 years that there is no sign of.
+Attorneys asked this exact question about a hand-drawn Rushmore land in the same place, and
+their residual concern is trademark, not copyright — which bites on commercial use implying
+endorsement, not on a free, non-commercial, open-source children's game drawing its own
+picture. (Not legal advice.)
+
+Two things still hold. US freedom of panorama covers **buildings only**, not sculpture, so
+the argument is the 1941 formalities one, not "it is in public view". And we draw it
+ourselves from reference and never trace a photograph — the photographer's copyright is
+separate and very much alive. The Black Hills monument to actually avoid is **Crazy Horse**:
+privately owned, still being carved, and actively protective of its imagery.
+
+**South Dakota's pick therefore becomes Keystone, not the Badlands.** Keystone is the town
+at the foot of the memorial, and it is the terminus of the **Black Hills Central Railroad**
+— the 1880 Train, a real steam operation running the twenty miles up from Hill City. That
+railroad *hauled the equipment used to carve Mount Rushmore*, so the steam engine at our
+crossing is the descendant of the train that built the thing on the mountain behind it.
+Engine preset: `steam`.
+
+**And the carving goes in big.** It is one of the two or three things a small child
+anywhere in the world knows about America, and a version of this scene where it is a bump
+on a distant ridge would be a failure of nerve. The four heads are the hero of the frame,
+not set dressing behind a town. The one honest compromise is the sightline — from Keystone
+itself the carving is small and oblique — but every scene in this set already compresses
+(Quechee puts the falls, the mill and the covered bridge in one frame), and the rule has
+always been *truth about a place*, which is not the same as a survey drawing.
+
+The Badlands stays on the reserve list for whenever the ordering rule frees up a second
+South Dakota slot.
+---
+
+## Wave 7 — built
+
+Four scenes, double the usual wave. `new-river-gorge`, `mount-rushmore`, `vicksburg` and
+`newport` bring the set to **41 destinations across 36 states plus DC**, leaving **14
+states** empty.
+
+| Scene id | State | What it is | Engine |
+|---|---|---|---|
+| `new-river-gorge` | West Virginia | The canyon floor at Fayette Station, the arch overhead | `diesel` |
+| `mount-rushmore` | South Dakota | The carving above Keystone, and the 1880 Train | `steam` |
+| `vicksburg` | Mississippi | A tow on the river, the bluff, the floodwall gate | `diesel` |
+| `newport` | Rhode Island | The harbour under sail and the Pell Bridge | `steam` |
+
+Four firsts: the first **gorge** and the first landmark drawn from underneath and sitting
+entirely above the horizon; the first **Mississippi** and the first **river freight**; the
+first **carved monument**; and the first **sail**.
+
+Every one of the four had to answer the same question before it was allowed in — *where is
+the level crossing?* — and every one has a real answer: Fayette Station Road crosses the
+railroad at the bottom of the gorge; Keystone is the terminus of the Black Hills Central;
+Vicksburg is a KCS railroad town; and the Old Colony & Newport runs the Newport waterfront.
+
+### Wave 8 — the ordering rule is unchanged
+
+**A state with 0 locations beats a state with 1, and a state with 1 beats a state with 2. No
+state gets a third until every state has at least one.** Fourteen states still have nothing.
+
+Named candidates from empty states: **Bailey Yard at North Platte, Nebraska** — the largest
+railroad yard in the world, which would be a remarkable subject for this particular game —
+and **Glacier, Montana**. The remaining empty states with no candidate chosen yet: Alabama,
+Arkansas, Connecticut, Delaware, Iowa, Maryland, New Jersey, North Dakota, Oklahoma, South
+Carolina, Virginia and Wisconsin.
+
+Still blocked by the rule rather than rejected: **Philadelphia** (the Art Museum steps),
+**Portland**, **Louisville**, and now **the South Dakota Badlands**, which would be a second
+South Dakota pick.

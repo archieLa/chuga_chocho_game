@@ -290,6 +290,43 @@
       scenery:{ theme:'motorsport', features:['mainstraight','pitlane','pagoda','grandstand'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'newrivergorge', state:'West Virginia', city:'New River Gorge',
+      say:{ en:'New River Gorge', pl:'New River Gorge' },
+      scene:'new-river-gorge',
+      // Viewpoint: the canyon FLOOR at Fayette Station, not the rim — from the rim the road
+      // and the railway are a thousand feet below you and there is no scene. The walls climb
+      // out of both edges and the arch crosses the wedge of sky between them, 876 feet up.
+      scenery:{ theme:'gorge', features:['archbridge','canyonwalls','rapids','fayettestation'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'mountrushmore', state:'South Dakota', city:'Mount Rushmore',
+      say:{ en:'Mount Rushmore', pl:'Mount Rushmore' },
+      scene:'mount-rushmore',
+      // Viewpoint: Keystone, looking up at the carving — which is deliberately only a
+      // quarter of the frame wide. This is the Black Hills WITH Rushmore in them, not a
+      // portrait of four faces. The crossing is the 1880 Train's terminus, and that railroad
+      // hauled the equipment that carved the mountain behind it.
+      scenery:{ theme:'blackhills', features:['carving','keystone','flagavenue','ponderosa'] },
+      trainPreset:{ engine:'steam' } },
+
+    { id:'vicksburg', state:'Mississippi', city:'Vicksburg',
+      say:{ en:'Vicksburg', pl:'Vicksburg' },
+      scene:'vicksburg',
+      // Viewpoint: the waterfront below the bluff. The set's first Mississippi and its first
+      // river freight — a towboat pushing fifteen barges. The road ends at a floodwall gate,
+      // which stands open onto the riverfront car park and the boat ramp.
+      scenery:{ theme:'river', features:['tow','floodwall','trussbridge','levee'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'newport', state:'Rhode Island', city:'Newport',
+      say:{ en:'Newport', pl:'Newport' },
+      scene:'newport',
+      // Viewpoint: Thames Street opening onto the harbour, the Pell Bridge beyond. The set's
+      // first sail. The road ends at a STATION rather than a junction — there are only 88
+      // pixels between the horizon and the far gate, and a T-junction does not fit in that.
+      scenery:{ theme:'harbour', features:['sails','pellbridge','station','thamesstreet'] },
+      trainPreset:{ engine:'steam' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

@@ -90,6 +90,16 @@ CATALOGUE = [
      ['diesel', 'wagon-coach-modern', 'wagon-coach-modern']),
     ('indianapolis', 'Indiana',    'Indianapolis',    'The main straight, the pit lane and the yard of bricks',
      ['diesel', 'wagon-boxcar', 'wagon-caboose']),
+    ('new-river-gorge', 'West Virginia', 'New River Gorge',
+     'The arch overhead, Fayette Station on the canyon floor',
+     ['diesel', 'wagon-hopper', 'wagon-hopper']),
+    ('mount-rushmore', 'South Dakota', 'Mount Rushmore',
+     'The carving above Keystone, and the 1880 Train',
+     ['steam', 'wagon-coach-old', 'wagon-coach-old']),
+    ('vicksburg',    'Mississippi', 'Vicksburg',        'A tow on the river, the bluff and the floodwall gate',
+     ['diesel', 'wagon-boxcar', 'wagon-caboose']),
+    ('newport',      'Rhode Island', 'Newport',         'The harbour, the bay under sail and the Pell Bridge',
+     ['steam', 'wagon-coach-old', 'wagon-coach-old']),
 ]
 
 
@@ -112,7 +122,7 @@ def veh_inner(key):
 # Colorado) and a layer name (in every scene) — a blind id="water" rewrite renamed the
 # layer too, which silently breaks anything looking layers up by id.
 def namespace(inner, sid):
-    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass', 'savg', 'harbour', 'ledge', 'abqg', 'atl', 'sandg', 'lh5', 'qriver', 'qground', 'dlot', 'svsnow', 'imstar', 'imsgrass']:
+    for gid in ['skyg', 'sung', 'grassg', 'roadg', 'bay', 'lake', 'water', 'stream', 'river', 'pave', 'sand', 'ocean', 'asphalt', 'sound', 'wetst', 'bay', 'park', 'boilerShade', 'aurora', 'aurora2', 'lasal', 'glass', 'hancock', 'charles', 'sinter', 'prism', 'basin', 'ocean', 'conc', 'stone', 'superior', 'canalw', 'creekw', 'creekclip', 'pasture', 'deep', 'pumice', 'lakeclip', 'resv', 'floor', 'alpine', 'mtclip', 'cpwater', 'cpgrass', 'savg', 'harbour', 'ledge', 'abqg', 'atl', 'sandg', 'lh5', 'qriver', 'qground', 'dlot', 'svsnow', 'imstar', 'imsgrass', 'ngriver', 'ngbank', 'ngground', 'mrground', 'mrtalus', 'vkriver', 'vkground', 'npbay', 'npground']:
         # match the definition, not any element that happens to share the name
         for kind in ('linearGradient', 'radialGradient', 'pattern', 'filter', 'clipPath'):
             inner = inner.replace(f'<{kind} id="{gid}"', f'<{kind} id="{sid}-{gid}"')
