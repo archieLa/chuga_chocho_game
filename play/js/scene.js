@@ -396,6 +396,7 @@
     const boom = buildBoom(svg);
     const idles = buildIdles(svg);
     const drifts = buildDrifts(svg);
+    const flags = buildFlags(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -411,7 +412,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, drifts: drifts, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -2128,6 +2129,49 @@
     });
   }
 
+  // =======================================================================
+  // Flags (.cc-flag) — Mount Rushmore's avenue of banners.
+  //
+  // A flag does two things at once and needs both, or it reads as a card on a
+  // stick: it SWINGS about the halyard, and it FURLS — the free edge collapses
+  // toward the pole and fills again as the gust passes. Rotation alone is a
+  // pendulum; the narrowing is what makes it cloth.
+  //
+  // Phases run along the avenue rather than at random, so a gust travels down
+  // the line from one end to the other. That is worth more than twelve flags
+  // each doing their own thing, and it costs the same.
+  //
+  //   .cc-flag with data-pivot="x,y" at the halyard and data-i for the phase
+  const FLAG = { swing: 5, furl: 0.22, secs: 1.5, gust: 0.11 };
+
+  function buildFlags(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-flag').forEach(node => {
+      const p = (node.getAttribute('data-pivot') || '').split(',').map(Number);
+      if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-flag has no usable data-pivot'); return; }
+      const i = parseFloat(node.getAttribute('data-i')) || 0;
+      out.push({ el: node, px: p[0], py: p[1], phase: i * FLAG.gust });
+    });
+    return out;
+  }
+
+  function updateFlags(t) {
+    const list = currentScene && currentScene.flags;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(f => {
+      const u = (secs / FLAG.secs + f.phase) * TAU;
+      const a = FLAG.swing * Math.sin(u);
+      // Not in step with the swing — a flag furls between gusts, not at the
+      // bottom of every arc.
+      const sx = 1 - FLAG.furl * (0.5 + 0.5 * Math.sin(u * 1.7 + 0.9));
+      f.el.setAttribute('transform',
+        'rotate(' + a.toFixed(2) + ',' + f.px + ',' + f.py + ') ' +
+        'translate(' + f.px + ',' + f.py + ') scale(' + sx.toFixed(3) + ',1) ' +
+        'translate(' + (-f.px) + ',' + (-f.py) + ')');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -2963,6 +3007,7 @@
     updateBoom(dt);
     updateIdles(t);
     updateDrifts(t, dt);
+    updateFlags(t);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);

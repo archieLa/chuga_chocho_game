@@ -30,6 +30,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, `data-scale` if it is drawn at another size, and `data-speed` to override the per-class default — two boats in one bay at the same speed read as one mechanism. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
+| **Flags** — cloth in a gust | `.cc-flag` with `data-pivot="x,y"` at the halyard and `data-i` for its place in the line. It swings AND furls — rotation alone is a pendulum, the narrowing is what makes it cloth — and phases run along the row so a gust travels down it. | Mount Rushmore's avenue |
 | **Idling animals** — alive while standing still | `.cc-idle` with `data-i` for a stable phase, containing `.cc-head` and/or `.cc-tail`, each with `data-pivot="x,y"`. The head pivots at the WITHERS, not the poll. Touches only those two parts, never the root, so it composes with anything driving the animal along. | Bluegrass |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
 | **Ropeway** — a lift is a loop, not a line | Two ropes side by side, `#…-path-up` / `#…-path-down`, with cabins `#cc-<lift>-up-N` / `-down-N` carrying `data-t`. Driven in OPPOSITE directions or it reads as a one-way conveyor, and everything shrinks as it climbs — `0.95 − 0.5t`, which is exactly the rule the art was drawn to. | Sun Valley's gondola and chairlift |
@@ -88,6 +89,13 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **An exported hook is not always usable.** Mount Rushmore exports
+  `#keystone-street` "for town traffic if wanted" — but there is no roadway drawn
+  under it, so cars would drive across grass and shopfronts, and the carriageway
+  crosses it, so they would slide behind the tarmac as well. Check there is
+  something to drive ON before taking a hook at its word.
+- **A flag swings AND furls.** Rotation on its own is a pendulum. The free edge
+  collapsing toward the pole between gusts is what reads as cloth.
 - **A far-side platform hides the people on it.** Cedar Point's is on the near
   side, so passengers walk in front of the coaches. Newport's is on the far side,
   and figures standing at the platform EDGE ended up ten pixels above a coach
@@ -223,6 +231,7 @@ Two traps, both already paid for once:
 | Vicksburg | a tow pushes fifteen barges upstream · driftwood comes down past it · a freight crosses the railroad bridge |
 | Newport | four sails drift the bay at their own speeds · traffic crosses the Pell Bridge both ways  · the train calls at the station and people get on and off |
 | New River Gorge | three rafts run the rapids, bobbing · traffic crosses the arch 876 feet up |
+| Mount Rushmore | the avenue of banners stirs, a gust running down the line |
 | Grand Canyon | three hikers walk the rim trail · a mule deer ambles the bench, lifting its head |
 | Cape Canaveral | rocket launches off Pad 39 with an exhaust column |
 | Gatlinburg | SkyLift chairs up the hillside |

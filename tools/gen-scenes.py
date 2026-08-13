@@ -18155,9 +18155,14 @@ def mount_rushmore():
                            f'width="{k * 0.18:.1f}" height="{h:.0f}" fill="#c6c2b6"/>'
                            f'<circle cx="0" cy="{-h - k * 0.12:.0f}" r="{k * 0.13:.1f}" '
                            f'fill="#e8c94a"/>'
+                           # The banner is a moving part: it swings about the
+                           # halyard and furls between gusts. data-i is its place
+                           # in the avenue, so the gust travels down the line.
+                           f'<g class="cc-flag" data-i="{i * 2 + (0 if side < 0 else 1)}" '
+                           f'data-pivot="{k * 0.09:.1f},{-h + k * 0.2:.0f}">'
                            f'<path d="M{k * 0.09:.1f},{-h + k * 0.2:.0f} '
                            f'l{k * 1.5:.1f},{k * 0.35:.1f} '
-                           f'l{-k * 1.5:.1f},{k * 0.9:.1f} Z" fill="{c}"/></g>')
+                           f'l{-k * 1.5:.1f},{k * 0.9:.1f} Z" fill="{c}"/></g></g>')
         out.append('</g>')
         return ''.join(out)
 
