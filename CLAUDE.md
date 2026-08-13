@@ -178,6 +178,15 @@ cannot be the gameplay train, because that runs the straight track band the cros
 gates and the endpoint logic are all built on — a train round the bowl has no crossing to
 close a gate against. Scenes without the path simply get no background train.
 
+### Modes — see `MODES.md`
+
+A sketch, **not a plan**: the challenge-mode idea (close the gate when five cars
+have passed; when the word appears), why the gate being the answer is the good
+part of it, the ladder of rungs that is meant to answer *outgrowing*, and how it
+squares with hard rule #4's "no losing". Nothing is committed and no code should
+be written against it yet. `modes.js` and `i18n.js`'s `numbers`/`shapes`/`praise`
+are the scaffolding already in place.
+
 ### Voice — see `VOICE.md`
 
 The browser's `SpeechSynthesis` is a **release blocker**, not a finished feature:
