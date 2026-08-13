@@ -6341,7 +6341,8 @@ def yellowstone():
                 '<path d="M2,-222 L26,-215 L2,-208 Z" fill="#b8323c"/></g></g>')
 
     # ---------------------------------------------------------------- props ----
-    def bison(x, y, s=1.0, a='#54412f', b='#6b5340', dark='#332619', wool='#7d6146'):
+    def bison(x, y, s=1.0, a='#54412f', b='#6b5340', dark='#332619', wool='#7d6146',
+              run=None, speed=6):
         """Bison, built as ONE continuous outline and then shaded inside it. Assembling the
         animal from a body shape plus a separate hump shape gave a brown boulder wearing a
         shell — the hump has to be part of the same silhouette as the back and the head, or
@@ -6357,14 +6358,27 @@ def yellowstone():
                 'L20,-13 L-6,-14 '
                 'C -20,-14 -30,-17 -38,-15 '
                 'C -48,-13 -54,-17 -58,-24 Z')
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(-8, 3, 46, 7, 0.22)}'
+        # A bison ambles. Head is at -58, so it is drawn facing LEFT and needs
+        # data-nose="-1". Its head is part of the one continuous outline that
+        # makes the silhouette work, so there is no head to move separately —
+        # only the legs and the body, which is plenty for an animal this heavy.
+        bcls = ' class="cc-canter"' if run else ''
+        bdata = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                 f' data-stride="62" data-nose="-1"' if run else '')
+        return (f'<g{bcls}{bdata} transform="translate({x},{y}) scale({s})">'
+                f'{shadow(-8, 3, 46, 7, 0.22)}'
+                + ('<g class="cc-canter-body">' if run else '')
                 # legs first, so the body reads over them
                 + f'<g fill="{dark}">'
-                f'<path d="M-36,-18 L-27,-18 L-25,1 L-34,1 Z"/>'
-                f'<path d="M-22,-16 L-14,-16 L-13,1 L-21,1 Z"/></g>'
+                f'<g class="cc-leg" data-pivot="-31,-18">'
+                f'<path d="M-36,-18 L-27,-18 L-25,1 L-34,1 Z"/></g>'
+                f'<g class="cc-leg" data-pivot="-18,-16">'
+                f'<path d="M-22,-16 L-14,-16 L-13,1 L-21,1 Z"/></g></g>'
                 + f'<g fill="{a}">'
-                f'<rect x="16" y="-18" width="7" height="19" rx="2"/>'
-                f'<rect x="28" y="-18" width="7" height="19" rx="2"/></g>'
+                f'<g class="cc-leg" data-pivot="19,-18">'
+                f'<rect x="16" y="-18" width="7" height="19" rx="2"/></g>'
+                f'<g class="cc-leg" data-pivot="31,-18">'
+                f'<rect x="28" y="-18" width="7" height="19" rx="2"/></g></g>'
                 # the whole animal, one shape
                 + f'<path d="{body}" fill="{a}"/>'
                 # the hump, shaded rather than added — a highlight inside the same outline
@@ -6386,19 +6400,27 @@ def yellowstone():
                 f'stroke-width="3.2" fill="none" stroke-linecap="round"/>'
                 + f'<circle cx="-53" cy="-31" r="2" fill="#141009"/>'
                 + f'<path d="M36,-34 C 46,-30 48,-19 44,-11" stroke="{dark}" stroke-width="3" '
-                f'fill="none" stroke-linecap="round"/></g>')
+                f'fill="none" stroke-linecap="round"/>'
+                + ('</g>' if run else '') + '</g>')
 
-    def elk(x, y, s=1.0, body='#a87c4e', neck='#5f4632', rump='#e4d7b4'):
+    def elk(x, y, s=1.0, body='#a87c4e', neck='#5f4632', rump='#e4d7b4',
+            run=None, speed=9):
         """Bull elk: long legs, a deep chest, and a neck held high and fairly STRAIGHT. An
         S-curved neck turns him into an alpaca. The antlers sweep back over the body rather
         than standing up like a deer's."""
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 2, 30, 5, 0.2)}'
-                + f'<g fill="{body}">'
-                + ''.join(f'<rect x="{lx}" y="-30" width="4" height="31" rx="2"/>'
-                          for lx in (-20, -11, 16, 25)) + '</g>'
-                + f'<g fill="{neck}">'
-                + ''.join(f'<rect x="{lx}" y="-6" width="4.4" height="7" rx="1.5"/>'
-                          for lx in (-20.2, -11.2, 15.8, 24.8)) + '</g>'
+        # Each leg is an upper and a lower rect, so the two have to be PAIRED into
+        # one group or the dark hoof stays behind while the leg swings away.
+        ecls = ' class="cc-canter"' if run else ''
+        edata = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                 f' data-stride="46"' if run else '')
+        return (f'<g{ecls}{edata} transform="translate({x},{y}) scale({s})">'
+                f'{shadow(0, 2, 30, 5, 0.2)}'
+                + ('<g class="cc-canter-body">' if run else '')
+                + ''.join(f'<g class="cc-leg" data-pivot="{lx + 2},-30">'
+                          f'<rect x="{lx}" y="-30" width="4" height="31" rx="2" fill="{body}"/>'
+                          f'<rect x="{lx - 0.2}" y="-6" width="4.4" height="7" rx="1.5" '
+                          f'fill="{neck}"/></g>' for lx in (-20, -11, 16, 25))
+                + ''
                 # body
                 f'<path d="M-22,-54 C -4,-59 20,-57 30,-49 C 36,-43 36,-32 30,-28 '
                 f'C 12,-22 -12,-25 -22,-33 Z" fill="{body}"/>'
@@ -6418,7 +6440,8 @@ def yellowstone():
                 f'M-12,-115 L-10,-125"/>'
                 f'<path d="M-33,-96 C -26,-106 -14,-110 -2,-108"/>'
                 f'<path d="M-24,-104 L-26,-114 M-14,-109 L-13,-118"/></g>'
-                f'<circle cx="-41" cy="-89" r="1.6" fill="#141009"/></g>')
+                f'<circle cx="-41" cy="-89" r="1.6" fill="#141009"/>'
+                + ('</g>' if run else '') + '</g>')
 
     def boardwalk(x0, x1, y, s=1.0):
         """Raised boardwalk on stilts — you may not step on the crust here, and the walkway
@@ -6465,7 +6488,7 @@ def yellowstone():
                       [(74, 390, 0.35), (116, 396, 0.3), (152, 386, 0.28),
                        (398, 394, 0.33), (438, 388, 0.28),
                        (740, 398, 0.33), (782, 391, 0.29)])
-            + elk(536, 391, 0.33)
+            + elk(536, 391, 0.33, run='536,440,391', speed=9)
             + ''.join(raven(x, y, sc) for x, y, sc in
                       [(880, 168, 0.7), (940, 196, 0.5), (818, 210, 0.42)]))
 
@@ -6488,10 +6511,15 @@ def yellowstone():
              + ''.join(snag(x, y, sc) for x, y, sc in [(120, 622, 0.95), (1188, 604, 0.8)])
              # the near part of the herd — bigger, but nothing like the boulders of the
              # first pass. Against a mountain wall the animals have to stay small.
-             + bison(206, 664, 0.95) + bison(122, 706, 1.15)
-             + bison(1096, 676, 1.0) + bison(1224, 714, 1.15)
-             + bison(430, 616, 0.66)
-             + elk(512, 604, 0.6)
+             # The road spans 525..755 at y=664, 514..766 at 706, 522..758 at 676,
+             # 512..768 at 714 and 538..742 at 616 — every walk stays outside it.
+             # Bison are slow and heavy; these are ambles, not charges.
+             + bison(206, 664, 0.95, run='206,318,664', speed=6)
+             + bison(122, 706, 1.15, run='122,236,706', speed=5)
+             + bison(1096, 676, 1.0, run='1096,986,676', speed=6)
+             + bison(1224, 714, 1.15, run='1224,1104,714', speed=5)
+             + bison(430, 616, 0.66, run='430,320,616', speed=7)
+             + elk(512, 604, 0.6, run='512,392,604', speed=8)
              + raven(1160, 548, 0.9))
 
     scene('yellowstone', 'YELLOWSTONE — the Lamar Valley herd under the Absarokas', {

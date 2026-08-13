@@ -87,6 +87,9 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **Pair the parts of a leg before you swing it.** An elk's leg is an upper and
+  a lower rect; grouped separately, the dark hoof stays behind while the leg
+  swings away from it.
 - **A stride is the length of the ANIMAL.** The canter contract had one stride
   for everything that walks; a hiker with 13-unit legs given a horse's 78-unit
   barrel moonwalks. `data-stride` per animal.
@@ -217,7 +220,7 @@ Two traps, both already paid for once:
 | Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
 | Moab | one jeep crawls up over the block and down its far face · another potters the bench |
 | Bluegrass | four horses walk the paddocks, foal included · the rest graze, and every tail swishes |
-| Yellowstone | the geyser waits, erupts and falls back on a 27s cycle |
+| Yellowstone | the geyser erupts · five bison amble the sage flat and two bull elk cross it |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
 | Oʻahu | three catamarans work the reef, each at its own pace |
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
