@@ -88,6 +88,12 @@ Two traps, both already paid for once:
   eight things that are stuck. This was spotted by a three-year-old about two
   seconds after the cantering one shipped. Either the whole herd moves or none
   of it does — and idling is cheap, so it is nearly always the whole herd.
+- **A far-side platform hides the people on it.** Cedar Point's is on the near
+  side, so passengers walk in front of the coaches. Newport's is on the far side,
+  and figures standing at the platform EDGE ended up ten pixels above a coach
+  roof — four people apparently standing on the wagon tops. They wait at the BACK
+  of the platform instead and step forward, vanishing behind the coach as they
+  board, which is what boarding looks like from that side.
 - **Check which way a thing FACES from its eye, not from a guess.** I read the
   elk's neck path as starting at +26 and assumed it looked right; its eye is at
   x=-41. It walked backwards. The eye, or the nose, is the one part that cannot
@@ -215,7 +221,7 @@ Two traps, both already paid for once:
 | Rocky Mountains | Georgetown Loop train on the trestle · gondola up the peak |
 | Chicago | Ferris wheel · the L along the viaduct · airliner over the lake |
 | Vicksburg | a tow pushes fifteen barges upstream · driftwood comes down past it · a freight crosses the railroad bridge |
-| Newport | four sails drift the bay at their own speeds · traffic crosses the Pell Bridge both ways |
+| Newport | four sails drift the bay at their own speeds · traffic crosses the Pell Bridge both ways  · the train calls at the station and people get on and off |
 | New River Gorge | three rafts run the rapids, bobbing · traffic crosses the arch 876 feet up |
 | Grand Canyon | three hikers walk the rim trail · a mule deer ambles the bench, lifting its head |
 | Cape Canaveral | rocket launches off Pad 39 with an exhaust column |

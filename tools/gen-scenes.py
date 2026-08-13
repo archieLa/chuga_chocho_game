@@ -19589,9 +19589,14 @@ def newport():
                 f'<circle cx="0" cy="{-k * 4.42:.0f}" r="{k * 0.12:.0f}" '
                 f'fill="#2f3439"/></g>')
 
-    def person(x, y, shirt, trouser, seed=1):
-        """1.7m. Every figure in the set is now sized this way."""
-        k = ppm(y) * 1.7 / 34.0
+    def person(x, y, shirt, trouser, seed=1, k=None):
+        """1.7m. Every figure in the set is now sized this way.
+
+        `k` overrides the size so a figure can be drawn at the ORIGIN at unit
+        scale and let an animating wrapper carry translate and scale instead —
+        which is what .cc-passenger needs."""
+        if k is None:
+            k = ppm(y) * 1.7 / 34.0
         return (f'<g transform="translate({x:.0f},{y:.0f}) scale({k:.3f})">'
                 f'{shadow(0, 1, 8, 3, 0.2)}'
                 f'<path d="M-4,-10 L-4,0" stroke="{trouser}" stroke-width="5" '
@@ -19767,9 +19772,43 @@ def newport():
                        f'fill="#7a5a3c"/>'
                        f'<g fill="#4a5259"><rect x="-16" y="-9" width="4" height="9"/>'
                        f'<rect x="12" y="-9" width="4" height="9"/></g></g>')
-        for px, sh, tr in [(408, '#c1443a', '#2f3f52'), (452, '#f2efe6', '#7a2f34'),
-                           (466, '#2f5f9e', '#e8e4d8'), (504, '#e8a02a', '#2f3f52')]:
-            out.append(person(px, PLAT_B - 14, sh, tr))
+        # THE TRAIN CALLS HERE. Same contract as Cedar Point, with one difference
+        # that decides everything: this platform is on the FAR side of the track,
+        # so passengers walk AWAY from the viewer to board and vanish behind the
+        # coaches, rather than towards them. It reads correctly either way — going
+        # behind the train is getting on it — and the platform is in scenery-back,
+        # painted before the train, so the occlusion happens for free.
+        #
+        # THEY WAIT AT THE BACK OF THE PLATFORM, not at its edge. Standing at the
+        # edge (436) put them barely 10px above a coach roof at ~403, so once the
+        # train was in they read as four people standing on the wagon tops. The
+        # platform runs 386..450, so waiting at 404 — against the depot, which is
+        # where people wait anyway — keeps them wholly clear of the train, and
+        # they step FORWARD to the door at 466 and vanish behind the coach side.
+        # That is what boarding looks like from this side of the track.
+        #
+        # data-stop is the HEAD, and the head is the locomotive. With the steam
+        # preset and two old coaches the origins sit 118/303/454 behind it, so
+        # 904 puts the SECOND coach at 450 — among the people waiting — instead of
+        # parking the engine there for them to climb into.
+        PSTAND, PDOOR = PLAT_T + 18, PLAT_B + 16
+        PK = ppm(PSTAND) * 1.7 / 34.0
+        out.append('<g class="cc-platform" data-stop="904" data-dwell="6.5"></g>')
+        for px, dx, role, sh, tr in [(408, 436, 'board', '#c1443a', '#2f3f52'),
+                                     (452, 446, 'alight', '#f2efe6', '#7a2f34'),
+                                     (466, 462, 'alight', '#2f5f9e', '#e8e4d8'),
+                                     (504, 472, 'board', '#e8a02a', '#2f3f52')]:
+            # Both roles are DRAWN on the platform, even the ones that arrive at
+            # the door — they start invisible and the engine places them on the
+            # first frame, so the drawn position only has to be somewhere honest.
+            # Drawing them at the door put them inside the track band and
+            # check-scenes.py rightly called it a prop standing on the track.
+            at = (px, PSTAND)
+            out.append(f'<g class="cc-passenger" data-role="{role}" data-scale="{PK:.3f}"'
+                       f' data-stand="{px},{PSTAND}" data-door="{dx},{PDOOR}"'
+                       f' transform="translate({at[0]},{at[1]}) scale({PK:.3f})"'
+                       + (' opacity="0"' if role == 'alight' else '') + '>'
+                       + person(0, 0, sh, tr, k=1.0) + '</g>')
         # the name board — a shape, never a word
         out.append(f'<g transform="translate({dx + dw + 34:.0f},{PLAT_B - 46})">'
                    f'<rect x="-2" y="0" width="4" height="30" fill="#4a5259"/>'
