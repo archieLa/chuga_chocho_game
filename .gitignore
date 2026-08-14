@@ -1,2 +1,9 @@
 .DS_Store
 node_modules/
+
+# Art drops from the scene collaborator. They are working input, not part of
+# the game: everything wanted from one is merged into the repo proper, and the
+# folder is thrown away. Two of them (wave6, wave7) reached history because the
+# exclusion was a git-reset list that had to be updated by hand for each new
+# folder, and twice it was not. A pattern cannot forget.
+chuga-chocho-*/
