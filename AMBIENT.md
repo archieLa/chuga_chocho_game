@@ -98,6 +98,17 @@ Two traps, both already paid for once:
   something to drive ON before taking a hook at its word.
 - **A flag swings AND furls.** Rotation on its own is a pendulum. The free edge
   collapsing toward the pole between gusts is what reads as cloth.
+- **NOBODY WAITS ON THE CROSSING.** A driver does not stop on a level crossing,
+  and this game least of all should draw a car parked on the rails. Where a queue
+  position would land in the track band, the car waits on the near side instead.
+  That one rule is what makes Mystic's queue look real: one at the boom, one in
+  the gap before the rails, the rest behind the crossing.
+- **A shut bridge stops traffic BOTH ways, and the second way is easy to miss.**
+  Northbound queues at it — obvious. But nothing may ARRIVE from the far side
+  either, because nothing could have got over. Spawning has to know.
+- **Where a road carries on over something, cars must carry on too.** They were
+  vanishing on the near abutment because the tarmac polygon ends at the hinge.
+  The run extends past it when the way is clear.
 - **Two barriers in one scene must not share a driver.** Detroit's `.cc-plant-boom`
   lifts FOR cars; Mystic's drops to STOP them. Same class, opposite job — so
   whoever owns it drives it, and the traffic-watching controller stands down when

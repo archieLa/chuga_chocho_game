@@ -38,6 +38,8 @@
   const STOP_NEAR = 566;           // a car coming up waits below the near gate (arm at y≈528)
   const CROSS_MID = 483;           // middle of the track band, y 450–516
   const CAR_FADE = 46;             // how far before the road's far end a car fades out
+  const BRIDGE_STOP = 386;         // where northbound traffic waits for a lifted span
+  const CROSS_KEEP = [438, 530];   // no car may come to REST between these — the rails
   const CROSSING_X = [500, 780];   // where the road meets the rails
 
   const CAR_COLOURS = ['#e84a4a', '#3d7bd6', '#f4b400', '#7b3fb0', '#2aa84a', '#ff8c2a', '#e8e8ee'];
@@ -2305,6 +2307,26 @@
     return { movers: movers, weights: weights, step: 0, t: 0, open: 0, ding: 0 };
   }
 
+  /** Is the way over the bridge shut? Everything the traffic does hangs off
+      this: nobody crosses, nobody queues past it, and — the part that is easy to
+      forget — NOBODY ARRIVES FROM THE FAR SIDE EITHER, because nothing could
+      have got over. A scene with no bascule is never shut. */
+  function bridgeShut() {
+    const b = currentScene && currentScene.bascule;
+    if (!b) return false;
+    const boom = currentScene.boom;
+    return !boom || boom.a > -60;              // the arm anywhere near down
+  }
+
+  /** Where a car's run ends. Normally the far edge of the tarmac — but where the
+      road carries ON over a bridge, a northbound car drives across and off the
+      far bank instead of evaporating on the near abutment. */
+  function carEndY(dir) {
+    const base = currentScene ? currentScene.roadTop : HORIZON;
+    if (dir < 0 && currentScene && currentScene.bascule && !bridgeShut()) return base - 34;
+    return base;
+  }
+
   function updateBascule(dt) {
     const b = currentScene && currentScene.bascule;
     if (!b) return;
@@ -2806,6 +2828,8 @@
     // drives past the tarmac.
     const top = currentScene ? currentScene.roadTop : HORIZON;
     const ex = currentScene ? currentScene.roadExit : null;
+    // Nothing comes over a bridge that is shut.
+    if (down && bridgeShut()) return;
     const at = down ? top + 4 : H + 120;
     // Where the road turns, traffic coming toward us has driven in along the side
     // road rather than materialising at the end of ours.
@@ -2875,7 +2899,7 @@
     // Fade over the last stretch before the road's far end. At the horizon a car
     // is tiny and this is invisible; on a truncated road it is what stops a
     // still-sizeable car from popping out of existence in mid-picture.
-    const top = currentScene ? currentScene.roadTop : HORIZON;
+    const top = carEndY(car.dir);
     // Fade only applies to the carriageway. A car that has turned onto the side
     // road sits just above the road's end by y, and would otherwise be dimmed
     // for its whole run along a road it is legitimately driving on.
@@ -3064,8 +3088,20 @@
           want = dir > 0 ? Math.min(want, stopLine) : Math.max(want, stopLine);
         }
         if (limit != null) want = dir > 0 ? Math.min(want, limit) : Math.max(want, limit);
+        // Traffic waiting for a lifted bridge. Held short of the boom, not on it.
+        if (dir < 0 && bridgeShut()) want = Math.max(want, BRIDGE_STOP);
         // A car held at the junction for a gap on the side road.
         if (car.holdY != null) want = dir > 0 ? Math.min(want, car.holdY) : Math.max(want, car.holdY);
+        // NOBODY WAITS ON THE CROSSING. A driver does not stop on a level
+        // crossing and this game least of all should draw one parked on the
+        // rails. If holding here would leave a car standing in the track band,
+        // it waits on the near side of it instead — which is what makes a queue
+        // at Mystic look like a real one: one at the boom, one in the gap before
+        // the rails, the rest behind the crossing.
+        const stopping = want !== car.y + dir * step;
+        if (stopping && want > CROSS_KEEP[0] && want < CROSS_KEEP[1]) {
+          want = dir > 0 ? CROSS_KEEP[0] : CROSS_KEEP[1];
+        }
         car.stopped = Math.abs(want - car.y) < step * 0.4;
         car.y = want;
         limit = car.y - dir * carGap(car.y);
@@ -3088,8 +3124,7 @@
       // far end, so this deleted every car the moment it turned — the junction
       // worked perfectly and nothing was ever seen using it. A side-road car
       // ends on car.dead instead, when it runs off the frame.
-      const top = currentScene ? currentScene.roadTop : HORIZON;
-      const offTarmac = car.phase === 'road' && car.y < top;
+      const offTarmac = car.phase === 'road' && car.y < carEndY(car.dir);
       if (car.dead || offTarmac || car.y > H + 170) {
         if (car.el.parentNode) car.el.parentNode.removeChild(car.el);
         cars.splice(i, 1);
