@@ -32,6 +32,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
 | **Flags** — cloth in a gust | `.cc-flag` with `data-pivot="x,y"` at the halyard and `data-i` for its place in the line. It swings AND furls — rotation alone is a pendulum, the narrowing is what makes it cloth — and phases run along the row so a gust travels down it. | Mount Rushmore's avenue |
 | **Idling animals** — alive while standing still | `.cc-idle` with `data-i` for a stable phase, containing `.cc-head` and/or `.cc-tail`, each with `data-pivot="x,y"`. The head pivots at the WITHERS, not the poll. Touches only those two parts, never the root, so it composes with anything driving the animal along. | Bluegrass |
+| **Movable structure** — a span that lifts head-on | `.cc-bascule-leaf` containing `.cc-bascule-quad` polygons and a `.cc-bascule-dashes` group. Each piece carries its raised position in `data-up`, point-matched to `points`, and the engine TWEENS THE POINTS — head-on a lifting deck changes width as the foreshortening unwinds and no transform expresses that. Anything without a `data-up` is on the fixed span and stays put. `.cc-bascule-weight` takes `data-dy`. Runs on its own timer. | Mystic |
+| **Channel** — boats that wait for a bridge | `.cc-sail` / `.cc-launch` on `#channel-path`. They queue short of the towers and go through together while the span is up. | Mystic |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
 | **Ropeway** — a lift is a loop, not a line | Two ropes side by side, `#…-path-up` / `#…-path-down`, with cabins `#cc-<lift>-up-N` / `-down-N` carrying `data-t`. Driven in OPPOSITE directions or it reads as a one-way conveyor, and everything shrinks as it climbs — `0.95 − 0.5t`, which is exactly the rule the art was drawn to. | Sun Valley's gondola and chairlift |
 | **Ski run** — a line of turns, not a fall line | `.cc-skier` with `data-run`, `data-t`, `data-s`; the run itself is `<path id="run-path-N">` wandering inside its corridor. Scale `0.34 + 0.34t` because the bottom of a run is nearer, and the lean comes from the tangent. | Sun Valley |
@@ -96,6 +98,15 @@ Two traps, both already paid for once:
   something to drive ON before taking a hook at its word.
 - **A flag swings AND furls.** Rotation on its own is a pendulum. The free edge
   collapsing toward the pole between gusts is what reads as cloth.
+- **Two barriers in one scene must not share a driver.** Detroit's `.cc-plant-boom`
+  lifts FOR cars; Mystic's drops to STOP them. Same class, opposite job — so
+  whoever owns it drives it, and the traffic-watching controller stands down when
+  a bascule is present.
+- **Release by PHASE, not by how open something looks.** Gating the boats on the
+  span's openness let them keep feeding into the gap all through the descent, so
+  the bridge waited for a channel that never cleared. Two holds, both one-way and
+  neither ever making the child wait: the lift will not begin while the crossing
+  gate is down, and will not lower while a boat is between the towers.
 - **A far-side platform hides the people on it.** Cedar Point's is on the near
   side, so passengers walk in front of the coaches. Newport's is on the far side,
   and figures standing at the platform EDGE ended up ten pixels above a coach
@@ -230,6 +241,7 @@ Two traps, both already paid for once:
 | Chicago | Ferris wheel · the L along the viaduct · airliner over the lake |
 | Vicksburg | a tow pushes fifteen barges upstream · driftwood comes down past it · a freight crosses the railroad bridge |
 | Newport | four sails drift the bay at their own speeds · traffic crosses the Pell Bridge both ways  · the train calls at the station and people get on and off |
+| Mystic | the bascule span stands on end and a queue of boats goes through · a boom shuts the road first · quay traffic |
 | New River Gorge | three rafts run the rapids, bobbing · traffic crosses the arch 876 feet up |
 | Mount Rushmore | the avenue of banners stirs, a gust running down the line |
 | Grand Canyon | three hikers walk the rim trail · a mule deer ambles the bench, lifting its head |

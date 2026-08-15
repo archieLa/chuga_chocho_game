@@ -394,6 +394,8 @@
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
+    const bascule = buildBascule(svg);
+    const channel = buildChannel(svg);
     const idles = buildIdles(svg);
     const drifts = buildDrifts(svg);
     const flags = buildFlags(svg);
@@ -412,7 +414,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -1269,14 +1271,28 @@
   function buildBoom(svg) {
     const el = svg.querySelector('.cc-plant-boom');
     if (!el) return null;
-    const p = (el.getAttribute('data-pivot') || '').split(',').map(Number);
-    if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-plant-boom has no usable data-pivot'); return null; }
-    return { el: el, px: p[0], py: p[1], a: 0 };
+    // Two spellings in the wild: Detroit's data-pivot="x,y" and Mystic's
+    // separate data-pivot-x / data-pivot-y. Accept either.
+    let px = parseFloat(el.getAttribute('data-pivot-x'));
+    let py = parseFloat(el.getAttribute('data-pivot-y'));
+    if (isNaN(px) || isNaN(py)) {
+      const p = (el.getAttribute('data-pivot') || '').split(',').map(Number);
+      if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-plant-boom has no usable pivot'); return null; }
+      px = p[0]; py = p[1];
+    }
+    // The arm may be a child (Mystic) or the group itself (Detroit).
+    const arm = el.querySelector('.cc-boom-arm') || el;
+    return { el: arm, px: px, py: py, a: 0,
+             down: parseFloat(el.getAttribute('data-down-deg')),
+             up: parseFloat(el.getAttribute('data-up-deg')) };
   }
 
   function updateBoom(dt) {
     const b = currentScene && currentScene.boom;
-    if (!b) return;
+    // A bascule owns its own approach barrier and drives it from the lift
+    // sequence, not from the traffic. Detroit's lifts FOR cars; Mystic's drops
+    // to STOP them. Same class, opposite job — so whoever owns it, drives it.
+    if (!b || (currentScene && currentScene.bascule)) return;
     const top = currentScene.roadTop;
     // Only traffic heading AWAY from us is going into the plant; a car coming
     // down the road has already been through.
@@ -2172,6 +2188,177 @@
     });
   }
 
+  // =======================================================================
+  // A movable structure — the Mystic bascule (.cc-bascule-leaf).
+  //
+  // HEAD-ON, A LIFTING SPAN IS NOT A ROTATION. The deck's far edge rises and
+  // its width changes as the perspective foreshortening unwinds, and no SVG
+  // transform expresses that. So the art ships each piece as a four-point
+  // polygon with its raised position in data-up, and the engine tweens the
+  // points. That was the art side's call and it is the right one.
+  //
+  // The rule is: TWEEN ANYTHING THAT DECLARES A data-up. Four of the nine
+  // centre-line dashes have none, because they are on the fixed span beyond the
+  // leaf and must stay put — so declaring the raised state is also how the
+  // artwork says which pieces move.
+  //
+  // The lift runs on its own timer and the gate buttons cannot trigger it. The
+  // only coupling is one-way and defensive: it will not BEGIN while the
+  // crossing gate is down, because that would shut the same road twice over
+  // with nowhere for the traffic to wait. Nothing the child does is ever
+  // blocked or interrupted by it — see AMBIENT.md on why the gate stays theirs.
+  const BASCULE = {
+    steps: [['idle', 13], ['warn', 1.4], ['boom', 1.2], ['settle', 0.8],
+            ['lift', 3.2], ['open', 6.5], ['lower', 3.2], ['clear', 0.8], ['raise', 1.2]],
+    ding: 1.35,       // seconds between bell strikes while it is working
+  };
+
+  function parsePts(s) {
+    return (s || '').trim().split(/\s+/).map(p => p.split(',').map(Number))
+      .filter(q => q.length === 2 && !q.some(isNaN));
+  }
+
+  // The channel traffic, which is the whole reason the bridge opens.
+  //
+  // Every mast here stands well above the closed deck, so nothing passes under
+  // it — the boats hold short of the towers and go through together when the
+  // span is up. That queue is worth more than staggering them: it makes the
+  // bridge's purpose legible without a word of explanation.
+  const CHANNEL = { hold: 528, space: 96, speed: 26, gap: [536, 744] };
+
+  /** Is anything still between the towers? The span must not come down on it. */
+  function channelBusy() {
+    const c = currentScene && currentScene.channel;
+    if (!c) return false;
+    return c.boats.some(o => o.x > CHANNEL.gap[0] && o.x < CHANNEL.gap[1]);
+  }
+
+  function buildChannel(svg) {
+    const path = svg.querySelector('[id$="channel-path"]');
+    if (!path) return null;
+    const boats = [].map.call(svg.querySelectorAll('.cc-sail, .cc-launch'), el => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)(?:\s*scale\(\s*([\d.]+))?/
+        .exec(el.getAttribute('transform') || '');
+      return { el: el, x: m ? +m[1] : 0, s: (m && m[3]) ? +m[3] : 1 };
+    });
+    if (!boats.length) return null;
+    // Sample the path once so a boat can read its y from its x — the channel is
+    // a gentle curve and following it beats a flat line.
+    const L = path.getTotalLength(), N = 64, xs = [], ys = [];
+    for (let i = 0; i <= N; i++) { const q = path.getPointAtLength(L * i / N); xs.push(q.x); ys.push(q.y); }
+    return { boats: boats, xs: xs, ys: ys };
+  }
+
+  function channelY(c, x) {
+    const xs = c.xs;
+    if (x <= xs[0]) return c.ys[0];
+    for (let i = 1; i < xs.length; i++) {
+      if (x <= xs[i]) {
+        const u = (x - xs[i - 1]) / (xs[i] - xs[i - 1] || 1);
+        return c.ys[i - 1] + (c.ys[i] - c.ys[i - 1]) * u;
+      }
+    }
+    return c.ys[c.ys.length - 1];
+  }
+
+  function updateChannel(dt) {
+    const c = currentScene && currentScene.channel;
+    if (!c) return;
+    // "Open" to a boat means the span is UP and staying up — the 'open' phase —
+    // not merely part-way through a lift or a lower.
+    const open = !!(currentScene.bascule && currentScene.bascule.phase === 'open');
+    const secs = dt / 1000;
+    // Front of the queue first, so they stack up rather than through each other.
+    c.boats.slice().sort((a, b) => b.x - a.x).forEach((o, i) => {
+      let want = o.x + CHANNEL.speed * secs;
+      // RELEASED BY THE PHASE, NOT BY HOW OPEN IT LOOKS. Gating on openness let
+      // boats keep feeding into the gap all through the descent — the span was
+      // waiting for a channel that never cleared because more kept arriving.
+      // Once the deck starts down, whoever is short of the line stays there.
+      if (!open) {
+        const line = CHANNEL.hold - i * CHANNEL.space;   // each waits behind the one ahead
+        if (o.x <= line) want = Math.min(want, line);
+      }
+      o.x = want > 1400 ? -160 : want;
+      o.el.setAttribute('transform',
+        'translate(' + o.x.toFixed(1) + ',' + channelY(c, o.x).toFixed(1) + ') scale(' + o.s + ')');
+    });
+  }
+
+  function buildBascule(svg) {
+    const leaf = svg.querySelector('.cc-bascule-leaf');
+    if (!leaf) return null;
+    const movers = [];
+    svg.querySelectorAll('.cc-bascule-quad[data-up], .cc-bascule-dashes [data-up]').forEach(el => {
+      const from = parsePts(el.getAttribute('points'));
+      const to = parsePts(el.getAttribute('data-up'));
+      if (!from.length || from.length !== to.length) {
+        console.warn('cc-bascule piece: points and data-up do not match');
+        return;
+      }
+      movers.push({ el: el, from: from, to: to });
+    });
+    if (!movers.length) { console.warn('cc-bascule-leaf has nothing to move'); return null; }
+    const weights = [].map.call(svg.querySelectorAll('.cc-bascule-weight'), el => ({
+      el: el, dy: parseFloat(el.getAttribute('data-dy')) || 0,
+    }));
+    return { movers: movers, weights: weights, step: 0, t: 0, open: 0, ding: 0 };
+  }
+
+  function updateBascule(dt) {
+    const b = currentScene && currentScene.bascule;
+    if (!b) return;
+    const secs = dt / 1000;
+    const step = BASCULE.steps[b.step];
+    b.t += secs;
+
+    // Two holds, both defensive, neither of them ever making the CHILD wait.
+    //
+    //   idle  — do not begin while the crossing gate is down; that would shut
+    //           the same road twice with nowhere for the traffic to go.
+    //   open  — do not begin lowering while a boat is still between the towers.
+    //           Releasing the queue on a timer meant the last one was halfway
+    //           through when the deck came down on top of it.
+    const held = b.t >= step[1] &&
+                 ((step[0] === 'idle' && CC.gate.isDown()) ||
+                  (step[0] === 'open' && channelBusy()));
+    if (!held && b.t >= step[1]) { b.t = 0; b.step = (b.step + 1) % BASCULE.steps.length; }
+
+    const now = BASCULE.steps[b.step][0];
+    b.phase = now;
+    const u = Math.min(1, b.t / BASCULE.steps[b.step][1]);
+    // How far open the leaf is, 0..1, eased so it starts and stops gently.
+    let raw = now === 'lift' ? u : now === 'lower' ? 1 - u
+            : (now === 'open') ? 1 : 0;
+    b.open = raw * raw * (3 - 2 * raw);
+
+    b.movers.forEach(m => {
+      const pts = m.from.map((p, i) =>
+        (p[0] + (m.to[i][0] - p[0]) * b.open).toFixed(1) + ',' +
+        (p[1] + (m.to[i][1] - p[1]) * b.open).toFixed(1));
+      m.el.setAttribute('points', pts.join(' '));
+    });
+    b.weights.forEach(w => w.el.setAttribute('transform', 'translate(0,' + (w.dy * b.open).toFixed(1) + ')'));
+
+    // The boom is DOWN for everything except idle — it comes down first and
+    // goes up last, so the road is shut before the deck ever moves.
+    const boom = currentScene.boom;
+    if (boom) {
+      const wantUp = (now === 'idle') || (now === 'raise');
+      const target = wantUp ? (isNaN(boom.up) ? -84 : boom.up) : (isNaN(boom.down) ? 0 : boom.down);
+      const rate = 84 * secs / 1.2;
+      boom.a += Math.max(-rate, Math.min(rate, target - boom.a));
+      boom.el.setAttribute('transform',
+        'rotate(' + boom.a.toFixed(1) + ' ' + boom.px + ' ' + boom.py + ')');
+    }
+
+    // Bell while it is working, lower and slower than the crossing's.
+    if (now !== 'idle' && now !== 'open') {
+      b.ding -= secs;
+      if (b.ding <= 0) { b.ding = BASCULE.ding; CC.audio && CC.audio.bridgeDing && CC.audio.bridgeDing(); }
+    } else { b.ding = 0; }
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -3005,6 +3192,8 @@
     updateBalloons(t, dt);
     updateFalls(t);
     updateBoom(dt);
+    updateBascule(dt);
+    updateChannel(dt);
     updateIdles(t);
     updateDrifts(t, dt);
     updateFlags(t);
@@ -3087,7 +3276,15 @@
         next.svg.classList.add('is-on');
       }
       if (prev && prev !== next) {
-        prev.svg.querySelectorAll('.cc-car').forEach(c => c.parentNode.removeChild(c));
+        // ONLY THE CARS THE ENGINE MADE. This used to sweep every .cc-car out of
+        // the scene being left, which is fine until a scene AUTHORS cars of its
+        // own — Mystic parks five along the quay — because scenes are cached and
+        // never rebuilt, so they would have gone for good the first time you
+        // walked away. The engine's cars all live in the two groups the engine
+        // itself inserted; nothing else is its to remove.
+        [prev.carsFar, prev.carsNear].forEach(g => {
+          if (g) while (g.firstChild) g.removeChild(g.firstChild);
+        });
         setTimeout(() => { if (currentScene !== prev) prev.svg.classList.remove('is-on'); }, 480);
       }
       drawGates(performance.now());

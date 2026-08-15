@@ -70,6 +70,7 @@ const SUPPORTED = {
   'South Dakota': ['Mount Rushmore'],
   'Mississippi': ['Vicksburg'],
   'Rhode Island': ['Newport'],
+  'Connecticut': ['Mystic'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

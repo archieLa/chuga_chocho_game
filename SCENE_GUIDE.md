@@ -1576,3 +1576,179 @@ def in_road(x, y, pad=16):
 `check-scenes.py` catches props on the *track*; nothing catches props on the road. Until
 it does, every `for _ in range(n)` that plants something needs this guard. Savannah had
 a tree on the road, twice — same bug, and hand-culling it there is why it came back here.
+
+### A near-field building's height is NOT `ppm(y)` of the frame bottom
+
+Mystic's street wings were sized with `ppm(720)`. At the very bottom of the frame that is
+**35.6 px/m**, so a three-storey building came out 380px tall and buried the entire track
+band — the train ran behind the scenery, which is the one thing a scene here may never do.
+
+Wings stand at the SIDES of the frame, set back from the viewer, so they take their own
+edge scale. Pick it from the constraint, not from the metre: every roof must land below
+**y=516**, the bottom of the rails. Check that first and the proportions second.
+
+### A gantry's legs must be open, or it is a concrete pylon
+
+Bailey Yard's service gantry was first drawn with solid tapered legs and it read as a
+bridge pier. The whole point of a gantry is that you see sky through it. Two slender
+members per leg with X bracing between them and nothing else — the same reason the Mystic
+bascule's leaf is an open truss rather than a plate.
+
+### A locomotive at 40px is the STEP, not the shape
+
+Three attempts at a hood unit came out as a bus, then as a flatcar with a yellow container
+on it. What reads at that size is the *step*: a long LOW hood (3.2m), a taller cab (5.3m)
+set well back, a stub nose — plus a hard dark edge down both sides of the cab. Without
+those two edges the cab and hood are the same colour touching each other and the whole
+machine flattens into a slab.
+
+Also: radiator louvres drawn wide enough to see are read as *windows*, which is what turned
+the first version into a coach. And three locomotives buffered up in a row become one
+continuous yellow band; a machine needs ballast either side of it to be a machine.
+
+### Draw the bridge before you draw the river
+
+The Mystic bascule went into `mid`, and the layer order is sky, far, mid, ground, **water**
+— so the river painted over its own bridge. It took a moment to spot because the towers
+still showed above the waterline. Anything standing IN water goes in `scenery-back`.
+
+### A hinged mechanism is ONE rigid body
+
+A heel-trunnion bascule is not a deck that lifts and a counterweight that falls. The deck
+leaf, the arm reaching back over the pin, and both concrete blocks are bolted together and
+swing as a single lever. So `#cc-bascule-leaf` carries `translate(pivot)` and **every child
+is in pivot-relative coordinates** — opening it is `translate(900,330) rotate(-72)` and
+nothing else in the scene moves.
+
+The first version offset the deck by the pivot but not the arm, and the counterweights
+ended up in the top-left corner of the sky. If part of a mechanism is in absolute
+coordinates and part is relative, the animation will tear.
+
+### Same-width, same-height, same-colour frontage is a picket fence
+
+Mystic's far shore was 23 white houses on one baseline: a fence. Real waterfront varies in
+every dimension at once — width, height, roof pitch, baseline — and about one in four is
+not white. Trees over the joins break the run. This is the Savannah lesson again, and it
+arrives every time a row of buildings is generated from a regular loop.
+
+### A bridge is a road that keeps going
+
+Seven drafts of Mystic failed the same way and I could not see it: the bridge was a machine
+sitting in a river. Big, small, centred, off to one side, in profile, three-quarter — none
+of it mattered, because the deck started nowhere and ended nowhere. There was no road on the
+far bank and our own road did not run onto it.
+
+The test is one sentence: **can you follow the carriageway from under your feet, across the
+water, and out of the picture on the other side?** If not, you have drawn a machine, and no
+amount of counterweight detail will fix it. Draw the road on the far bank *first* — even a
+30px strip going up between the houses — and then the bridge has a job.
+
+### The head-on lift, and why it is two states rather than a transform
+
+Side-on, a bascule opening is one rotation about one pin. Head-on it is not a rotation in
+screen space at all: the far edge rises AND the perspective foreshortening unwinds, so the
+deck gets *wider* as it comes up. A `rotate()` cannot do that and a `scaleY` about the hinge
+keeps the width constant, which loses most of what sells it.
+
+So the leaf is authored twice — every moving shape a quadrilateral, `points` for down and
+`data-up` for up, four points to four points — and the engine tweens the points. Nine quads,
+about twenty lines of engine code, smooth at 60fps.
+
+Two things learned drawing it: the centre-line dashes have to fade out past about 15° (they
+would need to compress non-linearly and nobody misses them once the deck is on end), and the
+kerbs must be pale **concrete**, not another grey steel. Drawn a shade off the roadway they
+vanish and the raised span comes up as a featureless slab.
+
+### Two barriers in one scene must differ in KIND
+
+Mystic has the crossing gate and the bridge's approach boom. The rule that has held
+everywhere else in this set applies here too: a second barrier that differs only in
+*position* reads as a duplicate of the first. The crossing keeps crossbucks and red lamps;
+the bridge boom is a plain black-and-white pole on a squat pedestal with no lamps at all.
+
+The same reasoning killed the idea of wiring the lift to the gate buttons. Those two buttons
+are the one piece of vocabulary the game has taught — *the train is coming*. Make CLOSE
+sometimes mean *a boat is coming* and the vocabulary blurs. The bridge runs on its own timer
+and merely defers to the gate; nothing the child presses starts or stops it.
+
+### The river-over-bridge bug does not look like a missing bridge
+
+This is the second time in one scene, and the second time is the one worth writing down.
+
+Anything standing in water and drawn in `mid` is painted over by its own river, because the
+layer order is sky, far, mid, ground, **water**, scenery-back. I knew that — there is an
+entry above saying so — and I put the Mystic bridge back in `mid` anyway.
+
+What made it survive a look: **the failure does not present as a missing bridge.** The
+fixed far span sits just above the waterline, so it survives, and the towers are above the
+water entirely. The picture still shows a bridge. What is missing is only the half that
+crosses the channel — so what you actually see is a road that stops at the quay, a band of
+open water, and then a bridge starting inexplicably on the far bank.
+
+Check the **span over the channel**, not the towers. And check it at zoom on the thing you
+changed: I signed this off from a 1200px contact sheet where the gap read as a thin dark
+line and I told myself it was the deck.
+
+### Two halves of one road meet on the same two x values
+
+The fixed span's near end was 20px wider than the moving leaf's far end, which threw a pale
+wing out either side of the carriageway at the joint and read as a ledge laid across the
+bridge. Where two pieces of one road meet they share their edge coordinates exactly —
+derive both from the same variables rather than writing each from its own offsets.
+
+### A bridge closed is ONE road — build it from one generator
+
+Mystic's moving leaf and its fixed span were built by separate blocks of code, each with its
+own width, its own kerb inset and its own idea of where the edge was. Closed, it read as two
+slabs of road butted together — which it was.
+
+The deck is now a single taper, `t=0` at the hinge to `t=1` at the far abutment, and every
+part of it — underside, girder, roadway, kerbs, parapets, centre line — comes out of the
+same `ed(t)`. The leaf is simply the piece with `t < 0.55`; the only difference is that its
+pieces carry `data-up`. Kerb and parapet widths are fractions of the local deck width, so
+they taper with it instead of stepping at the joint.
+
+The general rule: **when one object is split for animation, generate both halves from the
+same function and split by parameter, not by writing each half separately.** Two hand-written
+halves will never line up, and the seam is exactly where the eye goes.
+
+### A road does not need a prop to end it
+
+The far-bank road was cut off flat against the sky, so I planted a stand of trees across the
+end. That is a stage flat and it looked like one. A road going over a rise **tapers to almost
+nothing and is gone** — six pixels wide at the top of the bank does it, and the scattered
+trees already on the shore fall naturally either side of it.
+
+### Boats get measured off the road too
+
+Mystic's sloop was drawn at a hand-picked scale factor and came out 4.9m long with a 6.5m
+mast — a pond yacht moored next to full-size cars. It read exactly as what it was: a toy.
+
+Every vessel in this set now takes its scale from `ppm(y)` like everything else:
+`scale = (length_m × ppm(y)) / (generator's own unit length)`. A Mystic sloop is about 11m
+on deck with a mast roughly 1.35× the hull, and getting that right is not decoration — the
+mast has to be visibly too tall to pass under the closed span, or the bridge has no reason
+to open.
+
+Same failure as the Vicksburg car park, the Newport houses and the Keystone shopfronts. Four
+times now. If a thing has a real-world size, look it up and multiply by `ppm(y)`; never pick
+a scale factor by eye.
+
+### The height cap on a foreground building is the RAILS, and `h` is not the building
+
+Mystic's street got gables, mansards, cornices and chimneys — and the gable ends went
+straight through the ballast, because I sized the WALL and forgot that the silhouette is
+taller than the wall. A cornice adds 0.055h, a gable another 0.32h, a chimney sits above
+that: a 207px wall is a 285px building.
+
+Nothing in `foreground` may reach above **y=516**, the bottom of the track band, or the
+train runs behind the scenery. Size the stack, not the wall, and check the tallest element
+of the tallest building.
+
+### A row of buildings needs a row behind it
+
+Where a two-storey shopfront sat beside a three-storey one, the gap above it showed bare
+ground standing on end like a wall. A street has depth: what you see over a low roof is
+another roof. A cheap back row — plain blocks, a cornice line, two rows of windows, muted
+by one step — fixes it completely, and it must break where the carriageway runs through,
+because what you see up the street is road.

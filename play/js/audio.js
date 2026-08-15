@@ -81,6 +81,12 @@
     stopBell() { if (bellTimer) { clearInterval(bellTimer); bellTimer = null; } },
 
     whistle() { tone({ type: 'sawtooth', from: 400, to: 560, glide: 0.2, gain: 0.3, len: 1, attack: 0.05 }); },
+
+    /** The bridge bell — deliberately LOWER and SLOWER than the crossing bell.
+        Mystic is the first scene with two barriers that mean different things,
+        and if they sound alike the distinction the artwork is drawing is undone
+        the moment a child closes their eyes. One ding; the caller sets the pace. */
+    bridgeDing() { tone({ type: 'sine', from: 392, gain: 0.16, len: 0.55, attack: 0.01 }); },
     chuff() { tone({ type: 'square', from: 95, gain: 0.14, len: 0.18 }); },
     honk() { tone({ type: 'square', from: 300, gain: 0.2, len: 0.25 }); },
 

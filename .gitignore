@@ -7,3 +7,4 @@ node_modules/
 # exclusion was a git-reset list that had to be updated by hand for each new
 # folder, and twice it was not. A pattern cannot forget.
 chuga-chocho-*/
+*-drop/

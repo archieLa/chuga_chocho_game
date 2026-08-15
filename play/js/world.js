@@ -327,6 +327,15 @@
       scenery:{ theme:'harbour', features:['sails','pellbridge','station','thamesstreet'] },
       trainPreset:{ engine:'steam' } },
 
+    { id:'mystic', state:'Connecticut', city:'Mystic',
+      say:{ en:'Mystic', pl:'Mystic' },
+      scene:'mystic',
+      // Viewpoint: Main Street looking down onto the bascule bridge, head-on. The set's
+      // first MOVABLE STRUCTURE — the span stands on end in front of you and a boat goes
+      // through underneath. Two barriers on one road, meaning different things.
+      scenery:{ theme:'seaport', features:['basculebridge','mainstreet','river','sloops'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 
