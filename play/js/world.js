@@ -336,6 +336,15 @@
       scenery:{ theme:'seaport', features:['basculebridge','mainstreet','river','sloops'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'baileyyard', state:'Nebraska', city:'Bailey Yard',
+      say:{ en:'Bailey Yard', pl:'Bailey Yard' },
+      scene:'bailey-yard',
+      // The first scene where the railroad IS the destination — everywhere else a railway
+      // runs through somewhere, here the somewhere is the railway. The road crosses the
+      // main line, passes the yard gate and runs between the two halves of the diesel shop.
+      scenery:{ theme:'yard', features:['gantry','dieselshop','bowl','switchtower'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
   ];
 

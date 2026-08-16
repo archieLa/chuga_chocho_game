@@ -1752,3 +1752,38 @@ ground standing on end like a wall. A street has depth: what you see over a low 
 another roof. A cheap back row — plain blocks, a cornice line, two rows of windows, muted
 by one step — fixes it completely, and it must break where the carriageway runs through,
 because what you see up the street is road.
+
+### In a flat layer, ORDER IS DEPTH — append far to near, always
+
+Bailey Yard's service-road pickups are at y=396. The loading wagons are at y=424 and are
+therefore *nearer*. Both live in `scenery-back`, and the pickups were appended afterwards —
+so a hi-rail truck was painted halfway up the side of a boxcar standing in front of it.
+
+It does not look like a layering bug. It looks like clutter, and I spent a round thinning
+the background trying to fix "too much overlap" before looking closely enough to see that
+one object was simply in front of something it should have been behind.
+
+Within a single SVG layer there is no z; the append order is the whole depth model. Sort by
+y before you emit, or write the block in depth order and keep it that way.
+
+### A tab on a post lands on whatever is behind it
+
+The yard gate's posts carried a yellow cap. The posts are 34px tall and stand at y=442; the
+wagons behind them are at y=424, so the caps landed exactly on the wagons' underframes and
+read as yellow blobs stuck to the side of a wagon. Anything on top of a vertical prop needs
+checking against what is directly behind it at that height — a fence post, a signal, a lamp,
+a mast. The prop reads fine; the thing on top of it does not.
+
+### A hanging load needs daylight and needs to be the same KIND of thing
+
+Bailey Yard's crane held a narrow green box sitting flush on the top container of the wagon
+beneath it. It read as a third container stacked on the pile, because that is exactly what
+it looked like: no gap, and a different width from everything around it.
+
+Two things make a load read as *hanging*: about 25-30px of visible air under it, and being
+the same kind of object as the ones it is about to join — same width, same corner posts,
+same ribbing. Then the spreader beam goes on top, wider than the load, with the ropes
+landing on its ends rather than passing behind it.
+
+Derive the hook height from the target: `HOOK_Y = deck_top - gap - load_h - spreader_h`.
+Pick it by eye and it will be flush the moment any of those change.

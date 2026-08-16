@@ -396,6 +396,7 @@
     const routes = buildRoutes(svg);
     const balloons = buildBalloons(svg);
     const boom = buildBoom(svg);
+    const gantry = buildGantry(svg);
     const bascule = buildBascule(svg);
     const channel = buildChannel(svg);
     const idles = buildIdles(svg);
@@ -416,7 +417,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -2381,6 +2382,125 @@
     } else { b.ding = 0; }
   }
 
+  // =======================================================================
+  // The Bailey Yard portal crane (.cc-gantry-trolley + .cc-gantry-hoist).
+  //
+  // It shuffles wagons about the loading track: pick one up, carry it, set it
+  // down in an empty slot. Deliberately NOT loading the player's train — Detroit
+  // already does that, and doing it twice would make two scenes the same. A yard
+  // crane moving wagons around a yard is what a yard crane is for, and it is
+  // gate-blind like everything else back here.
+  //
+  // REPARENT INTO .cc-crane-load, which is what the art put it there for. I
+  // first drove the wagon's own transform instead — the crab's x and the hoist's
+  // y are known every frame, so the maths is easy — and it moved correctly and
+  // looked wrong: the loading track is painted before the diesel shop and the
+  // gantry after it, so a lifted wagon slid up BEHIND the building while the
+  // crane carrying it stayed in front.
+  //
+  // Inside the load group the offset is constant and falls out in one line. The
+  // group sits under translate(tx,0) then translate(0, hoistY - homeY), and the
+  // wagon is authored at absolute scene coordinates, so
+  //     translate(-centreX, homeY - liftY)
+  // hangs it under the spreader at every crab position and every hoist height.
+  const GANTRY = { speed: 150, hoist: 200 };   // px per second
+
+  function buildGantry(svg) {
+    const trolley = svg.querySelector('.cc-gantry-trolley');
+    const hoist = svg.querySelector('.cc-gantry-hoist');
+    if (!trolley || !hoist) return null;
+    const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return isNaN(v) ? d : v; };
+    const wagons = [].map.call(svg.querySelectorAll('[id*="cc-crane-wagon-"]'), el => {
+      const cx = num(el, 'data-centre-x', 0);
+      return { el: el, cx: cx, slot: cx };
+    });
+    if (!wagons.length) return null;
+    // Two more places to put one than there are wagons, so the shuffle can never
+    // deadlock. Both are clear of the carriageway, which the loading track
+    // crosses between 473 and 807.
+    const slots = wagons.map(w => w.cx).concat([140, 1140]).sort((a, b) => a - b);
+    return {
+      trolley: trolley, hoist: hoist, wagons: wagons, slots: slots,
+      minX: num(trolley, 'data-min-x', 92), maxX: num(trolley, 'data-max-x', 1188),
+      homeY: num(hoist, 'data-home-y', 288), topY: num(hoist, 'data-top-y', 142),
+      liftY: num(hoist, 'data-lift-y', 322),
+      // CARRY LOW. data-top-y is the gantry's full travel, and hoisting a wagon
+      // that high puts it behind the diesel shop roof — out of sight for the whole
+      // traverse, which is the only part worth watching. A yard crane lifts just
+      // enough to clear what it is passing over, so we do too.
+      carryY: num(hoist, 'data-lift-y', 322) - 96,
+      hook: svg.querySelector('.cc-crane-load'),
+      x: num(trolley, 'data-home-x', 807), y: num(hoist, 'data-home-y', 288),
+      phase: 'idle', t: 0, load: null, target: 0,
+    };
+  }
+
+  function updateGantry(dt) {
+    const g = currentScene && currentScene.gantry;
+    if (!g) return;
+    const secs = dt / 1000;
+    const toward = (v, goal, rate) => {
+      const d = goal - v, s = rate * secs;
+      return Math.abs(d) <= s ? goal : v + (d > 0 ? s : -s);
+    };
+
+    if (g.phase === 'idle') {
+      g.t += secs;
+      g.y = toward(g.y, g.homeY, GANTRY.hoist);
+      if (g.t > 1.6) {
+        const free = g.slots.filter(s => !g.wagons.some(w => Math.abs(w.slot - s) < 4));
+        const w = g.wagons[Math.floor(Math.random() * g.wagons.length)];
+        if (free.length) {
+          g.load = w; g.target = free[Math.floor(Math.random() * free.length)];
+          g.phase = 'toSource';
+        }
+        g.t = 0;
+      }
+    } else if (g.phase === 'toSource') {
+      g.y = toward(g.y, g.carryY, GANTRY.hoist);
+      g.x = toward(g.x, g.load.slot, GANTRY.speed);
+      if (g.x === g.load.slot && g.y === g.carryY) g.phase = 'lower';
+    } else if (g.phase === 'lower') {
+      g.y = toward(g.y, g.liftY, GANTRY.hoist);
+      if (g.y === g.liftY) { g.phase = 'hooked'; g.t = 0; }
+    } else if (g.phase === 'hooked') {
+      g.t += secs;
+      if (g.t > 0.5) {
+        if (g.hook && g.load.el.parentNode !== g.hook) {
+          g.load.home = g.load.el.parentNode;
+          g.hook.appendChild(g.load.el);
+        }
+        g.phase = 'raise';
+      }
+    } else if (g.phase === 'raise') {
+      g.y = toward(g.y, g.carryY, GANTRY.hoist);
+      if (g.y === g.carryY) g.phase = 'carry';
+    } else if (g.phase === 'carry') {
+      g.x = toward(g.x, g.target, GANTRY.speed);
+      if (g.x === g.target) g.phase = 'set';
+    } else if (g.phase === 'set') {
+      g.y = toward(g.y, g.liftY, GANTRY.hoist);
+      if (g.y === g.liftY) {
+        const w = g.load;
+        w.slot = g.target;
+        if (w.home && w.el.parentNode !== w.home) w.home.appendChild(w.el);
+        g.load = null; g.phase = 'idle'; g.t = -0.6;
+      }
+    }
+
+    g.x = Math.max(g.minX, Math.min(g.maxX, g.x));
+    g.trolley.setAttribute('transform', 'translate(' + g.x.toFixed(1) + ',0)');
+    g.hoist.setAttribute('transform', 'translate(0,' + (g.y - g.homeY).toFixed(1) + ')');
+    // On the hook the offset is constant — the group it hangs in is already
+    // being moved by the crab and the hoist. On the ground it sits in its slot.
+    g.wagons.forEach(w => {
+      const up = g.hook && w.el.parentNode === g.hook;
+      w.el.setAttribute('transform', up
+        ? 'translate(' + (-w.cx) + ',' + (g.homeY - g.liftY) + ')'
+        : 'translate(' + (w.slot - w.cx).toFixed(1) + ',0)');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -3235,6 +3355,7 @@
     updateBalloons(t, dt);
     updateFalls(t);
     updateBoom(dt);
+    updateGantry(dt);
     updateBascule(dt);
     updateChannel(dt);
     updateIdles(t);

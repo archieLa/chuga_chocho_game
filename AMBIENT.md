@@ -154,6 +154,12 @@ Two traps, both already paid for once:
   about 65px/s where the pack runs 210 and up, so it winds up to racing speed
   going on and sheds it coming off. And it gets a lane of its own: the pack was
   moved off the near lane, which is the one the access road arrives at.
+- **To CARRY something, put it in the carrier.** Bailey Yard's crane drives the
+  wagon's own transform perfectly well — the crab's x and the hoist's y are known
+  every frame — and it looked wrong, because the loading track is painted before
+  the diesel shop and the gantry after it, so a lifted wagon slid up BEHIND the
+  building while the crane holding it stayed in front. Reparenting into the
+  hook fixes the depth and the maths at once: inside it the offset is constant.
 - **Gather every reason a car cannot move into ONE limit, then apply it once.**
   Clamping the position in stages and then second-guessing the result is how the
   Mystic queue came to oscillate: the keep-clear rule fired only on the frame a
