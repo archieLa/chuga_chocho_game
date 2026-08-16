@@ -302,6 +302,36 @@ Two traps, both already paid for once:
 
 ---
 
+## Next job: Bailey Yard's crane should load the player's train
+
+Agreed with the maintainer and his tester, overruling an earlier call of mine.
+I had the yard crane shuffle wagons around the loading track rather than load the
+train, reasoning that Detroit already does the latter and two scenes doing the
+same thing is a waste. They disagree, and they are right: the coupling moment is
+the best thing in Detroit, and "don't repeat yourself" is a rule about code, not
+about fun.
+
+**Make Bailey's gantry speak Detroit's existing crane contract rather than
+forking it.** `planShunt`, `updateShunt`, `buildRacks` and `setCrane` are already
+generic; three things are scene-specific and need widening:
+
+1. **`buildRacks` matches only `[id*="cc-autorack-"]`.** Widen to Bailey's
+   `[id*="cc-crane-wagon-"]`, building `wagon-container` or `wagon-boxcar` from
+   each one's `data-kind` instead of always `wagon-autorack`. It must READ the
+   authored transform — Bailey's wagons sit at `translate(centre - halfLength,
+   railY)` and assuming `translate(0,0)` put all four in the corner once already.
+2. **The extra wagon type is hard-coded** `wagon-autorack` in `launchTrain`. It
+   has to come from the scene.
+3. **The crane visual is the only real decision.** Detroit's `.cc-crane`
+   SYNTHESISES ropes and a spreader because its art has none; Bailey's
+   `.cc-gantry-hoist` has real ones drawn, so using Detroit's path unchanged
+   would show two spreaders. Drive Bailey's real hoist from the shunt phases —
+   that is what `.cc-crane-load` was exported for, and it is better than drawing
+   over the top of good art.
+
+Take the standalone yard shuffle out at the same time. The shunt replaces it, and
+both running would fight over the same four wagons.
+
 ## Queued, best first
 
 The original queue is empty — everything on it has been built. What is left is
