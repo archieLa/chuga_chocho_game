@@ -1357,11 +1357,18 @@
   const RACK_KINDS = [
     { sel: '[id*="cc-autorack-"]', num: /cc-autorack-(\d+)/,
       type: () => 'wagon-autorack',
-      at: (el, t) => ({ x: t.x, y: t.y }) },
+      at: (el, t) => ({ x: t.x, y: t.y }),
+      // Detroit's racks are drawn to a size the scene chose; match the drawing.
+      size: (t, drawn, gb) => gb.width ? (drawn.width * t.s) / gb.width : t.s },
     { sel: '[id*="cc-crane-wagon-"]', num: /cc-crane-wagon-(\d+)/,
       type: el => 'wagon-' + (el.getAttribute('data-kind') || 'boxcar'),
       at: (el, t) => ({ x: attrNum(el, 'data-centre-x', t.x),
-                        y: attrNum(el, 'data-rail-y', t.y) }) },
+                        y: attrNum(el, 'data-rail-y', t.y) }),
+      // Bailey's are sized by DEPTH, exactly as the train is, so a wagon standing
+      // on the loading track and the same wagon rolling on the main line below
+      // cannot disagree. Drawn to the scene's own taste they came out half again
+      // longer than the train they were about to join, on a track further away.
+      size: (t, drawn, gb, spot) => depthScale(spot.y) },
   ];
 
   function attrNum(el, name, dflt) {
@@ -1396,7 +1403,7 @@
         const gb = g.getBBox();
         // Same footprint on the siding as the drawing it stands in for. Both put
         // y=0 on the rail, so the translate carries straight over.
-        const s2 = gb.width ? (drawn.width * t.s) / gb.width : t.s;
+        const s2 = kind.size(t, drawn, gb, spot);
         el.setAttribute('visibility', 'hidden');
         // roofU is the wagon's own height above the rail, in ITS units, so the
         // hook can find the roof at any scale. It used to be the number 140,
@@ -1508,7 +1515,7 @@
     if (c) { setCrane(c, x, top, halfW); return; }
     if (!g) return;
     g.x = x;
-    g.y = top == null ? g.homeY : top - g.gap;
+    g.y = top == null ? g.homeY : top;
     setGantry(g);
   }
 
@@ -2508,10 +2515,6 @@
       trolley: trolley, hoist: hoist, ropes: ropes, wagons: [], slots: [],
       minX: attrNum(trolley, 'data-min-x', 92), maxX: attrNum(trolley, 'data-max-x', 1188),
       homeY: homeY, topY: attrNum(hoist, 'data-top-y', 142),
-      // The art hangs a load this far BELOW the spreader — beam, daylight, then
-      // the box, with the twist-locks between. Ignore it and the load sits
-      // flush against the beam and hides it, which is what happened first time.
-      gap: attrNum(hoist, 'data-lift-y', 322) - homeY,
       hook: svg.querySelector('.cc-crane-load'),
       homeX: homeX, x: homeX, y: homeY,
       phase: 'idle', t: 0, load: null, target: 0,
@@ -2533,9 +2536,10 @@
     g.slots = g.wagons.map(w => w.x).concat([140, 1140]).sort((a, b) => a - b);
   }
 
-  /** Where the spreader must be to have a grip on this wagon: a hook's gap
-      above its roof. */
-  const grabY = (g, r) => r.y - r.roofU * r.s - g.gap;
+  /** Where the spreader must be to have a grip on this wagon: ON its roof. A real
+      spreader locks to the box; hang the load a hook's length below the beam and
+      it reads as magnetised, with an invisible force holding the two apart. */
+  const grabY = (g, r) => r.y - r.roofU * r.s;
   /** CARRY LOW, but high enough. data-top-y is the gantry's full travel, and
       hoisting a wagon that high puts it behind the diesel shop roof — out of
       sight for the whole traverse, which is the only part worth watching. One
@@ -2653,7 +2657,7 @@
       // simply stands in its slot.
       if (g.hook && w.el.parentNode === g.hook) {
         w.el.setAttribute('transform',
-          'translate(0,' + (g.homeY + g.gap + w.roofU * w.s).toFixed(1)
+          'translate(0,' + (g.homeY + w.roofU * w.s).toFixed(1)
           + ') scale(' + w.s.toFixed(4) + ')');
       } else placeRack(w);
     });

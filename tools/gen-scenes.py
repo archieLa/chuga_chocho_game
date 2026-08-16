@@ -20994,6 +20994,14 @@ def bailey_yard():
         l, r = road_span(y)
         return l - pad < x < r + pad
 
+    # A person is 1.75m and the figure below is 29 units from boots to hard hat, so this
+    # is the only scale a worker is ever allowed. The first pass sized them against the
+    # WAGONS instead, which was fine reasoning applied to wagons that were themselves half
+    # again too big — so the men came out over two metres tall and stood shoulder to
+    # shoulder with a boxcar. Fix the wagons and the ruler works again.
+    def pk(y):
+        return ppm(y) * 1.75 / 29.0
+
     def worker(x, y, s, coat='#f0902a'):
         return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
                 f'{shadow(0, 1, 7, 2.5, 0.2)}'
@@ -21154,8 +21162,12 @@ def bailey_yard():
                  + ''.join(f'<rect x="{40 + q * 116}" y="{-SH_H - 22:.0f}" width="46" '
                            f'height="14" rx="3"/>' for q in range(int(w // 116))) + '</g>')
         DW, DH = 58, SH_H * 0.6
+        # STEP BY THE DOOR'S LEFT EDGE, and leave room for the door itself. The old
+        # spacing walked the LEFT edge from 26 to w-26, so the last door of each half
+        # hung 32px off the end of the building — a shutter and its lintel floating in
+        # mid-air over the yard behind, which is exactly what it looked like.
         for q in range(ndoor):
-            dx = 26 + q * ((w - 52) / max(1, ndoor - 1) if ndoor > 1 else 0)
+            dx = 26 + q * ((w - 52 - DW) / max(1, ndoor - 1) if ndoor > 1 else 0)
             o.append(f'<rect x="{dx:.0f}" y="{-DH:.0f}" width="{DW}" height="{DH:.0f}" '
                      f'fill="#2f3338"/>')
             if q != 1:
@@ -21271,23 +21283,36 @@ def bailey_yard():
                 f'1320,{LOAD_Y + 2.0 * kl:.0f} -40,{LOAD_Y + 2.0 * kl:.0f}" '
                 f'fill="#a9a294"/>')
     back.append(rails(LOAD_Y, -40, 1320))
-    # THE FOUR. Two each side of the carriageway, drawn in the engine's own rolling-stock
-    # style so they read as wagons our train could couple to — chunky underframe, four big
-    # wheels, and a coupler knuckle at each end.
-    # 19.5m at this depth is 232px long and 129px tall, which swallowed the bowl and the
-    # shop doors behind it. These are the nearest wagons in the yard, so they should be the
-    # biggest — but not so big that the yard they stand in disappears.
-    WL = 14.5 * kl
+    # THE FOUR. Two pairs, one each side of the carriageway, drawn in the engine's own
+    # rolling-stock style so they read as wagons our train could couple to — chunky
+    # underframe, four big wheels, and a coupler knuckle at each end.
+    #
+    # SIZE THEM BY DEPTH, like everything else. The first pass drew them at 14.5m —
+    # 183px, HALF AGAIN as long as the same wagon looks when our own train pulls in on
+    # the main line below. They are further away than the main line, so they have to be
+    # SMALLER than the train, and they were bigger; the loading track swallowed the bowl,
+    # the shop doors and the sense of a yard having any depth at all. The engine sizes
+    # what it substitutes here by `depthScale(y) = roadHalf(y)/130`, exactly as it sizes
+    # the train, so the drawing matches that and the two agree.
+    DEPTH = (18 + 112 * (LOAD_Y - HORIZON) / 420.0) / 130.0     # 0.393 at y=424
+    WL = 265 * DEPTH                                            # ~265 units over the couplers
+    # A pair each side of the road crossing, symmetric about it, with the outer thirds of
+    # the track left EMPTY on purpose: those are the two spare slots the shuffle needs to
+    # have anywhere to move a wagon to, and they are where the crane visibly goes.
+    # Keep away from x≈210 as well — that is where the shunt sets a wagon down on the main
+    # line, and a wagon parked there stands directly behind the one being coupled, so two
+    # identical containers pile up on each other at the one moment anyone is watching.
+    LOADS = [(640 - 274, 'container', '#c9a02c', '#3f6a92'),
+             (640 - 158, 'boxcar', '#8f5236', '#8f5236'),
+             (640 + 158, 'container', '#b5453a', '#3f7a5a'),
+             (640 + 274, 'boxcar', '#4a6a86', '#4a6a86')]
     lr, rr = road_span(LOAD_Y)
-    LOADS = [(lr - 24 - 2 * WL - 14, 'container', '#c9a02c', '#3f6a92'),
-             (lr - 24 - WL, 'boxcar', '#8f5236', '#8f5236'),
-             (rr + 24, 'container', '#b5453a', '#3f7a5a'),
-             (rr + 24 + WL + 14, 'boxcar', '#4a6a86', '#4a6a86')]
-    for i, (lx, kind, c1, c2) in enumerate(LOADS):
+    for i, (cx, kind, c1, c2) in enumerate(LOADS):
+        lx = cx - WL / 2
         w = game_wagon(lx, LOAD_Y, WL, kind, c1, c2, gid=f'cc-crane-wagon-{i}')
         # everything the engine needs to drive the crane onto this wagon, on the wagon
         w = w.replace(f'id="cc-crane-wagon-{i}"',
-                      f'id="cc-crane-wagon-{i}" data-centre-x="{lx + WL / 2:.0f}" '
+                      f'id="cc-crane-wagon-{i}" data-centre-x="{cx:.0f}" '
                       f'data-rail-y="{LOAD_Y}" data-top-y="{LOAD_Y - 0.555 * WL:.0f}" '
                       f'data-length="{WL:.0f}" data-kind="{kind}"', 1)
         back.append(w)
@@ -21328,22 +21353,47 @@ def bailey_yard():
                      f'height="6" rx="2" fill="#3a3d42"/>')
     fence.append('</g>')
     back.append(''.join(fence))
-    # the gatehouse the road runs up to — this is where the road goes, and it is the same
-    # answer Detroit gives: through a gate into the yard
-    back.append(f'<g id="gatehouse" transform="translate({road_span(FENCE_Y)[1] + 54:.0f},{FENCE_Y + 4})">'
-                f'{shadow(16, 3, 22, 6, 0.22)}'
-                f'<rect x="0" y="-34" width="34" height="34" fill="#cfc7b4"/>'
-                f'<rect x="0" y="-34" width="34" height="4" fill="#ffffff" opacity="0.25"/>'
-                f'<rect x="-4" y="-40" width="42" height="7" rx="2" fill="#7d7266"/>'
-                f'<rect x="5" y="-27" width="24" height="13" fill="#4d6274" opacity="0.9"/>'
+    # THE GATEHOUSE the road runs up to — this is where the road goes, and it is the same
+    # answer Detroit gives: through a gate into the yard.
+    #
+    # It used to be a 34px cream box with a blue smear on it and no door, which reads as
+    # a box and not as a building; the maintainer's note was "I am not sure what this
+    # small building is supposed to be". It is now drawn as what it is: a hut a man walks
+    # into. Everything is measured off a person — a door he fits through, a window at his
+    # eye level, an eave that overhangs — because a door at human scale is the single
+    # thing that tells you a shape is a building.
+    gp = pk(FENCE_Y)
+    gh_h, gh_w = 32 * gp / 0.85, 40 * gp / 0.85          # ~2.3m tall, ~2.9m across
+    dr_h, dr_w = 29 * gp * 1.05, 29 * gp * 0.42          # a door a worker fits through
+    # Clear of the fence's own gate post at rg+40, or the two read as one object.
+    back.append(f'<g id="gatehouse" transform="translate({road_span(FENCE_Y)[1] + 68:.0f},{FENCE_Y + 6})">'
+                f'{shadow(gh_w / 2, 3, gh_w * 0.62, 6, 0.22)}'
+                f'<rect x="0" y="{-gh_h:.1f}" width="{gh_w:.1f}" height="{gh_h:.1f}" '
+                f'fill="#d5cdba"/>'
+                f'<rect x="0" y="{-gh_h:.1f}" width="{gh_w:.1f}" height="{gh_h * 0.13:.1f}" '
+                f'fill="#ffffff" opacity="0.28"/>'
+                # eave, overhanging both sides — a flat cap sat flush reads as a lid
+                f'<rect x="{-gh_w * 0.12:.1f}" y="{-gh_h - gh_h * 0.19:.1f}" '
+                f'width="{gh_w * 1.24:.1f}" height="{gh_h * 0.19:.1f}" rx="2" fill="#8a7d6c"/>'
+                f'<rect x="{-gh_w * 0.12:.1f}" y="{-gh_h - gh_h * 0.19:.1f}" '
+                f'width="{gh_w * 1.24:.1f}" height="{gh_h * 0.05:.1f}" rx="2" fill="#ffffff" '
+                f'opacity="0.18"/>'
+                # the door, on the road side, and a step under it
+                f'<rect x="{gh_w * 0.13:.1f}" y="{-dr_h:.1f}" width="{dr_w:.1f}" '
+                f'height="{dr_h:.1f}" rx="1" fill="#5c6b76"/>'
+                f'<rect x="{gh_w * 0.13:.1f}" y="{-dr_h:.1f}" width="{dr_w:.1f}" '
+                f'height="{dr_h * 0.1:.1f}" fill="#ffffff" opacity="0.15"/>'
+                f'<rect x="{gh_w * 0.09:.1f}" y="-2" width="{dr_w * 1.5:.1f}" height="2.5" '
+                f'rx="1" fill="#9b9382"/>'
+                # the window a gateman actually watches the road through
+                f'<rect x="{gh_w * 0.48:.1f}" y="{-gh_h * 0.78:.1f}" width="{gh_w * 0.4:.1f}" '
+                f'height="{gh_h * 0.34:.1f}" rx="1" fill="#4d6274"/>'
+                f'<rect x="{gh_w * 0.48:.1f}" y="{-gh_h * 0.78:.1f}" width="{gh_w * 0.4:.1f}" '
+                f'height="{gh_h * 0.1:.1f}" rx="1" fill="#ffffff" opacity="0.22"/>'
                 f'</g>')
-    # The engine's rolling stock is deliberately chunky — its wheels are about twice the
-    # size a real wheel would be at this depth. Size the people off ppm() and they come out
-    # shorter than a wagon wheel, which is what the first pass did. People here are sized
-    # against the WAGONS, not against the ruler: about a third of a wagon's body height.
-    for wx, wc, ws in ((330, '#f0902a', 2.1), (356, '#f2c23a', 1.9),
-                       (878, '#f0902a', 2.1), (1094, '#f2c23a', 2.0)):
-        back.append(worker(wx, FENCE_Y + 6, ws, wc))
+    for wx, wc, k in ((330, '#f0902a', 1.02), (356, '#f2c23a', 0.94),
+                      (878, '#f0902a', 1.03), (1094, '#f2c23a', 0.97)):
+        back.append(worker(wx, FENCE_Y + 6, pk(FENCE_Y) * k, wc))
 
     # ------------------------------------------------------- THE GANTRY ----
     # Detroit's move: one portal spanning the whole frame, feet just above the rails, beam
@@ -21391,41 +21441,48 @@ def bailey_yard():
     # off the loading track and set it on the train — so anything already dangling from the
     # spreader is in the way of the animation. `#cc-crane-load` is left as an empty group
     # for the engine to parent a wagon into.
-    TROLLEY_X = road_span(LOAD_Y)[1] + 24 + 7.25 * kl
-    HOOK_Y = int(LOAD_Y - 0.555 * WL - 34)
+    TROLLEY_X = 640 + 158                  # parked over one of the loaded wagons
+    LIFT_Y = LOAD_Y - 0.555 * WL           # a parked wagon's roof: where the hook grips
+    HOOK_Y = int(LIFT_Y - 34)              # and where it rests, tucked up, with nothing on
 
-    # THE CRAB AND ITS LOAD.
+    # THE CRAB AND ITS SPREADER.
     #
-    # Two things make a hanging load read as *hanging*: DAYLIGHT under it, and being the
-    # same kind of object as the ones it is going to join. The first version had a narrow
-    # green box sitting flush on the wagon's top container — no gap, different width — so
-    # it read as a third container stacked on the pile, which is exactly what it looked
-    # like. It is now a full-width container with 28px of air beneath it, corner posts like
-    # the others, and a spreader beam wider than the box with the ropes landing on its ends.
-    LOAD_W = 0.89 * WL
-    SPREAD_W = LOAD_W * 1.08
-    ROPE_X = LOAD_W * 0.44
+    # The spreader sits ON the load, the way a real one does — it locks to the roof, so
+    # there is no daylight between the two. Hanging the wagon a hook's-length below the
+    # beam made it look magnetised: the maintainer read it as "some invisible force
+    # between wagons and crane arm", which is exactly right, because nothing was touching.
+    #
+    # What keeps the beam READABLE with a load locked under it is being WIDER than the
+    # load, so its ends and the ropes landing on them show either side of the box. It is
+    # sized off the wagons, not off the crab.
+    CRAB_W = 92
+    SPREAD_W = WL * 1.18
+    ROPE_X = SPREAD_W * 0.40
     g.append(f'<g id="cc-gantry-trolley" class="cc-gantry-trolley" '
              f'data-min-x="{GL + 30}" data-max-x="{GR - 30}" '
              f'data-home-x="{TROLLEY_X:.0f}" '
              f'transform="translate({TROLLEY_X:.0f},0)">'
-             f'<rect x="{-SPREAD_W * 0.34:.0f}" y="{G_TOP - 66}" '
-             f'width="{SPREAD_W * 0.68:.0f}" height="34" rx="4" fill="{YELLOW}"/>'
-             f'<rect x="{-SPREAD_W * 0.34:.0f}" y="{G_TOP - 66}" '
-             f'width="{SPREAD_W * 0.68:.0f}" height="9" rx="3" fill="#ffffff" '
+             f'<rect x="{-CRAB_W / 2:.0f}" y="{G_TOP - 66}" '
+             f'width="{CRAB_W:.0f}" height="34" rx="4" fill="{YELLOW}"/>'
+             f'<rect x="{-CRAB_W / 2:.0f}" y="{G_TOP - 66}" '
+             f'width="{CRAB_W:.0f}" height="9" rx="3" fill="#ffffff" '
              f'opacity="0.25"/>'
-             f'<rect x="{-SPREAD_W * 0.34:.0f}" y="{G_TOP - 40}" '
-             f'width="{SPREAD_W * 0.68:.0f}" height="8" fill="{YELLOW_D}"/>'
+             f'<rect x="{-CRAB_W / 2:.0f}" y="{G_TOP - 40}" '
+             f'width="{CRAB_W:.0f}" height="8" fill="{YELLOW_D}"/>'
              f'<g fill="#4a4d52"><circle cx="{-ROPE_X:.0f}" cy="{G_TOP - 30}" r="7"/>'
              f'<circle cx="{ROPE_X:.0f}" cy="{G_TOP - 30}" r="7"/></g>'
+             # The hoist group's OWN y is the line a load's roof sits on, so the beam is
+             # drawn just above it — bottom edge on the roof, locked to it.
              f'<g id="cc-gantry-hoist" class="cc-gantry-hoist" '
              f'data-top-y="{G_TOP - 30}" data-home-y="{HOOK_Y}" '
-             f'data-lift-y="{LOAD_Y - 0.555 * WL:.0f}">'
+             f'data-lift-y="{LIFT_Y:.0f}">'
              f'<g stroke="#6b7076" stroke-width="2.6">'
-             f'<line x1="{-ROPE_X:.0f}" y1="{G_TOP - 30}" x2="{-ROPE_X:.0f}" y2="{HOOK_Y}"/>'
-             f'<line x1="{ROPE_X:.0f}" y1="{G_TOP - 30}" x2="{ROPE_X:.0f}" y2="{HOOK_Y}"/></g>'
-             f'<rect x="{-SPREAD_W / 2:.0f}" y="{HOOK_Y}" width="{SPREAD_W:.0f}" '
+             f'<line x1="{-ROPE_X:.0f}" y1="{G_TOP - 30}" x2="{-ROPE_X:.0f}" y2="{HOOK_Y - 12}"/>'
+             f'<line x1="{ROPE_X:.0f}" y1="{G_TOP - 30}" x2="{ROPE_X:.0f}" y2="{HOOK_Y - 12}"/></g>'
+             f'<rect x="{-SPREAD_W / 2:.0f}" y="{HOOK_Y - 13}" width="{SPREAD_W:.0f}" '
              f'height="13" rx="3" fill="{YELLOW_D}"/>'
+             f'<rect x="{-SPREAD_W / 2:.0f}" y="{HOOK_Y - 13}" width="{SPREAD_W:.0f}" '
+             f'height="4" rx="2" fill="#ffffff" opacity="0.2"/>'
              f'<g id="cc-crane-load" class="cc-crane-load"></g>'
              + '</g></g>')
     g.append('</g>')
@@ -21520,11 +21577,11 @@ def bailey_yard():
     front.append(f'<path id="near-track-path" class="cc-path" '
                  f'd="M-900,{NEAR_Y} L{lroad - 50:.0f},{NEAR_Y}" fill="none" stroke="none"/>')
 
-    # people, for scale against all that steel
-    for wx, wc, ws in ((512, '#f0902a', 3.0), (548, '#f2c23a', 2.7),
-                       (748, '#f0902a', 3.1)):
+    # people, for scale against all that steel — off the same ruler as everyone else
+    for wx, wc, k in ((512, '#f0902a', 1.0), (548, '#f2c23a', 0.93),
+                      (748, '#f0902a', 1.04)):
         if not in_road(wx, 706, 4):
-            front.append(worker(wx, 706, ws, wc))
+            front.append(worker(wx, 706, pk(706) * k, wc))
     # the yard's clutter along the bottom edge
     front.append(container(24, 722, 150, 38, '#3f6a86'))
     front.append(container(1120, 722, 156, 40, '#3f7a5a'))

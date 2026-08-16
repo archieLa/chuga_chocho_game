@@ -169,10 +169,24 @@ Two traps, both already paid for once:
   wagon to its layer at the BACK of the document order, so after one shuffle it
   drew in front of the fence and the men standing at the track. Remember
   `nextSibling` as well as the parent and `insertBefore` it.
-- **Hang a load where the art says a load hangs.** Bailey's spreader is drawn
-  34px above where a wagon's roof belongs — beam, daylight, twist-locks, box.
-  Hanging the load flush against the beam hid the beam behind it, which is a
-  strange way to repay a scene for having drawn one.
+- **A spreader locks ON the load; nothing hangs below it.** I read Bailey's
+  `data-home-y` (the hook's RESTING height, tucked up) as a gap to hang a load
+  at, and put 34px of daylight between the beam and the wagon's roof. The
+  maintainer's word for it was "some invisible force between wagons and crane
+  arm", which is exactly what it is when nothing is touching. What keeps the beam
+  readable under a load is being WIDER than it, not being above it.
+- **Size a thing by DEPTH, not by taste.** Bailey's loading-track wagons were
+  drawn at 14.5m — half again longer than the same wagon looks when the child's
+  own train pulls in on the main line, which is NEARER. The engine now sizes what
+  it substitutes there by `depthScale(y)`, exactly as it sizes the train, so the
+  two cannot disagree. "These are the nearest wagons so they should be the
+  biggest" was written about wagons that are not the nearest.
+- **People come off the ruler, always.** They were sized against those oversized
+  wagons instead — sound reasoning, wrong yardstick, and the men came out over
+  two metres tall. `ppm(y) * 1.75 / <figure height>` and nothing else.
+- **A door has WIDTH.** The shop's doors stepped their LEFT edge from one margin
+  to the other, so the last of each row hung 32px past the end of the building —
+  a shutter and its lintel floating in the air over the yard behind.
 - **Gather every reason a car cannot move into ONE limit, then apply it once.**
   Clamping the position in stages and then second-guessing the result is how the
   Mystic queue came to oscillate: the keep-clear rule fired only on the frame a
