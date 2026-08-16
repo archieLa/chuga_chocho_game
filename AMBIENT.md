@@ -165,6 +165,14 @@ Two traps, both already paid for once:
   the diesel shop and the gantry after it, so a lifted wagon slid up BEHIND the
   building while the crane holding it stayed in front. Reparenting into the
   hook fixes the depth and the maths at once: inside it the offset is constant.
+- **Put it back where it was, not on the end.** `appendChild` returns a borrowed
+  wagon to its layer at the BACK of the document order, so after one shuffle it
+  drew in front of the fence and the men standing at the track. Remember
+  `nextSibling` as well as the parent and `insertBefore` it.
+- **Hang a load where the art says a load hangs.** Bailey's spreader is drawn
+  34px above where a wagon's roof belongs — beam, daylight, twist-locks, box.
+  Hanging the load flush against the beam hid the beam behind it, which is a
+  strange way to repay a scene for having drawn one.
 - **Gather every reason a car cannot move into ONE limit, then apply it once.**
   Clamping the position in stages and then second-guessing the result is how the
   Mystic queue came to oscillate: the keep-clear rule fired only on the frame a
@@ -292,6 +300,7 @@ Two traps, both already paid for once:
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
+| Bailey Yard | the portal crane shuffles wagons about the loading track · **not ambient** — every other train stops and the same crane lifts a wagon onto it. See below. |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
 | Mount Washington | the cog train climbs to the summit, waits, and comes back down — engine always below the coach, pushing |
 | Cedar Point | three-car trains on both coasters — slow up the lift, fast down the drop · every other train calls at the depot platform, three get on and two get off |
@@ -302,35 +311,47 @@ Two traps, both already paid for once:
 
 ---
 
-## Next job: Bailey Yard's crane should load the player's train
+## Bailey Yard loads the train too — and shares one crane to do it
 
-Agreed with the maintainer and his tester, overruling an earlier call of mine.
-I had the yard crane shuffle wagons around the loading track rather than load the
-train, reasoning that Detroit already does the latter and two scenes doing the
-same thing is a waste. They disagree, and they are right: the coupling moment is
-the best thing in Detroit, and "don't repeat yourself" is a rule about code, not
-about fun.
+Agreed with the maintainer and his tester, overruling an earlier call of mine. I
+had the yard crane shuffle wagons around the loading track rather than load the
+train, reasoning that Detroit already did the latter and two scenes doing the
+same thing was a waste. They disagreed, and they were right: the coupling moment
+is the best thing in Detroit, and "don't repeat yourself" is a rule about code,
+not about fun.
 
-**Make Bailey's gantry speak Detroit's existing crane contract rather than
-forking it.** `planShunt`, `updateShunt`, `buildRacks` and `setCrane` are already
-generic; three things are scene-specific and need widening:
+Bailey's gantry now **speaks Detroit's crane contract instead of forking it**.
+`planShunt` / `updateShunt` / `buildRacks` are shared; what was scene-specific
+got widened rather than duplicated:
 
-1. **`buildRacks` matches only `[id*="cc-autorack-"]`.** Widen to Bailey's
-   `[id*="cc-crane-wagon-"]`, building `wagon-container` or `wagon-boxcar` from
-   each one's `data-kind` instead of always `wagon-autorack`. It must READ the
-   authored transform — Bailey's wagons sit at `translate(centre - halfLength,
-   railY)` and assuming `translate(0,0)` put all four in the corner once already.
-2. **The extra wagon type is hard-coded** `wagon-autorack` in `launchTrain`. It
-   has to come from the scene.
-3. **The crane visual is the only real decision.** Detroit's `.cc-crane`
-   SYNTHESISES ropes and a spreader because its art has none; Bailey's
-   `.cc-gantry-hoist` has real ones drawn, so using Detroit's path unchanged
-   would show two spreaders. Drive Bailey's real hoist from the shunt phases —
-   that is what `.cc-crane-load` was exported for, and it is better than drawing
-   over the top of good art.
+- **`buildRacks` reads two dialects.** Detroit's `#cc-autorack-N` places from its
+  own transform; Bailey's `#cc-crane-wagon-N` is authored at the wagon's LEFT end
+  and labels the middle it wants, and says its `data-kind`, so a yard can hold a
+  mix of `wagon-container` and `wagon-boxcar`.
+- **The wagon that joins the train comes from the scene, not from a constant.**
+  Because the crane's pick is chosen after the consist is laid out, `launchTrain`
+  builds with the first kind, plans, and if the plan wanted a different wagon
+  builds that one and re-plans around it — `planShunt(pin)` keeps the same rack
+  so the second pass only moves the stopping place.
+- **Each scene's own hardware does the hoisting.** Detroit's `.cc-crane` has no
+  ropes in the artwork so `setCrane` draws them; Bailey's are real, and drawing
+  Detroit's over the top would have hung a second spreader on a good one.
+- **The hook height comes from the load, not from the number 140.** Each rack
+  measures its own roof at build time, which is what makes one crane serve an
+  auto-rack, a double-stack and a boxcar.
 
-Take the standalone yard shuffle out at the same time. The shunt replaces it, and
-both running would fight over the same four wagons.
+**One crane, two jobs, and the shunt wins.** Between trains it still shuffles
+wagons about the loading track. The first attempt let the shunt run only when the
+crane happened to be free — and a shuffle takes the best part of fifteen seconds,
+so the crane is almost never free and the shunt simply never happened: every
+train ran straight through. Now the shuffle YIELDS. It starts nothing new while a
+train is due, and if it is already holding a wagon it sets it down at the nearest
+free slot rather than carrying it across — a change of mind, not a teleport.
+
+That means the yard crane reads the crossing gate, the one thing back here that
+otherwise never does. It is the only warning that a train is coming, and the
+traffic is one-way: the crane listens, the gate never hears back, and the game is
+exactly as it was.
 
 ## Queued, best first
 
@@ -342,12 +363,13 @@ the below-the-line list, and whatever the next scenes bring.
 
 ---
 
-## Detroit is the exception: this one IS the train
+## The shunt is the exception: this one IS the train
 
-Everything else in this file is scenery. The Detroit shunt is not — it is the
-gameplay train doing something, and it lives in `updateTrain`, not here. It is
-written up in this file only because this is where anyone looking for "what
-moves" will come.
+Everything else in this file is scenery. The shunt is not — it is the gameplay
+train doing something, and it lives in `updateTrain`, not here. It is written up
+in this file only because this is where anyone looking for "what moves" will
+come. **Two scenes run it now, Detroit and Bailey Yard**; the section above says
+what widening it took.
 
     the train runs in and brakes to a stand
     a gantry crane picks a loaded auto-rack off the siding
@@ -357,10 +379,10 @@ moves" will come.
 The crane is the point. Without it the wagon drifted down on its own and, in the
 maintainer's words, a ghost was loading the train.
 
-A scene opts in by having `#cc-autorack-N` groups on a siding; every other place
-still runs a train straight through. Every OTHER train shunts — always would
-make the place feel like a cutscene, never would leave a child waiting on a coin
-flip for the best thing in the scene.
+A scene opts in by having `#cc-autorack-N` or `#cc-crane-wagon-N` groups standing
+on a siding; every other place still runs a train straight through. Every OTHER
+train shunts — always would make the place feel like a cutscene, never would
+leave a child waiting on a coin flip for the best thing in the scene.
 
 Two rules it must keep:
 

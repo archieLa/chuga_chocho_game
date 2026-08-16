@@ -422,6 +422,7 @@
     mounted[loc.id] = s;
     stage.appendChild(svg);
     s.racks = buildRacks(svg);       // after attaching: it measures with getBBox
+    linkGantry(s.gantry, s.racks);   // and the yard crane lifts what buildRacks made
     return s;
   }
 
@@ -1344,25 +1345,67 @@
     c.beam2.setAttribute('width', halfW * 2 + 16);
   }
 
+  /** The two dialects a scene can use to offer the crane something to lift.
+      They grew independently, in two scenes, and both are on disk now:
+
+        Detroit — the authored group's own transform IS the placement, and its
+                  origin already sits in the middle of the wagon.
+        Bailey  — authored at translate(leftEnd, railY) and labelled with the
+                  middle it wants, because our rolling stock hangs off its
+                  middle. It also says what KIND of wagon it is, so the yard can
+                  hold a mix and the train gets whichever one is lifted. */
+  const RACK_KINDS = [
+    { sel: '[id*="cc-autorack-"]', num: /cc-autorack-(\d+)/,
+      type: () => 'wagon-autorack',
+      at: (el, t) => ({ x: t.x, y: t.y }) },
+    { sel: '[id*="cc-crane-wagon-"]', num: /cc-crane-wagon-(\d+)/,
+      type: el => 'wagon-' + (el.getAttribute('data-kind') || 'boxcar'),
+      at: (el, t) => ({ x: attrNum(el, 'data-centre-x', t.x),
+                        y: attrNum(el, 'data-rail-y', t.y) }) },
+  ];
+
+  function attrNum(el, name, dflt) {
+    const v = parseFloat(el.getAttribute(name));
+    return isNaN(v) ? dflt : v;
+  }
+
+  /** A rack stands where its own record says it stands. `x` is the LIVE middle,
+      so the yard crane moves one simply by writing a new number into it. */
+  function placeRack(r) {
+    r.el.setAttribute('transform', 'translate(' + r.x.toFixed(1) + ',' + r.y.toFixed(1)
+      + ') scale(' + r.s.toFixed(4) + ')');
+  }
+
   function buildRacks(svg) {
     const racks = [];
-    svg.querySelectorAll('[id*="cc-autorack-"]').forEach(el => {
-      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
-        .exec(el.getAttribute('transform') || '');
-      if (!m) return;
-      const drawn = el.getBBox();
-      if (!drawn.width) { console.warn('cc-autorack has no size — is the scene attached?'); return; }
-      const n = /cc-autorack-(\d+)/.exec(el.id);
-      const x = +m[1], y = +m[2], s = +m[3];
-      const g = CC.rolling.build('wagon-autorack');
-      el.parentNode.insertBefore(g, el);
-      const gb = g.getBBox();
-      // Same footprint on the siding as the drawing it stands in for. Both put
-      // y=0 on the rail, so the translate carries straight over.
-      const s2 = gb.width ? (drawn.width * s) / gb.width : s;
-      g.setAttribute('transform', 'translate(' + x + ',' + y + ') scale(' + s2.toFixed(4) + ')');
-      el.setAttribute('visibility', 'hidden');
-      racks.push({ el: g, n: n ? +n[1] : 0, x: x, y: y, s: s2 });
+    RACK_KINDS.forEach(kind => {
+      svg.querySelectorAll(kind.sel).forEach(el => {
+        // The scale is optional: Detroit's racks carry one, Bailey's are drawn
+        // at full size and have none.
+        const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)(?:\s*scale\(\s*([\d.]+))?/
+          .exec(el.getAttribute('transform') || '');
+        if (!m) return;
+        const drawn = el.getBBox();
+        if (!drawn.width) { console.warn(el.id + ' has no size — is the scene attached?'); return; }
+        const t = { x: +m[1], y: +m[2], s: m[3] ? +m[3] : 1 };
+        const spot = kind.at(el, t);
+        const type = kind.type(el);
+        const n = kind.num.exec(el.id);
+        const g = CC.rolling.build(type);
+        el.parentNode.insertBefore(g, el);
+        const gb = g.getBBox();
+        // Same footprint on the siding as the drawing it stands in for. Both put
+        // y=0 on the rail, so the translate carries straight over.
+        const s2 = gb.width ? (drawn.width * t.s) / gb.width : t.s;
+        el.setAttribute('visibility', 'hidden');
+        // roofU is the wagon's own height above the rail, in ITS units, so the
+        // hook can find the roof at any scale. It used to be the number 140,
+        // which was right for an auto-rack and for nothing else.
+        const r = { el: g, n: n ? +n[1] : 0, x: spot.x, y: spot.y, s: s2,
+                    type: type, roofU: -gb.y };
+        placeRack(r);
+        racks.push(r);
+      });
     });
     racks.sort((a, b) => a.n - b.n);
     return racks.length ? racks : null;
@@ -1383,7 +1426,7 @@
       the carry rather than for being nearby. */
   const CARRY_WANT = 560;               // px of traverse that reads as a crane working
 
-  function planShunt() {
+  function planShunt(pin) {
     const racks = currentScene && currentScene.racks;
     if (!racks || train.items.length < 2) return null;
     const last = train.items[train.items.length - 1];
@@ -1391,16 +1434,25 @@
     const stopHead = clamp(tail + 210, 700, W - 150);
     const slot = stopHead - tail;
     if (slot < 40) return null;                   // consist too long to fit the move
-    let best = null, bestErr = Infinity;
-    racks.forEach(r => {
+    // `pin` re-plans around a wagon already chosen — see launchTrain, where the
+    // consist has to be rebuilt once the crane's pick turns out to be a
+    // different kind of wagon from the one we guessed.
+    let best = pin || null, bestErr = Infinity;
+    if (!best) racks.forEach(r => {
       const err = Math.abs(Math.abs(r.x - slot) - CARRY_WANT);
       if (err < bestErr) { bestErr = err; best = r; }
     });
     if (!best) return null;
+    // How high the load rides across the yard. Detroit's racks stand alone on a
+    // siding the crane leaves at once, so 30px of daylight is plenty. Bailey's
+    // four stand in a ROW on one loading track and the carry goes straight over
+    // the top of them — at 30px the wagon would sail through its neighbours.
+    const clear = racks.reduce((a, r) => Math.max(a, r.roofU * r.s), 0) + 14;
     return { rack: best, phase: 'run', t: 0, picked: false,
              pickIndex: train.items.length - 1,
              rollingIndex: -1,          // set only while it drives its own transform
              stopHead: stopHead,
+             lift: currentScene.gantry ? clear : SHUNT.lift,
              targetX: slot };
   }
 
@@ -1433,6 +1485,33 @@
 
   const ease = (r) => r * r * (3 - 2 * r);
 
+  /** Where the hook is now, whichever crane this scene owns. */
+  function craneX() {
+    const c = currentScene.crane, g = currentScene.gantry;
+    return c ? c.x : g ? g.x : 0;
+  }
+
+  /** The girder the hook hangs from — the line it returns to with nothing on it. */
+  function craneTop() {
+    const c = currentScene.crane, g = currentScene.gantry;
+    return c ? c.girder : g ? g.topY : 0;
+  }
+
+  /** Put the hook at x with a load whose roof is at `top` (null: nothing on it).
+
+      Detroit's crane has no ropes or spreader in the artwork, so `setCrane`
+      draws them. Bailey's are real, drawn, named parts — using Detroit's path
+      there would hang a second spreader over the top of a perfectly good one.
+      Each scene's own hardware does the job. */
+  function shuntHook(x, top, halfW) {
+    const c = currentScene.crane, g = currentScene.gantry;
+    if (c) { setCrane(c, x, top, halfW); return; }
+    if (!g) return;
+    g.x = x;
+    g.y = top == null ? g.homeY : top - g.gap;
+    setGantry(g);
+  }
+
   function updateShunt(dt) {
     const s = train.shunt;
     if (!s) return;
@@ -1443,10 +1522,10 @@
     // which saves a couple of seconds of everybody waiting and looks like the
     // yard knew the train was coming.
     if (s.phase === 'run') {
-      if (c) {
-        const to = s.rack.x;
+      if (c || currentScene.gantry) {
+        const to = s.rack.x, at = craneX();
         const step = 300 * dt / 1000;
-        setCrane(c, c.x + clamp(to - c.x, -step, step), null, 0);
+        shuntHook(at + clamp(to - at, -step, step), null, 0);
       }
       return;
     }
@@ -1467,7 +1546,7 @@
     }
 
     // Where the load is, step by step.
-    const lifted = SHUNT.lift * ease(stepT(u, 'hoist'));
+    const lifted = (s.lift || SHUNT.lift) * ease(stepT(u, 'hoist'));
     const carry = ease(stepT(u, 'carry'));
     const place = ease(stepT(u, 'place'));
     const x = s.rack.x + (s.targetX - s.rack.x) * carry;
@@ -1481,18 +1560,19 @@
       CC.rolling.roll(g, (x - s.rack.x) / TRAIN_S, train.items[s.pickIndex].type);
     }
 
-    if (c) {
+    if (c || currentScene.gantry) {
       // The hook comes down onto the rack, rides with it, and lifts clear again.
       const down = ease(stepT(u, 'lower'));
       const off = ease(stepT(u, 'release'));
-      const top = y - 140 * sc;                       // the wagon's roof
-      const hookY = c.girder + (top - c.girder) * down * (1 - off);
-      setCrane(c, (s.picked || down > 0) ? x : c.x, down > 0 ? hookY : null, 82 * sc);
+      const top = y - s.rack.roofU * sc;              // the wagon's roof
+      const girder = craneTop();
+      const hookY = girder + (top - girder) * down * (1 - off);
+      shuntHook((s.picked || down > 0) ? x : craneX(), down > 0 ? hookY : null, 82 * sc);
     }
 
     if (u >= SHUNT_TOTAL) {
       s.phase = 'away'; s.t = 0; s.rollingIndex = -1;
-      if (c) setCrane(c, c.x, null, 0);
+      shuntHook(craneX(), null, 0);
       CC.audio.whistle();
     }
   }
@@ -2385,11 +2465,18 @@
   // =======================================================================
   // The Bailey Yard portal crane (.cc-gantry-trolley + .cc-gantry-hoist).
   //
-  // It shuffles wagons about the loading track: pick one up, carry it, set it
-  // down in an empty slot. Deliberately NOT loading the player's train — Detroit
-  // already does that, and doing it twice would make two scenes the same. A yard
-  // crane moving wagons around a yard is what a yard crane is for, and it is
-  // gate-blind like everything else back here.
+  // It does two jobs with one set of hardware. Between trains it shuffles wagons
+  // about the loading track — pick one up, carry it, set it down in an empty
+  // slot — and that part is ambient and gate-blind like everything else back
+  // here. When a train calls, `updateShunt` borrows the same crane and it loads
+  // the child's train instead; see "The shunt is the exception" in AMBIENT.md.
+  //
+  // I first had it shuffle and nothing more, reasoning that Detroit already
+  // loaded the train and two scenes doing the same thing was a waste. The
+  // maintainer and his tester overruled that, and they were right: the coupling
+  // moment is the best thing in Detroit, and "don't repeat yourself" is a rule
+  // about code, not about fun. ONE driver at a time, though — whoever is
+  // driving, the other stands off.
   //
   // REPARENT INTO .cc-crane-load, which is what the art put it there for. I
   // first drove the wagon's own transform instead — the crab's x and the hoist's
@@ -2409,53 +2496,98 @@
     const trolley = svg.querySelector('.cc-gantry-trolley');
     const hoist = svg.querySelector('.cc-gantry-hoist');
     if (!trolley || !hoist) return null;
-    const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return isNaN(v) ? d : v; };
-    // READ THE TRANSFORM THEY ARE ALREADY DRAWN WITH. Each wagon is authored at
-    // translate(centre - halfLength, railY): its origin is its own LEFT END, not
-    // the scene's. Assuming they sat at translate(0,0) and writing a bare offset
-    // teleported all four to the top-left corner, where the crane then dutifully
-    // picked up nothing at all.
-    const wagons = [].map.call(svg.querySelectorAll('[id*="cc-crane-wagon-"]'), el => {
-      const cx = num(el, 'data-centre-x', 0);
-      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
-      return { el: el, cx: cx, slot: cx,
-               ax: m ? +m[1] : cx, ay: m ? +m[2] : num(el, 'data-rail-y', 424) };
-    });
-    if (!wagons.length) return null;
-    // Two more places to put one than there are wagons, so the shuffle can never
-    // deadlock. Both are clear of the carriageway, which the loading track
-    // crosses between 473 and 807.
-    const slots = wagons.map(w => w.cx).concat([140, 1140]).sort((a, b) => a - b);
+    // The ropes are drawn from the sheaves down to the spreader and they live
+    // INSIDE the group we translate, so a bare translate drags their top ends
+    // off the sheaves along with everything else. Remember where each one
+    // starts; put it back every frame and the rope pays out instead of sliding.
+    const ropes = [].map.call(hoist.querySelectorAll('line'),
+      l => ({ el: l, y1: parseFloat(l.getAttribute('y1')) || 0 }));
+    const homeX = attrNum(trolley, 'data-home-x', 807);
+    const homeY = attrNum(hoist, 'data-home-y', 288);
     return {
-      trolley: trolley, hoist: hoist, wagons: wagons, slots: slots,
-      minX: num(trolley, 'data-min-x', 92), maxX: num(trolley, 'data-max-x', 1188),
-      homeY: num(hoist, 'data-home-y', 288), topY: num(hoist, 'data-top-y', 142),
-      liftY: num(hoist, 'data-lift-y', 322),
-      // CARRY LOW. data-top-y is the gantry's full travel, and hoisting a wagon
-      // that high puts it behind the diesel shop roof — out of sight for the whole
-      // traverse, which is the only part worth watching. A yard crane lifts just
-      // enough to clear what it is passing over, so we do too.
-      carryY: num(hoist, 'data-lift-y', 322) - 96,
+      trolley: trolley, hoist: hoist, ropes: ropes, wagons: [], slots: [],
+      minX: attrNum(trolley, 'data-min-x', 92), maxX: attrNum(trolley, 'data-max-x', 1188),
+      homeY: homeY, topY: attrNum(hoist, 'data-top-y', 142),
+      // The art hangs a load this far BELOW the spreader — beam, daylight, then
+      // the box, with the twist-locks between. Ignore it and the load sits
+      // flush against the beam and hides it, which is what happened first time.
+      gap: attrNum(hoist, 'data-lift-y', 322) - homeY,
       hook: svg.querySelector('.cc-crane-load'),
-      x: num(trolley, 'data-home-x', 807), y: num(hoist, 'data-home-y', 288),
+      homeX: homeX, x: homeX, y: homeY,
       phase: 'idle', t: 0, load: null, target: 0,
     };
   }
 
+  /** The crane cannot shuffle wagons it cannot see.
+
+      `buildRacks` swaps every authored drawing for a real piece of rolling stock
+      once the scene is attached, so the list of things to lift can only be made
+      HERE, after that has happened. Pointed at the hidden originals, the crane
+      flew about the yard moving nothing at all. */
+  function linkGantry(g, racks) {
+    if (!g) return;
+    g.wagons = racks || [];
+    // Two more places to put one than there are wagons, so the shuffle can never
+    // deadlock. Both are clear of the carriageway, which the loading track
+    // crosses between 473 and 807.
+    g.slots = g.wagons.map(w => w.x).concat([140, 1140]).sort((a, b) => a - b);
+  }
+
+  /** Where the spreader must be to have a grip on this wagon: a hook's gap
+      above its roof. */
+  const grabY = (g, r) => r.y - r.roofU * r.s - g.gap;
+  /** CARRY LOW, but high enough. data-top-y is the gantry's full travel, and
+      hoisting a wagon that high puts it behind the diesel shop roof — out of
+      sight for the whole traverse, which is the only part worth watching. One
+      wagon's worth of daylight clears the neighbours it passes over, which is
+      what a yard crane actually lifts. */
+  const carryY = (g, r) => Math.max(g.topY, grabY(g, r) - r.roofU * r.s - 14);
+
+  /** Put the crab at x and the spreader at y, and pay the ropes out to match. */
+  function setGantry(g) {
+    g.x = Math.max(g.minX, Math.min(g.maxX, g.x));
+    const dy = g.y - g.homeY;
+    g.trolley.setAttribute('transform', 'translate(' + g.x.toFixed(1) + ',0)');
+    g.hoist.setAttribute('transform', 'translate(0,' + dy.toFixed(1) + ')');
+    g.ropes.forEach(r => r.el.setAttribute('y1', (r.y1 - dy).toFixed(1)));
+  }
+
+  /** Slots with nothing standing in them. `ignore` is the wagon on the hook,
+      which still remembers the slot it came from until it is set down. */
+  function freeSlots(g, ignore) {
+    return g.slots.filter(s => !g.wagons.some(w => w !== ignore && Math.abs(w.x - s) < 4));
+  }
+
   function updateGantry(dt) {
     const g = currentScene && currentScene.gantry;
-    if (!g) return;
+    if (!g || !g.wagons.length) return;
+    // While a train is being loaded the shunt owns this crane. One driver.
+    if (train.shunt) return;
     const secs = dt / 1000;
     const toward = (v, goal, rate) => {
       const d = goal - v, s = rate * secs;
       return Math.abs(d) <= s ? goal : v + (d > 0 ? s : -s);
     };
 
+    // A TRAIN IS DUE, SO THE YARD CRANE GETS OUT OF THE WAY. A shuffle takes the
+    // best part of fifteen seconds and the crane spends most of its life in one,
+    // so a shunt that politely waited for a free crane never happened at all —
+    // every train ran straight through a yard whose crane was busy. Now the
+    // shuffle yields: it starts nothing new, and if it is holding a wagon it
+    // sets it down at the NEAREST free slot instead of carrying it across. That
+    // is a change of mind, not a teleport, and it takes a second or two.
+    //
+    // Yes, this reads the gate — the one thing back here that otherwise never
+    // does. It is the only warning that a train is coming, and the traffic in
+    // that direction is one-way: the crane listens, the gate never hears back,
+    // and the game is exactly as it was.
+    const yielding = train.active || CC.gate.isDown();
+
     if (g.phase === 'idle') {
       g.t += secs;
       g.y = toward(g.y, g.homeY, GANTRY.hoist);
-      if (g.t > 1.6) {
-        const free = g.slots.filter(s => !g.wagons.some(w => Math.abs(w.slot - s) < 4));
+      if (g.t > 1.6 && !yielding) {
+        const free = freeSlots(g, null);
         const w = g.wagons[Math.floor(Math.random() * g.wagons.length)];
         if (free.length) {
           g.load = w; g.target = free[Math.floor(Math.random() * free.length)];
@@ -2463,51 +2595,67 @@
         }
         g.t = 0;
       }
+    } else if (yielding && g.load && (!g.hook || g.load.el.parentNode !== g.hook)) {
+      // Nothing on the hook yet — just abandon the trip.
+      g.load = null; g.phase = 'idle'; g.t = 0;
     } else if (g.phase === 'toSource') {
-      g.y = toward(g.y, g.carryY, GANTRY.hoist);
-      g.x = toward(g.x, g.load.slot, GANTRY.speed);
-      if (g.x === g.load.slot && g.y === g.carryY) g.phase = 'lower';
+      const up = carryY(g, g.load);
+      g.y = toward(g.y, up, GANTRY.hoist);
+      g.x = toward(g.x, g.load.x, GANTRY.speed);
+      if (g.x === g.load.x && g.y === up) g.phase = 'lower';
     } else if (g.phase === 'lower') {
-      g.y = toward(g.y, g.liftY, GANTRY.hoist);
-      if (g.y === g.liftY) { g.phase = 'hooked'; g.t = 0; }
+      const on = grabY(g, g.load);
+      g.y = toward(g.y, on, GANTRY.hoist);
+      if (g.y === on) { g.phase = 'hooked'; g.t = 0; }
     } else if (g.phase === 'hooked') {
       g.t += secs;
       if (g.t > 0.5) {
         if (g.hook && g.load.el.parentNode !== g.hook) {
+          // Remember the exact slot in the DOM, not just the parent. Putting
+          // it back with appendChild moved it to the END of the layer, where it
+          // drew in front of the fence and the men standing at the track.
           g.load.home = g.load.el.parentNode;
+          g.load.after = g.load.el.nextSibling;
           g.hook.appendChild(g.load.el);
         }
         g.phase = 'raise';
       }
-    } else if (g.phase === 'raise') {
-      g.y = toward(g.y, g.carryY, GANTRY.hoist);
-      if (g.y === g.carryY) g.phase = 'carry';
-    } else if (g.phase === 'carry') {
-      g.x = toward(g.x, g.target, GANTRY.speed);
-      if (g.x === g.target) g.phase = 'set';
+    } else if (g.phase === 'raise' || g.phase === 'carry') {
+      if (yielding) {
+        // Put it down at whichever free slot is closest, and be gone.
+        const free = freeSlots(g, g.load);
+        if (free.length) g.target = free.reduce((a, b) =>
+          Math.abs(b - g.x) < Math.abs(a - g.x) ? b : a);
+      }
+      const up = carryY(g, g.load);
+      if (g.phase === 'raise') {
+        g.y = toward(g.y, up, GANTRY.hoist);
+        if (g.y === up) g.phase = 'carry';
+      } else {
+        g.x = toward(g.x, g.target, GANTRY.speed);
+        if (g.x === g.target) g.phase = 'set';
+      }
     } else if (g.phase === 'set') {
-      g.y = toward(g.y, g.liftY, GANTRY.hoist);
-      if (g.y === g.liftY) {
-        const w = g.load;
-        w.slot = g.target;
-        if (w.home && w.el.parentNode !== w.home) w.home.appendChild(w.el);
+      const w = g.load, on = grabY(g, w);
+      g.y = toward(g.y, on, GANTRY.hoist);
+      if (g.y === on) {
+        w.x = g.target;                        // its new home on the loading track
+        if (w.home && w.el.parentNode !== w.home) w.home.insertBefore(w.el, w.after);
         g.load = null; g.phase = 'idle'; g.t = -0.6;
       }
     }
 
-    g.x = Math.max(g.minX, Math.min(g.maxX, g.x));
-    g.trolley.setAttribute('transform', 'translate(' + g.x.toFixed(1) + ',0)');
-    g.hoist.setAttribute('transform', 'translate(0,' + (g.y - g.homeY).toFixed(1) + ')');
-    // On the hook the offset is constant — the group it hangs in is already
-    // being moved by the crab and the hoist. On the ground it sits in its slot.
+    setGantry(g);
     g.wagons.forEach(w => {
-      const up = g.hook && w.el.parentNode === g.hook;
-      // Grounded: its authored place, shifted to whichever slot it now occupies.
-      // On the hook: the group it hangs in is already moved by the crab and the
-      // hoist, so the offset from its authored position is constant.
-      w.el.setAttribute('transform', up
-        ? 'translate(' + (w.ax - w.cx).toFixed(1) + ',' + (w.ay - g.liftY + g.homeY).toFixed(1) + ')'
-        : 'translate(' + (w.ax + w.slot - w.cx).toFixed(1) + ',' + w.ay.toFixed(1) + ')');
+      // On the hook the offset is CONSTANT: the group it hangs in is already
+      // being moved by the crab and the hoist, and our rolling stock hangs off
+      // its own middle, which is exactly where the hook is. On the ground it
+      // simply stands in its slot.
+      if (g.hook && w.el.parentNode === g.hook) {
+        w.el.setAttribute('transform',
+          'translate(0,' + (g.homeY + g.gap + w.roofU * w.s).toFixed(1)
+          + ') scale(' + w.s.toFixed(4) + ')');
+      } else placeRack(w);
     });
   }
 
@@ -2819,11 +2967,27 @@
     }
     train.shunt = null;
     if (currentScene.racks) {
-      currentScene.shuntTurn = !currentScene.shuntTurn;
-      if (currentScene.shuntTurn) {
+      // Only a wagon actually hanging on the hook stops the shunt; a crane
+      // merely travelling can simply be taken over. If it IS holding one, the
+      // turn is not spent, so nothing is lost but a train.
+      const gy = currentScene.gantry;
+      const busy = gy && gy.load && gy.hook && gy.load.el.parentNode === gy.hook;
+      if (gy && !busy) { gy.load = null; gy.phase = 'idle'; gy.t = 0; }
+      if (!busy) currentScene.shuntTurn = !currentScene.shuntTurn;
+      if (!busy && currentScene.shuntTurn) {
         train.dir = 1;
-        buildConsist({ type: 'wagon-autorack' });
+        // The wagon that joins the train is whichever one the crane picks up,
+        // and a yard may hold more than one kind. Build with a guess, plan, and
+        // if the plan wanted a different wagon, build that one and re-plan
+        // around it — the second pass only moves the stopping place.
+        const first = currentScene.racks[0].type;
+        buildConsist({ type: first });
         train.shunt = planShunt();
+        if (train.shunt && train.shunt.rack.type !== first) {
+          const want = train.shunt.rack;
+          buildConsist({ type: want.type });
+          train.shunt = planShunt(want);
+        }
         if (!train.shunt) buildConsist();           // would not fit — run a plain train
       }
     }
@@ -2898,6 +3062,13 @@
         train.shunt.rack.el.setAttribute('visibility', 'visible');
         train.shunt = null;
         if (currentScene.crane) setCrane(currentScene.crane, SHUNT.park, null, 0);
+        if (currentScene.gantry) {
+          // Hand the crane back to the yard, with a pause before it finds
+          // something else to do.
+          const g = currentScene.gantry;
+          g.load = null; g.phase = 'idle'; g.t = -1.2; g.y = g.homeY;
+          setGantry(g);
+        }
         buildConsist();
         setTrainVisible(false);
       }
