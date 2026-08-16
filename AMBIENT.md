@@ -154,6 +154,11 @@ Two traps, both already paid for once:
   about 65px/s where the pack runs 210 and up, so it winds up to racing speed
   going on and sheds it coming off. And it gets a lane of its own: the pack was
   moved off the near lane, which is the one the access road arrives at.
+- **READ the transform a thing is already drawn with; never assume translate(0,0).**
+  Bailey Yard's wagons are authored at `translate(centre - halfLength, railY)` —
+  their origin is their own left end, not the scene's. Writing a bare offset over
+  that teleported all four to the top-left corner, where the crane went on
+  picking up nothing with perfect mechanical accuracy.
 - **To CARRY something, put it in the carrier.** Bailey Yard's crane drives the
   wagon's own transform perfectly well — the crab's x and the hoist's y are known
   every frame — and it looked wrong, because the loading track is painted before

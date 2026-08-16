@@ -2410,9 +2410,16 @@
     const hoist = svg.querySelector('.cc-gantry-hoist');
     if (!trolley || !hoist) return null;
     const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return isNaN(v) ? d : v; };
+    // READ THE TRANSFORM THEY ARE ALREADY DRAWN WITH. Each wagon is authored at
+    // translate(centre - halfLength, railY): its origin is its own LEFT END, not
+    // the scene's. Assuming they sat at translate(0,0) and writing a bare offset
+    // teleported all four to the top-left corner, where the crane then dutifully
+    // picked up nothing at all.
     const wagons = [].map.call(svg.querySelectorAll('[id*="cc-crane-wagon-"]'), el => {
       const cx = num(el, 'data-centre-x', 0);
-      return { el: el, cx: cx, slot: cx };
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      return { el: el, cx: cx, slot: cx,
+               ax: m ? +m[1] : cx, ay: m ? +m[2] : num(el, 'data-rail-y', 424) };
     });
     if (!wagons.length) return null;
     // Two more places to put one than there are wagons, so the shuffle can never
@@ -2495,9 +2502,12 @@
     // being moved by the crab and the hoist. On the ground it sits in its slot.
     g.wagons.forEach(w => {
       const up = g.hook && w.el.parentNode === g.hook;
+      // Grounded: its authored place, shifted to whichever slot it now occupies.
+      // On the hook: the group it hangs in is already moved by the crab and the
+      // hoist, so the offset from its authored position is constant.
       w.el.setAttribute('transform', up
-        ? 'translate(' + (-w.cx) + ',' + (g.homeY - g.liftY) + ')'
-        : 'translate(' + (w.slot - w.cx).toFixed(1) + ',0)');
+        ? 'translate(' + (w.ax - w.cx).toFixed(1) + ',' + (w.ay - g.liftY + g.homeY).toFixed(1) + ')'
+        : 'translate(' + (w.ax + w.slot - w.cx).toFixed(1) + ',' + w.ay.toFixed(1) + ')');
     });
   }
 
