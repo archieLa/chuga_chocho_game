@@ -2321,9 +2321,9 @@
   /** Where a car's run ends. Normally the far edge of the tarmac — but where the
       road carries ON over a bridge, a northbound car drives across and off the
       far bank instead of evaporating on the near abutment. */
-  function carEndY(dir) {
+  function carEndY() {
     const base = currentScene ? currentScene.roadTop : HORIZON;
-    if (dir < 0 && currentScene && currentScene.bascule && !bridgeShut()) return base - 34;
+    if (currentScene && currentScene.bascule && !bridgeShut()) return base - 62;
     return base;
   }
 
@@ -2830,7 +2830,10 @@
     const ex = currentScene ? currentScene.roadExit : null;
     // Nothing comes over a bridge that is shut.
     if (down && bridgeShut()) return;
-    const at = down ? top + 4 : H + 120;
+    // Where the road carries on over a bridge, traffic coming towards us starts
+    // at the FAR end of that run and drives across, rather than appearing on the
+    // near abutment with the bridge behind it.
+    const at = down ? carEndY() + 4 : H + 120;
     // Where the road turns, traffic coming toward us has driven in along the side
     // road rather than materialising at the end of ours.
     if (down && ex) {
@@ -2899,7 +2902,7 @@
     // Fade over the last stretch before the road's far end. At the horizon a car
     // is tiny and this is invisible; on a truncated road it is what stops a
     // still-sizeable car from popping out of existence in mid-picture.
-    const top = carEndY(car.dir);
+    const top = carEndY();
     // Fade only applies to the carriageway. A car that has turned onto the side
     // road sits just above the road's end by y, and would otherwise be dimmed
     // for its whole run along a road it is legitimately driving on.
@@ -3087,21 +3090,26 @@
         if (blocked && beforeLine) {
           want = dir > 0 ? Math.min(want, stopLine) : Math.max(want, stopLine);
         }
-        if (limit != null) want = dir > 0 ? Math.min(want, limit) : Math.max(want, limit);
-        // Traffic waiting for a lifted bridge. Held short of the boom, not on it.
-        if (dir < 0 && bridgeShut()) want = Math.max(want, BRIDGE_STOP);
-        // A car held at the junction for a gap on the side road.
-        if (car.holdY != null) want = dir > 0 ? Math.min(want, car.holdY) : Math.max(want, car.holdY);
+        // Gather every reason this car cannot go further into ONE limit, then
+        // apply it once. Clamping `want` in stages and then second-guessing the
+        // result is what made the queue oscillate: the keep-clear rule fired only
+        // on the frame a car was actually pinned, shoved it back to the near side
+        // of the rails, and then let it creep forward again until it was pinned
+        // once more. A limit cycle, about 30px wide, for every car behind the
+        // second. Snap the LIMIT out of the danger and the car simply rests.
+        let lim = limit;
+        const closer = (a, b) => a == null ? b : b == null ? a : (dir > 0 ? Math.min(a, b) : Math.max(a, b));
+        if (dir < 0 && bridgeShut()) lim = closer(lim, BRIDGE_STOP);
+        if (car.holdY != null) lim = closer(lim, car.holdY);
         // NOBODY WAITS ON THE CROSSING. A driver does not stop on a level
         // crossing and this game least of all should draw one parked on the
-        // rails. If holding here would leave a car standing in the track band,
-        // it waits on the near side of it instead — which is what makes a queue
-        // at Mystic look like a real one: one at the boom, one in the gap before
-        // the rails, the rest behind the crossing.
-        const stopping = want !== car.y + dir * step;
-        if (stopping && want > CROSS_KEEP[0] && want < CROSS_KEEP[1]) {
-          want = dir > 0 ? CROSS_KEEP[0] : CROSS_KEEP[1];
+        // rails. A limit that lands in the track band becomes the near side of
+        // it — which is what makes Mystic's queue read as a real one: one at the
+        // boom, one in the gap before the rails, the rest behind the crossing.
+        if (lim != null && lim > CROSS_KEEP[0] && lim < CROSS_KEEP[1]) {
+          lim = dir > 0 ? CROSS_KEEP[0] : CROSS_KEEP[1];
         }
+        if (lim != null) want = dir > 0 ? Math.min(want, lim) : Math.max(want, lim);
         car.stopped = Math.abs(want - car.y) < step * 0.4;
         car.y = want;
         limit = car.y - dir * carGap(car.y);
@@ -3124,7 +3132,7 @@
       // far end, so this deleted every car the moment it turned — the junction
       // worked perfectly and nothing was ever seen using it. A side-road car
       // ends on car.dead instead, when it runs off the frame.
-      const offTarmac = car.phase === 'road' && car.y < carEndY(car.dir);
+      const offTarmac = car.phase === 'road' && car.y < carEndY();
       if (car.dead || offTarmac || car.y > H + 170) {
         if (car.el.parentNode) car.el.parentNode.removeChild(car.el);
         cars.splice(i, 1);

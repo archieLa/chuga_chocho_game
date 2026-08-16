@@ -154,6 +154,15 @@ Two traps, both already paid for once:
   about 65px/s where the pack runs 210 and up, so it winds up to racing speed
   going on and sheds it coming off. And it gets a lane of its own: the pack was
   moved off the near lane, which is the one the access road arrives at.
+- **Gather every reason a car cannot move into ONE limit, then apply it once.**
+  Clamping the position in stages and then second-guessing the result is how the
+  Mystic queue came to oscillate: the keep-clear rule fired only on the frame a
+  car was actually pinned, shoved it back off the rails, and then let it creep
+  forward until it was pinned again — a ~30px limit cycle for every car behind
+  the second. Snap the LIMIT out of the danger and the car simply rests.
+- **Nobody waits on the crossing.** A driver does not stop on a level crossing,
+  and this game least of all should draw one parked on the rails. A hold that
+  would land a car in the track band moves to the near side of it instead.
 - **Keeping a gap may HOLD a car, never shove it backwards.** If the one in front
   appears closer than the gap — which is exactly what a car turning out of a
   junction does — capping the follower drags it the wrong way up the street.
