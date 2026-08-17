@@ -72,6 +72,8 @@ const SUPPORTED = {
   'Rhode Island': ['Newport'],
   'Connecticut': ['Mystic'],
   'Nebraska': ['Bailey Yard'],
+  'South Carolina': ['Charleston'],
+  'Montana': ['Essex'],
 };
 
 // Two-letter USPS abbreviations — shown on the map. The FULL state name is

@@ -323,7 +323,26 @@
       scenery:{ theme:'river', features:['tow','floodwall','trussbridge','levee'] },
       trainPreset:{ engine:'diesel' } },
 
-    { id:'newport', state:'Rhode Island', city:'Newport',
+    { id:'charleston', state:'South Carolina', city:'Charleston',
+      say:{ en:'Charleston', pl:'Charleston' },
+      scene:'charleston',
+      // Viewpoint: down the Rainbow Row terrace to the harbour. The road crosses the
+      // railroad and T's into East Battery at the sea wall; cars turn on and off the main
+      // road along #turn-left-path / #turn-right-path / #battery-path, and vessels run the
+      // channel on #harbour-path and #inshore-path.
+      scenery:{ theme:'lowcountry-harbour', features:['rainbowrow','seawall','portcranes','steeples'] },
+      trainPreset:{ engine:'diesel' } },
+
+    { id:'glacier', state:'Montana', city:'Essex',
+      say:{ en:'Glacier', pl:'Glacier' },
+      scene:'glacier',
+      // Viewpoint: the crossing at Essex on the Marias Pass main line, looking across it to
+      // the Izaak Walton Inn, its red water tower and its caboose cabins, with the Middle
+      // Fork and the layered peaks of the Flathead Range beyond. Autumn: the larch are gold.
+      // The road ends in the inn's gravel yard — see #yard-left-path / #yard-right-path.
+      scenery:{ theme:'northern-rockies', features:['larch','lodge','watertower','cabooses'] },
+      trainPreset:{ engine:'diesel' } },
+     { id:'newport', state:'Rhode Island', city:'Newport',
       say:{ en:'Newport', pl:'Newport' },
       scene:'newport',
       // Viewpoint: Thames Street opening onto the harbour, the Pell Bridge beyond. The set's

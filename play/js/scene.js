@@ -413,11 +413,13 @@
     const ploughs = buildPloughs(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
+    const vessels = buildVessels(svg);
+    const tour = buildTour(svg);
 
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -954,7 +956,11 @@
     }
     // The pads. Sorted by their trailing number so the rotation is left to
     // right rather than whatever order the document happens to be in.
-    const pads = [].slice.call(svg.querySelectorAll('[id*="cc-launch-"]')).map(el => {
+    // Only pads that carry a balloon. "Launch" is also a small BOAT, and a scene
+    // with one of those in it has nothing to do with a mass ascension.
+    const pads = [].slice.call(svg.querySelectorAll('[id*="cc-launch-"]'))
+      .filter(el => el.classList.contains('cc-balloon') || el.querySelector('.cc-balloon, .cc-flame'))
+      .map(el => {
       const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*scale\(\s*([\d.]+)/
         .exec(el.getAttribute('transform') || '');
       if (!m) { console.warn('cc-launch pad has no translate/scale to return to'); return null; }
@@ -2663,6 +2669,159 @@
     });
   }
 
+  // =======================================================================
+  // VESSELS (.cc-vessel) — anything that drifts along a drawn line of water.
+  //
+  // Charleston's sloops and pilot launch and Glacier's kayaks are the same idea
+  // twice: a small craft on a named path, going one way, wrapping round off-frame
+  // and coming back. So they are one contract rather than two, and the next
+  // harbour or river scene gets it for nothing.
+  //
+  //   data-path="harbour"   the engine finds [id*="harbour-path"]
+  //   data-speed="-15"      px per second; NEGATIVE runs the path backwards
+  //   data-t="0.40"         where on the path it starts, 0..1
+  //   data-nose="1|-1"      -1 if the art is drawn facing the other way
+  //   data-bob="1.1"        optional swell, in px
+  //
+  // The path carries the y, so a channel that recedes carries its vessels with
+  // it and the art does not have to say so twice. Scale comes from the transform
+  // the art was drawn with and is NOT depth-corrected: Glacier's kayaks are drawn
+  // at roughly twice true scale on purpose, because a true-scale kayak at that
+  // distance is a smudge, and "fixing" that would delete them.
+  // Gate-blind, like everything else back here.
+  // =======================================================================
+  function buildVessels(svg) {
+    const paths = {};
+    const out = [];
+    svg.querySelectorAll('.cc-vessel').forEach(el => {
+      const key = el.getAttribute('data-path') || '';
+      if (!paths[key]) {
+        const p = svg.querySelector('[id*="' + key + '-path"]');
+        if (!p) { console.warn('cc-vessel wants a path called ' + key); return; }
+        paths[key] = { el: p, len: p.getTotalLength() };
+      }
+      const path = paths[key];
+      if (!path) return;
+      const m = /scale\(\s*(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      out.push({
+        el: el, path: path,
+        t: parseFloat(el.getAttribute('data-t')) || 0,
+        speed: parseFloat(el.getAttribute('data-speed')) || 12,
+        nose: parseFloat(el.getAttribute('data-nose')) || 1,
+        bob: parseFloat(el.getAttribute('data-bob')) || 0,
+        // The art's own scale, with any authored mirror taken out — data-nose is
+        // the one place that decides which way round a vessel is drawn.
+        s: m ? Math.abs(+m[1]) : 1,
+        ph: out.length * 1.9,
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  function updateVessels(dt, now) {
+    const list = currentScene && currentScene.vessels;
+    if (!list) return;
+    const secs = dt / 1000;
+    list.forEach(v => {
+      v.t += (v.speed / v.path.len) * secs;
+      if (v.t > 1) v.t -= 1;
+      if (v.t < 0) v.t += 1;
+      const p = v.path.el.getPointAtLength(v.path.len * v.t);
+      const y = p.y + (v.bob ? Math.sin(now / 1000 * 1.7 + v.ph) * v.bob : 0);
+      v.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + y.toFixed(1)
+        + ') scale(' + (v.nose * v.s).toFixed(3) + ',' + v.s.toFixed(3) + ')');
+    });
+  }
+
+  // =======================================================================
+  // THE TOUR BUS (.cc-tour) — parked at a viewpoint with everybody waving, and
+  // every so often it takes a run up the valley and comes back.
+  //
+  // IT NEVER TRAVELS BACKWARDS, and that costs a turn. The bus is drawn in
+  // scenery-back, which is painted UNDER the carriageway, so it must stay on the
+  // inn's side of the road — one exit, to the left. With only one exit the maths
+  // is forced: bay to off-frame and back is two traversals, and one flip
+  // off-screen leaves it facing the wrong way to set off again. So it turns twice
+  // — once out of sight at the top of the valley, and once in its own bay, which
+  // is what a bus in a car park actually does. The bay turn is a swing through
+  // scaleX = 0 about the middle of the parking space, so the bus stays in its bay
+  // and comes round on the spot.
+  //
+  //   data-bay    the LEFT EDGE of the parking space
+  //   data-len    how long the bus is
+  //   data-away   the left edge of where it waits, off frame
+  // Gate-blind: the child can hold the gate down all day and the bus does not care.
+  // =======================================================================
+  function buildTour(svg) {
+    const el = svg.querySelector('.cc-tour');
+    if (!el) return null;
+    const bay = attrNum(el, 'data-bay', NaN);
+    if (isNaN(bay)) { console.warn('.cc-tour has no data-bay'); return null; }
+    const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+    return {
+      el: el, bay: bay, y: m ? +m[2] : 0,
+      len: attrNum(el, 'data-len', 120),
+      away: attrNum(el, 'data-away', bay - 600),
+      speed: attrNum(el, 'data-speed', 50),
+      dwell: attrNum(el, 'data-dwell', 12),
+      gone: attrNum(el, 'data-gone', 6),
+      waves: [].map.call(el.querySelectorAll('.cc-wave'), (w, i) => {
+        const p = (w.getAttribute('data-pivot') || '').split(',').map(Number);
+        return { el: w, px: p[0] || 0, py: p[1] || 0, ph: i * 1.3 };
+      }),
+      // x is the body's LEFT EDGE and f is which way it is drawn: +1 as authored
+      // (nose-left), -1 mirrored. It always drives the way its nose points.
+      x: bay, f: 1, phase: 'park', t: 0,
+    };
+  }
+
+  const WAVE = { deg: 13, hz: 1.45 };
+  const TURN_SECS = 1.3;              // the swing round in the bay
+
+  function updateTour(dt, now) {
+    const b = currentScene && currentScene.tour;
+    if (!b) return;
+    const secs = dt / 1000;
+    let f = b.f;
+
+    if (b.phase === 'park') {                       // nose-left, waiting
+      b.t += secs;
+      if (b.t > b.dwell) { b.phase = 'out'; b.t = 0; }
+    } else if (b.phase === 'out') {                 // up the valley
+      b.x -= b.speed * secs;
+      if (b.x <= b.away) { b.x = b.away; b.phase = 'gone'; b.t = 0; }
+    } else if (b.phase === 'gone') {                // out of sight — turn here
+      b.t += secs;
+      if (b.t > b.gone) { b.f = f = -1; b.phase = 'back'; b.t = 0; }
+    } else if (b.phase === 'back') {                // home again, nose-right
+      b.x += b.speed * secs;
+      if (b.x >= b.bay) { b.x = b.bay; b.phase = 'home'; b.t = 0; }
+    } else if (b.phase === 'home') {                // nose-right, waiting
+      b.t += secs;
+      if (b.t > b.dwell) { b.phase = 'turn'; b.t = 0; }
+    } else if (b.phase === 'turn') {                // swing round in the bay
+      b.t += secs;
+      f = -1 + 2 * clamp(b.t / TURN_SECS, 0, 1);
+      if (b.t >= TURN_SECS) { b.f = f = 1; b.phase = 'park'; b.t = 0; }
+    }
+
+    // A mirrored group hangs to the LEFT of its origin, so the origin moves to the
+    // far end of the body as f goes negative. One line covers driving, parking and
+    // the swing, and keeps the body inside its bay the whole way round.
+    const ox = b.x + b.len * (1 - f) / 2;
+    b.el.setAttribute('transform', 'translate(' + ox.toFixed(1) + ',' + b.y
+      + ') scale(' + f.toFixed(3) + ',1)');
+    b.el.setAttribute('visibility', b.phase === 'gone' ? 'hidden' : 'visible');
+
+    // They wave the whole time, parked or moving, and out of phase with each
+    // other — five arms swinging as one is a machine, not a bus full of people.
+    b.waves.forEach(w => {
+      const a = Math.sin(now / 1000 * WAVE.hz * 2 * Math.PI + w.ph) * WAVE.deg;
+      w.el.setAttribute('transform',
+        'rotate(' + a.toFixed(1) + ',' + w.px + ',' + w.py + ')');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -3553,6 +3712,8 @@
     updateRace(dt);
     updateLifts(t);
     updateSkiers(dt);
+    updateVessels(dt, t);
+    updateTour(dt, t);
     updatePloughs(dt);
     updateCableCars(dt);
     updateRocket(dt);

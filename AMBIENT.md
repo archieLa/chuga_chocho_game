@@ -35,6 +35,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Movable structure** — a span that lifts head-on | `.cc-bascule-leaf` containing `.cc-bascule-quad` polygons and a `.cc-bascule-dashes` group. Each piece carries its raised position in `data-up`, point-matched to `points`, and the engine TWEENS THE POINTS — head-on a lifting deck changes width as the foreshortening unwinds and no transform expresses that. Anything without a `data-up` is on the fixed span and stays put. `.cc-bascule-weight` takes `data-dy`. Runs on its own timer. | Mystic |
 | **Channel** — boats that wait for a bridge | `.cc-sail` / `.cc-launch` on `#channel-path`. They queue short of the towers and go through together while the span is up. | Mystic |
 | **Barrier** — lifts for road traffic | `.cc-plant-boom` with `data-pivot="x,y"` (the hinge). Raises while a car is heading into the site and drops behind it. Nothing to do with the crossing gate — that one is the game. | Detroit's plant gate |
+| **Vessel** — drifts along a drawn line of water | `.cc-vessel` with `data-path="harbour"` (the engine finds `[id*="harbour-path"]`), `data-speed` (NEGATIVE runs the path backwards), `data-t`, `data-nose`, `data-bob`. The path carries the y, so a channel that recedes takes its vessels with it. Scale is the art's own and is NOT depth-corrected. | Charleston's sloops and pilot launch, Glacier's kayaks |
+| **Tour** — parks, drives off, comes back | `.cc-tour` with `data-bay` (the LEFT EDGE of the parking space), `data-len`, `data-away`, `data-speed`, `data-dwell`, `data-gone`, plus `.cc-wave` arms with `data-pivot` at the shoulder. Never travels backwards: it turns out of sight at the far end and swings round in its own bay. | Glacier's red bus |
 | **Ropeway** — a lift is a loop, not a line | Two ropes side by side, `#…-path-up` / `#…-path-down`, with cabins `#cc-<lift>-up-N` / `-down-N` carrying `data-t`. Driven in OPPOSITE directions or it reads as a one-way conveyor, and everything shrinks as it climbs — `0.95 − 0.5t`, which is exactly the rule the art was drawn to. | Sun Valley's gondola and chairlift |
 | **Ski run** — a line of turns, not a fall line | `.cc-skier` with `data-run`, `data-t`, `data-s`; the run itself is `<path id="run-path-N">` wandering inside its corridor. Scale `0.34 + 0.34t` because the bottom of a run is nearer, and the lean comes from the tangent. | Sun Valley |
 | **Race** — a pack that keeps its lanes, and a pit stop | `.cc-racer` ids `cc-racer-<n>` on the straight (the class alone also matches the paddock — select on the number); `<path id="pit-in-path">` / `pit-lane-path` / `pit-out-path`, `#pit-box-stop`, `.cc-racer-wheels` so they can come off, and `#cc-racer-pit` hidden while another car is in the stall. | Indianapolis |
@@ -324,6 +326,59 @@ Two traps, both already paid for once:
 | Las Vegas | the marquee bulbs chase round every sign on the Strip |
 
 ---
+
+## Vessels (.cc-vessel) — one contract, two scenes
+
+Charleston's sloops and pilot launch and Glacier's kayaks turned out to be the
+same idea twice: a small craft on a drawn line of water, going one way, wrapping
+round off-frame and coming back. So they are ONE contract, and the next harbour
+or river gets it for nothing.
+
+```
+class="cc-vessel"  data-path="harbour"   the engine finds [id*="harbour-path"]
+                   data-speed="-15"      px/sec; NEGATIVE runs the path backwards
+                   data-t="0.40"         where it starts, 0..1
+                   data-nose="1|-1"      -1 if the art is drawn facing the other way
+                   data-bob="1.1"        optional swell, in px
+```
+
+The path carries the y, so a channel that recedes takes its vessels with it and
+the art never has to say so twice. **Scale is the art's own and is NOT
+depth-corrected** — Glacier's kayaks are drawn at roughly twice true scale on
+purpose, because a true-scale kayak at that distance is a smudge, and
+"correcting" it would delete them.
+
+Mixed directions and four different paces, deliberately. A harbour where
+everything runs one way at one speed is a conveyor belt.
+
+Charleston's container ship stays **berthed**, as the art intended: it is
+alongside under the cranes, being worked, which is the reason the cranes are
+there at all. Sail it away and they are lifting nothing.
+
+## The tour bus (.cc-tour) — why it turns round twice
+
+Glacier's red bus is parked at a viewpoint with five people standing up through
+the open roof, three of them waving. Every so often it takes a run up the valley
+and comes back, and everyone keeps waving the whole way.
+
+**It never travels backwards, and that costs a turn.** The bus is drawn in
+`scenery-back`, which is painted UNDER the carriageway, so it stays on the inn's
+side of the road — one exit, to the left. With one exit the arithmetic is forced:
+bay → off-frame → bay is two traversals, and a single flip out of sight leaves it
+facing the wrong way to set off again. So it turns twice: once at the top of the
+valley where nobody can see it, and once in its own bay, which is what a bus in a
+car park actually does. The bay turn is a swing through `scaleX = 0` about the
+middle of the parking space, so it comes round on the spot and stays in its bay.
+
+The one line that makes all of that tractable: **x is the body's LEFT EDGE, never
+the transform's origin.** A mirrored group hangs to the left of its origin, so
+`origin = x + len * (1 - f) / 2` covers driving, parking and the swing at once.
+
+Driving it right across the frame was built and then taken out. It needed lifting
+out of scenery-back into the road's own depth, and a bus sailing past the
+crossing while the cars beside it wait at the gate is the wrong thing to show in
+a game whose entire subject is the gate. The maintainer called it before it
+shipped.
 
 ## Bailey Yard loads the train too — and shares one crane to do it
 
