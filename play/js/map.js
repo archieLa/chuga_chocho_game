@@ -151,21 +151,22 @@
         s.textContent = text;
         card.appendChild(s);
       };
-      // The STATE, then the place. The dice already flash the state on the map,
-      // and naming it turns that flash into something a child can hold on to:
-      // this is Nebraska, and Bailey Yard is in it. Choosing a place by hand
-      // does NOT do this, deliberately — you just tapped the state, so you know.
+      // The place, then the STATE it is in — "Bailey Yard, Nebraska", the way an
+      // American says where somewhere is. The dice already flash that state on
+      // the map, and naming it turns the flash into something a child can hold
+      // on to. Choosing a place by hand does NOT do this, deliberately — you
+      // just tapped the state, so you know.
       const st = CC.world.spokenState(res.loc);
       if (res.wrapped) line('surprise-allseen', CC.i18n.t('ui.allSeen'));
       line('surprise-kicker', CC.i18n.t('ui.nextStop'));
-      if (st) line('surprise-state', st.text);
       line('surprise-name', (res.loc.say && res.loc.say[CC.i18n.code]) || res.loc.city || res.loc.state);
+      if (st) line('surprise-state', st.text);
       box.appendChild(card);
 
       // Every word on that card is spoken, in the order it is written. The
-      // kicker is UI language; the state is always English; the place name takes
-      // whichever voice its own name wants, which is not always the same one —
-      // see world.spoken() and world.spokenState().
+      // kicker is UI language; the place name takes whichever voice its own name
+      // wants, which is not always the same one; the state is always English.
+      // See world.spoken() and world.spokenState().
       if (CC.speech) {
         const said = CC.world.spoken(res.loc);
         let first = true;
@@ -175,8 +176,8 @@
         };
         if (res.wrapped) say(CC.i18n.t('ui.allSeen'));
         say(CC.i18n.t('ui.nextStop'));
-        if (st) say(st.text, st.lang);
         say(said.text, said.lang);
+        if (st) say(st.text, st.lang);
       }
       this.refreshDice();
       dice.disabled = true;             // refreshDice re-enables; hold it shut for the reveal
