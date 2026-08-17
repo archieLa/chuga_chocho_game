@@ -22725,6 +22725,18 @@ def charleston():
     back.append(f'<path id="turn-right-path" class="cc-path" '
                 f'd="M640,{STREET_NEAR + 12} C640,{STREET_NEAR - 2} {rsn + 20:.0f},'
                 f'{STREET_NEAR - 8} 1370,{STREET_NEAR - 8}" fill="none" stroke="none"/>')
+    # AND THE TURN ITSELF, on the contract Crater Lake, Ketchum and the Speedway
+    # already use. "east" is right-turns-only, which is what right-hand traffic does at
+    # a T: a car coming UP the carriageway turns right and runs east along the Battery,
+    # and a car joining comes in from the west, drives east, and turns right down onto
+    # the carriageway — where it then has to mind the crossing like everything else.
+    # Nobody ever crosses the oncoming stream, so nothing has to model a gap in it.
+    #
+    # In "east" mode both streams share ONE lane down the middle of the band, so the
+    # band is the whole street and the lane lands at 381 — clear of the kerb at 396,
+    # which a lane pushed out to dodge the overlook bay was straddling. The bay's own
+    # cars move UP into the bay instead; see below.
+    back.append(f'<g class="cc-road-exit" data-exit="{STREET_FAR},{STREET_NEAR},640,east"></g>')
 
     # THE OVERLOOK. Somewhere for an arriving car to actually stop: a paved bay let into the
     # sea-wall side of the street, with two bays marked out and a bench at the railing.
@@ -22871,8 +22883,12 @@ def charleston():
                 f'r="{k * 0.36:.1f}"/><circle cx="{L * 0.78:.1f}" cy="0" '
                 f'r="{k * 0.36:.1f}"/></g></g>')
 
+    # WHEELS INSIDE THE BAY, not on its near edge. At +12 they stood on the line, which
+    # put them half in the running lane once traffic started using the street; at +6
+    # they are properly in the bay and moving traffic passes in FRONT of them, which is
+    # both correct and the right depth — the engine's cars are drawn after the road.
     for i, (cx, cc) in enumerate([(736, '#c2b45a'), (824, '#8f9aa2')]):
-        back.append(car(cx, STREET_FAR + 12, cc, gid=f'cc-overlook-car-{i}'))
+        back.append(car(cx, STREET_FAR + 6, cc, gid=f'cc-overlook-car-{i}'))
     for px, pc, ph in ((640, '#e8d0a8', 1.0), (666, '#8fb0c8', 0.84),
                        (1150, '#d8a0a8', 1.0)):
         kk = ppm(STREET_FAR + 2) * ph
