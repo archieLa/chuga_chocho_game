@@ -118,6 +118,11 @@
       // letters instead of slurring them. See world.spoken().
       say:{ en:'Washington', pl:'Waszyngton' },
       sayAs:{ en:'Washington D C' },
+      // The district IS the place. Everywhere else gets its state announced with
+      // it — "Nebraska. Bailey Yard." — but "District of Columbia. Washington
+      // D C." is the same answer given twice, and the second half already spells
+      // out the first. See world.spokenState().
+      stateIsPlace:true,
       scene:'washington-dc',
       // Viewpoint: the Tidal Basin at peak cherry blossom. The Capitol is small and distant
       // on purpose — from here that is where it actually is.
@@ -395,6 +400,20 @@
       const text = (loc.sayAs && loc.sayAs[lang]) || shown;
       const untranslated = loc.say && loc.say.en === shown && lang !== 'en';
       return { text: text, lang: untranslated ? 'en' : lang };
+    },
+
+    /** The state to announce alongside a place, or null when saying it would
+        only repeat the place itself.
+
+        ALWAYS ENGLISH, and always spoken by an English voice — state names are
+        American proper nouns and decision #6 keeps them that way, the same rule
+        the map labels follow. So this hands back the language too, exactly as
+        `spoken()` does, and the caller does not have to remember. */
+    spokenState(loc) {
+      if (!loc || !loc.state || loc.stateIsPlace) return null;
+      const shown = (loc.say && loc.say.en) || loc.city || '';
+      if (shown === loc.state) return null;
+      return { text: loc.state, lang: 'en' };
     },
 
     /** How far round the bag we are — { drawn, total }. */

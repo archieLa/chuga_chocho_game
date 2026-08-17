@@ -151,14 +151,21 @@
         s.textContent = text;
         card.appendChild(s);
       };
+      // The STATE, then the place. The dice already flash the state on the map,
+      // and naming it turns that flash into something a child can hold on to:
+      // this is Nebraska, and Bailey Yard is in it. Choosing a place by hand
+      // does NOT do this, deliberately — you just tapped the state, so you know.
+      const st = CC.world.spokenState(res.loc);
       if (res.wrapped) line('surprise-allseen', CC.i18n.t('ui.allSeen'));
       line('surprise-kicker', CC.i18n.t('ui.nextStop'));
+      if (st) line('surprise-state', st.text);
       line('surprise-name', (res.loc.say && res.loc.say[CC.i18n.code]) || res.loc.city || res.loc.state);
       box.appendChild(card);
 
-      // Every word on that card is spoken, in the order it is written. The first
-      // two are UI language; the place name takes whichever voice its own name
-      // wants, which is not always the same one — see world.spoken().
+      // Every word on that card is spoken, in the order it is written. The
+      // kicker is UI language; the state is always English; the place name takes
+      // whichever voice its own name wants, which is not always the same one —
+      // see world.spoken() and world.spokenState().
       if (CC.speech) {
         const said = CC.world.spoken(res.loc);
         let first = true;
@@ -168,19 +175,22 @@
         };
         if (res.wrapped) say(CC.i18n.t('ui.allSeen'));
         say(CC.i18n.t('ui.nextStop'));
+        if (st) say(st.text, st.lang);
         say(said.text, said.lang);
       }
       this.refreshDice();
       dice.disabled = true;             // refreshDice re-enables; hold it shut for the reveal
 
       // Long enough to hear the name and find the state, not so long that a
-      // child thinks the button did nothing.
+      // child thinks the button did nothing. There is one more thing to say than
+      // there used to be, so the hold grew with it — the card should still be up
+      // when the place is named.
       setTimeout(() => {
         if (seq !== this.drawSeq) return;       // they pressed ✕ — leave them where they are
         if (shape) shape.classList.remove('state--surprise');
         CC.world.select(res.loc.id, { speak: false });   // already announced above
         this.close();
-      }, res.wrapped ? 3600 : 2400);
+      }, res.wrapped ? 4200 : 3000);
     },
 
     relabel() {
