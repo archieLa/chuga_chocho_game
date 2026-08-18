@@ -9754,22 +9754,51 @@ def bluegrass():
              # the two big trees that frame the whole picture
              + shade_tree(74, 700, 1.35) + shade_tree(1216, 712, 1.45)
              + cedar(392, 640, 0.85) + cedar(918, 646, 0.9)
-             # the hero horses, close enough to count the legs
-             + horse(250, 706, 0.56, '#8a5230', '#6f3f24', '#2b2119',
-                     # No socks on this one: they are drawn at fixed x OUTSIDE the leg
-                     # groups, so on a moving horse they stay behind and hang in the
-                     # air between her legs. Not worth re-rigging for two white marks.
-                     run='250,-140,706', speed=78)
-             + horse(1046, 700, 0.52, '#5c3a22', '#472b18', '#241c14', grazing=True)
-             # The foal keeps to the right of its mother, who grazes at 1046.
-             + foal(1140, 700, 0.36, '#a8703f', run='1140,1246,700', speed=13)
+             # THE FAMILY, close enough to count the legs: two big horses with the
+             # little one between them, walking the near pasture together. A
+             # maintainer's-son request, and the best one in the file — the mare
+             # and the foal he already liked, with the horse that used to be alone
+             # across the road brought over to join them.
+             #
+             # They stay in formation because the contract makes it free — the
+             # engine ping-pongs each animal between its own two x's at its own
+             # speed, so give all three the SAME range LENGTH (130) and the SAME
+             # speed and they set off together, turn together and come back
+             # together, for ever, with no group logic at all. Offset ranges,
+             # identical spans, and no group code anywhere.
+             #
+             # The pasture this side is hemmed in, so the run is shorter than it
+             # would be on the open side — but this is where the two he pointed at
+             # live. The near end is set by the OPEN BUTTON, not by the art: it
+             # covers x 697-864 and the leading horse walked its head behind it.
+             # The far end is the big shade tree at 1216, which a nose may overlap
+             # because the horses are painted after it.
+             #
+             # Grey for the third one: the mare is a dark bay and the foal a
+             # chestnut, and three brown horses would be one brown horse three
+             # times over.
+             #
+             # No socks on any of them: socks are drawn at a fixed x OUTSIDE the
+             # leg groups, so on a moving horse they stay behind and hang in the
+             # air between the legs. Not worth re-rigging for two white marks.
+             #
+             # Both parents first, THEN the little one — it walks at 708 rather
+             # than 700, so it is the nearest of the three and has to be painted
+             # last or its mother is drawn over the top of it.
+             + horse(1046, 700, 0.56, '#8f8a84', '#75716c', '#3f3a36',
+                     run='1046,930,700', speed=26)
+             + horse(1200, 700, 0.52, '#5c3a22', '#472b18', '#241c14',
+                     run='1200,1084,700', speed=26)
+             + foal(1120, 708, 0.36, '#a8703f', run='1120,1004,708', speed=26)
              + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
              + horse(880, 578, 0.34, '#a8a29a', '#8c867e', '#4a443e', grazing=True)
              + horse(432, 566, 0.31, '#7a4a2c', '#623a20', '#241c14', grazing=True)
              + horse(1078, 550, 0.3, '#5c3a22', '#472b18', '#241c14',
                      run='1078,900,550', speed=17)
              + foal(470, 566, 0.22, '#a8703f')
-             + person(880, 700, 0.9, '#2f6f4f', '#3f4650', '#8a5a3c', '#e8e2d4'))
+             # Moved across the drive: he stood at 880, which is under the OPEN
+             # button, and the empty side needed somebody in it anyway.
+             + person(268, 708, 0.9, '#2f6f4f', '#3f4650', '#8a5a3c', '#e8e2d4'))
 
     scene('bluegrass', 'KENTUCKY — bluegrass horse farm, white board fence and a show barn', {
         'sky': sky_l,
