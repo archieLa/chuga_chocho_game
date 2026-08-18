@@ -413,6 +413,9 @@
     const ploughs = buildPloughs(svg);
     const crane = buildCrane(svg, trainG);
     const falls = buildFalls(svg);
+    const bikeSig = buildBikeSignals(svg);
+    const rides = buildRides(svg);
+    const vultures = buildVultures(svg);
     const vessels = buildVessels(svg);
     const tour = buildTour(svg);
 
@@ -420,6 +423,7 @@
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
                 spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
     stage.appendChild(svg);
@@ -2822,6 +2826,262 @@
     });
   }
 
+  // =======================================================================
+  // A RIDE (.cc-ride) — a rider that follows a CHAIN of drawn paths, rotates to
+  // the tangent, and obeys a signal partway along.
+  //
+  // Bentonville's timber wave and its jump line are on opposite sides of the
+  // road and the only legal way between them is the Greenway crossing at the
+  // front of the frame. That is the scene rather than an obstacle: one rider
+  // makes one story out of both features and both sets of signals.
+  //
+  //   data-legs    ordered path ids, comma separated. "id@x0:x1" rides only the
+  //                part of a path between two scene-x values, which is how the
+  //                Greenway is joined at 452 and left at 756 without the art
+  //                having to cut one path into three.
+  //   data-speed   px per second along the path
+  //   data-hold    "leg@x" — the scene-x to wait at until the bike signal is
+  //                green, and the leg it counts on. The leg matters: the timber
+  //                wave crosses the stop line's x as well, and a rider held
+  //                there waits at a red light in the middle of a field.
+  //   data-t       0..1, where round the chain to start
+  //   data-nose    -1 if the chain runs against the way the art faces
+  //   data-hide    id of a second drawing of the SAME rider, hidden at mount
+  //   data-shadow-leg  "leg@x0:x1" — where .cc-ride-shadow tracks the rider. The
+  //                    range is the GAP, not the leg: a shadow cast on the face
+  //                    of the ramp the rider is still climbing says nothing, and
+  //                    the one thing that shape is for is saying AIRBORNE.
+  //
+  // ROTATE TO THE TANGENT and the jump costs nothing: nose-up off the lip and
+  // nose-down onto the landing both fall out of the curve the art already drew.
+  // =======================================================================
+  const RIDE_SHADOW_Y = null;      // the shadow keeps whatever y it was drawn at
+
+  /** How far along a path its point first reaches scene-x. Binary search, because
+      a path is drawn as curves and there is no closed form — and these are all
+      monotonic in x, which is the only case it has to serve. */
+  function lengthAtX(p, total, x) {
+    const xAt = (l) => p.getPointAtLength(l).x;
+    const rising = xAt(total) >= xAt(0);
+    let lo = 0, hi = total;
+    for (let i = 0; i < 22; i++) {
+      const m = (lo + hi) / 2;
+      if ((xAt(m) < x) === rising) lo = m; else hi = m;
+    }
+    return (lo + hi) / 2;
+  }
+
+  function buildRides(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-ride').forEach(el => {
+      const spec = (el.getAttribute('data-legs') || '').split(',')
+        .map(t => t.trim()).filter(Boolean);
+      if (!spec.length) { console.warn('.cc-ride has no data-legs'); return; }
+      const legs = [];
+      let total = 0, bad = false;
+      spec.forEach(raw => {
+        const cut = raw.split('@');
+        // Ids are namespaced per scene, so match on the END of the id. Every leg
+        // name here is unique by its ending — "berm-path" does not match
+        // "berm-run-in-path", which ends in "run-in-path".
+        const p = svg.querySelector('[id$="' + cut[0] + '"]');
+        if (!p || !p.getTotalLength) { console.warn('.cc-ride cannot find ' + cut[0]); bad = true; return; }
+        const len = p.getTotalLength();
+        let a = 0, b = len;
+        if (cut[1]) {
+          const xs = cut[1].split(':').map(Number);
+          if (xs.length === 2 && !xs.some(isNaN)) {
+            a = lengthAtX(p, len, xs[0]);
+            b = lengthAtX(p, len, xs[1]);
+          }
+        }
+        legs.push({ p: p, name: cut[0], a: a, b: b, at: total, len: Math.abs(b - a) });
+        total += Math.abs(b - a);
+      });
+      if (bad || total <= 0) return;
+      const hideId = el.getAttribute('data-hide');
+      if (hideId) {
+        const twin = svg.querySelector('[id$="' + hideId + '"]');
+        // The same person drawn at two moments of one ride. Animate one and the
+        // other has to go, or the scene has two of him.
+        if (twin) twin.setAttribute('visibility', 'hidden');
+      }
+      const shRaw = (el.getAttribute('data-shadow-leg') || '').split('@');
+      const shadowLeg = shRaw[0] || null;
+      const shX = (shRaw[1] || '').split(':').map(Number);
+      const shadow = shadowLeg ? svg.querySelector('.cc-ride-shadow') : null;
+      // THE STOP LINE, RESOLVED ONCE, into a distance along the chain. Detecting
+      // the crossing frame by frame looked simpler and was wrong: the berm's exit
+      // curve doubles back on itself, so the rider reaches the stop line's x
+      // travelling LEFT and the test never fired. A distance has no such case.
+      const holdRaw = (el.getAttribute('data-hold') || '').split('@');
+      let holdD = null;
+      if (holdRaw.length === 2) {
+        const leg = legs.filter(g => g.name === holdRaw[0])[0];
+        const hx = parseFloat(holdRaw[1]);
+        if (leg && !isNaN(hx)) {
+          holdD = leg.at + Math.abs(lengthAtX(leg.p, leg.p.getTotalLength(), hx) - leg.a);
+        } else console.warn('.cc-ride data-hold names no leg it rides: ' + holdRaw[0]);
+      }
+      out.push({
+        el: el, legs: legs, total: total, holdD: holdD,
+        d: (parseFloat(el.getAttribute('data-t')) || 0) * total,
+        speed: parseFloat(el.getAttribute('data-speed')) || 80,
+        nose: parseFloat(el.getAttribute('data-nose')) || 1,
+        held: false,
+        shadow: shadow, shadowLeg: shadowLeg,
+        shadowX0: shX.length === 2 && !shX.some(isNaN) ? shX[0] : -1e9,
+        shadowX1: shX.length === 2 && !shX.some(isNaN) ? shX[1] : 1e9,
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  /** Where on the chain, and which way is it pointing there. */
+  function rideAt(r, d) {
+    let leg = r.legs[r.legs.length - 1], into = 0;
+    for (let i = 0; i < r.legs.length; i++) {
+      if (d < r.legs[i].at + r.legs[i].len || i === r.legs.length - 1) {
+        leg = r.legs[i]; into = clamp(d - leg.at, 0, leg.len); break;
+      }
+    }
+    const fwd = leg.b >= leg.a ? 1 : -1;
+    const l = leg.a + fwd * into;
+    const p = leg.p.getPointAtLength(l);
+    // The tangent from two samples 3px apart — enough to be stable on a straight
+    // and still tight enough to follow the lip of the ramp.
+    const q = leg.p.getPointAtLength(clamp(l + fwd * 3, 0, leg.p.getTotalLength()));
+    return { x: p.x, y: p.y, vx: q.x - p.x, vy: q.y - p.y, leg: leg };
+  }
+
+  function updateRides(dt) {
+    const list = currentScene && currentScene.rides;
+    if (!list) return;
+    const green = bikeGreen();
+    const secs = dt / 1000;
+    list.forEach(r => {
+      let d = r.d + r.speed * secs;
+      // Held at the line while the light is against them. A rider already past it
+      // is never pulled back, and one that wrapped round is caught again next lap.
+      r.held = false;
+      if (r.holdD != null && !green && r.d <= r.holdD && d > r.holdD) {
+        d = r.holdD; r.held = true;
+      }
+      if (d >= r.total) d -= r.total;               // both ends are off frame
+      r.d = d;
+      const at = rideAt(r, d);
+      const deg = r.nose > 0 ? Math.atan2(at.vy, at.vx) : Math.atan2(-at.vy, -at.vx);
+      r.el.setAttribute('transform',
+        'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ') rotate('
+        + (deg * 180 / Math.PI).toFixed(1) + ') scale(' + r.nose + ',1)');
+      // THE SHADOW IS THE CUE, and only over the gap. A dark ellipse on the dirt
+      // directly beneath is what says AIRBORNE rather than standing on a rise
+      // behind — and it only works while it is ON the dirt, so it shows for the
+      // one leg that runs over it and hides everywhere else.
+      if (r.shadow) {
+        const on = at.leg.name === r.shadowLeg && at.x >= r.shadowX0 && at.x <= r.shadowX1;
+        r.shadow.setAttribute('visibility', on ? 'visible' : 'hidden');
+        if (on) r.shadow.setAttribute('cx', at.x.toFixed(1));
+      }
+    });
+  }
+
+  // =======================================================================
+  // THE BIKE SIGNAL (.cc-bike-signal) — the one thing back here that is NOT
+  // gate-blind, and deliberately so.
+  //
+  // The Greenway crosses the road at the front of the frame with a signal each
+  // side, and it goes green when the RAILWAY gate is down and the cars have
+  // stopped. That is the scene: a child watches a rider held at a red light
+  // because a train is coming, and then released — the same lesson the gate
+  // teaches, taught twice, without a word.
+  //
+  // The traffic is one way. The signal listens; the crossing never hears back,
+  // its behaviour is byte for byte what it is everywhere else, and the game is
+  // exactly as it was. See the note at the top of AMBIENT.md.
+  //
+  // The DELAY matters. Green on the same frame the gate drops reads as one
+  // mechanism; a beat later reads as the crossing noticing the road has cleared.
+  // =======================================================================
+  const BIKE_SIG = { delay: 1.3,
+                     redOn: '#ff3b30', redOff: '#5c1f1c',
+                     greenOn: '#3fd06a', greenOff: '#1f4a2c' };
+
+  function buildBikeSignals(svg) {
+    const heads = [].map.call(svg.querySelectorAll('.cc-bike-signal'), el => ({
+      red: el.querySelectorAll('.cc-lamp-red'),
+      green: el.querySelectorAll('.cc-lamp-green'),
+    }));
+    if (!heads.length) return null;
+    return { heads: heads, green: false, t: 0, painted: false };
+  }
+
+  /** Are the riders allowed across? False in any scene without a bike signal, so
+      a ride in some other scene never waits for a light that is not there. */
+  function bikeGreen() {
+    const s = currentScene && currentScene.bikeSig;
+    return s ? s.green : true;
+  }
+
+  function updateBikeSignals(dt) {
+    const s = currentScene && currentScene.bikeSig;
+    if (!s) return;
+    const down = CC.gate.isDown();
+    s.t = down ? s.t + dt / 1000 : 0;
+    const green = down && s.t >= BIKE_SIG.delay;
+    if (green === s.green && s.painted) return;
+    s.green = green; s.painted = true;
+    s.heads.forEach(h => {
+      [].forEach.call(h.red, e => e.setAttribute('fill', green ? BIKE_SIG.redOff : BIKE_SIG.redOn));
+      [].forEach.call(h.green, e => e.setAttribute('fill', green ? BIKE_SIG.greenOn : BIKE_SIG.greenOff));
+    });
+  }
+
+  // =======================================================================
+  // VULTURES (.cc-vulture) — two thermals, because one ring of birds all the
+  // same size reads as a clock face.
+  //
+  // Each bird names its ring and where round it it starts. It SCALES with its
+  // place on the ellipse — bigger at the near side, smaller at the far — or the
+  // ring reads flat, and a slow rock of a few degrees is what a turkey vulture
+  // actually does and costs one sine.
+  // =======================================================================
+  const VULTURE = { lift: 0.24, rock: 6, rockHz: 0.09 };
+
+  function buildVultures(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-vulture').forEach(el => {
+      const ring = svg.querySelector('[id$="' + (el.getAttribute('data-ring') || '') + '"]');
+      if (!ring) { console.warn('.cc-vulture has no ring'); return; }
+      const n = (a) => parseFloat(ring.getAttribute(a)) || 0;
+      out.push({
+        el: el, cx: n('cx'), cy: n('cy'), rx: n('rx'), ry: n('ry'),
+        t: parseFloat(el.getAttribute('data-t')) || 0,
+        tilt: parseFloat(el.getAttribute('data-tilt')) || 0,
+        // A wider ring is a bigger circle, so it takes longer. That also keeps
+        // the two kettles out of step without a magic number per scene.
+        period: 18 + n('rx') / 12,
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  function updateVultures(dt, now) {
+    const list = currentScene && currentScene.vultures;
+    if (!list) return;
+    list.forEach(v => {
+      v.t = (v.t + dt / 1000 / v.period) % 1;
+      const a = v.t * TAU;
+      const near = Math.sin(a);                       // +1 at the near side
+      const s = 1 + VULTURE.lift * near;
+      const rock = Math.sin(now / 1000 * VULTURE.rockHz * TAU + v.t * 3) * VULTURE.rock;
+      v.el.setAttribute('transform',
+        'translate(' + (v.cx + v.rx * Math.cos(a)).toFixed(1) + ','
+        + (v.cy + v.ry * near).toFixed(1) + ') rotate(' + (v.tilt + rock).toFixed(1)
+        + ') scale(' + s.toFixed(3) + ')');
+    });
+  }
+
   // Chairs crawl up one cable and back down the other, wrapping at each end.
   // A lift is slow — a full traverse takes about twenty seconds, which is what
   // makes it read as a chairlift rather than a fairground ride.
@@ -3713,6 +3973,9 @@
     updateLifts(t);
     updateSkiers(dt);
     updateVessels(dt, t);
+    updateBikeSignals(dt);        // before the rides: they read its aspect
+    updateRides(dt);
+    updateVultures(dt, t);
     updateTour(dt, t);
     updatePloughs(dt);
     updateCableCars(dt);

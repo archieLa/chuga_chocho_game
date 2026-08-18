@@ -16,6 +16,24 @@ Motion is always **gate-blind**. Nothing here reacts to the crossing, waits
 for it, or is blocked by it. If a thing needs to know about the gate it is not
 ambient motion, it is gameplay, and it belongs somewhere else.
 
+### Three things now read the gate, and here is the whole of it
+
+The rule is still the rule and everything that can be gate-blind is. Three are not,
+all in one direction: they **listen, and the crossing never hears back**. The gate's
+own behaviour, its two buttons and the physical endpoint are byte for byte what they
+were, and no child can tell the difference at the crossing itself.
+
+* **Bentonville's bike signal** goes green a beat after the gate is down. That is not
+  a concession, it is the scene: a rider held at a red light *because a train is
+  coming*, then released. The same lesson the gate teaches, taught twice, without a
+  word.
+* **Glacier's tour bus** does not set off while the gate is down, because it would
+  drive out of frame just as the child looks up.
+* **Bailey Yard's shuffle** puts its wagon down and gets out of the way, because the
+  same crane is about to load the train.
+
+If a fourth wants in, it needs a reason of that size.
+
 ---
 
 ## How to add some — the art tags itself, the engine drives it
@@ -43,6 +61,9 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Station stop** — the train calls, people get on and off | `.cc-platform` with `data-stop` (the HEAD position — the head is the ENGINE, so aim it so a coach and not the loco ends up at the deck) and `data-dwell`; `.cc-passenger` figures with `data-stand="x,y"`, `data-door="x,y"`, `data-role="board"`/`"alight"`, `data-scale`. Every other train calls. **Not ambient** — it stops the gameplay train — but gate-blind like the shunt. | Cedar Point |
 | **Crawl** — a vehicle that follows the ground | `.cc-crawl` with `data-crawl="x,y x,y ..."` in scene coordinates, plus `data-scale`, `data-speed`, `data-nose`. Walks the polyline and takes its PITCH from the segment under it, measured left-to-right because the ground does not care which way you are driving. Read the points straight off the silhouette of whatever it climbs. | Moab's jeep on the block |
 | **Canter** — an animal that runs on its own legs | `.cc-canter` with `data-run="from,to,y"`, `data-scale`, `data-speed`, `data-nose`; `.cc-canter-body` inside takes the bob so the shadow stays flat on the ground; each leg is a `.cc-leg` with `data-pivot="x,y"` at the joint it swings from. Stride is measured in DISTANCE, so the legs cannot pedal independently of the speed. | the Bluegrass thoroughbred |
+| **Ride** — a rider that follows a CHAIN of drawn paths | `.cc-ride` on the mover itself, with `data-legs` = ordered path ids (`id@x0:x1` rides part of one), `data-speed`, `data-t`, `data-nose`, `data-hide` (a second drawing of the same person, hidden at mount), `data-hold="leg@x"` (wait there until the bike signal releases you) and `data-shadow-leg="leg@x0:x1"` (where `.cc-ride-shadow` tracks the rider in x). Rotates to the path tangent, so nose-up off a ramp and nose-down onto a landing are free. | Bentonville's berm-to-jump loop, its Greenway riders, its trail riders |
+| **Bike signal** — a second crossing, slaved to the first | `.cc-bike-signal` containing `.cc-lamp-red` and `.cc-lamp-green`; the engine swaps their `fill`. Goes green a beat after the RAILWAY gate is down. **The one thing back here that is not gate-blind** — see the note under the rule. | Bentonville |
+| **Vultures** — birds on a thermal | `.cc-vulture` with `data-ring` (the id of an `<ellipse>`), `data-t` and `data-tilt`. Orbits the ellipse, SCALES with its place on it — bigger at the near side — and rocks a few degrees. Two rings, because one ring of birds all one size reads as a clock face. | Bentonville |
 | **A group that moves together** | Nothing. Give every animal the SAME range LENGTH and the SAME `data-speed`, with the ranges offset by the spacing you want. They set off together, turn together and come back together for ever, because they each cover the same distance between the same pauses. Any group logic here would be code earning nothing. | the Bluegrass family |
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
 | **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
@@ -325,6 +346,7 @@ Two traps, both already paid for once:
 | New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |
 | Austin | the bat column boils out from under the Congress Avenue Bridge |
 | Las Vegas | the marquee bulbs chase round every sign on the Strip |
+| Bentonville | **one rider does the whole circuit** — timber wave, down to the Greenway, held at the red light, across the road when the gate drops, up the ramp and over the gap with its shadow on the dirt · two more riders queue at the same light · two riders come down out of the woods · six vultures on two thermals |
 
 ---
 

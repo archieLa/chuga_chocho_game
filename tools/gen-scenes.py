@@ -24195,7 +24195,799 @@ def glacier():
                  }, defs=d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier()
+def bentonville():
+    """BENTONVILLE, ARKANSAS — where the singletrack comes out of the woods beside town.
+
+    The set's first scene about a sport, and the first with a SECOND crossing in it.
+
+    Bentonville was rebuilt around cycling, and the thing the reference makes obvious is
+    that the trails are not somewhere you drive to. Slaughter Pen runs along the Greenway
+    within sight of the square, so the honest picture is not "mountain-bike trail in
+    Arkansas" — it is a small brick town with enormous timber trail features growing out of
+    the woods at the end of the street. So the composition states that literally: the road
+    runs to the vanishing point with WOODLAND down its left side and the BRICK SQUARE down
+    its right, and they meet at the road.
+
+    Three things had to be true and all three shaped the geometry:
+
+    * **Every bike is animated.** A bicycle at 40px is the smudge that killed the Charleston
+      carriage and the Glacier drift boat, so every rider here is either in the near field
+      at 50px-plus, or small and moving on a path where motion does the identifying.
+    * **There is a jump, and it is the point.** Takeoff lip, gap, landing, in the near field
+      where a rider is big.
+    * **THE JUMP STAYS BELOW THE RAILS.** This was tempting to break — an airborne rider
+      crossing the track band would be spectacular. It is also the one thing this game must
+      never draw. The whole subject is that a level crossing is where you stop and wait, and
+      a cyclist flying across at the height of a passing train reads as someone jumping the
+      tracks. The arc peaks with the rider's head at y=528, twelve pixels clear of the
+      rails, and the railway is nowhere near it.
+
+    There is no active grade crossing in Bentonville. That is fine and it is not new — the
+    crossing is the game's furniture, and several scenes site it where one plausibly could
+    be rather than where one is."""
+    ROAD_TOP = HORIZON              # the street runs into town; nothing to truncate
+    WOOD_BASE = 448                 # the treeline beyond the tracks
+    GREENWAY_Y = 662                # the paved path where it crosses the road
+    BERM_BASE, JUMP_BASE = 634, 636
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def road_span(y):
+        t = (y - HORIZON) / 420.0
+        return 622 - 112 * t, 658 + 112 * t
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a8ec8"/><stop offset="0.58" stop-color="#a2cbe4"/>
+      <stop offset="1" stop-color="#e2edf0"/>
+    </linearGradient>
+    <linearGradient id="bvfloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fa356"/><stop offset="0.4" stop-color="#6f9349"/>
+      <stop offset="1" stop-color="#5d8040"/>
+    </linearGradient>'''
+
+    # ------------------------------------------------------------------- sky ----
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+    for cx, cy, r_ in ((230, 66, 104), (700, 44, 78), (1060, 84, 116)):
+        sk.append(f'<g fill="#ffffff" opacity="0.82">'
+                  f'<ellipse cx="{cx}" cy="{cy}" rx="{r_}" ry="{r_ * 0.28:.0f}"/>'
+                  f'<ellipse cx="{cx - r_ * 0.5:.0f}" cy="{cy + r_ * 0.1:.0f}" '
+                  f'rx="{r_ * 0.44:.0f}" ry="{r_ * 0.2:.0f}"/>'
+                  f'<ellipse cx="{cx + r_ * 0.44:.0f}" cy="{cy + r_ * 0.05:.0f}" '
+                  f'rx="{r_ * 0.36:.0f}" ry="{r_ * 0.17:.0f}"/></g>')
+
+    # ------------------------------------------------------------------- far ----
+    # The Ozarks are a dissected PLATEAU, not a range: long flat-topped wooded ridges with
+    # shallow valleys between them. Anything with a peak in it would be wrong here, and
+    # would also be the eighth mountain in the set.
+    far = []
+    for pts, col in (([(-40, 268), (120, 226), (300, 216), (480, 230), (660, 212),
+                       (860, 224), (1040, 210), (1200, 226), (1320, 244)], '#7d9a76'),
+                     ([(-40, 300), (160, 258), (360, 250), (560, 262), (780, 246),
+                       (980, 256), (1180, 250), (1320, 272)], '#6b8a62')):
+        far.append('    <polygon points="'
+                   + ' '.join(f'{x},{y}' for x, y in pts)
+                   + ' 1320,302 -40,302" fill="' + col + '"/>')
+    rrf = rnd(7)
+    x = -40
+    while x < 1320:
+        h = 8 + rrf() * 14
+        far.append(f'<ellipse cx="{x:.0f}" cy="{300 - h * 0.5:.0f}" rx="{6 + rrf() * 7:.1f}" '
+                   f'ry="{h * 0.6:.1f}" fill="#5f8058" opacity="0.8"/>')
+        x += 8 + rrf() * 9
+
+    # ------------------------------------------------------------- vultures ----
+    # Northwest Arkansas is vulture country, and a kettle of them turning on a thermal is
+    # the one thing that can happen in the top third of this frame — which was otherwise
+    # 260 pixels of empty sky.
+    #
+    # A turkey vulture is legible at 40px from two things and only two: the wings held in a
+    # shallow dihedral V rather than flat, and the splayed finger primaries at each tip.
+    # Get those and the silhouette is unmistakable; miss them and it is a seagull.
+    def vulture(x, y, w, gid, tilt=0.0, dark='#33383c', pale='#7d848a'):
+        h = w * 0.5
+        r = f' rotate({tilt})' if tilt else ''
+
+        def wing(sg):
+            return (f'M0,{-0.02 * h:.1f} '
+                    f'C {sg * 0.22 * w:.1f},{-0.16 * h:.1f} {sg * 0.36 * w:.1f},'
+                    f'{-0.3 * h:.1f} {sg * 0.46 * w:.1f},{-0.36 * h:.1f} '
+                    f'L {sg * 0.5 * w:.1f},{-0.24 * h:.1f} '
+                    f'L {sg * 0.44 * w:.1f},{-0.22 * h:.1f} '
+                    f'L {sg * 0.47 * w:.1f},{-0.1 * h:.1f} '
+                    f'L {sg * 0.4 * w:.1f},{-0.1 * h:.1f} '
+                    f'L {sg * 0.42 * w:.1f},{0.02 * h:.1f} '
+                    f'L {sg * 0.34 * w:.1f},{0.0:.1f} '
+                    f'C {sg * 0.2 * w:.1f},{0.1 * h:.1f} {sg * 0.1 * w:.1f},'
+                    f'{0.14 * h:.1f} 0,{0.16 * h:.1f} Z')
+
+        o = [f'<g id="{gid}" class="cc-vulture" transform="translate({x},{y}){r}">']
+        o.append(f'<path d="{wing(-1)}" fill="{dark}"/>')
+        o.append(f'<path d="{wing(1)}" fill="{dark}"/>')
+        # the pale trailing band a turkey vulture shows from below
+        o.append(f'<path d="M{-0.36 * w:.1f},{0.03 * h:.1f} C {-0.2 * w:.1f},'
+                 f'{0.1 * h:.1f} {-0.08 * w:.1f},{0.13 * h:.1f} 0,{0.14 * h:.1f} '
+                 f'C {0.08 * w:.1f},{0.13 * h:.1f} {0.2 * w:.1f},{0.1 * h:.1f} '
+                 f'{0.36 * w:.1f},{0.03 * h:.1f} L {0.34 * w:.1f},{-0.02 * h:.1f} '
+                 f'C {0.18 * w:.1f},{0.05 * h:.1f} {-0.18 * w:.1f},{0.05 * h:.1f} '
+                 f'{-0.34 * w:.1f},{-0.02 * h:.1f} Z" fill="{pale}" opacity="0.75"/>')
+        o.append(f'<ellipse cx="0" cy="{0.02 * h:.1f}" rx="{0.055 * w:.1f}" '
+                 f'ry="{0.2 * h:.1f}" fill="{dark}"/>')
+        o.append(f'<path d="M{-0.05 * w:.1f},{0.18 * h:.1f} L{0.05 * w:.1f},'
+                 f'{0.18 * h:.1f} L{0.08 * w:.1f},{0.36 * h:.1f} L{-0.08 * w:.1f},'
+                 f'{0.36 * h:.1f} Z" fill="{dark}"/>')
+        o.append(f'<circle cx="0" cy="{-0.16 * h:.1f}" r="{0.045 * w:.1f}" '
+                 f'fill="#8a5a4a"/>')
+        return ''.join(o) + '</g>'
+
+    # Two thermals rather than one, because a single ring of birds all the same size looks
+    # like a clock face. Nearer birds are bigger and lower; the far kettle is small and high.
+    far.append(f'<ellipse id="thermal-near" class="cc-path" cx="880" cy="172" rx="210" '
+               f'ry="46" fill="none" stroke="none"/>')
+    far.append(f'<ellipse id="thermal-far" class="cc-path" cx="330" cy="128" rx="150" '
+               f'ry="30" fill="none" stroke="none"/>')
+    # WHICH RING, AND WHERE ON IT. The engine orbits them, so each bird has to say
+    # which thermal it belongs to and where round it it starts — otherwise the only
+    # way to know is to guess from how close it was drawn to an ellipse, and #5 was
+    # drawn outside its own ring anyway. data-t runs 0..1 anticlockwise from due east.
+    for i, (vx, vy, vw, vt, ring, vtt) in enumerate(
+            [(1052, 186, 62, 5, 'near', 0.06), (836, 158, 52, -7, 'near', 0.65),
+             (704, 196, 44, 9, 'near', 0.41), (392, 138, 36, -5, 'far', 0.11),
+             (268, 118, 28, 6, 'far', 0.61), (1160, 118, 24, -8, 'near', 0.88)]):
+        far.append(vulture(vx, vy, vw, f'cc-vulture-{i}', tilt=vt)
+                   .replace('class="cc-vulture"',
+                            f'class="cc-vulture" data-ring="thermal-{ring}" '
+                            f'data-t="{vtt}" data-tilt="{vt}"', 1))
+
+    # ---------------------------------------------------------------- ground ----
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#bvfloor)"/>']
+    gr.append('<rect x="0" y="516" width="1280" height="22" fill="#8b9a5c"/>')
+    # the dirt of the trail corridor on the left, and the paved square on the right
+    gr.append(f'<path d="M-40,{WOOD_BASE} L560,{WOOD_BASE} L604,352 L-40,352 Z" '
+              f'fill="#6d8f47" opacity="0.7"/>')
+    gr.append(f'<path d="M700,352 L1320,352 L1320,{WOOD_BASE} L676,{WOOD_BASE} Z" '
+              f'fill="#b9b2a0" opacity="0.55"/>')
+
+    back = ['    ']
+
+    # -------------------------------------------------------- bicycle + rider ---
+    def mtb(x, y, k, jersey, gid='', cls='cc-bike', flip=False, rot=0.0,
+            cranked=False, frame='#c8462f', helmet='#d8442f'):
+        """A mountain bike and rider, origin at the ground under the wheels' contact line.
+
+        Sized off k = pixels per metre: a bike is 1.75m long and a rider on it stands about
+        1.8m to the shoulder. Everything below is a fraction of that, so a rider on the
+        near-field jump and a rider on the far trail are the same drawing at the same true
+        size, and neither has been eyeballed.
+        """
+        L = 1.75 * k
+        wr = 0.34 * k
+        f = -1 if flip else 1
+        i = f' id="{gid}"' if gid else ''
+        r = f' rotate({rot})' if rot else ''
+        bar = '#2b2f33'
+        o = [f'<g{i} class="{cls}" transform="translate({x:.1f},{y:.1f}){r} scale({f},1)">']
+        o.append(f'<g stroke="{bar}" fill="none" stroke-width="{0.055 * k:.2f}">'
+                 f'<circle cx="{-L * 0.36:.1f}" cy="{-wr:.1f}" r="{wr:.1f}"/>'
+                 f'<circle cx="{L * 0.36:.1f}" cy="{-wr:.1f}" r="{wr:.1f}"/></g>')
+        # frame: two triangles, fork, bars, cranks
+        o.append(f'<g stroke="{frame}" stroke-width="{0.07 * k:.2f}" fill="none" '
+                 f'stroke-linejoin="round">'
+                 f'<path d="M{-L * 0.36:.1f},{-wr:.1f} L{-L * 0.02:.1f},{-wr * 0.95:.1f} '
+                 f'L{-L * 0.1:.1f},{-wr * 2.15:.1f} Z"/>'
+                 f'<path d="M{-L * 0.1:.1f},{-wr * 2.15:.1f} L{-L * 0.02:.1f},{-wr * 0.95:.1f} '
+                 f'L{L * 0.2:.1f},{-wr * 1.5:.1f} L{L * 0.16:.1f},{-wr * 2.25:.1f} Z"/></g>')
+        o.append(f'<g stroke="{bar}" stroke-width="{0.055 * k:.2f}" fill="none" '
+                 f'stroke-linecap="round">'
+                 f'<path d="M{L * 0.16:.1f},{-wr * 2.25:.1f} L{L * 0.36:.1f},{-wr:.1f}"/>'
+                 f'<path d="M{L * 0.06:.1f},{-wr * 2.5:.1f} L{L * 0.3:.1f},{-wr * 2.5:.1f}"/>'
+                 f'<path d="M{L * 0.16:.1f},{-wr * 2.25:.1f} L{L * 0.18:.1f},{-wr * 2.5:.1f}"/>'
+                 f'</g>')
+        o.append(f'<circle cx="{-L * 0.02:.1f}" cy="{-wr * 0.95:.1f}" r="{0.05 * k:.2f}" '
+                 f'fill="{bar}"/>')
+        # rider, weight back and elbows out — the attack position, which is what makes a
+        # 50px figure read as riding rather than sitting
+        hy = -wr * 2.15
+        o.append(f'<path d="M{-L * 0.16:.1f},{hy - 0.24 * k:.1f} '
+                 f'L{L * 0.04:.1f},{hy - 0.62 * k:.1f} L{L * 0.16:.1f},{hy - 0.5 * k:.1f} '
+                 f'L{-L * 0.06:.1f},{hy - 0.1 * k:.1f} Z" fill="{jersey}"/>')
+        o.append(f'<g stroke="#2f3438" stroke-width="{0.075 * k:.2f}" fill="none" '
+                 f'stroke-linecap="round">'
+                 f'<path d="M{-L * 0.1:.1f},{hy - 0.12 * k:.1f} '
+                 f'L{-L * 0.03:.1f},{hy + (0.28 if cranked else 0.12) * k:.1f} '
+                 f'L{L * 0.02:.1f},{hy + 0.02 * k:.1f}"/>'
+                 f'<path d="M{-L * 0.02:.1f},{hy - 0.1 * k:.1f} '
+                 f'L{L * 0.06:.1f},{hy + 0.2 * k:.1f} '
+                 f'L{L * 0.02:.1f},{hy + 0.02 * k:.1f}"/></g>')
+        o.append(f'<path d="M{L * 0.02:.1f},{hy - 0.56 * k:.1f} '
+                 f'L{L * 0.22:.1f},{hy - 0.4 * k:.1f}" stroke="{jersey}" '
+                 f'stroke-width="{0.08 * k:.2f}" stroke-linecap="round" fill="none"/>')
+        o.append(f'<circle cx="{L * 0.1:.1f}" cy="{hy - 0.72 * k:.1f}" r="{0.13 * k:.2f}" '
+                 f'fill="#e8c49a"/>')
+        o.append(f'<path d="M{L * 0.1 - 0.16 * k:.1f},{hy - 0.76 * k:.1f} '
+                 f'A{0.16 * k:.2f},{0.16 * k:.2f} 0 0 1 {L * 0.1 + 0.16 * k:.1f},'
+                 f'{hy - 0.76 * k:.1f} L{L * 0.1 + 0.2 * k:.1f},{hy - 0.7 * k:.1f} '
+                 f'L{L * 0.1 - 0.14 * k:.1f},{hy - 0.7 * k:.1f} Z" fill="{helmet}"/>')
+        return ''.join(o) + '</g>'
+
+    # ---------------------------------------------------- woods beyond the rails ---
+    OAKG = ('#3f7a44', '#4e8f50')
+    rrw = rnd(23)
+    for xx in range(-60, 700, 1):
+        pass
+    trees = []
+    x = -70
+    while x < 660:
+        base = 360 + rrw() * 86
+        s = 0.34 + (base - 360) / 86.0 * 0.5 + rrw() * 0.12
+        trees.append((base, oak(x, base, s, canopy=OAKG[0] if rrw() < 0.5 else OAKG[1],
+                                canopy2='#5da05a', trunk='#6b5638')))
+        x += 16 + rrw() * 22
+    # a second, denser wall further back so the wood has depth, not a row of lollipops
+    x = -70
+    while x < 700:
+        base = 348 + rrw() * 16
+        trees.append((base - 40, oak(x, base, 0.3 + rrw() * 0.1, canopy='#356b3c',
+                                     canopy2='#437c46', trunk='#5f4d33')))
+        x += 11 + rrw() * 13
+    for _, t in sorted(trees, key=lambda p: p[0]):
+        back.append(t)
+
+    # the limestone shelves bedded into the wood floor
+    rrl = rnd(41)
+    for i in range(6):
+        lx = -30 + rrl() * 620
+        ly = 386 + rrl() * 58
+        w = 26 + rrl() * 40
+        back.append(f'<path d="M{lx:.0f},{ly:.0f} L{lx + w:.0f},{ly - 3:.0f} '
+                    f'L{lx + w - 6:.0f},{ly + 9:.0f} L{lx + 5:.0f},{ly + 11:.0f} Z" '
+                    f'fill="#b3ac97"/>'
+                    f'<path d="M{lx + 5:.0f},{ly + 11:.0f} L{lx + w - 6:.0f},{ly + 9:.0f} '
+                    f'L{lx + w - 8:.0f},{ly + 14:.0f} L{lx + 7:.0f},{ly + 16:.0f} Z" '
+                    f'fill="#968f7c"/>')
+    # A boardwalk on posts — the second unmistakable Bentonville structure. It has to LAND
+    # at both ends. The first version stopped in mid-air at each end, so the riders on it
+    # were crossing a bridge from nowhere to nowhere; a structure that carries a trail has
+    # to start on that trail and finish on it, or the eye asks where the bikes go and gets
+    # no answer.
+    BW = [(-30, 444), (48, 434), (126, 426), (204, 418), (282, 410), (352, 402)]
+    for i in range(len(BW) - 1):
+        (x0, y0), (x1, y1) = BW[i], BW[i + 1]
+        back.append(f'<polygon points="{x0},{y0} {x1},{y1} {x1},{y1 - 9} {x0},{y0 - 9}" '
+                    f'fill="#a07a4e"/>')
+        for j in range(7):
+            t = j / 7
+            px, py = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+            back.append(f'<rect x="{px:.0f}" y="{py - 9:.0f}" width="3.2" height="9" '
+                        f'fill="#8a6540"/>')
+        back.append(f'<rect x="{x0}" y="{y0 - 1}" width="4" height="13" fill="#6f5334"/>')
+        back.append(f'<path d="M{x0},{y0 - 10} L{x0},{y0 - 23} M{x1},{y1 - 10} '
+                    f'L{x1},{y1 - 23} M{x0},{y0 - 21} L{x1},{y1 - 21}" stroke="#8a6540" '
+                    f'stroke-width="3" fill="none" stroke-linecap="round"/>')
+
+    # WHERE DO THE BIKES GO? A deck that simply stops has no answer, and the eye asks it
+    # immediately. So the right end gets a real DESCENDING RAMP down to ground level, and
+    # the trail then turns away and is swallowed by the trees — which is what these trails
+    # do, and the only honest exit available, since the road is a few metres further right
+    # and a trail cannot cross it anywhere but at the marked crossing.
+    #
+    # The whole boardwalk moved left to make room for it. Landed hard against the crossing,
+    # the ramp and the returning trail overlapped into one unreadable brown mass.
+    RAMP = [(352, 393), (382, 400), (410, 408), (432, 414)]
+    for i in range(len(RAMP) - 1):
+        (x0, y0), (x1, y1) = RAMP[i], RAMP[i + 1]
+        back.append(f'<polygon points="{x0},{y0 + 9} {x1},{y1 + 9} {x1},{y1} {x0},{y0}" '
+                    f'fill="#a07a4e"/>')
+        for j in range(6):
+            t = j / 6
+            px, py = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+            back.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="3.2" height="9" '
+                        f'fill="#8a6540"/>')
+        back.append(f'<path d="M{x0},{y0 - 1} L{x0},{y0 - 13} M{x1},{y1 - 1} '
+                    f'L{x1},{y1 - 13} M{x0},{y0 - 11} L{x1},{y1 - 11}" stroke="#8a6540" '
+                    f'stroke-width="2.6" fill="none" stroke-linecap="round"/>')
+    # the trail off the foot of the ramp, turning away up into the wood
+    for wdt, col in ((13, '#a8794f'), (6, '#c99a67')):
+        back.append(f'<path d="M432,418 C 456,414 478,406 498,398" stroke="{col}" '
+                    f'stroke-width="{wdt}" fill="none" stroke-linecap="round"/>')
+    # and the trees that swallow it — drawn AFTER the trail, which is the whole trick
+    # These have to be BIG enough to actually hide the end. At 0.45 they were smaller than
+    # the trail was wide and it simply ran past them into the open.
+    for tx, ty, ts in ((506, 406, 0.74), (556, 396, 0.6), (470, 414, 0.52)):
+        back.append(oak(tx, ty, ts, canopy='#3a7240', canopy2='#4e8f50', trunk='#6b5638'))
+    # the dirt at the far end, running off the left of the frame
+    back.append('<path d="M-30,447 L-80,452 L-80,456 L-30,451 Z" fill="#a8794f"/>')
+
+    # The trail path runs the way the ride does: out of the trees, down the trail, over the
+    # boardwalk, and away off the left of the frame.
+    back.append(f'<path id="trail-path" class="cc-path" d="M512,394 '
+                f'C 492,398 456,412 432,418 '
+                f'L352,393 L-30,435 C -50,438 -64,440 -90,443" '
+                f'fill="none" stroke="none"/>')
+
+    for i, (bx, by, jc, fc, hc) in enumerate(
+            [(212, 417, '#d8b03c', '#2f3438', '#e8e2d4'),
+             (356, 403, '#4a8f5c', '#c9a02c', '#2f3438')]):
+        # Same contract as the hero ride, one leg and no hold. The trail is drawn
+        # right to left and the bikes are drawn facing right, so data-nose flips
+        # them; data-t spreads the two along it.
+        back.append(mtb(bx, by - 9, ppm(by) * 1.15, jc, gid=f'cc-rider-trail-{i}',
+                        frame=fc, helmet=hc)
+                    .replace('class="cc-bike"',
+                             f'class="cc-bike cc-ride" data-legs="trail-path" '
+                             f'data-speed="30" data-nose="-1" data-t="{0.12 + i * 0.44:.2f}"',
+                             1))
+
+    # ------------------------------------------------- the square, right of road ---
+    # FOUR STRUCTURES, NOT FOUR COLOURS. The first version was one storefront function with
+    # the wall colour swapped, and it read as a single long building painted in sections —
+    # the same failure as Savannah, Mystic and Charleston before it. A real square is a run
+    # of buildings put up in different decades by different people: a heavy brick corner
+    # block with a stone cornice, a cream classical front with pilasters, a single-storey
+    # shop with a deep canopy, a two-storey with a stepped parapet. Different HEIGHTS,
+    # different roof lines, different numbers of floors.
+    def storefront(x0, x1, base, h, wall, trim, seed, style='corner'):
+        r = rnd(seed)
+        w = x1 - x0
+        top = base - h
+        glass = '#42606f'
+        o = [f'<g>{shadow((x0 + x1) / 2, base + 2, w * 0.5, 6, 0.15)}']
+        o.append(f'<rect x="{x0}" y="{top}" width="{w}" height="{h}" fill="{wall}"/>')
+
+        if style == 'corner':
+            # brick, three floors, heavy stone cornice and a stone band at each floor
+            o.append(f'<rect x="{x0 - w * 0.035:.0f}" y="{top - h * 0.045:.0f}" '
+                     f'width="{w * 1.07:.0f}" height="{h * 0.085:.1f}" fill="{trim}"/>')
+            o.append(f'<rect x="{x0 - w * 0.02:.0f}" y="{top - h * 0.085:.0f}" '
+                     f'width="{w * 1.04:.0f}" height="{h * 0.045:.1f}" fill="{trim}"/>')
+            for fy in (0.4, 0.66):
+                o.append(f'<rect x="{x0}" y="{top + h * fy:.0f}" width="{w}" '
+                         f'height="{h * 0.03:.1f}" fill="{trim}"/>')
+            floors, wtop, wbot, arch = 2, 0.16, 0.34, True
+        elif style == 'classical':
+            # stucco, pilasters running the full height, flat parapet, tall windows
+            o.append(f'<rect x="{x0 - 4}" y="{top - h * 0.06:.0f}" width="{w + 8}" '
+                     f'height="{h * 0.09:.1f}" fill="{trim}"/>')
+            o.append(f'<path d="M{x0 + w * 0.34:.0f},{top - h * 0.06:.0f} '
+                     f'L{x0 + w * 0.66:.0f},{top - h * 0.06:.0f} '
+                     f'L{x0 + w * 0.5:.0f},{top - h * 0.17:.0f} Z" fill="{trim}"/>')
+            for j in range(4):
+                px = x0 + w * (0.04 + j * 0.307)
+                o.append(f'<rect x="{px:.0f}" y="{top}" width="{w * 0.05:.1f}" '
+                         f'height="{h * 0.78:.0f}" fill="{trim}" opacity="0.75"/>')
+            floors, wtop, wbot, arch = 2, 0.14, 0.36, False
+        elif style == 'lowshop':
+            # one storey, deep canopy on brackets, blank sign band above it
+            o.append(f'<rect x="{x0 - 3}" y="{top}" width="{w + 6}" '
+                     f'height="{h * 0.14:.1f}" fill="{trim}"/>')
+            o.append(f'<rect x="{x0 + 4}" y="{top + h * 0.2:.0f}" width="{w - 8}" '
+                     f'height="{h * 0.18:.0f}" fill="{trim}" opacity="0.55"/>')
+            floors, wtop, wbot, arch = 0, 0, 0, False
+        else:                                   # 'gabled' — stepped parapet, two storeys
+            o.append(f'<path d="M{x0 - 3},{top + h * 0.1:.0f} L{x0 - 3},{top} '
+                     f'L{x0 + w * 0.28:.0f},{top} L{x0 + w * 0.28:.0f},{top - h * 0.07:.0f} '
+                     f'L{x0 + w * 0.72:.0f},{top - h * 0.07:.0f} '
+                     f'L{x0 + w * 0.72:.0f},{top} L{x1 + 3},{top} '
+                     f'L{x1 + 3},{top + h * 0.1:.0f} Z" fill="{trim}"/>')
+            floors, wtop, wbot, arch = 1, 0.2, 0.42, False
+
+        cols = max(2, int(w / 30))
+        for f_ in range(floors):
+            wy = top + h * (wtop + f_ * (wbot - wtop))
+            wh = h * 0.155
+            for c in range(cols):
+                wx = x0 + w * (0.11 + c * 0.78 / max(cols - 1, 1)) - w * 0.05
+                ww = w * 0.1
+                if arch:
+                    o.append(f'<path d="M{wx:.1f},{wy + wh:.1f} L{wx + ww:.1f},{wy + wh:.1f} '
+                             f'L{wx + ww:.1f},{wy + wh * 0.3:.1f} '
+                             f'Q{wx + ww / 2:.1f},{wy - wh * 0.18:.1f} {wx:.1f},'
+                             f'{wy + wh * 0.3:.1f} Z" fill="{glass}"/>')
+                else:
+                    o.append(f'<rect x="{wx:.1f}" y="{wy:.1f}" width="{ww:.1f}" '
+                             f'height="{wh:.1f}" fill="{glass}"/>'
+                             f'<rect x="{wx - 1.5:.1f}" y="{wy - 2:.1f}" '
+                             f'width="{ww + 3:.1f}" height="2.4" fill="{trim}"/>')
+
+        # the shopfront: glass, stall riser, and an awning on only some of them
+        sy = base - h * (0.42 if style == 'lowshop' else 0.28)
+        o.append(f'<rect x="{x0 + 3}" y="{sy}" width="{w - 6}" height="{base - sy:.0f}" '
+                 f'fill="{glass}"/>')
+        o.append(f'<rect x="{x0 + 3}" y="{base - 6}" width="{w - 6}" height="6" '
+                 f'fill="#6b5f52"/>')
+        o.append(f'<rect x="{x0 + w * 0.42:.0f}" y="{sy + 3}" width="{w * 0.16:.0f}" '
+                 f'height="{base - sy - 6:.0f}" fill="#5a4634"/>')
+        if seed % 3:
+            aw = ('#c8462f', '#3f6a8c', '#4a8f5c', '#d8b03c')[seed % 4]
+            o.append(f'<path d="M{x0 - 3},{sy} L{x1 + 3},{sy} '
+                     f'L{x1 - 1},{sy + h * 0.1:.0f} L{x0 + 1},{sy + h * 0.1:.0f} Z" '
+                     f'fill="{aw}"/>')
+            for j in range(int(w / 14) + 1):
+                if j % 2:
+                    continue
+                ax = x0 - 3 + j * 14
+                o.append(f'<path d="M{ax:.0f},{sy} L{min(ax + 14, x1 + 3):.0f},{sy} '
+                         f'L{min(ax + 13, x1 + 1):.0f},{sy + h * 0.1:.0f} '
+                         f'L{ax + 1:.0f},{sy + h * 0.1:.0f} Z" fill="#ffffff" '
+                         f'opacity="0.3"/>')
+        return ''.join(o) + '</g>'
+
+    # heights and styles alternate deliberately; no two neighbours share a roof line
+    SQ = [(1188, 1340, 452, 184, '#9c4b3a', '#efe7d4', 3, 'corner'),
+          (1052, 1194, 444, 128, '#e2dcc8', '#f6f1e2', 5, 'classical'),
+          (952, 1058, 436, 92, '#4f6a7a', '#e8ddc8', 6, 'lowshop'),
+          (836, 958, 428, 146, '#a85a44', '#f2ead8', 7, 'gabled'),
+          (748, 842, 418, 108, '#8f4a3a', '#e8ddc8', 9, 'corner'),
+          (676, 754, 410, 130, '#b5654a', '#f0e6d2', 4, 'classical')]
+    for x0, x1, base, h, wall, trim, sd, st in SQ:
+        back.append(storefront(x0, x1, base, h, wall, trim, sd, st))
+    # the sidewalk, its kerb, street trees and a lamp standard or two
+    back.append(f'<polygon points="676,{WOOD_BASE} 1320,{WOOD_BASE} 1320,436 700,436" '
+                f'fill="#c6c0b0"/>')
+    back.append(f'<polygon points="676,{WOOD_BASE} 1320,{WOOD_BASE} 1320,{WOOD_BASE - 5} '
+                f'700,{WOOD_BASE - 4}" fill="#a8a290"/>')
+    for tx, ty, ts in ((744, 434, 0.34), (886, 440, 0.4), (1064, 446, 0.46)):
+        back.append(oak(tx, ty, ts, canopy='#4a8a4c', canopy2='#5da05a', trunk='#6b5638'))
+    for lx, ly in ((812, 438), (990, 444), (1180, 450)):
+        k = ppm(ly) * 0.7
+        back.append(f'<g><rect x="{lx}" y="{ly - 3.6 * k:.0f}" width="{0.16 * k:.1f}" '
+                    f'height="{3.6 * k:.0f}" fill="#33383c"/>'
+                    f'<circle cx="{lx + 0.08 * k:.0f}" cy="{ly - 3.8 * k:.0f}" '
+                    f'r="{0.26 * k:.1f}" fill="#f6ecc0"/></g>')
+    for px, pc, pxy in ((790, '#c8503f', 442), (824, '#3f6a8c', 442),
+                        (1010, '#d8b03c', 448), (1128, '#4a8f5c', 452)):
+        k = ppm(pxy) * 0.88
+        back.append(f'<g transform="translate({px},{pxy})">'
+                    f'<rect x="{-0.16 * k:.1f}" y="{-0.78 * k:.1f}" width="{0.32 * k:.1f}" '
+                    f'height="{0.78 * k:.1f}" fill="#3f4a52"/>'
+                    f'<path d="M{-0.3 * k:.1f},{-0.78 * k:.1f} L{0.3 * k:.1f},'
+                    f'{-0.78 * k:.1f} L{0.24 * k:.1f},{-1.42 * k:.1f} L{-0.24 * k:.1f},'
+                    f'{-1.42 * k:.1f} Z" fill="{pc}"/>'
+                    f'<circle cx="0" cy="{-1.58 * k:.1f}" r="{0.18 * k:.1f}" '
+                    f'fill="#e8c49a"/></g>')
+
+    # ================================================================ NEAR FIELD ===
+    fr = ['    ']
+
+    # ---- THE DIRT ---------------------------------------------------------
+    # Without this the near field was two brown objects sitting on a big green lawn. A
+    # trail corridor runs through both of them, so the wave and the jump line read as parts
+    # of ONE trail rather than as scattered props. It cannot cross the road except at the
+    # marked crossing, so it is two runs — the wave's on the left, the jump line's on the
+    # right — which is also how it really works.
+    fr.append('<path d="M-70,600 C 80,566 180,560 300,584 C 400,604 460,626 520,646 '
+              'L520,668 C 440,644 380,622 280,606 C 170,588 60,596 -70,626 Z" '
+              'fill="#a8794f"/>')
+    fr.append('<path d="M-70,606 C 80,574 180,568 300,590 C 400,608 460,628 520,648 '
+              'L520,660 C 440,638 380,618 280,600 C 170,582 60,590 -70,618 Z" '
+              'fill="#bd8253"/>')
+    fr.append('<path d="M760,652 C 840,626 900,610 962,600 C 1050,586 1140,594 1340,624 '
+              'L1340,662 C 1140,630 1050,622 962,634 C 900,642 840,656 760,676 Z" '
+              'fill="#a8794f"/>')
+    fr.append('<path d="M760,658 C 840,632 900,616 962,606 C 1050,592 1140,600 1340,630 '
+              'L1340,652 C 1140,622 1050,614 962,626 C 900,634 840,650 760,668 Z" '
+              'fill="#cfa877"/>')
+    rrd = rnd(83)
+    for i in range(34):
+        dx = rrd() * 1400 - 60
+        dy = 566 + rrd() * 120
+        lo, hi = 622 - 112 * (dy - 300) / 420.0, 644 + 126 * (dy - 300) / 420.0
+        if lo - 20 < dx < hi + 20:
+            continue
+        fr.append(f'<ellipse cx="{dx:.0f}" cy="{dy:.0f}" rx="{4 + rrd() * 9:.1f}" '
+                  f'ry="{2 + rrd() * 3.4:.1f}" fill="#cfc9b4" opacity="0.8"/>')
+
+    # ---- THE TIMBER WAVE, near left ------------------------------------------
+    def timber_wave(x0, x1, base, crest_y):
+        # A ROLLING WAVE, not a dome. The first version was one symmetric hump and read as
+        # a giant loaf of bread. What the reference shows is a sculpted timber wave with
+        # two crests and a trough, and it is the ribs — one plank per section, alternating
+        # in value — that make it read as WOOD rather than as a brown ramp.
+        import math
+        o = ['<g>']
+        n = 64
+
+        def top(t):
+            u = min(max((t - 0.04) / 0.92, 0.0), 1.0)
+            return base - (base - crest_y) * (math.sin(u * math.pi) ** 0.7) * \
+                (0.6 + 0.4 * math.cos(u * 3.4 * math.pi - 0.5))
+
+        pts = [(x0 + (x1 - x0) * (i / n), top(i / n)) for i in range(n + 1)]
+        o.append(f'<path d="M{x0},{base + 10} '
+                 + ' '.join(f'L{px:.0f},{py:.1f}' for px, py in pts)
+                 + f' L{x1},{base + 10} Z" fill="#6b4f30"/>')
+        for i in range(n):
+            (ax, ay), (bx_, by_) = pts[i], pts[i + 1]
+            o.append(f'<polygon points="{ax:.1f},{ay:.1f} {bx_:.1f},{by_:.1f} '
+                     f'{bx_:.1f},{by_ + 26:.1f} {ax:.1f},{ay + 26:.1f}" '
+                     f'fill="{"#b58c58" if i % 2 else "#a07c4c"}"/>')
+        o.append(f'<path d="M{x0},{base + 10} '
+                 + ' '.join(f'L{px:.0f},{py + 27:.1f}' for px, py in pts)
+                 + f' L{x1},{base + 10} Z" fill="#5e4529"/>')
+        o.append('<path d="M' + ' L'.join(f'{px:.0f},{py:.1f}' for px, py in pts)
+                 + '" stroke="#caa471" stroke-width="3" fill="none"/>')
+        # HAND BACK THE SURFACE. The first version placed the rider by eye and put it 85px
+        # above the timber, floating in the sky. Anything that sits ON a generated shape is
+        # positioned FROM that shape's own function, never from a number that looked about
+        # right in the last render.
+        return ''.join(o) + '</g>', top, (x0, x1)
+
+    _wave_svg, _wave_top, (_wx0, _wx1) = timber_wave(-60, 476, BERM_BASE, 558)
+    fr.append(_wave_svg)
+
+    def wave_xy(t):
+        return _wx0 + (_wx1 - _wx0) * t, _wave_top(t) + 2
+
+    _pts = [wave_xy(i / 24.0) for i in range(25)]
+    fr.append('<path id="berm-path" class="cc-path" d="M'
+              + ' L'.join(f'{px:.0f},{py:.1f}' for px, py in _pts)
+              + '" fill="none" stroke="none"/>')
+    _rx, _ry = wave_xy(0.29)
+    fr.append(mtb(_rx, _ry, ppm(626) * 0.98, '#3f7fb0', frame='#2f6ea8', helmet='#2f6ea8',
+                  gid='cc-rider-berm', rot=-18)
+              # THE RIDE. One rider, six legs, in order, and the whole thing is
+              # data — scene.js never learns this scene by name. A leg is a path
+              # id; "@x0:x1" rides only part of one, which is how the Greenway is
+              # joined at 452 and left at 756 without cutting the path in two.
+              # data-hold is the scene-x the rider waits at until the bike signal
+              # lets them across — an x rather than a leg, because the two riders
+              # already on the Greenway queue at the same line without ever
+              # having ridden the berm.
+              .replace('class="cc-bike"',
+                       'class="cc-bike cc-ride" data-legs="berm-run-in-path,'
+                       'berm-path,berm-exit-path,greenway-path@380:756,'
+                       'jump-run-in-path,jump-path" data-hold="greenway-path@380" '
+                       'data-hide="cc-rider-jump" data-speed="104" '
+                       'data-shadow-leg="jump-path@948:1072"', 1))
+
+    # ---- THE JUMP LINE, near right -------------------------------------------
+    # Takeoff lip, gap, landing. The whole arc is exported as ONE path: drive a rider along
+    # it and rotate to the tangent, and the nose-up on takeoff and nose-down on landing
+    # come out for free with no special-case code.
+    #
+    # THE ARC STAYS BELOW THE RAILS — the rider's helmet peaks at y=526, ten pixels clear.
+    # Not one pixel higher, and this is not a stylistic preference. The whole subject of
+    # this game is that a level crossing is where you stop and wait, and a cyclist flying
+    # across the frame at the height of a passing train reads as someone jumping the
+    # tracks. It is the one image the set must never contain.
+    def kicker(x, base, w, h, flip=False):
+        s_ = -1 if flip else 1
+        return (f'<g transform="translate({x},{base})">'
+                f'{shadow(s_ * w * 0.45, 4, w * 0.55, 7, 0.18)}'
+                f'<path d="M0,0 L{s_ * w:.0f},0 L{s_ * w:.0f},{-h * 0.28:.0f} '
+                f'C{s_ * w * 0.6:.0f},{-h * 0.86:.0f} {s_ * w * 0.28:.0f},{-h:.0f} '
+                f'0,{-h:.0f} Z" fill="#8a5e3a"/>'
+                f'<path d="M0,{-h:.0f} C{s_ * w * 0.28:.0f},{-h:.0f} '
+                f'{s_ * w * 0.6:.0f},{-h * 0.86:.0f} {s_ * w:.0f},{-h * 0.28:.0f} '
+                f'L{s_ * w:.0f},{-h * 0.28 + 10:.0f} C{s_ * w * 0.6:.0f},'
+                f'{-h * 0.86 + 10:.0f} {s_ * w * 0.28:.0f},{-h + 10:.0f} 0,{-h + 10:.0f} Z" '
+                f'fill="#b5764a"/>'
+                f'<rect x="{-5 if flip else -5:.0f}" y="{-h - 4:.0f}" width="11" '
+                f'height="7" rx="3" fill="#9d7a4c"/></g>')
+
+    # THE TAKEOFF IS TIMBER, NOT DIRT. Built as a dirt kicker it was the same brown as the
+    # trail ribbon running under it and the two merged into a single unreadable lump — the
+    # rider appeared to be floating over a field. Bentonville's features really are timber,
+    # a planked ramp on posts reads instantly at this size, and it separates cleanly from
+    # the dirt it stands on.
+    def ramp(x0, x1, base, lip_y):
+        o = ['<g>']
+        o.append(f'{shadow((x0 + x1) / 2 + 10, base + 4, (x1 - x0) * 0.55, 8, 0.2)}')
+        for px in range(int(x0) + 14, int(x1) - 6, 30):
+            t = (px - x0) / (x1 - x0)
+            ty = base - (base - lip_y) * t ** 1.7
+            h_ = base - ty - 10
+            if h_ < 2:            # the posts nearest the lip have no length left
+                continue
+            o.append(f'<rect x="{px}" y="{ty + 12:.0f}" width="7" '
+                     f'height="{h_:.0f}" fill="#6b5334"/>')
+        n = 22
+        pts = [(x0 + (x1 - x0) * (i / n), base - (base - lip_y) * (i / n) ** 1.7)
+               for i in range(n + 1)]
+        o.append(f'<path d="M{x0},{base + 4} '
+                 + ' '.join(f'L{px:.0f},{py + 13:.1f}' for px, py in pts)
+                 + f' L{x1},{base + 4} Z" fill="#5e4529"/>')
+        for i in range(n):
+            (ax, ay), (bx_, by_) = pts[i], pts[i + 1]
+            o.append(f'<polygon points="{ax:.1f},{ay:.1f} {bx_:.1f},{by_:.1f} '
+                     f'{bx_:.1f},{by_ + 14:.1f} {ax:.1f},{ay + 14:.1f}" '
+                     f'fill="{"#c09466" if i % 2 else "#a97f4f"}"/>')
+        o.append(f'<rect x="{x1 - 12:.0f}" y="{lip_y - 5:.0f}" width="18" height="9" '
+                 f'rx="3" fill="#8a6540"/>')
+        return ''.join(o) + '</g>'
+
+    fr.append(ramp(806, 950, JUMP_BASE + 8, 578))
+    # the landing: a dirt mound with a smooth downslope, and a run-out beyond it
+    fr.append(f'<path d="M1058,{JUMP_BASE + 16} C 1078,{JUMP_BASE - 42} '
+              f'1120,{JUMP_BASE - 46} 1160,{JUMP_BASE - 24} '
+              f'C 1210,{JUMP_BASE + 4} 1270,{JUMP_BASE + 14} 1340,{JUMP_BASE + 16} Z" '
+              f'fill="#8a5e3a"/>')
+    fr.append(f'<path d="M1058,{JUMP_BASE + 16} C 1078,{JUMP_BASE - 42} '
+              f'1120,{JUMP_BASE - 46} 1160,{JUMP_BASE - 24} '
+              f'C 1210,{JUMP_BASE + 4} 1270,{JUMP_BASE + 14} 1340,{JUMP_BASE + 16} '
+              f'L1340,{JUMP_BASE + 6} C 1270,{JUMP_BASE + 4} 1210,{JUMP_BASE - 6} '
+              f'1160,{JUMP_BASE - 34} C 1120,{JUMP_BASE - 56} 1078,{JUMP_BASE - 52} '
+              f'1058,{JUMP_BASE + 6} Z" fill="#bd8253"/>')
+    # THE SHADOW IS THE CUE. A rider drawn above the ground is ambiguous — they could be
+    # standing on a rise behind. A dark ellipse on the dirt directly beneath, with clear
+    # daylight between, is what says AIRBORNE, and it costs one shape.
+    fr.append(shadow(1002, JUMP_BASE - 14, 28, 6, 0.32)
+              .replace('<ellipse', '<ellipse class="cc-ride-shadow"', 1))
+    fr.append(f'<path id="jump-path" class="cc-path" '
+              f'd="M778,{JUMP_BASE + 16} L806,{JUMP_BASE + 12} '
+              f'C 866,{JUMP_BASE + 4} 918,610 950,582 '
+              # THE CEILING, ENFORCED. The handoff sets it at a helmet of y=524 —
+              # eight pixels clear of the rails — and says, rightly, that it is the one
+              # image this set must not contain. The curve as DRAWN peaked at 564, which
+              # put the helmet at 518: level with the bottom of the ballast rather than
+              # clear of it. Only the two middle controls move, so the ramp lip at
+              # (948,574) and the landing stay exactly where they were drawn and the
+              # rider still leaves and meets the ground on them.
+              f'C 978,574 1010,570 1042,574 C 1078,578 1108,{JUMP_BASE - 40} '
+              f'1160,{JUMP_BASE - 24} C 1220,{JUMP_BASE + 2} 1280,{JUMP_BASE + 14} '
+              f'1350,{JUMP_BASE + 16}" fill="none" stroke="none"/>')
+    # Authored just PAST the lip and still climbing, nose high — not at the apex. A rider
+    # frozen at the top of an arc reads as hovering; one at 24 degrees of nose-up, off the
+    # end of a visible ramp with its shadow on the dirt below, reads as having launched.
+    #
+    # THE HELMET PEAKS AT y=524, eight pixels clear of the rails, and that ceiling is not a
+    # stylistic preference. The whole subject of this game is that a level crossing is where
+    # you stop and wait; a cyclist flying across the frame at the height of a passing train
+    # reads as someone jumping the tracks, and it is the one image the set must not contain.
+    fr.append(mtb(1002, 572, ppm(650) * 1.0, '#3f7fb0', frame='#2f6ea8', helmet='#2f6ea8',
+                  gid='cc-rider-jump', rot=-24, cranked=True))
+
+    # ---- THE GREENWAY, and the second crossing -------------------------------
+    # A paved shared-use path crossing the road on green paint, with a signal each side.
+    # Bentonville really does mark its bike crossings green, and TWO signalled crossings in
+    # one picture — one for the train, one for the bikes — is the whole game in miniature:
+    # something is coming, so you wait, and then you go.
+    #
+    # It sits at the very FRONT of the frame, not in the middle. In the middle it was a
+    # strong horizontal band cutting the near field in half and stranding both the berm and
+    # the jump; at the front it is out of their way and its riders are the largest figures
+    # in the scene, which is what a crossing the child is supposed to read deserves.
+    lo_g, hi_g = road_span(GREENWAY_Y)
+    fr.append(f'<path d="M-60,{GREENWAY_Y + 18} L1340,{GREENWAY_Y + 8} '
+              f'L1340,{GREENWAY_Y - 12} L-60,{GREENWAY_Y - 4} Z" fill="#a8aca6"/>')
+    fr.append(f'<path d="M-60,{GREENWAY_Y - 4} L1340,{GREENWAY_Y - 12} '
+              f'L1340,{GREENWAY_Y - 16} L-60,{GREENWAY_Y - 8} Z" fill="#bcc0ba"/>')
+    fr.append(f'<polygon points="{lo_g - 8:.0f},{GREENWAY_Y + 18} '
+              f'{hi_g + 8:.0f},{GREENWAY_Y + 13} {hi_g + 8:.0f},{GREENWAY_Y - 12} '
+              f'{lo_g - 8:.0f},{GREENWAY_Y - 6}" fill="#3f9e5c" opacity="0.85"/>')
+    for j in range(8):
+        t0, t1 = j / 8.0, (j + 0.56) / 8.0
+        xa = lo_g - 8 + (hi_g - lo_g + 16) * t0
+        xb = lo_g - 8 + (hi_g - lo_g + 16) * t1
+        fr.append(f'<polygon points="{xa:.0f},{GREENWAY_Y + 17} {xb:.0f},{GREENWAY_Y + 17} '
+                  f'{xb:.0f},{GREENWAY_Y - 7} {xa:.0f},{GREENWAY_Y - 7}" '
+                  f'fill="#f2f0e6" opacity="0.92"/>')
+    fr.append(f'<path id="greenway-path" class="cc-path" d="M-70,{GREENWAY_Y + 6} '
+              f'L1350,{GREENWAY_Y - 6}" fill="none" stroke="none"/>')
+
+    # ======================================================== THE RIDE, IN ORDER ===
+    # The wave and the jump are on opposite sides of the road, so a rider cannot simply go
+    # from one to the other — and the only legal way across is the Greenway crossing at the
+    # front. That turns out to be the whole point rather than an obstacle, because it makes
+    # one continuous story out of the two features and the two sets of signals:
+    #
+    #   1. #berm-run-in-path    enter left, drop onto the timber
+    #   2. #berm-path           carve the wave, left to right
+    #   3. #berm-exit-path      off the end, swing down to the Greenway
+    #   4. #greenway-path       ride right, and STOP at #cc-bike-signal-0
+    #   5. ---- wait ----       the railway gate comes down, the cars stop, and only then
+    #                           does .cc-lamp-green light on both bike signals
+    #   6. #greenway-path       cross the road on the green paint, past #cc-bike-signal-1
+    #   7. #jump-run-in-path    swing back up the right-hand side to the ramp
+    #   8. #jump-path           up the timber, into the air, land, run out right
+    #
+    # Every one of those is a plain <path> in this file with its ends meeting the next
+    # one's start, so the engine concatenates rather than computing joins. The whole loop
+    # is authored left to right and every rider is drawn facing right, so nothing needs
+    # flipping anywhere in it.
+    fr.append(f'<path id="berm-run-in-path" class="cc-path" '
+              f'd="M-210,{BERM_BASE + 6} C -160,{BERM_BASE + 2} -110,{BERM_BASE} '
+              f'{_pts[0][0]:.0f},{_pts[0][1]:.1f}" fill="none" stroke="none"/>')
+    # THE EXIT SWINGS FURTHER WEST than the handoff's 452, and the CLOSE BUTTON is
+    # why. It covers x 416-589, which is exactly the western approach to the bike
+    # crossing — so a rider held at 452 waits at a red light behind a button, and
+    # the one image this scene exists to make happens where nobody can see it. The
+    # art already knew: it put the near signal out at 392 rather than beside the
+    # paint. The stop line now keeps it company, and the exit curve sweeps down to
+    # meet it. Same lesson as the horses at Bluegrass — the buttons are part of the
+    # composition whether the art accounts for them or not.
+    fr.append(f'<path id="berm-exit-path" class="cc-path" '
+              f'd="M{_pts[-1][0]:.0f},{_pts[-1][1]:.1f} C 512,{BERM_BASE + 14} '
+              f'474,{GREENWAY_Y - 10} 380,{GREENWAY_Y + 4}" fill="none" stroke="none"/>')
+    fr.append(f'<path id="jump-run-in-path" class="cc-path" '
+              f'd="M756,{GREENWAY_Y - 2} C 766,{GREENWAY_Y - 8} 774,{JUMP_BASE + 24} '
+              f'778,{JUMP_BASE + 16}" fill="none" stroke="none"/>')
+
+    def bike_signal(x, y, gid):
+        k = ppm(y) * 0.72
+        return (f'<g id="{gid}" class="cc-bike-signal" transform="translate({x},{y})">'
+                f'{shadow(0, 2, 0.4 * k, 0.14 * k, 0.2)}'
+                f'<rect x="{-0.09 * k:.1f}" y="{-3.1 * k:.1f}" width="{0.18 * k:.1f}" '
+                f'height="{3.1 * k:.1f}" fill="#33383c"/>'
+                f'<rect x="{-0.38 * k:.1f}" y="{-4.5 * k:.1f}" width="{0.76 * k:.1f}" '
+                f'height="{1.44 * k:.1f}" rx="{0.12 * k:.1f}" fill="#22262a"/>'
+                f'<circle class="cc-lamp-red" cx="0" cy="{-4.14 * k:.1f}" '
+                f'r="{0.24 * k:.1f}" fill="#ff3b30"/>'
+                f'<circle class="cc-lamp-green" cx="0" cy="{-3.46 * k:.1f}" '
+                f'r="{0.24 * k:.1f}" fill="#1f4a2c"/>'
+                f'<rect x="{-0.32 * k:.1f}" y="{-2.7 * k:.1f}" width="{0.64 * k:.1f}" '
+                f'height="{0.46 * k:.1f}" rx="{0.08 * k:.1f}" fill="#e8e2d4"/></g>')
+
+    fr.append(bike_signal(392, GREENWAY_Y + 30, 'cc-bike-signal-0'))
+    fr.append(bike_signal(790, GREENWAY_Y + 22, 'cc-bike-signal-1'))
+    for i, (bx, by, jc, fc, hc) in enumerate(
+            [(300, GREENWAY_Y + 12, '#c8503f', '#e8e2d4', '#2f3438'),
+             (172, GREENWAY_Y + 16, '#7a5ea8', '#4a8f5c', '#e8d24a')]):
+        # THEY QUEUE. Two riders already on the Greenway, holding a few metres
+        # short of the one that came off the berm, so the red light has somebody
+        # waiting at it — which is the whole picture the scene is here to make.
+        # Different speeds so they do not ride as one object.
+        fr.append(mtb(bx, by, ppm(by) * 0.92, jc, gid=f'cc-rider-greenway-{i}',
+                      frame=fc, helmet=hc)
+                  .replace('class="cc-bike"',
+                           f'class="cc-bike cc-ride" data-legs="greenway-path" '
+                           f'data-speed="{68 + i * 9}" data-hold="greenway-path@{350 - i * 30}" '
+                           f'data-t="{0.26 - i * 0.09:.2f}"', 1))
+
+    # a couple of riders' friends watching from the side, and trail furniture
+    for px, pc, py in ((1206, '#c8503f', 604), (1240, '#4a8f5c', 610)):
+        k = ppm(py) * 0.96
+        fr.append(f'<g transform="translate({px},{py})">'
+                  f'<rect x="{-0.16 * k:.1f}" y="{-0.78 * k:.1f}" width="{0.32 * k:.1f}" '
+                  f'height="{0.78 * k:.1f}" fill="#3f4a52"/>'
+                  f'<path d="M{-0.3 * k:.1f},{-0.78 * k:.1f} L{0.3 * k:.1f},{-0.78 * k:.1f} '
+                  f'L{0.24 * k:.1f},{-1.42 * k:.1f} L{-0.24 * k:.1f},{-1.42 * k:.1f} Z" '
+                  f'fill="{pc}"/>'
+                  f'<circle cx="0" cy="{-1.58 * k:.1f}" r="{0.18 * k:.1f}" '
+                  f'fill="#e8c49a"/></g>')
+
+    fg = ['    ']
+    rrb = rnd(59)
+    for i in range(320):
+        bx = rrb() * 1400 - 60
+        by = 548 + rrb() * 176
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 26 < bx < hi + 26:
+            continue
+        if 560 < by < 700 and (bx < 500 or 780 < bx < 1290):
+            continue
+        s = 1.1 + rrb() * 1.0
+        c = ('#5d8040', '#6e9a4a', '#7fa356', '#4e7038')[int(rrb() * 4)]
+        fg.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.6 * s:.1f},{by - 7.4 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 0.4 * s:.1f},{by - 9.2 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 2.2 * s:.1f},{by - 7 * s:.1f}" '
+                  f'stroke="{c}" stroke-width="{1.2 * s:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="0.9"/>')
+
+    return scene('bentonville', 'Bentonville, Arkansas',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fg),
+                     'roadkw': dict(surface='#5a5b60', surface2='#48494e',
+                                    shoulder='#c6c0b0', dash='#ffe066'),
+                     'trackkw': dict(ballast='#a09678', ballast_hi='#b0a686',
+                                     tie='#5a4634', rail='#cfd4d9'),
+                 }, defs=d)
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

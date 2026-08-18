@@ -370,6 +370,18 @@
       trainPreset:{ engine:'diesel' } },
 
     { id:'neworleans', state:'Louisiana',  city:'New Orleans',   say:{ en:'New Orleans', pl:'Nowy Orlean' },   scene:'new-orleans', scenery:{ theme:'bayou',   features:['cathedral','galleries','riverboat','oaks'] }, trainPreset:{ engine:'streetcar' } },
+
+    { id:'bentonville', state:'Arkansas', city:'Bentonville',
+      say:{ en:'Bentonville', pl:'Bentonville' },
+      scene:'bentonville',
+      // Viewpoint: the street out of town, woodland down its left side and the brick square
+      // down its right. The set's first scene about a sport, and the first with a SECOND
+      // signalled crossing: the Razorback Greenway crosses the road on green paint at the
+      // front of the frame, and its bike signal is meant to go green when the railway gate
+      // is down and the cars are stopped. Timber wave on the near left, jump line on the
+      // near right. Every bicycle in the scene is meant to move.
+      scenery:{ theme:'ozark-trailtown', features:['timberwave','jumpline','greenway','square'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

@@ -33,6 +33,7 @@ const r1 = v => Math.round(v * 10) / 10;
 // A state has as many destinations as it has visually distinct looks.
 // Must stay in sync with play/js/world.js.
 const SUPPORTED = {
+  'Arkansas': ['Bentonville'],
   'California': ['San Francisco', 'Los Angeles'],
   'Colorado': ['Rocky Mountains'],
   'Illinois': ['Chicago'],
