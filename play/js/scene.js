@@ -186,6 +186,24 @@
     // Insert, never re-order. Far cars sit behind the far gate; the train and
     // its smoke sit between the far gate and the foreground; near cars sit in
     // front of the foreground but behind the near gate's arm.
+    // ON THE CARRIAGEWAY, BEHIND THE RAILS. Scenery lives in scenery-back, which
+    // is painted UNDER the road — so anything authored there that crosses the
+    // road walks beneath the tarmac. Birmingham's tour party did exactly that.
+    // Anything tagged data-over-road moves into a group of its own between the
+    // road and the track: over the surface, still behind the train and the gates.
+    //
+    // Its own group and NOT cc-cars-far, which looks like the same slot and is
+    // not: leaving a scene empties the two car groups, so a scene's own art
+    // parked in one would be destroyed the first time you walked away and never
+    // come back, because scenes are cached and never rebuilt.
+    const trackLayer = svg.querySelector('#track');
+    const overRoad = svg.querySelectorAll('[data-over-road]');
+    if (overRoad.length && trackLayer) {
+      const g = el('g', { class: 'cc-over-road' });
+      trackLayer.parentNode.insertBefore(g, trackLayer);
+      [].forEach.call(overRoad, e => g.appendChild(e));
+    }
+
     const carsFar = el('g', { class: 'cc-cars-far' });
     const smokeG = el('g', { class: 'cc-smoke' });
     const trainG = el('g', { class: 'cc-train' });

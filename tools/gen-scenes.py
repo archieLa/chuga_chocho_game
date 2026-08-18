@@ -25573,8 +25573,11 @@ def birmingham():
         # They ride the one path on the .cc-ride contract from Bentonville: at
         # twenty pixels tall a one-pixel bob says walking and articulated legs
         # would say nothing.
+        # data-over-road, because the tour route crosses the carriageway and
+        # scenery-back is painted UNDER it — without this they walk beneath the
+        # tarmac and come out the other side.
         walks = (f' cc-ride" data-legs="tour-path" data-speed="15" data-bob="1.1"'
-                 f' data-t="{(px + 70) / 1420.0:.3f}"') if i < 4 else '"'
+                 f' data-over-road="1" data-t="{(px + 70) / 1420.0:.3f}"') if i < 4 else '"'
         back.append(f'<g id="cc-visitor-{i}" class="cc-walker{walks} '
                     f'transform="translate({px},{py})">'
                     f'<rect x="{-0.16 * k:.1f}" y="{-0.78 * k:.1f}" width="{0.32 * k:.1f}" '
