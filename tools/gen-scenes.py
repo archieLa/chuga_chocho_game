@@ -24523,7 +24523,7 @@ def bentonville():
                         frame=fc, helmet=hc)
                     .replace('class="cc-bike"',
                              f'class="cc-bike cc-ride" data-legs="trail-path" '
-                             f'data-speed="30" data-nose="-1" data-t="{0.12 + i * 0.44:.2f}"',
+                             f'data-speed="30" data-t="{0.12 + i * 0.44:.2f}"',
                              1))
 
     # ------------------------------------------------- the square, right of road ---
@@ -24743,8 +24743,8 @@ def bentonville():
               # having ridden the berm.
               .replace('class="cc-bike"',
                        'class="cc-bike cc-ride" data-legs="berm-run-in-path,'
-                       'berm-path,berm-exit-path,greenway-path@380:756,'
-                       'jump-run-in-path,jump-path" data-hold="greenway-path@380" '
+                       'berm-path,berm-exit-path,greenway-path@508:756,'
+                       'jump-run-in-path,jump-path" data-hold="greenway-path@508" '
                        'data-hide="cc-rider-jump" data-speed="104" '
                        'data-shadow-leg="jump-path@948:1072"', 1))
 
@@ -24896,17 +24896,23 @@ def bentonville():
     fr.append(f'<path id="berm-run-in-path" class="cc-path" '
               f'd="M-210,{BERM_BASE + 6} C -160,{BERM_BASE + 2} -110,{BERM_BASE} '
               f'{_pts[0][0]:.0f},{_pts[0][1]:.1f}" fill="none" stroke="none"/>')
-    # THE EXIT SWINGS FURTHER WEST than the handoff's 452, and the CLOSE BUTTON is
-    # why. It covers x 416-589, which is exactly the western approach to the bike
-    # crossing — so a rider held at 452 waits at a red light behind a button, and
-    # the one image this scene exists to make happens where nobody can see it. The
-    # art already knew: it put the near signal out at 392 rather than beside the
-    # paint. The stop line now keeps it company, and the exit curve sweeps down to
-    # meet it. Same lesson as the horses at Bluegrass — the buttons are part of the
-    # composition whether the art accounts for them or not.
+    # THE EXIT RUNS EAST, and never doubles back. As drawn it swung right to 500
+    # and then returned to 452, so the rider met the stop line travelling WEST and
+    # sat at the red light having turned round to get there. The engine mirrors
+    # rather than inverting now, so nothing stands on its head — but a rider that
+    # arrives backwards still has to turn round in front of the child before it
+    # can set off. Easier to not arrive backwards: the wave lets out downhill and
+    # forwards onto the Greenway, which is what a trail exit is.
+    #
+    # That puts the leading rider's wait behind the CLOSE BUTTON, which covers
+    # x 409-589 — the whole western approach to the paint. The art already knew
+    # something was wrong there: it set the near signal out at 392 rather than
+    # beside the crossing. So the two riders already ON the Greenway queue at the
+    # signal where they can be seen, and the one off the berm waits out of sight
+    # and rides out the moment the light changes.
     fr.append(f'<path id="berm-exit-path" class="cc-path" '
-              f'd="M{_pts[-1][0]:.0f},{_pts[-1][1]:.1f} C 512,{BERM_BASE + 14} '
-              f'474,{GREENWAY_Y - 10} 380,{GREENWAY_Y + 4}" fill="none" stroke="none"/>')
+              f'd="M{_pts[-1][0]:.0f},{_pts[-1][1]:.1f} C 488,{BERM_BASE + 12} '
+              f'498,{GREENWAY_Y - 10} 508,{GREENWAY_Y + 4}" fill="none" stroke="none"/>')
     fr.append(f'<path id="jump-run-in-path" class="cc-path" '
               f'd="M756,{GREENWAY_Y - 2} C 766,{GREENWAY_Y - 8} 774,{JUMP_BASE + 24} '
               f'778,{JUMP_BASE + 16}" fill="none" stroke="none"/>')

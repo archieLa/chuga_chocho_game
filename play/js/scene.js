@@ -2845,7 +2845,9 @@
   //                wave crosses the stop line's x as well, and a rider held
   //                there waits at a red light in the middle of a field.
   //   data-t       0..1, where round the chain to start
-  //   data-nose    -1 if the chain runs against the way the art faces
+  //   data-nose    -1 only if the ART itself is drawn facing LEFT. Which way a
+  //                rider faces as it travels is taken from the tangent, so a
+  //                chain that runs right to left needs nothing said about it.
   //   data-hide    id of a second drawing of the SAME rider, hidden at mount
   //   data-shadow-leg  "leg@x0:x1" — where .cc-ride-shadow tracks the rider. The
   //                    range is the GAP, not the leg: a shadow cast on the face
@@ -2970,10 +2972,17 @@
       if (d >= r.total) d -= r.total;               // both ends are off frame
       r.d = d;
       const at = rideAt(r, d);
-      const deg = r.nose > 0 ? Math.atan2(at.vy, at.vx) : Math.atan2(-at.vy, -at.vx);
+      // WHICH WAY IT FACES COMES FROM THE TANGENT, and it MIRRORS rather than
+      // rotating past vertical. Rotating a right-facing sprite to follow a
+      // leftward tangent turns it upside down — which is what the rider did at
+      // the end of the timber wave, and then waited at the red light inverted.
+      // Mirroring keeps it the right way up going either way, and it means a
+      // path that doubles back can never invert anything again.
+      const fwd = r.nose * (at.vx >= 0 ? 1 : -1);
+      const deg = fwd > 0 ? Math.atan2(at.vy, at.vx) : Math.atan2(-at.vy, -at.vx);
       r.el.setAttribute('transform',
         'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ') rotate('
-        + (deg * 180 / Math.PI).toFixed(1) + ') scale(' + r.nose + ',1)');
+        + (deg * 180 / Math.PI).toFixed(1) + ') scale(' + fwd + ',1)');
       // THE SHADOW IS THE CUE, and only over the gap. A dark ellipse on the dirt
       // directly beneath is what says AIRBORNE rather than standing on a rise
       // behind — and it only works while it is ON the dirt, so it shows for the
