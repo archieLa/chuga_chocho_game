@@ -25573,11 +25573,21 @@ def birmingham():
         # They ride the one path on the .cc-ride contract from Bentonville: at
         # twenty pixels tall a one-pixel bob says walking and articulated legs
         # would say nothing.
-        # data-over-road, because the tour route crosses the carriageway and
-        # scenery-back is painted UNDER it — without this they walk beneath the
-        # tarmac and come out the other side.
-        walks = (f' cc-ride" data-legs="tour-path" data-speed="15" data-bob="1.1"'
-                 f' data-over-road="1" data-t="{(px + 70) / 1420.0:.3f}"') if i < 4 else '"'
+        # THEY DO NOT CROSS THE ROAD. The tour route is exported the full width
+        # of the site, but the carriageway is live — cars come up it and stop at
+        # the gate — and walking a party of visitors out into it is not something
+        # this game should show a three-year-old. So each one works a stretch of
+        # the path that stops short of the kerb (583 at this y) and turns round,
+        # and turns again at the left edge of the frame.
+        #
+        # Same range LENGTH for all four and the same data-t, ranges offset by
+        # the spacing: they set off together, turn together and come back
+        # together, which is what makes it read as a tour rather than as four
+        # people who happen to be walking. The horses at Bluegrass hold formation
+        # the same way.
+        walks = (f' cc-ride" data-legs="tour-path@{8 + i * 26}:{484 + i * 26}"'
+                 f' data-speed="15" data-turn="2.2" data-bob="1.1"'
+                 f' data-t="0.433"') if i < 4 else '"'
         back.append(f'<g id="cc-visitor-{i}" class="cc-walker{walks} '
                     f'transform="translate({px},{py})">'
                     f'<rect x="{-0.16 * k:.1f}" y="{-0.78 * k:.1f}" width="{0.32 * k:.1f}" '

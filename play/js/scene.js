@@ -186,24 +186,6 @@
     // Insert, never re-order. Far cars sit behind the far gate; the train and
     // its smoke sit between the far gate and the foreground; near cars sit in
     // front of the foreground but behind the near gate's arm.
-    // ON THE CARRIAGEWAY, BEHIND THE RAILS. Scenery lives in scenery-back, which
-    // is painted UNDER the road — so anything authored there that crosses the
-    // road walks beneath the tarmac. Birmingham's tour party did exactly that.
-    // Anything tagged data-over-road moves into a group of its own between the
-    // road and the track: over the surface, still behind the train and the gates.
-    //
-    // Its own group and NOT cc-cars-far, which looks like the same slot and is
-    // not: leaving a scene empties the two car groups, so a scene's own art
-    // parked in one would be destroyed the first time you walked away and never
-    // come back, because scenes are cached and never rebuilt.
-    const trackLayer = svg.querySelector('#track');
-    const overRoad = svg.querySelectorAll('[data-over-road]');
-    if (overRoad.length && trackLayer) {
-      const g = el('g', { class: 'cc-over-road' });
-      trackLayer.parentNode.insertBefore(g, trackLayer);
-      [].forEach.call(overRoad, e => g.appendChild(e));
-    }
-
     const carsFar = el('g', { class: 'cc-cars-far' });
     const smokeG = el('g', { class: 'cc-smoke' });
     const trainG = el('g', { class: 'cc-train' });
@@ -2867,6 +2849,11 @@
   //                rider faces as it travels is taken from the tangent, so a
   //                chain that runs right to left needs nothing said about it.
   //   data-hide    id of a second drawing of the SAME rider, hidden at mount
+  //   data-turn    seconds to pause at each end, then walk back. Without it a ride
+  //                LOOPS, which is right when both ends are off frame and wrong
+  //                everywhere else: a tour party does not teleport to the start,
+  //                it turns round — and a route whose end is a live carriageway
+  //                must not run off the end of it at all.
   //   data-bob     px of vertical bob, out of phase per mover. At twenty pixels
   //                tall a walker reads as walking from a one-pixel bob and would
   //                not read at all from articulated legs.
@@ -2953,6 +2940,8 @@
         nose: parseFloat(el.getAttribute('data-nose')) || 1,
         held: false,
         bob: parseFloat(el.getAttribute('data-bob')) || 0,
+        turn: el.hasAttribute('data-turn') ? (parseFloat(el.getAttribute('data-turn')) || 0) : null,
+        dir: 1, wait: 0,
         shadow: shadow, shadowLeg: shadowLeg,
         shadowX0: shX.length === 2 && !shX.some(isNaN) ? shX[0] : -1e9,
         shadowX1: shX.length === 2 && !shX.some(isNaN) ? shX[1] : 1e9,
@@ -2984,16 +2973,32 @@
     const green = bikeGreen();
     const secs = dt / 1000;
     list.forEach(r => {
-      let d = r.d + r.speed * secs;
+      let d = r.d;
+      if (r.turn != null) {
+        // THERE AND BACK. It stands a moment at each end and walks back the way
+        // it came, which is the only honest thing to do when an end of the route
+        // is somewhere you can see — or somewhere it must not go.
+        if (r.wait > 0) r.wait -= secs;
+        else {
+          d += r.dir * r.speed * secs;
+          if (d >= r.total) { d = r.total; r.dir = -1; r.wait = r.turn; }
+          else if (d <= 0) { d = 0; r.dir = 1; r.wait = r.turn; }
+        }
+      } else {
+        d += r.speed * secs;
+        if (d >= r.total) d -= r.total;             // both ends are off frame
+      }
       // Held at the line while the light is against them. A rider already past it
       // is never pulled back, and one that wrapped round is caught again next lap.
       r.held = false;
       if (r.holdD != null && !green && r.d <= r.holdD && d > r.holdD) {
         d = r.holdD; r.held = true;
       }
-      if (d >= r.total) d -= r.total;               // both ends are off frame
       r.d = d;
       const at = rideAt(r, d);
+      // Walking the route BACKWARDS means the tangent points backwards too, or
+      // the walker moonwalks home still facing the way it came.
+      if (r.dir < 0) { at.vx = -at.vx; at.vy = -at.vy; }
       // WHICH WAY IT FACES COMES FROM THE TANGENT, and it MIRRORS rather than
       // rotating past vertical. Rotating a right-facing sprite to follow a
       // leftward tangent turns it upside down — which is what the rider did at
@@ -3002,7 +3007,7 @@
       // path that doubles back can never invert anything again.
       // A bob keyed to DISTANCE, not to the clock, so a mover that is standing
       // at a signal stands still instead of bouncing on the spot.
-      const bob = r.bob ? -Math.abs(Math.sin(d * 0.22)) * r.bob : 0;
+      const bob = (r.bob && r.wait <= 0) ? -Math.abs(Math.sin(d * 0.22)) * r.bob : 0;
       const fwd = r.nose * (at.vx >= 0 ? 1 : -1);
       const deg = fwd > 0 ? Math.atan2(at.vy, at.vx) : Math.atan2(-at.vy, -at.vx);
       r.el.setAttribute('transform',
