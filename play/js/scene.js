@@ -2849,7 +2849,10 @@
   //                rider faces as it travels is taken from the tangent, so a
   //                chain that runs right to left needs nothing said about it.
   //   data-hide    id of a second drawing of the SAME rider, hidden at mount
-  //   data-shadow-leg  "leg@x0:x1" — where .cc-ride-shadow tracks the rider. The
+  //   data-bob     px of vertical bob, out of phase per mover. At twenty pixels
+  //                tall a walker reads as walking from a one-pixel bob and would
+  //                not read at all from articulated legs.
+  //   data-shadow-leg  "leg@x0:x1" — where `.cc-ride-shadow` tracks the rider. The  "leg@x0:x1" — where .cc-ride-shadow tracks the rider. The
   //                    range is the GAP, not the leg: a shadow cast on the face
   //                    of the ramp the rider is still climbing says nothing, and
   //                    the one thing that shape is for is saying AIRBORNE.
@@ -2931,6 +2934,7 @@
         speed: parseFloat(el.getAttribute('data-speed')) || 80,
         nose: parseFloat(el.getAttribute('data-nose')) || 1,
         held: false,
+        bob: parseFloat(el.getAttribute('data-bob')) || 0,
         shadow: shadow, shadowLeg: shadowLeg,
         shadowX0: shX.length === 2 && !shX.some(isNaN) ? shX[0] : -1e9,
         shadowX1: shX.length === 2 && !shX.some(isNaN) ? shX[1] : 1e9,
@@ -2978,10 +2982,13 @@
       // the end of the timber wave, and then waited at the red light inverted.
       // Mirroring keeps it the right way up going either way, and it means a
       // path that doubles back can never invert anything again.
+      // A bob keyed to DISTANCE, not to the clock, so a mover that is standing
+      // at a signal stands still instead of bouncing on the spot.
+      const bob = r.bob ? -Math.abs(Math.sin(d * 0.22)) * r.bob : 0;
       const fwd = r.nose * (at.vx >= 0 ? 1 : -1);
       const deg = fwd > 0 ? Math.atan2(at.vy, at.vx) : Math.atan2(-at.vy, -at.vx);
       r.el.setAttribute('transform',
-        'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ') rotate('
+        'translate(' + at.x.toFixed(1) + ',' + (at.y + bob).toFixed(2) + ') rotate('
         + (deg * 180 / Math.PI).toFixed(1) + ') scale(' + fwd + ',1)');
       // THE SHADOW IS THE CUE, and only over the gap. A dark ellipse on the dirt
       // directly beneath is what says AIRBORNE rather than standing on a rise

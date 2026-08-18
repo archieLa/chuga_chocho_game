@@ -382,6 +382,16 @@
       // near right. Every bicycle in the scene is meant to move.
       scenery:{ theme:'ozark-trailtown', features:['timberwave','jumpline','greenway','square'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'birmingham', state:'Alabama', city:'Birmingham',
+      say:{ en:'Birmingham', pl:'Birmingham' },
+      scene:'birmingham',
+      // Viewpoint: the road past Sloss Furnaces, cold and preserved — the stove row, the
+      // comb of stacks, the skip hoist, the casting shed — with Vulcan on Red Mountain
+      // behind and the city beyond. Kudzu everywhere. Drawn as the museum it is, not as a
+      // working furnace: no pour, no heat in the sky.
+      scenery:{ theme:'iron-city', features:['stoves','stacks','skiphoist','kudzu','vulcan'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

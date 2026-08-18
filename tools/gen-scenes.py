@@ -24993,7 +24993,732 @@ def bentonville():
                  }, defs=d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville()
+def birmingham():
+    """BIRMINGHAM, ALABAMA — Sloss Furnaces, cold, with Vulcan on the ridge behind.
+
+    The city exists because iron ore, coal and limestone all sit close together here, and
+    Sloss is what it grew on: two blast furnaces in the middle of town, in blast from 1882
+    to 1971, now a preserved landmark you can walk through. It had its own rail operation
+    and the main line runs straight past it, so the crossing is honest — the railway is
+    there because the furnace is there.
+
+    Drawn COLD, as it actually is. Not a slag pour, no heat in the sky. That was a
+    deliberate choice: drawing it working would be a scene of 1950 rather than of today, and
+    the rule that truth about a place beats a better picture is the one that has kept this
+    set honest. The warmth comes from the material instead — and the reference settles that
+    the stoves are not "rust", they are a strong ORANGE oxide, far more saturated than grey
+    industry, which is most of why this scene has a palette nothing else in the set shares.
+
+    What the reference says is unmistakably Sloss, in order of importance:
+
+      1. **The row of stoves** — four fat cylinders in a line, orange, with hooped bands.
+         Simple, repeated and large: the shape a child can recognise.
+      2. **The comb of stacks** — a dozen slim dark chimneys of different heights standing
+         behind everything. It is the rhythm that says "works" rather than "shed".
+      3. **The inclined skip hoist** — a lattice ramp running up the furnace at forty-odd
+         degrees. The one diagonal in a picture made of verticals.
+      4. **Kudzu.** Alabama's vine swallows whole trees into green lumps with the tree still
+         visible inside. It is in the reference twice, it is in no other scene, and it costs
+         nothing.
+      5. **Vulcan** — the world's largest cast-iron statue, on his tower on Red Mountain
+         since 1904, arm raised. Old enough to be clear on the same reasoning as Mount
+         Rushmore, and drawn from reference rather than traced.
+
+    The road runs past the works and on into the city, under a pipe bridge. It is not
+    truncated, so there is no car park and no T-junction — Glacier and Charleston have each
+    just done one of those."""
+    WORKS_BASE = 448
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def road_span(y):
+        t = (y - HORIZON) / 420.0
+        return 622 - 112 * t, 658 + 112 * t
+
+    def mix_bh(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    RUST, RUST_D, RUST_L = '#b4553a', '#94402b', '#c96e4e'
+    IRON, IRON_L = '#4a423e', '#5f564f'
+    BRICK, BRICK_D = '#96513c', '#7d4030'
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6ba0c8"/><stop offset="0.54" stop-color="#a8c9de"/>
+      <stop offset="1" stop-color="#e4ecec"/>
+    </linearGradient>
+    <linearGradient id="bhfloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8d9656"/><stop offset="0.36" stop-color="#7e8a4c"/>
+      <stop offset="1" stop-color="#6d7842"/>
+    </linearGradient>'''
+
+    # ------------------------------------------------------------------- sky ----
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+    for cx, cy, r_ in ((250, 62, 110), (720, 40, 82), (1090, 78, 124)):
+        sk.append(f'<g fill="#ffffff" opacity="0.72">'
+                  f'<ellipse cx="{cx}" cy="{cy}" rx="{r_}" ry="{r_ * 0.3:.0f}"/>'
+                  f'<ellipse cx="{cx - r_ * 0.5:.0f}" cy="{cy + r_ * 0.12:.0f}" '
+                  f'rx="{r_ * 0.44:.0f}" ry="{r_ * 0.22:.0f}"/>'
+                  f'<ellipse cx="{cx + r_ * 0.44:.0f}" cy="{cy + r_ * 0.06:.0f}" '
+                  f'rx="{r_ * 0.36:.0f}" ry="{r_ * 0.18:.0f}"/></g>')
+
+    # ------------------------------------------------- far: Red Mountain, Vulcan ----
+    far = []
+    for pts, col in (([(-40, 276), (180, 250), (420, 244), (660, 252), (900, 240),
+                       (1120, 250), (1320, 264)], '#8fa285'),
+                     ([(-40, 292), (220, 272), (480, 266), (740, 274), (1000, 264),
+                       (1260, 274), (1320, 280)], '#7b8f72')):
+        far.append('    <polygon points="' + ' '.join(f'{x},{y}' for x, y in pts)
+                   + ' 1320,302 -40,302" fill="' + col + '"/>')
+    rrf = rnd(11)
+    x = -40
+    while x < 1320:
+        far.append(f'<ellipse cx="{x:.0f}" cy="{294 - rrf() * 6:.0f}" '
+                   f'rx="{7 + rrf() * 8:.1f}" ry="{5 + rrf() * 7:.1f}" fill="#6d8264" '
+                   f'opacity="0.85"/>')
+        x += 9 + rrf() * 10
+
+    # VULCAN. A tall square tower with a column of window slots, and on top a grey iron
+    # figure with one arm raised holding a spear point. At this size the read is entirely
+    # the SILHOUETTE — tower, then a small figure whose raised arm breaks the skyline — so
+    # the tower is drawn plain and the arm is drawn long.
+    def vulcan(x, base, h):
+        w = h * 0.16
+        top = base - h
+        o = [f'<g>{shadow(x, base + 2, w * 1.5, 6, 0.16)}']
+        o.append(f'<path d="M{x - w * 1.5:.0f},{base} L{x + w * 1.5:.0f},{base} '
+                 f'L{x + w * 0.62:.0f},{base - h * 0.2:.0f} '
+                 f'L{x - w * 0.62:.0f},{base - h * 0.2:.0f} Z" fill="#9c8f7c"/>')
+        o.append(f'<rect x="{x - w * 0.5:.0f}" y="{top}" width="{w:.0f}" '
+                 f'height="{h * 0.82:.0f}" fill="#b8ab98"/>')
+        o.append(f'<rect x="{x - w * 0.16:.0f}" y="{top + h * 0.1:.0f}" '
+                 f'width="{w * 0.32:.0f}" height="{h * 0.6:.0f}" fill="#8a7f70"/>')
+        o.append(f'<rect x="{x - w * 0.66:.0f}" y="{top - h * 0.03:.0f}" '
+                 f'width="{w * 1.32:.0f}" height="{h * 0.035:.1f}" fill="#a8998a"/>')
+        s = h * 0.006
+        fx, fy = x, top - h * 0.03
+        o.append(f'<g fill="#9aa2a6">'
+                 f'<path d="M{fx - 5 * s:.1f},{fy} L{fx + 6 * s:.1f},{fy} '
+                 f'L{fx + 4 * s:.1f},{fy - 22 * s:.1f} L{fx - 4 * s:.1f},'
+                 f'{fy - 22 * s:.1f} Z"/>'
+                 f'<circle cx="{fx:.1f}" cy="{fy - 27 * s:.1f}" r="{4 * s:.1f}"/>'
+                 f'<path d="M{fx + 2 * s:.1f},{fy - 20 * s:.1f} '
+                 f'L{fx + 15 * s:.1f},{fy - 40 * s:.1f}" stroke="#9aa2a6" '
+                 f'stroke-width="{3 * s:.1f}" stroke-linecap="round" fill="none"/>'
+                 f'<path d="M{fx + 13 * s:.1f},{fy - 36 * s:.1f} '
+                 f'L{fx + 19 * s:.1f},{fy - 47 * s:.1f} L{fx + 22 * s:.1f},'
+                 f'{fy - 41 * s:.1f} Z"/>'
+                 f'<path d="M{fx - 3 * s:.1f},{fy - 18 * s:.1f} '
+                 f'L{fx - 12 * s:.1f},{fy - 8 * s:.1f}" stroke="#9aa2a6" '
+                 f'stroke-width="{3 * s:.1f}" stroke-linecap="round" fill="none"/></g>')
+        return ''.join(o) + '</g>'
+
+    far.append(vulcan(768, 252, 108))
+
+    # ---------------------------------------------------------------- downtown ----
+    # THIRD ATTEMPT, and the reference photographs say the first two were wrong about the
+    # SHAPE OF THE CITY, not just about the buildings in it.
+    #
+    #   1. seven grey rectangles of different heights   -> a bar chart
+    #   2. twelve towers with four crown types          -> still a row of towers on grass
+    #
+    # Birmingham's downtown is not a row of towers. It is a dense LOW MASS of four- to
+    # ten-storey brick and tan blocks packed shoulder to shoulder, with trees in among them,
+    # and only five or six genuinely tall buildings standing up out of it. Version 2 had no
+    # low mass at all, which is why it read as models on a shelf however good the crowns
+    # were: a skyline needs something for the towers to be tall RELATIVE TO.
+    #
+    # And the tall ones differ in their whole BODY, not just their hat. The photographs show
+    # a dark bronze-glass slab, a pale tower with fluted vertical piers, a brick tower with
+    # a notched crown, a green-glass tower with a stepped pyramid on top, and a pale civic
+    # dome down in the mass. Those are five different buildings, not five heights of one.
+    def dt_mix(c):
+        return mix_bh(c, '#a8c9de', 0.2)
+
+    def dt_windows(o, x, y0, y1, w, kind, r):
+        if kind == 'band':                       # curtain wall: continuous glazing bands
+            n = max(3, int((y1 - y0) / 8))
+            for i in range(n):
+                yy = y0 + (y1 - y0) * (i + 0.35) / n
+                o.append(f'<rect x="{x + w * 0.08:.1f}" y="{yy:.1f}" '
+                         f'width="{w * 0.84:.1f}" height="{(y1 - y0) / n * 0.42:.1f}" '
+                         f'fill="#ffffff" opacity="0.16"/>')
+        elif kind == 'flute':                    # vertical piers, no horizontals at all
+            n = max(3, int(w / 6))
+            for i in range(n):
+                xx = x + w * (0.1 + i * 0.8 / max(n - 1, 1))
+                o.append(f'<rect x="{xx:.1f}" y="{y0:.1f}" width="{w * 0.035:.1f}" '
+                         f'height="{y1 - y0:.1f}" fill="#000000" opacity="0.16"/>')
+        else:                                    # punched holes in masonry
+            cols_ = max(2, int(w / 8))
+            rows_ = max(2, int((y1 - y0) / 10))
+            for cc in range(cols_):
+                for rr_ in range(rows_):
+                    if r() < 0.16:
+                        continue
+                    wx = x + w * (0.11 + cc * 0.78 / max(cols_ - 1, 1))
+                    wy = y0 + (y1 - y0) * (0.06 + rr_ * 0.88 / max(rows_ - 1, 1))
+                    o.append(f'<rect x="{wx:.1f}" y="{wy:.1f}" width="{w * 0.055:.1f}" '
+                             f'height="{(y1 - y0) * 0.032:.1f}" fill="#ffffff" '
+                             f'opacity="{0.12 + r() * 0.16:.2f}"/>')
+
+    def dt_tower(x, base, w, h, style, col, seed):
+        r = rnd(seed)
+        c = dt_mix(col)
+        lit = mix_bh(c, '#ffffff', 0.14)
+        shd = mix_bh(c, '#3a4a5c', 0.24)
+        top = base - h
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{top}" width="{w}" height="{h}" fill="{c}"/>')
+        o.append(f'<rect x="{x + w * 0.7:.1f}" y="{top}" width="{w * 0.3:.1f}" '
+                 f'height="{h}" fill="{shd}"/>')
+        if style == 'dark_glass':
+            dt_windows(o, x, top + 6, base, w, 'band', r)
+            o.append(f'<rect x="{x - 1.5:.1f}" y="{top - 3}" width="{w + 3:.1f}" '
+                     f'height="4" fill="{lit}"/>')
+        elif style == 'flute_pale':
+            dt_windows(o, x, top + 8, base, w, 'flute', r)
+            o.append(f'<rect x="{x - 2:.1f}" y="{top - 5}" width="{w + 4:.1f}" '
+                     f'height="6" fill="{lit}"/>')
+            o.append(f'<rect x="{x + w * 0.44:.1f}" y="{top - 20}" width="{w * 0.12:.1f}" '
+                     f'height="16" fill="{shd}"/>')
+        elif style == 'brick_notch':
+            dt_windows(o, x, top + 10, base, w, 'punch', r)
+            for j, iw in enumerate((0.9, 0.62, 0.34)):
+                bw = w * iw
+                o.append(f'<rect x="{x + (w - bw) / 2:.1f}" y="{top - 6 - j * 7}" '
+                         f'width="{bw:.1f}" height="8" fill="{lit if j % 2 else c}"/>')
+        elif style == 'pyramid':
+            dt_windows(o, x, top + 6, base, w, 'band', r)
+            o.append(f'<polygon points="{x - 3:.1f},{top} {x + w + 3:.1f},{top} '
+                     f'{x + w * 0.5:.1f},{top - h * 0.1:.1f}" fill="{lit}"/>')
+            o.append(f'<polygon points="{x + w * 0.5:.1f},{top} {x + w + 3:.1f},{top} '
+                     f'{x + w * 0.5:.1f},{top - h * 0.1:.1f}" fill="{shd}"/>')
+            o.append(f'<rect x="{x + w * 0.46:.1f}" y="{top - h * 0.17:.1f}" '
+                     f'width="{w * 0.08:.1f}" height="{h * 0.075:.1f}" fill="{shd}"/>')
+        else:                                    # 'slab'
+            dt_windows(o, x, top + 8, base, w, 'punch', r)
+            o.append(f'<rect x="{x - 2:.1f}" y="{top - 4}" width="{w + 4:.1f}" '
+                     f'height="5" fill="{lit}"/>')
+            o.append(f'<rect x="{x + w * 0.24:.1f}" y="{top - 12}" '
+                     f'width="{w * 0.4:.1f}" height="9" fill="{shd}"/>')
+        return ''.join(o) + '</g>'
+
+    # 1. THE TALL ONES. Six, each a different building — not one building six times.
+    for tx, tw, th, st, tc, ts in (
+            (868, 30, 116, 'brick_notch', '#9c5442', 3),
+            (924, 38, 178, 'dark_glass', '#3d444c', 5),
+            (972, 26, 138, 'flute_pale', '#d6d2c6', 7),
+            (1016, 44, 202, 'pyramid', '#4f6f6a', 9),
+            (1084, 30, 150, 'brick_notch', '#a8674e', 11),
+            (1136, 24, 172, 'flute_pale', '#cbc7ba', 13),
+            (1194, 40, 126, 'dark_glass', '#454e56', 15),
+            (1258, 32, 158, 'slab', '#c0ad8c', 17)):
+        far.append(dt_tower(tx, 302, tw, th, st, tc, ts))
+
+    # 2. THE MASS. This is the part that was missing entirely. Four- to ten-storey blocks
+    # packed shoulder to shoulder across the whole width, brick and tan and cream, with a
+    # cornice on most of them.
+    rrd = rnd(23)
+    MASS = ['#9c5442', '#8a4a3a', '#a8674e', '#c2ad8e', '#b8a488', '#d8d0bc',
+            '#9aa0a4', '#b07a5e', '#cfc0a2']
+    x = 826
+    while x < 1352:
+        bw = 22 + rrd() * 52
+        bh = 32 + rrd() * 54
+        c = dt_mix(MASS[int(rrd() * len(MASS))])
+        far.append(f'<rect x="{x:.0f}" y="{302 - bh:.0f}" width="{bw:.0f}" '
+                   f'height="{bh:.0f}" fill="{c}"/>')
+        far.append(f'<rect x="{x + bw * 0.72:.0f}" y="{302 - bh:.0f}" '
+                   f'width="{bw * 0.28:.0f}" height="{bh:.0f}" '
+                   f'fill="{mix_bh(c, "#3a4a5c", 0.2)}"/>')
+        if rrd() < 0.7:
+            far.append(f'<rect x="{x - 2:.0f}" y="{302 - bh - 3:.0f}" '
+                       f'width="{bw + 4:.0f}" height="4" '
+                       f'fill="{mix_bh(c, "#ffffff", 0.22)}"/>')
+        rr2 = rnd(int(x))
+        o2 = []
+        dt_windows(o2, x, 302 - bh + 6, 300, bw, 'punch' if rrd() < 0.7 else 'band', rr2)
+        far.append(''.join(o2))
+        x += bw + (0 if rrd() < 0.7 else 3 + rrd() * 6)
+
+    # the civic dome down in the mass — every southern downtown has one and it is the one
+    # curve in a picture made entirely of boxes
+    far.append(f'<g><rect x="1044" y="272" width="46" height="30" fill="{dt_mix("#d8d0bc")}"/>'
+               f'<path d="M1044,272 A23,20 0 0 1 1090,272 Z" fill="{dt_mix("#b8b0a0")}"/>'
+               f'<rect x="1064" y="238" width="6" height="16" fill="{dt_mix("#b8b0a0")}"/>'
+               f'<circle cx="1067" cy="236" r="4" fill="{dt_mix("#c8c0b0")}"/></g>')
+
+    # 3. TREES IN AMONG IT. Birmingham is a green city and the photographs are full of
+    # canopy between the blocks; without it the mass reads as a wall.
+    rrt = rnd(37)
+    x = 820
+    while x < 1350:
+        th_ = 10 + rrt() * 12
+        far.append(f'<ellipse cx="{x:.0f}" cy="{302 - th_ * 0.5:.0f}" '
+                   f'rx="{th_ * 0.8:.1f}" ry="{th_ * 0.62:.1f}" '
+                   f'fill="{dt_mix("#5f7d52")}"/>')
+        x += 14 + rrt() * 26
+
+    # ---------------------------------------------------------------- ground ----
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#bhfloor)"/>']
+    gr.append(f'<polygon points="-40,{WORKS_BASE + 6} 1320,{WORKS_BASE + 6} '
+              f'1320,384 -40,384" fill="#9c9078" opacity="0.55"/>')
+    gr.append('<rect x="0" y="516" width="1280" height="24" fill="#948a70"/>')
+    gr.append('<path d="M0,600 Q 340,578 640,596 Q 940,614 1280,590 L1280,720 L0,720 Z" '
+              'fill="#67723e" opacity="0.5"/>')
+
+    back = ['    ']
+
+    # ================================================================ THE WORKS ===
+    def stack(x, base, h, w, col=IRON):
+        # a slim chimney, tapering, with a lip at the top. Their VARIED HEIGHTS are the
+        # point — a row of equal ones reads as a fence.
+        tw = w * 0.82
+        return (f'<g><polygon points="{x - w / 2:.1f},{base} {x + w / 2:.1f},{base} '
+                f'{x + tw / 2:.1f},{base - h:.1f} {x - tw / 2:.1f},{base - h:.1f}" '
+                f'fill="{col}"/>'
+                f'<rect x="{x - tw * 0.62:.1f}" y="{base - h - w * 0.22:.1f}" '
+                f'width="{tw * 1.24:.1f}" height="{w * 0.3:.1f}" fill="{IRON_L}"/>'
+                f'<polygon points="{x:.1f},{base} {x + w / 2:.1f},{base} '
+                f'{x + tw / 2:.1f},{base - h:.1f} {x:.1f},{base - h:.1f}" fill="#000" '
+                f'opacity="0.16"/></g>')
+
+    # the comb of stacks, furthest back
+    rrk = rnd(41)
+    for i in range(13):
+        sx = 92 + i * 40 + rrk() * 10
+        sh = 132 + rrk() * 108
+        back.append(stack(sx, 430, sh, 13 + rrk() * 6))
+
+    def stove(x, base, h, w):
+        # A hot-blast stove: a fat orange cylinder with hooped bands and a domed top. Four
+        # of these in a row are the single most recognisable thing at Sloss.
+        top = base - h
+        o = ['<g>']
+        o.append(f'{shadow(x, base + 2, w * 0.6, 6, 0.18)}')
+        o.append(f'<rect x="{x - w / 2:.1f}" y="{top}" width="{w:.1f}" '
+                 f'height="{h:.1f}" fill="{RUST}"/>')
+        o.append(f'<rect x="{x - w / 2:.1f}" y="{top}" width="{w * 0.22:.1f}" '
+                 f'height="{h:.1f}" fill="{RUST_L}" opacity="0.55"/>')
+        o.append(f'<rect x="{x + w * 0.24:.1f}" y="{top}" width="{w * 0.26:.1f}" '
+                 f'height="{h:.1f}" fill="{RUST_D}" opacity="0.5"/>')
+        o.append(f'<path d="M{x - w / 2:.1f},{top} Q{x:.1f},{top - w * 0.42:.1f} '
+                 f'{x + w / 2:.1f},{top} Z" fill="{RUST_D}"/>')
+        for j in range(6):
+            by = top + h * (0.1 + j * 0.16)
+            o.append(f'<rect x="{x - w * 0.53:.1f}" y="{by:.1f}" width="{w * 1.06:.1f}" '
+                     f'height="{h * 0.018:.1f}" fill="{RUST_D}"/>')
+        o.append(f'<rect x="{x - w * 0.58:.1f}" y="{top + h * 0.3:.1f}" '
+                 f'width="{w * 1.16:.1f}" height="{h * 0.022:.1f}" fill="{IRON_L}"/>')
+        o.append(f'<rect x="{x - w * 0.1:.1f}" y="{base - h * 0.16:.1f}" '
+                 f'width="{w * 0.2:.1f}" height="{h * 0.16:.1f}" fill="{RUST_D}"/>')
+        return ''.join(o) + '</g>'
+
+    for i in range(4):
+        back.append(stove(96 + i * 74, WORKS_BASE - 14, 168, 56))
+    # the big hot-blast main running along the front of the stove row
+    back.append(f'<rect x="40" y="{WORKS_BASE - 96}" width="330" height="13" rx="6" '
+                f'fill="{RUST_D}"/>')
+    for px in range(56, 370, 40):
+        back.append(f'<rect x="{px}" y="{WORKS_BASE - 84}" width="7" height="70" '
+                    f'fill="{IRON}"/>')
+
+    def blast_furnace(x, base, h):
+        w = h * 0.34
+        top = base - h
+        o = [f'<g>{shadow(x, base + 2, w * 0.7, 7, 0.2)}']
+        # the bosh: a cone widening upward into the stack
+        o.append(f'<path d="M{x - w * 0.3:.1f},{base} L{x + w * 0.3:.1f},{base} '
+                 f'L{x + w * 0.5:.1f},{base - h * 0.28:.1f} '
+                 f'L{x - w * 0.5:.1f},{base - h * 0.28:.1f} Z" fill="{RUST_D}"/>')
+        o.append(f'<rect x="{x - w * 0.5:.1f}" y="{top + h * 0.16:.1f}" '
+                 f'width="{w:.1f}" height="{h * 0.56:.1f}" fill="{RUST}"/>')
+        o.append(f'<rect x="{x + w * 0.18:.1f}" y="{top + h * 0.16:.1f}" '
+                 f'width="{w * 0.32:.1f}" height="{h * 0.56:.1f}" fill="{RUST_D}" '
+                 f'opacity="0.5"/>')
+        # the bell top and the downcomer curving away
+        o.append(f'<path d="M{x - w * 0.5:.1f},{top + h * 0.16:.1f} '
+                 f'L{x + w * 0.5:.1f},{top + h * 0.16:.1f} '
+                 f'L{x + w * 0.3:.1f},{top:.1f} L{x - w * 0.3:.1f},{top:.1f} Z" '
+                 f'fill="{IRON}"/>')
+        o.append(f'<rect x="{x - w * 0.12:.1f}" y="{top - h * 0.1:.1f}" '
+                 f'width="{w * 0.24:.1f}" height="{h * 0.1:.1f}" fill="{IRON_L}"/>')
+        o.append(f'<path d="M{x + w * 0.26:.1f},{top + h * 0.06:.1f} '
+                 f'C{x + w * 1.1:.1f},{top + h * 0.02:.1f} {x + w * 1.2:.1f},'
+                 f'{top + h * 0.5:.1f} {x + w * 1.1:.1f},{base - h * 0.05:.1f}" '
+                 f'stroke="{RUST_D}" stroke-width="{w * 0.17:.1f}" fill="none"/>')
+        for fy in (0.28, 0.48, 0.66):
+            o.append(f'<rect x="{x - w * 0.66:.1f}" y="{top + h * fy:.1f}" '
+                     f'width="{w * 1.32:.1f}" height="{h * 0.022:.1f}" fill="{IRON_L}"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(blast_furnace(430, WORKS_BASE - 10, 214))
+
+    # THE SKIP HOIST — the one diagonal in a picture made of verticals, and the thing that
+    # most says "this machine was fed from below".
+    def skip_hoist(x0, y0, x1, y1, w=15):
+        import math
+        dx, dy = x1 - x0, y1 - y0
+        L = math.hypot(dx, dy)
+        nx, ny = -dy / L * w, dx / L * w
+        o = ['<g>']
+        o.append(f'<polygon points="{x0 + nx:.1f},{y0 + ny:.1f} {x1 + nx:.1f},'
+                 f'{y1 + ny:.1f} {x1 - nx:.1f},{y1 - ny:.1f} {x0 - nx:.1f},'
+                 f'{y0 - ny:.1f}" fill="{IRON}"/>')
+        n = 12
+        for i in range(n):
+            t0, t1 = i / n, (i + 0.5) / n
+            ax, ay = x0 + dx * t0, y0 + dy * t0
+            bx_, by_ = x0 + dx * t1, y0 + dy * t1
+            o.append(f'<path d="M{ax + nx:.1f},{ay + ny:.1f} L{bx_ - nx:.1f},'
+                     f'{by_ - ny:.1f}" stroke="{IRON_L}" stroke-width="2.4" '
+                     f'fill="none"/>')
+        # THE RAIL, exported. A cold furnace leaves its skip parked at the foot, which is
+        # how it is authored — but this is the only machine in the picture and if the engine
+        # ever wants one moving part, this is the one worth having. Sloss runs its site as a
+        # working metal-arts foundry, so a skip going up is not a lie about the place the
+        # way a slag pour would be.
+        o.append(f'<path id="skip-path" class="cc-path" d="M{x0 + dx * 0.1:.0f},'
+                 f'{y0 + dy * 0.1:.0f} L{x0 + dx * 0.92:.0f},{y0 + dy * 0.92:.0f}" '
+                 f'fill="none" stroke="none"/>')
+        # the skip car, parked at the foot where a cold furnace leaves it
+        cx_, cy_ = x0 + dx * 0.12, y0 + dy * 0.12
+        o.append(f'<g id="cc-skip" class="cc-skip" transform="translate({cx_:.0f},'
+                 f'{cy_:.0f})"><rect x="-13" y="-15" width="26" height="17" rx="2" '
+                 f'fill="{RUST_D}"/><rect x="-13" y="-15" width="26" height="4" '
+                 f'fill="{RUST_L}"/></g>')
+        return ''.join(o) + '</g>'
+
+    back.append(skip_hoist(322, WORKS_BASE - 6, 424, WORKS_BASE - 176))
+
+    def cast_shed(x0, x1, base, h):
+        # A SHED IS A VOLUME. The first version drew the brick base and a thin curved band
+        # for the roof with nothing in between, so it read as a hoop floating over the
+        # stoves. The mass under the roof has to be filled before any of the detail on it
+        # means anything.
+        w = x1 - x0
+        cx_ = (x0 + x1) / 2
+
+        def roof_y(px):
+            t = (px - x0 + 6) / (w + 12)
+            return base - h * (0.52 + 0.72 * (4 * t * (1 - t)))
+
+        o = ['<g>']
+        pts = [(x0 - 6 + (w + 12) * (i / 26.0)) for i in range(27)]
+        o.append(f'<path d="M{x0 - 6},{base} '
+                 + ' '.join(f'L{px:.0f},{roof_y(px):.0f}' for px in pts)
+                 + f' L{x1 + 6},{base} Z" fill="#6e5c4a"/>')
+        o.append(f'<rect x="{x0}" y="{base - h * 0.5:.0f}" width="{w}" '
+                 f'height="{h * 0.5:.0f}" fill="{BRICK_D}"/>')
+        n = max(3, int(w / 46))
+        for i in range(n):
+            ax = x0 + w * (i + 0.5) / n
+            aw = w / n * 0.56
+            o.append(f'<path d="M{ax - aw / 2:.1f},{base} '
+                     f'L{ax - aw / 2:.1f},{base - h * 0.3:.0f} '
+                     f'Q{ax:.1f},{base - h * 0.46:.0f} {ax + aw / 2:.1f},'
+                     f'{base - h * 0.3:.0f} L{ax + aw / 2:.1f},{base} Z" '
+                     f'fill="#2f2a26"/>')
+        # the corrugated roof: a lit upper half, a shaded lower half, and ribs
+        o.append(f'<path d="M{x0 - 6},{roof_y(x0 - 6):.0f} '
+                 + ' '.join(f'L{px:.0f},{roof_y(px):.0f}' for px in pts)
+                 + ' ' + ' '.join(f'L{px:.0f},{roof_y(px) + 13:.0f}'
+                                  for px in reversed(pts)) + ' Z" fill="#8a7460"/>')
+        for px in pts[::1]:
+            o.append(f'<rect x="{px:.0f}" y="{roof_y(px):.0f}" width="2.6" height="13" '
+                     f'fill="#5e4f40" opacity="0.55"/>')
+        o.append(f'<path d="M{x0 - 6},{roof_y(x0 - 6):.0f} '
+                 + ' '.join(f'L{px:.0f},{roof_y(px):.0f}' for px in pts)
+                 + f'" stroke="#a89078" stroke-width="3" fill="none"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(cast_shed(-70, 300, WORKS_BASE + 2, 78))
+
+    # ------------------------------------------------ right of the road: the yard ---
+    def water_tower(x, base, h):
+        # Sloss's tower is a PALE spheroid on an open steel frame — nothing like Glacier's
+        # red railroad tank, and the difference is worth keeping.
+        tw = h * 0.44
+        ty = base - h
+        o = [f'<g>{shadow(x, base + 2, tw * 0.6, 6, 0.16)}']
+        for lx in (-tw * 0.42, -tw * 0.15, tw * 0.15, tw * 0.42):
+            o.append(f'<rect x="{x + lx - 2.2:.1f}" y="{ty + tw * 0.9:.0f}" width="4.4" '
+                     f'height="{base - ty - tw * 0.9:.0f}" fill="{IRON_L}"/>')
+        for j in range(3):
+            yy = ty + tw * 0.9 + (base - ty - tw * 0.9) * (j + 0.5) / 3
+            o.append(f'<path d="M{x - tw * 0.42:.0f},{yy - 12:.0f} '
+                     f'L{x + tw * 0.42:.0f},{yy + 12:.0f} M{x + tw * 0.42:.0f},'
+                     f'{yy - 12:.0f} L{x - tw * 0.42:.0f},{yy + 12:.0f}" '
+                     f'stroke="{IRON_L}" stroke-width="2.2" fill="none"/>')
+        o.append(f'<ellipse cx="{x}" cy="{ty + tw * 0.46:.0f}" rx="{tw * 0.5:.0f}" '
+                 f'ry="{tw * 0.44:.0f}" fill="#dcdcd4"/>')
+        o.append(f'<path d="M{x - tw * 0.5:.0f},{ty + tw * 0.46:.0f} '
+                 f'A{tw * 0.5:.0f},{tw * 0.44:.0f} 0 0 1 {x + tw * 0.5:.0f},'
+                 f'{ty + tw * 0.46:.0f} Z" fill="#efefe8"/>')
+        o.append(f'<rect x="{x - tw * 0.5:.0f}" y="{ty + tw * 0.42:.0f}" '
+                 f'width="{tw:.0f}" height="3" fill="#b8b8b0"/>')
+        o.append(f'<rect x="{x - 3:.0f}" y="{ty:.0f}" width="6" height="{tw * 0.1:.0f}" '
+                 f'fill="{IRON_L}"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(water_tower(792, WORKS_BASE - 8, 138))
+
+    def brick_shed(x0, x1, base, h, roof='#6b5a48'):
+        w = x1 - x0
+        o = [f'<g>{shadow((x0 + x1) / 2, base + 2, w * 0.5, 6, 0.15)}']
+        o.append(f'<rect x="{x0}" y="{base - h}" width="{w}" height="{h}" fill="{BRICK}"/>')
+        o.append(f'<rect x="{x0}" y="{base - h}" width="{w * 0.3:.0f}" height="{h}" '
+                 f'fill="{BRICK_D}" opacity="0.45"/>')
+        o.append(f'<polygon points="{x0 - 6},{base - h} {x1 + 6},{base - h} '
+                 f'{x1 + 6},{base - h - 9} {x0 - 6},{base - h - 9}" fill="{roof}"/>')
+        for i in range(max(2, int(w / 32))):
+            wx = x0 + w * (0.12 + i * 0.76 / max(int(w / 32) - 1, 1)) - w * 0.05
+            o.append(f'<rect x="{wx:.0f}" y="{base - h * 0.72:.0f}" '
+                     f'width="{w * 0.1:.0f}" height="{h * 0.34:.0f}" fill="#3a4650"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(brick_shed(846, 1010, WORKS_BASE - 2, 74))
+    back.append(brick_shed(1024, 1200, WORKS_BASE + 2, 96))
+    back.append(brick_shed(1212, 1350, WORKS_BASE + 6, 122))
+    for i in range(6):
+        back.append(stack(870 + i * 52, WORKS_BASE - 70, 60 + rrk() * 54,
+                          9 + rrk() * 4))
+
+    # ------------------------------------------------------------------- kudzu ------
+    # Alabama's vine. It swallows whole trees into lumpy green mounds with the tree still
+    # readable inside, and nothing else in the set has anything like it. Drawn as a stack of
+    # overlapping blobs over a trunk, with a few leaf-strings hanging off the bottom edge.
+    def kudzu(x, base, w, h, seed):
+        # Alabama's vine, and nothing else in the set has it. The first version was a heap
+        # of round blobs — broccoli. What actually identifies kudzu is that you can still
+        # see the SHAPE OF THE THING IT ATE inside the green: a trunk, a couple of branches
+        # standing proud, and long strands hanging off the lower edge. So the tree is drawn
+        # first and then only mostly covered.
+        r = rnd(seed)
+        o = ['<g>']
+        o.append(f'{shadow(x, base + 2, w * 0.5, h * 0.07, 0.16)}')
+        # the swallowed tree
+        o.append(f'<path d="M{x - w * 0.05:.0f},{base} L{x + w * 0.05:.0f},{base} '
+                 f'L{x + w * 0.025:.0f},{base - h * 0.72:.0f} '
+                 f'L{x - w * 0.025:.0f},{base - h * 0.72:.0f} Z" fill="#5a4a38"/>')
+        for bx_, by_ in ((-0.26, 0.9), (0.3, 1.0), (-0.12, 1.06)):
+            o.append(f'<path d="M{x:.0f},{base - h * 0.6:.0f} '
+                     f'Q{x + w * bx_ * 0.5:.0f},{base - h * by_ * 0.8:.0f} '
+                     f'{x + w * bx_:.0f},{base - h * by_:.0f}" stroke="#5a4a38" '
+                     f'stroke-width="{max(2.0, w * 0.018):.1f}" fill="none" '
+                     f'stroke-linecap="round"/>')
+        # the vine over it: overlapping lobes, wider at the bottom, ragged at the top
+        for i in range(16):
+            t = i / 15.0
+            bx_ = x + (r() - 0.5) * w * (0.5 + 0.6 * (1 - t))
+            by_ = base - h * (0.12 + t * 0.86 + (r() - 0.5) * 0.12)
+            rx = w * (0.13 + r() * 0.16) * (1.0 - 0.3 * t)
+            ry = rx * (0.6 + r() * 0.34)
+            c = ('#4e8f45', '#5da252', '#3f7a3a', '#68ab5c', '#457f3e')[int(r() * 5)]
+            o.append(f'<ellipse cx="{bx_:.0f}" cy="{by_:.0f}" rx="{rx:.0f}" '
+                     f'ry="{ry:.0f}" fill="{c}"/>')
+        # the curtain of strands along the lower edge — the giveaway
+        for i in range(11):
+            sx = x + (r() - 0.5) * w * 0.92
+            sy = base - h * (0.1 + r() * 0.24)
+            ln = h * (0.1 + r() * 0.2)
+            o.append(f'<path d="M{sx:.0f},{sy:.0f} q{(r() - 0.5) * 10:.0f},'
+                     f'{ln * 0.5:.0f} {(r() - 0.5) * 8:.0f},{ln:.0f}" '
+                     f'stroke="{"#4e8f45" if r() < 0.5 else "#5da252"}" '
+                     f'stroke-width="{max(2.4, w * 0.022):.1f}" fill="none" '
+                     f'stroke-linecap="round"/>')
+        return ''.join(o) + '</g>'
+
+    for kx, kb, kw, kh, ks in ((-30, 444, 150, 96, 3), (556, 440, 96, 62, 5),
+                               (700, 438, 88, 56, 7), (1290, 452, 130, 88, 9)):
+        back.append(kudzu(kx, kb, kw, kh, ks))
+
+    # a chain-link fence along the front of the works, which is how you always see it
+    back.append(f'<rect x="-40" y="{WORKS_BASE + 2}" width="1360" height="2.6" '
+                f'fill="#9aa0a4" opacity="0.8"/>')
+    for fx in range(-40, 1330, 54):
+        back.append(f'<rect x="{fx}" y="{WORKS_BASE - 22}" width="3" height="26" '
+                    f'fill="#8a9094" opacity="0.85"/>')
+    back.append(f'<rect x="-40" y="{WORKS_BASE - 22}" width="1360" height="2.4" '
+                f'fill="#9aa0a4" opacity="0.7"/>')
+
+    # visitors on the site — it is a museum, and people are what say so
+    # THE TOUR. Visitors are what say "museum" rather than "ruin", and with the furnace
+    # cold they are also most of what moves here. The route runs the full width of the site
+    # in front of the fence line, so a group can be walked right across the picture.
+    back.append(f'<path id="tour-path" class="cc-path" d="M-70,{WORKS_BASE - 2} '
+                f'C 300,{WORKS_BASE - 8} 700,{WORKS_BASE - 6} 1350,{WORKS_BASE - 12}" '
+                f'fill="none" stroke="none"/>')
+    for i, (px, pc) in enumerate([(214, '#c8503f'), (240, '#3f6a8c'), (266, '#e8d24a'),
+                                  (296, '#7a5ea8'), (500, '#d8b03c'), (534, '#4a8f5c'),
+                                  (884, '#c86a3f'), (1042, '#3f7fb0')]):
+        py = WORKS_BASE - 6
+        k = ppm(py) * 0.9
+        # THE PARTY OF FOUR WALKS; the pair and the two singles stand. A site
+        # where everybody is moving looks evacuated, and a tour is a tour because
+        # it keeps together — same range and speed for all four, ranges offset by
+        # the spacing, which is how the horses at Bluegrass hold formation too.
+        # They ride the one path on the .cc-ride contract from Bentonville: at
+        # twenty pixels tall a one-pixel bob says walking and articulated legs
+        # would say nothing.
+        walks = (f' cc-ride" data-legs="tour-path" data-speed="15" data-bob="1.1"'
+                 f' data-t="{(px + 70) / 1420.0:.3f}"') if i < 4 else '"'
+        back.append(f'<g id="cc-visitor-{i}" class="cc-walker{walks} '
+                    f'transform="translate({px},{py})">'
+                    f'<rect x="{-0.16 * k:.1f}" y="{-0.78 * k:.1f}" width="{0.32 * k:.1f}" '
+                    f'height="{0.78 * k:.1f}" fill="#3f4a52"/>'
+                    f'<path d="M{-0.3 * k:.1f},{-0.78 * k:.1f} L{0.3 * k:.1f},'
+                    f'{-0.78 * k:.1f} L{0.24 * k:.1f},{-1.42 * k:.1f} L{-0.24 * k:.1f},'
+                    f'{-1.42 * k:.1f} Z" fill="{pc}"/>'
+                    f'<circle cx="0" cy="{-1.58 * k:.1f}" r="{0.18 * k:.1f}" '
+                    f'fill="#e8c49a"/></g>')
+
+    # ============================================================== NEAR FIELD =====
+    fr = ['    ']
+    # ------------------------------------------------------------ the pipe bridge ---
+    # IT GOES OVER THE ROAD, so it must be drawn AFTER the road — which means
+    # `scenery-front`, not `scenery-back`. Built in `scenery-back` the carriageway was
+    # painted straight over it and the bridge appeared to pass BEHIND the road it was
+    # supposed to span. The same layer-order mistake as Charleston's lane markings.
+    #
+    # It is safe in `scenery-front` even though that layer paints after the train: the
+    # bridge lives at y 324-361 and the train occupies y 450-516, so they can never overlap,
+    # and the far gate's crossbucks top out at y=372.
+    #
+    # A works bridges its own road with pipework rather than with a truss, which is true and
+    # — after Detroit, Bailey Yard and Charleston — deliberately NOT another full-width
+    # horizontal steel span. It reaches just far enough to cross the carriageway.
+    def pipe_bridge():
+        def pipe_tower(x, base, top):
+            o = ['<g>']
+            o.append(f'<polygon points="{x - 16:.0f},{base} {x + 16:.0f},{base} '
+                     f'{x + 10:.0f},{top} {x - 10:.0f},{top}" fill="{IRON}"/>')
+            for i in range(5):
+                t0, t1 = i / 5, (i + 1) / 5
+                y0, y1 = base + (top - base) * t0, base + (top - base) * t1
+                w0, w1 = 16 - 6 * t0, 16 - 6 * t1
+                o.append(f'<path d="M{x - w0:.0f},{y0:.0f} L{x + w1:.0f},{y1:.0f} '
+                         f'M{x + w0:.0f},{y0:.0f} L{x - w1:.0f},{y1:.0f}" '
+                         f'stroke="{IRON_L}" stroke-width="2.2" fill="none"/>')
+            return ''.join(o) + '</g>'
+
+        o = [pipe_tower(492, 430, 348), pipe_tower(808, 428, 346)]
+        o.append(f'<rect x="486" y="352" width="328" height="9" fill="{IRON}"/>')
+        for py, pw, col in ((342, 7, RUST_D), (332, 9, '#6f6a5c'), (324, 6, RUST)):
+            o.append(f'<rect x="486" y="{py}" width="328" height="{pw}" rx="{pw / 2}" '
+                     f'fill="{col}"/>')
+        for px in range(496, 812, 34):
+            o.append(f'<rect x="{px}" y="324" width="3.4" height="30" fill="{IRON_L}"/>')
+        o.append('<rect x="486" y="361" width="328" height="3" fill="#000" opacity="0.2"/>')
+        return ''.join(o)
+
+    fr.append(pipe_bridge())
+
+    # THE NEAR FIELD IS A CITY, NOT A VERGE. Two brick bars laid across the grass read as
+    # red stripes floating in a field. What the reference actually shows either side of
+    # these streets is the flank of a brick warehouse, chain-link, weeds and wires — so the
+    # left edge gets a wall fragment with kudzu already climbing it, and the right gets the
+    # fence and the pole.
+    fr.append(f'<g>{shadow(60, 706, 120, 10, 0.18)}'
+              f'<rect x="-40" y="512" width="196" height="200" fill="{BRICK}"/>'
+              f'<rect x="-40" y="512" width="196" height="14" fill="#a8a294"/>'
+              f'<rect x="-40" y="700" width="196" height="12" fill="#7d6f5e"/>')
+    rrw = rnd(59)
+    for by in range(528, 700, 13):
+        off = 0 if (by // 13) % 2 else 9
+        for bx in range(-40 + off, 156, 26):
+            fr.append(f'<rect x="{bx}" y="{by}" width="23" height="10" '
+                      f'fill="{BRICK_D}" opacity="{0.22 + rrw() * 0.28:.2f}"/>')
+    for wx, wy in ((-10, 556), (74, 556), (-10, 632), (74, 632)):
+        fr.append(f'<rect x="{wx}" y="{wy}" width="56" height="52" fill="#33404a"/>'
+                  f'<rect x="{wx - 4}" y="{wy - 6}" width="64" height="8" '
+                  f'fill="#a8a294"/>')
+    fr.append('</g>')
+    fr.append(kudzu(178, 704, 136, 148, 21))
+
+    # chain-link along the right shoulder
+    fr.append(f'<g opacity="0.85"><rect x="784" y="596" width="560" height="3" '
+              f'fill="#9aa0a4"/><rect x="784" y="656" width="560" height="3" '
+              f'fill="#9aa0a4"/>')
+    for fx in range(786, 1340, 46):
+        fr.append(f'<rect x="{fx}" y="590" width="4" height="72" fill="#8a9094"/>')
+    fr.append('</g>')
+
+    fr.append('<path d="M232,700 C 300,690 380,684 470,682 L500,712 '
+              'C 400,714 300,720 236,720 Z" fill="#a89e88" opacity="0.7"/>')
+    fr.append('<path d="M796,676 C 900,672 1020,674 1120,682 L1120,700 '
+              'C 1020,692 900,690 800,694 Z" fill="#a89e88" opacity="0.6"/>')
+    for cx_, cy_ in ((300, 646), (346, 654), (1176, 664), (1218, 672)):
+        fr.append(f'<g>{shadow(cx_, cy_ + 2, 17, 4, 0.2)}'
+                  f'<rect x="{cx_ - 17}" y="{cy_ - 15}" width="34" height="15" rx="2" '
+                  f'fill="#b0aa9c"/><rect x="{cx_ - 17}" y="{cy_ - 15}" width="34" '
+                  f'height="4" fill="#c6c0b2"/></g>')
+    rrg = rnd(97)
+    for i in range(280):
+        bx = rrg() * 1400 - 60
+        by = 540 + rrg() * 186
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 24 < bx < hi + 24 or 580 < by < 616:
+            continue
+        s = 0.8 + rrg() * 1.2
+        c = ('#67723e', '#7e8a4c', '#5c6a3a', '#8d9656')[int(rrg() * 4)]
+        fr.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.5 * s:.1f},{by - 7 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 0.3 * s:.1f},{by - 8.6 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 2 * s:.1f},{by - 6.6 * s:.1f}" '
+                  f'stroke="{c}" stroke-width="{1.15 * s:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="0.85"/>')
+    # a utility pole, because every photograph of this city has wires in it
+    fr.append(f'<g><rect x="884" y="524" width="9" height="150" fill="#6b5a44"/>'
+              f'<rect x="856" y="536" width="66" height="5" fill="#6b5a44"/>'
+              f'<rect x="862" y="556" width="54" height="5" fill="#6b5a44"/>'
+              f'<g fill="#3f4a52"><circle cx="862" cy="533" r="3.4"/>'
+              f'<circle cx="888" cy="533" r="3.4"/><circle cx="914" cy="533" r="3.4"/>'
+              f'<circle cx="868" cy="553" r="3"/><circle cx="908" cy="553" r="3"/></g></g>')
+
+    fg = ['    ']
+    rrf2 = rnd(131)
+    for i in range(120):
+        bx = rrf2() * 1400 - 60
+        by = 650 + rrf2() * 84
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 30 < bx < hi + 30:
+            continue
+        s = 1.3 + rrf2() * 1.1
+        c = ('#5c6a3a', '#67723e', '#7e8a4c')[int(rrf2() * 3)]
+        fg.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.6 * s:.1f},{by - 7.4 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 0.4 * s:.1f},{by - 9 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 2.1 * s:.1f},{by - 7 * s:.1f}" '
+                  f'stroke="{c}" stroke-width="{1.25 * s:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="0.9"/>')
+
+    return scene('birmingham', 'Birmingham, Alabama',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fg),
+                     'roadkw': dict(surface='#5a5b60', surface2='#48494e',
+                                    shoulder='#a8a294', dash='#ffe066'),
+                     'trackkw': dict(ballast='#9a8f78', ballast_hi='#aa9f86',
+                                     tie='#54412f', rail='#cfd4d9'),
+                 }, defs=d)
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')
