@@ -2400,7 +2400,15 @@
   // machines nodding together read as one machine copied three times, which is
   // exactly what they are.
   // =======================================================================
-  const PUMP = { swing: 9, pitman: -0.55, secs: 4.6, spread: 0.9 };
+  //
+  // THE SIGN ON THE BEAM IS NOT ARBITRARY. In the art the counterweight sits at
+  // the crank's local -x and the crank pin at +x, so the weight is HIGHEST when
+  // the crank is at 90 degrees. Drive the beam with +A·sin and the horsehead is
+  // also up at 90 — weight and head rising together, which is what a real one
+  // must never do. The counterweight exists to fall while the head lifts the rod
+  // string, so it is HIGH when the head is DOWN and the rods are at the bottom of
+  // the stroke, about to be pulled up. Hence the minus.
+  const PUMP = { swing: -9, pitman: -0.55, secs: 4.6, spread: 0.9 };
 
   function buildPumpjacks(svg) {
     const out = [];
@@ -2413,11 +2421,14 @@
       const beam = node.querySelector('.cc-pj-beam');
       const pitman = node.querySelector('.cc-pj-pitman');
       if (!crank || !beam) { console.warn('cc-pumpjack is missing its crank or beam'); return; }
+      // Each well its own rate, and its own starting angle taken from the pose
+      // the art drew it in rather than from a counter.
+      const a0 = /rotate\(\s*(-?[\d.]+)/.exec(crank.getAttribute('transform') || '');
       out.push({
         crank: crank, beam: beam, pitman: pitman,
         ct: at(crank), bt: at(beam), pt: pitman ? at(pitman) : '',
-        // Each well its own rate and its own starting angle.
-        secs: PUMP.secs * (1 + (i % 3) * 0.17), phase: i * PUMP.spread,
+        secs: PUMP.secs * (1 + (i % 3) * 0.17),
+        phase: (a0 ? +a0[1] : i * 90) / 360,
       });
     });
     return out;
