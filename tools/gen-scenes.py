@@ -5891,11 +5891,58 @@ def boston():
               '<rect x="-1.2" y="-19" width="2.4" height="11" fill="#6f6a62"/>'
               '<path d="M-24,7 C -10,11 10,11 24,7" stroke="#8fb8cf" stroke-width="2" fill="none" opacity="0.7"/></g>')
 
+    # ------------------------------------------ THE GREEN LINE STOP ----
+    # Boston runs a streetcar and the Esplanade is full of people, so this is the
+    # scene that should have a stop — the maintainer's son is right about that.
+    #
+    # WHERE IT CAN GO IS DECIDED BY THE BUTTONS, not by the art. CLOSE and OPEN
+    # cover x 409-589 and 691-871 from y 518 down, which is the entire near side
+    # of the track except the two ends. And it has to be the near side: on the far
+    # promenade at y=438 a waiting passenger stands exactly where a stopped coach's
+    # body is, so the train would hide the very thing the stop exists to show.
+    #
+    # That leaves the left end, and the elm and the gaslamp were standing in it —
+    # a tree trunk crossing a platform deck reads as a tree growing out of it. Both
+    # move right rather than going away.
+    def platform(x0, x1, y, h=30):
+        return (f'<g id="bos-platform">'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="{h}" rx="3" fill="#b9b3a4"/>'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="5" rx="2" fill="#d2ccbc"/>'
+                f'<rect x="{x0}" y="{y + h - 3}" width="{x1 - x0}" height="4" fill="#8f8a7c"/>'
+                # a tactile edge strip, which is what a modern surface stop has
+                + '<g fill="#d9b64c" opacity="0.85">'
+                + ''.join(f'<rect x="{gx}" y="{y + 2}" width="7" height="3" rx="1.5"/>'
+                          for gx in range(x0 + 8, x1 - 6, 14)) + '</g></g>')
+
+    def passenger(sx, sy, dx, dy, role, s, coat, trouser, skin):
+        at = (sx, sy) if role == 'board' else (dx, dy)
+        return (f'<g class="cc-passenger" data-role="{role}" data-scale="{s}"'
+                f' data-stand="{sx},{sy}" data-door="{dx},{dy}"'
+                f' transform="translate({at[0]},{at[1]}) scale({s})"'
+                + (' opacity="0"' if role == 'alight' else '') + '>'
+                + person(0, 0, 1.0, coat, trouser, skin) + '</g>')
+
+    # data-stop is the HEAD, and the head is the ENGINE. Aim it so a COACH stands
+    # at the deck: with one loco and three wagons the origins sit roughly
+    # 118/303/454/606 behind the head, so 583 puts the second vehicle at 280 —
+    # the middle of the platform — instead of parking the streetcar there for
+    # people to climb into.
+    #
+    # Feet go on the deck's TOP edge, not its bottom: in a flat side-on view a
+    # figure standing at the bottom of the deck is standing in FRONT of it.
+    stop = ('<g class="cc-platform" data-stop="583" data-dwell="6.5"></g>'
+            + platform(150, 400, 516)
+            + passenger(186, 522, 258, 506, 'board', 0.80, '#b8442f', '#2f3440', '#c98d63')
+            + passenger(232, 520, 292, 506, 'alight', 0.74, '#f2ece2', '#4a4a52', '#8a5a3c')
+            + passenger(300, 522, 322, 506, 'alight', 0.82, '#3f5f8c', '#2f3440', '#e0b58c')
+            + passenger(352, 520, 344, 506, 'board', 0.76, '#4f8a6a', '#37414f', '#c98d63'))
+
     front = ('    '
              # a big maple leaning in from each side, which frames the whole view
              + maple(70, 660, 2.1) + maple(1214, 676, 2.3)
-             + elm(300, 604, 1.35) + maple(1010, 610, 1.5) + elm(884, 596, 1.15)
-             + gaslamp(180, 632, 1.05) + gaslamp(1120, 632, 1.05)
+             + elm(486, 604, 1.35) + maple(1010, 610, 1.5) + elm(884, 596, 1.15)
+             + stop
+             + gaslamp(432, 632, 1.05) + gaslamp(1120, 632, 1.05)
              + railing(0, 632, 9, 0.95) + railing(796, 632, 12, 0.95)
              + bench(412, 636, 0.95) + bench(1006, 640, 1.0)
              + person(452, 634, 0.86, '#b8442f', '#2f3440', '#c98d63', '#2f3440')
