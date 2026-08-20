@@ -402,6 +402,7 @@
     const idles = buildIdles(svg);
     const drifts = buildDrifts(svg);
     const flags = buildFlags(svg);
+    const jets = buildJets(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -422,7 +423,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -1091,7 +1092,10 @@
     svg.querySelectorAll('.cc-foam').forEach((node, k) => {
       foam.push({ el: node, period: 1.7 + k * 0.63, phase: k / 3 });
     });
-    return bands.length ? { bands: bands, foam: foam } : null;
+    // EITHER is enough. It used to need a falling band, which is right for a
+    // waterfall and wrong for a fountain: Kansas City has sheets over two basin
+    // lips and a pool that shifts, and nothing pouring in a straight line.
+    return (bands.length || foam.length) ? { bands: bands, foam: foam } : null;
   }
 
   function updateFalls(t) {
@@ -2259,6 +2263,44 @@
   //
   //   .cc-flag with data-pivot="x,y" at the halyard and data-i for the phase
   const FLAG = { swing: 5, furl: 0.22, secs: 1.5, gust: 0.11 };
+
+  // =======================================================================
+  // A JET (.cc-jet) — water thrown UP, which is the one thing a fountain does
+  // that a waterfall does not.
+  //
+  //   data-pivot="x,y"   the nozzle. The plume scales about it, so it grows out
+  //                      of the pipe rather than inflating around its own middle
+  //                      — the same rule the geyser column follows.
+  //   data-i             its place in the group, so no two jets pulse together.
+  //                      A fountain whose jets breathe in step is one jet.
+  //
+  // Height only. A jet that changed width too read as a puff of steam.
+  // =======================================================================
+  const JET = { lo: 0.84, hi: 1.1, secs: 2.3, stagger: 0.37 };
+
+  function buildJets(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-jet').forEach(node => {
+      const p = (node.getAttribute('data-pivot') || '').split(',').map(Number);
+      if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-jet has no usable data-pivot'); return; }
+      out.push({ el: node, px: p[0], py: p[1],
+                 phase: (parseFloat(node.getAttribute('data-i')) || 0) * JET.stagger });
+    });
+    return out;
+  }
+
+  function updateJets(t) {
+    const list = currentScene && currentScene.jets;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(j => {
+      const u = 0.5 + 0.5 * Math.sin((secs / JET.secs + j.phase) * TAU);
+      const k = JET.lo + (JET.hi - JET.lo) * u;
+      j.el.setAttribute('transform',
+        'translate(' + j.px + ',' + j.py + ') scale(1,' + k.toFixed(3) + ') '
+        + 'translate(' + (-j.px) + ',' + (-j.py) + ')');
+    });
+  }
 
   function buildFlags(svg) {
     const out = [];
@@ -4004,6 +4046,7 @@
     updateIdles(t);
     updateDrifts(t, dt);
     updateFlags(t);
+    updateJets(t);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);

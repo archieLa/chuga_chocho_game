@@ -48,6 +48,7 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, `data-scale` if it is drawn at another size, and `data-speed` to override the per-class default — two boats in one bay at the same speed read as one mechanism. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
+| **Jets** — water thrown UP | `.cc-jet` with `data-pivot="x,y"` at the NOZZLE and `data-i` for its place in the group. Scales in HEIGHT ONLY about the pivot, so the plume grows out of the pipe rather than inflating around its middle — the geyser's rule. One group per jet: three breathing in step are one jet. | Kansas City's fountain |
 | **Flags** — cloth in a gust | `.cc-flag` with `data-pivot="x,y"` at the halyard and `data-i` for its place in the line. It swings AND furls — rotation alone is a pendulum, the narrowing is what makes it cloth — and phases run along the row so a gust travels down it. | Mount Rushmore's avenue |
 | **Idling animals** — alive while standing still | `.cc-idle` with `data-i` for a stable phase, containing `.cc-head` and/or `.cc-tail`, each with `data-pivot="x,y"`. The head pivots at the WITHERS, not the poll. Touches only those two parts, never the root, so it composes with anything driving the animal along. | Bluegrass |
 | **Movable structure** — a span that lifts head-on | `.cc-bascule-leaf` containing `.cc-bascule-quad` polygons and a `.cc-bascule-dashes` group. Each piece carries its raised position in `data-up`, point-matched to `points`, and the engine TWEENS THE POINTS — head-on a lifting deck changes width as the foreshortening unwinds and no transform expresses that. Anything without a `data-up` is on the fixed span and stays put. `.cc-bascule-weight` takes `data-dy`. Runs on its own timer. | Mystic |
@@ -348,6 +349,7 @@ Two traps, both already paid for once:
 | New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |
 | Austin | the bat column boils out from under the Congress Avenue Bridge |
 | Las Vegas | the marquee bulbs chase round every sign on the Strip |
+| Kansas City | the fountain runs — three jets pulsing out of step, sheets over both basin lips, the pool shifting · the flag swings and furls on its pole |
 | Birmingham | a tour party of four walks the site together, in step, turning back at the kerb and at the frame edge · everyone else stands, because a place where everybody moves looks evacuated · the furnace is COLD and stays cold — no pour, no glow |
 | Bentonville | **one rider does the whole circuit** — timber wave, down to the Greenway, held at the red light, across the road when the gate drops, up the ramp and over the gap with its shadow on the dirt · two more riders queue at the same light · two riders come down out of the woods · six vultures on two thermals |
 
@@ -551,8 +553,8 @@ ever lifts, it lifts on its own timer, gate-blind like everything else here.
 
 ---
 
-Below the line, in rough order: Kansas City's fountain, traffic on the Brooklyn
-Bridge, a boat in San Francisco Bay.
+Below the line, in rough order: traffic on the Brooklyn Bridge, a boat in San
+Francisco Bay.
 
 **There is no cap on how many scenes move.** There used to be a
 twelve-to-fourteen limit in this file, on the theory that too much motion would

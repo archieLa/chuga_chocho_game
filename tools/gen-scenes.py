@@ -8641,18 +8641,28 @@ def kansas_city():
                 f'<ellipse cx="0" cy="-57" rx="28" ry="7" fill="{water}"/>'
                 f'<rect x="-6" y="-84" width="12" height="30" fill="{stone}"/>'
                 f'<ellipse cx="0" cy="-86" rx="20" ry="6" fill="{lit}"/>'
-                # the jets and the falling water
-                + '<g fill="#cfe8f4" opacity="0.85">'
-                f'<path d="M-2,-88 C -3,-104 -1,-114 0,-122 C 1,-114 3,-104 2,-88 Z"/>'
-                f'<path d="M-14,-86 C -20,-98 -22,-104 -24,-110 C -18,-102 -14,-94 -12,-86 Z"/>'
-                f'<path d="M14,-86 C 20,-98 22,-104 24,-110 C 18,-102 14,-94 12,-86 Z"/></g>'
-                + '<g fill="#b2dcef" opacity="0.7">'
+                # THE JETS, one group each so they pulse out of step. Each scales
+                # about its own nozzle, so it grows out of the pipe rather than
+                # inflating around its middle. Three jets breathing together are
+                # one jet, which is why they are not one group.
+                + ''.join(f'<g class="cc-jet" data-pivot="{jx},{jy}" data-i="{ji}">'
+                          f'<g fill="#cfe8f4" opacity="0.85"><path d="{jd}"/></g></g>'
+                          for ji, (jx, jy, jd) in enumerate([
+                              (0, -88, 'M-2,-88 C -3,-104 -1,-114 0,-122 C 1,-114 3,-104 2,-88 Z'),
+                              (-13, -86, 'M-14,-86 C -20,-98 -22,-104 -24,-110 C -18,-102 '
+                                         '-14,-94 -12,-86 Z'),
+                              (13, -86, 'M14,-86 C 20,-98 22,-104 24,-110 C 18,-102 '
+                                        '14,-94 12,-86 Z')]))
+                # The sheets over each basin lip and the shift on the pool are
+                # .cc-foam: they brighten and settle rather than travelling, which
+                # is what water does when it is falling a hand's width, not a cliff.
+                + '<g class="cc-foam" fill="#b2dcef" opacity="0.7">'
                 + ''.join(f'<rect x="{-26 + i*13}" y="-54" width="4" height="14" rx="2"/>'
                           for i in range(5)) + '</g>'
-                + '<g fill="#b2dcef" opacity="0.6">'
+                + '<g class="cc-foam" fill="#b2dcef" opacity="0.6">'
                 + ''.join(f'<rect x="{-15 + i*10}" y="-86" width="3.4" height="12" rx="1.7"/>'
                           for i in range(4)) + '</g>'
-                + '<g fill="#ffffff" opacity="0.7">'
+                + '<g class="cc-foam" fill="#ffffff" opacity="0.7">'
                 + ''.join(f'<ellipse cx="{-40 + i*20}" cy="-12" rx="6" ry="2.4"/>'
                           for i in range(5)) + '</g></g>')
 
@@ -8670,12 +8680,18 @@ def kansas_city():
                 f'<ellipse cx="0" cy="0" rx="16" ry="5" fill="#cfc9ba"/>'
                 f'<rect x="-2" y="-150" width="4" height="150" fill="#e2e2dc"/>'
                 f'<circle cx="0" cy="-153" r="3.4" fill="#d9b64c"/>'
+                # THE WHOLE FLAG IN ONE GROUP, pivoting at the HALYARD — the middle
+                # of the hoist, where the cloth is actually tied. Pivot it anywhere
+                # else and the flag swings like a sign on a hook. The engine gives
+                # it a swing and a furl out of step with each other, because cloth
+                # slackens between gusts rather than at the bottom of every arc.
+                + f'<g class="cc-flag" data-pivot="3,-136" data-i="0">'
                 f'<path d="M3,-148 L52,-140 L3,-124 Z" fill="#b8323c"/>'
                 f'<path d="M3,-148 L28,-144 L28,-132 L3,-130 Z" fill="#2b4a8c"/>'
                 + '<g fill="#f2ece2">'
                 + ''.join(f'<path d="M28,{-144 + k*4} L{52 - k*1.6:.0f},{-140 + k*4.4:.0f} '
                           f'L{52 - k*1.6:.0f},{-138 + k*4.4:.0f} L28,{-142 + k*4} Z"/>'
-                          for k in range(3)) + '</g></g>')
+                          for k in range(3)) + '</g></g></g>')
 
     def person(x, y, s=1.0, top='#3f5f8c', bottom='#2f3440', skin='#c98d63'):
         return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
