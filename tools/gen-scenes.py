@@ -1560,17 +1560,24 @@ def nyc():
                 f'<ellipse cx="4" cy="-32" rx="18" ry="11" opacity="0.7"/>'
                 f'<ellipse cx="-4" cy="-50" rx="22" ry="13" opacity="0.45"/></g></g>')
 
-    def bus(x, y, s=1.0):
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 7, 92, 10)}'
+    def bus(x, y, s=1.0, gid=None, extra=''):
+        """TURNED ROUND to face RIGHT. A bus wears its route number on the FRONT, so
+        the M14 blind was the nose and this one was pointing at the level crossing.
+        Driving it that way meant crossing the near road — where the engine's own
+        cars are — so the blind moved to the other end instead and it now leaves
+        AWAY from the crossing, over clear pavement, which nothing has to give way
+        to. Mirroring the group was the other option and it writes M14 backwards."""
+        idattr = f' id="{gid}"' if gid else ''
+        return (f'<g{idattr}{extra} transform="translate({x},{y}) scale({s})">{shadow(0, 7, 92, 10)}'
                 f'<rect x="-96" y="-62" width="192" height="52" rx="7" fill="#5f6b76"/>'
                 f'<rect x="-96" y="-62" width="192" height="15" rx="7" fill="#7a8794"/>'
                 f'<rect x="-96" y="-34" width="192" height="7" fill="#3f6b8f"/>'
                 f'<g fill="#bfe3f5" opacity="0.9">'
                 + ''.join(f'<rect x="{-88+i*33}" y="-56" width="26" height="18" rx="2"/>' for i in range(5))
-                + f'</g><rect x="-92" y="-58" width="46" height="10" rx="3" fill="#2f333a"/>'
-                f'<text x="-69" y="-50" text-anchor="middle" font-family="Trebuchet MS,sans-serif" '
+                + f'</g><rect x="46" y="-58" width="46" height="10" rx="3" fill="#2f333a"/>'
+                f'<text x="69" y="-50" text-anchor="middle" font-family="Trebuchet MS,sans-serif" '
                 f'font-size="8" font-weight="bold" fill="#ffe066">M14</text>'
-                f'<rect x="16" y="-27" width="34" height="17" fill="#3f4750"/>'
+                f'<rect x="-50" y="-27" width="34" height="17" fill="#3f4750"/>'
                 f'<g fill="#1b1f25"><circle cx="-58" cy="-8" r="12"/><circle cx="56" cy="-8" r="12"/></g>'
                 f'<g fill="#8d949c"><circle cx="-58" cy="-8" r="4.5"/><circle cx="56" cy="-8" r="4.5"/></g></g>')
 
@@ -1626,25 +1633,40 @@ def nyc():
                 f'<rect x="{x0}" y="{y + h - 4}" width="{x1 - x0}" height="4" fill="#767c84"/>'
                 f'<rect x="{x0}" y="{y + 4}" width="{x1 - x0}" height="4" fill="#e8b23a"/></g>')
 
-    def passenger(sx, sy, dx, dy, role, sc, coat, trouser, skin, hat=None):
+    def passenger(sx, sy, dx, dy, role, sc, coat, trouser, skin, hat=None, bus=None):
         at = (sx, sy) if role == 'board' else (dx, dy)
         return (f'<g class="cc-passenger" data-role="{role}" data-scale="{sc}"'
                 f' data-stand="{sx},{sy}" data-door="{dx},{dy}"'
-                f' transform="translate({at[0]},{at[1]}) scale({sc})"'
+                + (f' data-bus="{bus}"' if bus else '')
+                + f' transform="translate({at[0]},{at[1]}) scale({sc})"'
                 + (' opacity="0"' if role == 'alight' else '') + '>'
                 + person(0, 0, 1.0, coat, trouser, skin, hat) + '</g>')
 
     # data-stop is the HEAD, and the head is the ENGINE — aimed so a COACH and not
     # the motor car ends up at the deck.
-    stop = ('<g class="cc-platform" data-stop="1251" data-dwell="6.5"></g>'
+    # 7.5 rather than the usual 6.5: two of these passengers have a second walk to
+    # make, and at 6.5 the last of them was still crossing the pavement when the
+    # train pulled out.
+    stop = ('<g class="cc-platform" data-stop="1251" data-dwell="7.5"></g>'
             + platform(880, 1130, 516)
             + passenger(916, 530, 964, 506, 'board', 0.76, '#b8442f', '#2f3440', '#c98d63')
-            + passenger(962, 532, 1000, 506, 'alight', 0.72, '#e8d24a', '#37414f', '#8a5a3c')
-            + passenger(1014, 530, 1042, 506, 'alight', 0.80, '#4f8a6a', '#2f3440', '#e0b58c')
+            # THESE TWO CARRY ON TO THE BUS. data-bus is the door they walk to after
+            # they have reached the platform — get off one thing, get on another,
+            # and it drives away, which is a beginning-middle-end and the only
+            # sequence in the game.
+            + passenger(962, 532, 1000, 506, 'alight', 0.72, '#e8d24a', '#37414f', '#8a5a3c',
+                        bus='944,588')
+            + passenger(1014, 530, 1042, 506, 'alight', 0.80, '#4f8a6a', '#2f3440', '#e0b58c',
+                        bus='966,590')
             + passenger(1064, 532, 1080, 506, 'board', 0.74, '#7a4f9e', '#4a4a52', '#c98d63', '#2f3440')
             + passenger(1104, 530, 1112, 506, 'board', 0.78, '#3f6a8c', '#2f3440', '#8a5a3c'))
 
-    front = ('    ' + stop + bus(980, 596, 0.72) + cart(432, 700, 1.1)
+    # THE BUS THE TRANSFER FEEDS. It leaves to the RIGHT, away from the crossing,
+    # over pavement that carries nothing else — so it never has to give way to the
+    # engine's road cars and never touches the gate. data-bay is where it stands.
+    BUS = (' class="cc-bus-stop" data-bay="980" data-away="1470" data-speed="165"'
+           ' data-lead="1.0" data-gone="7"')
+    front = ('    ' + stop + bus(980, 596, 0.72, gid='cc-m14', extra=BUS) + cart(432, 700, 1.1)
              # somebody at the cart and somebody by the bench, so the street is not
              # empty between trains
              # Clear of the taxi (186-314) and the right-hand oak, both of which are

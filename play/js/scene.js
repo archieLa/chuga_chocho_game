@@ -406,6 +406,7 @@
     const watchers = buildWatchers(svg);
     const pumpjacks = buildPumpjacks(svg);
     const devil = buildDustDevil(svg);
+    const busStop = buildBusStop(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -426,7 +427,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -1165,6 +1166,13 @@
   // coach and fading; the ones getting off fade in there and walk away.
   const HALT = {
     lead: 1.0,       // stand still a beat before anyone moves
+    change: 0.5,     // and a beat on the platform before walking to the bus
+    // The second leg is SHORT — platform to bus door is about fifty pixels where
+    // coach door to platform is a hundred and fifty — so it gets its own time
+    // rather than the full crossing. With the shared 2.6 the last person to
+    // change was still walking when the train pulled out and got snapped back to
+    // the coach door by the reset.
+    hop: 1.6,
     walk: 2.6,       // seconds to cross the platform
     bob: 1.6,        // px they rise and fall, so they walk rather than slide
     steps: 3.4,      // bobs per second
@@ -1180,7 +1188,11 @@
       const a = (el.getAttribute('data-stand') || '').split(',').map(Number);
       const b = (el.getAttribute('data-door') || '').split(',').map(Number);
       if (a.length !== 2 || b.length !== 2 || a.concat(b).some(isNaN)) return;
-      people.push({ el: el, sx: a[0], sy: a[1], dx: b[0], dy: b[1],
+      // A THIRD LEG, for the ones who are changing. They get off, walk out onto
+      // the platform like everybody else, and then carry on down to the bus.
+      const c = (el.getAttribute('data-bus') || '').split(',').map(Number);
+      const bus = (c.length === 2 && !c.some(isNaN)) ? { x: c[0], y: c[1] } : null;
+      people.push({ el: el, sx: a[0], sy: a[1], dx: b[0], dy: b[1], bus: bus,
                     board: el.getAttribute('data-role') !== 'alight',
                     s: parseFloat(el.getAttribute('data-scale')) || 1,
                     // staggered, so five people do not move as one block
@@ -1223,8 +1235,28 @@
     if (s.phase === 'stand' && s.t >= s.dwell) { s.phase = 'away'; s.t = 0; }
     if (s.phase !== 'stand') return;
 
+    let changing = 0, aboard = 0;
     s.people.forEach(p => {
       const u = Math.max(0, Math.min(1, (s.t - HALT.lead - p.delay) / HALT.walk));
+      // THE CHANGE. Once they are out on the platform they wait a beat and walk on
+      // to the bus, fading as they step aboard. Two separate legs and not one long
+      // diagonal: they came out of a coach door and they are going to a bus door,
+      // and a straight line between those two goes through the platform edge.
+      if (p.bus) {
+        changing++;
+        const v = Math.max(0, Math.min(1, (s.t - HALT.lead - p.delay - HALT.walk - HALT.change) / HALT.hop));
+        if (u >= 1) {
+          const x = p.sx + (p.bus.x - p.sx) * v;
+          const y = p.sy + (p.bus.y - p.sy) * v;
+          const moving = v > 0 && v < 1;
+          const bob = moving ? -Math.abs(Math.sin(s.t * HALT.steps * Math.PI)) * HALT.bob : 0;
+          p.el.setAttribute('transform',
+            'translate(' + x.toFixed(1) + ',' + (y + bob).toFixed(1) + ') scale(' + p.s + ')');
+          p.el.setAttribute('opacity', Math.min(1, (1 - v) / 0.2).toFixed(2));
+          if (v >= 1) aboard++;
+          return;
+        }
+      }
       // Boarders go platform -> coach and fade out as they step up; the ones
       // getting off appear at the coach and walk out onto the platform.
       // k is "how far toward the platform", so it runs 1->0 for someone getting
@@ -1240,6 +1272,68 @@
       p.el.setAttribute('opacity',
         (p.board ? Math.min(1, (1 - u) / 0.18) : Math.min(1, u / 0.18)).toFixed(2));
     });
+
+    // Everybody who was changing is aboard: the bus can go. It leaves on its own
+    // clock from here, because the train pulls out at about the same moment and
+    // train.halt is thrown away with it.
+    const b = currentScene && currentScene.busStop;
+    if (b && changing && aboard >= changing && b.phase === 'wait') b.phase = 'pull';
+  }
+
+  // =======================================================================
+  // THE BUS AT THE STOP (.cc-bus-stop) — the far end of a transfer.
+  //
+  //   data-bay    where it stands, which is the x the art drew it at
+  //   data-away   the x it has left the frame by
+  //   data-speed  px/s   ·   data-lead  a beat before it pulls out
+  //   data-gone   seconds before the next one is at the stop
+  //
+  // It only ever drives FORWARDS and it only ever drives one way — the art faces
+  // it away from the crossing so its whole route is clear pavement, and it never
+  // has to give way to the engine's road cars or know the gate exists.
+  //
+  // The one honest cheat: the next bus FADES IN at the stop rather than driving
+  // in from the left, because driving in would mean crossing the near road
+  // against the traffic the engine is already running there. A route has many
+  // buses and nobody is following this one, and it happens with the platform
+  // empty between trains.
+  // =======================================================================
+  function buildBusStop(svg) {
+    const el = svg.querySelector('.cc-bus-stop');
+    if (!el) return null;
+    const n = (k, d) => { const v = parseFloat(el.getAttribute(k)); return isNaN(v) ? d : v; };
+    const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)\s*(scale\([^)]*\))?/
+      .exec(el.getAttribute('transform') || '');
+    if (!m) { console.warn('.cc-bus-stop has no usable transform'); return null; }
+    return { el: el, y: +m[2], sc: m[3] || '', bay: n('data-bay', +m[1]),
+             away: n('data-away', 1470), speed: n('data-speed', 165),
+             lead: n('data-lead', 1), gone: n('data-gone', 7),
+             x: n('data-bay', +m[1]), phase: 'wait', t: 0 };
+  }
+
+  function placeBus(b, fade) {
+    b.el.setAttribute('transform', 'translate(' + b.x.toFixed(1) + ',' + b.y + ') ' + b.sc);
+    b.el.setAttribute('opacity', fade.toFixed(2));
+  }
+
+  function updateBusStop(dt) {
+    const b = currentScene && currentScene.busStop;
+    if (!b) return;
+    const secs = dt / 1000;
+    if (b.phase === 'wait') { placeBus(b, 1); return; }
+    if (b.phase === 'pull') {                       // doors close, then away
+      b.t += secs;
+      if (b.t >= b.lead) { b.phase = 'away'; b.t = 0; }
+      placeBus(b, 1);
+    } else if (b.phase === 'away') {
+      b.x += b.speed * secs;
+      if (b.x >= b.away) { b.phase = 'gone'; b.t = 0; b.x = b.bay; }
+      placeBus(b, 1);
+    } else if (b.phase === 'gone') {                // the next one is along shortly
+      b.t += secs;
+      placeBus(b, Math.max(0, Math.min(1, (b.t - b.gone) / 1.1)));
+      if (b.t >= b.gone + 1.1) { b.phase = 'wait'; b.t = 0; }
+    }
   }
 
   const SHUNT = {
@@ -3738,6 +3832,7 @@
     }
     updateShunt(dt);
     updateHalt(dt);
+    updateBusStop(dt);
     train.head += train.dir * TRAIN_SPEED * shuntSpeed(dt) * haltSpeed() * dt / 1000;
     const dist = placeTrain();
 
