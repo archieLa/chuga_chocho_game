@@ -350,7 +350,7 @@ Two traps, both already paid for once:
 | New Orleans | the sternwheeler works the Mississippi, paddlewheel turning |
 | Austin | the bat column boils out from under the Congress Avenue Bridge |
 | Las Vegas | the marquee bulbs chase round every sign on the Strip |
-| Boston | every other Green Line car calls at the Esplanade stop — four people get on and off |
+| Boston | every other Green Line car calls at the Esplanade stop — four people get on and off, and the man walking his dog comes up off the lawn to join them, the dog a beat behind |
 | Kansas City | the fountain runs — three jets pulsing out of step, sheets over both basin lips, the pool shifting · the flag swings and furls on its pole |
 | Birmingham | a tour party of four walks the site together, in step, turning back at the kerb and at the frame edge · everyone else stands, because a place where everybody moves looks evacuated · the furnace is COLD and stays cold — no pour, no glow |
 | Bentonville | **one rider does the whole circuit** — timber wave, down to the Greenway, held at the red light, across the road when the gate drops, up the ramp and over the gap with its shadow on the dirt · two more riders queue at the same light · two riders come down out of the woods · six vultures on two thermals |

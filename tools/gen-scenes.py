@@ -5947,8 +5947,21 @@ def boston():
              + bench(412, 636, 0.95) + bench(1006, 640, 1.0)
              + person(452, 634, 0.86, '#b8442f', '#2f3440', '#c98d63', '#2f3440')
              + person(486, 628, 0.78, '#3f5f8c', '#4a4a52', '#e0b58c', None)
-             + person(244, 664, 0.92, '#4f8a6a', '#2f3440', '#8a5a3c', None)
-             + dog(292, 668, 0.9)
+             # THE MAN AND HIS DOG GET ON TOO — a maintainer's-son request, and a
+             # good one: they were the only two on the Esplanade doing nothing.
+             # They come up from the lawn rather than starting on the deck, which
+             # is a longer walk than anyone else's and reads as arriving for the
+             # train instead of already waiting for it. The dog is a passenger in
+             # its own right, one slot later in the DOM so it trots a beat behind
+             # its owner — the engine staggers by document order.
+             + f'<g class="cc-passenger" data-role="board" data-scale="0.92"'
+               f' data-stand="244,664" data-door="306,506"'
+               f' transform="translate(244,664) scale(0.92)">'
+               + person(0, 0, 1.0, '#4f8a6a', '#2f3440', '#8a5a3c', None) + '</g>'
+             + f'<g class="cc-passenger" data-role="board" data-scale="0.9"'
+               f' data-stand="292,668" data-door="330,512"'
+               f' transform="translate(292,668) scale(0.9)">'
+               + dog(0, 0, 1.0) + '</g>'
              + person(956, 636, 0.84, '#e0983c', '#37414f', '#c98d63', None)
              + person(824, 668, 0.9, '#7a4f9e', '#2f3440', '#e0b58c', '#2f3440')
              # leaf piles under the big trees
