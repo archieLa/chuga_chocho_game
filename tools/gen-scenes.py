@@ -1595,7 +1595,62 @@ def nyc():
                 f'<path d="M10,-4 L15,-3 L10,-2 Z" fill="#e8a34a"/>'
                 f'<g stroke="#e8a34a" stroke-width="1.4"><path d="M-2,5 L-2,9 M3,5 L3,9"/></g></g>')
 
-    front = ('    ' + bus(980, 596, 0.72) + cart(432, 700, 1.1)
+    # ------------------------------------------------ THE STATION STOP ----
+    # This city had no PEOPLE in it at all — a taxi, a hot dog cart and five
+    # pigeons. So the stop and its passengers are the same job.
+    #
+    # It goes above the M14 stop, which the art had already drawn complete with
+    # its shelter and its sign, and which sits clear of the OPEN button (that ends
+    # at 871). Passengers who get off here will walk down to that bus later; the
+    # platform is placed for a transfer even though this half only does the train.
+    def person(x, y, s=1.0, coat='#3f5f8c', trouser='#2f3440', skin='#c98d63', hat=None):
+        o = [f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}',
+             f'<g fill="{trouser}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
+             f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>',
+             f'<rect x="-8" y="-42" width="16" height="23" rx="5" fill="{coat}"/>',
+             f'<rect x="-11" y="-40" width="4" height="18" rx="2" fill="{coat}"/>',
+             f'<rect x="7" y="-40" width="4" height="18" rx="2" fill="{coat}"/>',
+             f'<circle cx="0" cy="-49" r="7" fill="{skin}"/>']
+        if hat:
+            o.append(f'<path d="M-8,-52 C -8,-59 8,-59 8,-52 Z" fill="{hat}"/>')
+            o.append(f'<rect x="-9" y="-53" width="18" height="2.6" rx="1.3" fill="{hat}"/>')
+        else:
+            o.append(f'<path d="M-7,-52 C -7,-58 7,-58 7,-52 Z" fill="#3f3128"/>')
+        return ''.join(o) + '</g>'
+
+    # Concrete, with the yellow edge every platform in this city has.
+    def platform(x0, x1, y, h=30):
+        return (f'<g id="nyc-platform">'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="{h}" rx="2" fill="#9aa0a8"/>'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="5" rx="2" fill="#b4bac2"/>'
+                f'<rect x="{x0}" y="{y + h - 4}" width="{x1 - x0}" height="4" fill="#767c84"/>'
+                f'<rect x="{x0}" y="{y + 4}" width="{x1 - x0}" height="4" fill="#e8b23a"/></g>')
+
+    def passenger(sx, sy, dx, dy, role, sc, coat, trouser, skin, hat=None):
+        at = (sx, sy) if role == 'board' else (dx, dy)
+        return (f'<g class="cc-passenger" data-role="{role}" data-scale="{sc}"'
+                f' data-stand="{sx},{sy}" data-door="{dx},{dy}"'
+                f' transform="translate({at[0]},{at[1]}) scale({sc})"'
+                + (' opacity="0"' if role == 'alight' else '') + '>'
+                + person(0, 0, 1.0, coat, trouser, skin, hat) + '</g>')
+
+    # data-stop is the HEAD, and the head is the ENGINE — aimed so a COACH and not
+    # the motor car ends up at the deck.
+    stop = ('<g class="cc-platform" data-stop="1251" data-dwell="6.5"></g>'
+            + platform(880, 1130, 516)
+            + passenger(916, 530, 964, 506, 'board', 0.76, '#b8442f', '#2f3440', '#c98d63')
+            + passenger(962, 532, 1000, 506, 'alight', 0.72, '#e8d24a', '#37414f', '#8a5a3c')
+            + passenger(1014, 530, 1042, 506, 'alight', 0.80, '#4f8a6a', '#2f3440', '#e0b58c')
+            + passenger(1064, 532, 1080, 506, 'board', 0.74, '#7a4f9e', '#4a4a52', '#c98d63', '#2f3440')
+            + passenger(1104, 530, 1112, 506, 'board', 0.78, '#3f6a8c', '#2f3440', '#8a5a3c'))
+
+    front = ('    ' + stop + bus(980, 596, 0.72) + cart(432, 700, 1.1)
+             # somebody at the cart and somebody by the bench, so the street is not
+             # empty between trains
+             # Clear of the taxi (186-314) and the right-hand oak, both of which are
+             # drawn after them and had them standing inside a car and a tree.
+             + person(165, 692, 1.05, '#c8762c', '#37414f', '#e0b58c')
+             + person(1150, 692, 1.0, '#4f8a6a', '#2f3440', '#c98d63', '#2f3440')
              + ''.join(pigeon(x, y, sc) for x, y, sc in
                        [(348, 712, 1.1), (372, 704, 0.95), (318, 700, 0.9),
                         (1096, 690, 1.05), (1120, 700, 0.9)])
@@ -1605,7 +1660,9 @@ def nyc():
                        f'<rect x="-3" y="-74" width="7" height="74" fill="#2f333a"/>'
                        f'<circle cx="0" cy="-80" r="9" fill="#ffe9a8"/>'
                        f'<rect x="-9" y="-4" width="19" height="6" rx="2" fill="#2f333a"/></g>'
-                       for x, y in [(400, 626), (804, 666), (912, 620)])
+                       # (912,620) put this lamp's globe at y=540, inside the new
+                       # platform deck. Dropped to the roadway with its neighbour.
+                       for x, y in [(400, 626), (804, 666), (912, 664)])
              + f'<g transform="translate(470,700)">{shadow(0, 8, 20)}'
              '<rect x="-9" y="-34" width="18" height="40" rx="4" fill="#c0392b"/>'
              '<rect x="-15" y="-24" width="30" height="8" rx="3" fill="#c0392b"/>'
