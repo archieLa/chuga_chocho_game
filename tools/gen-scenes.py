@@ -25827,7 +25827,643 @@ def birmingham():
                  }, defs=d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham()
+def oklahoma_city():
+    """OKLAHOMA CITY — the oil field, with the city behind it.
+
+    The city is built on the Oklahoma City Oil Field and its capitol grounds are the only
+    state capitol grounds in the United States with working oil rigs on them, so pumpjacks
+    belong here as completely as they belong in any pasture. The oil field is the subject
+    and the skyline is the backdrop.
+
+    Two things the reference corrected that I would have got wrong from memory:
+
+      * **The pumpjacks are painted SAND, not black.** Half the photographs show cream and
+        tan machines; the weathered black ones are the minority. Drawn black they would read
+        as dark blobs against gold grass, and the linkage — the whole point of the scene —
+        would be invisible.
+      * **The ground is gold, not green.** Dry tan grass with red dirt showing through, not
+        pasture. The red is strong: a proper orange-red, and it is the scene's second colour.
+
+    The one composition rule this scene had to obey is that **it must not be a second
+    Birmingham**, which is also "industry in front, city behind" and was the previous scene
+    built. Sloss is a dense wall of rusted verticals packed edge to edge under an inter-war
+    masonry skyline. So this one is deliberately its opposite: SPARSE machines standing well
+    apart on open ground, sand against gold and red, under a modern glass skyline dominated
+    by a single very tall slender tower. Different density, different palette, different era.
+
+    The dust devil is here instead of a tornado, and that was a decision rather than an
+    oversight. Moore is a suburb of this city and has been hit twice by violent tornadoes in
+    living memory; in 2013 seven children died in their school there. A dust devil is the
+    honest version of the same idea — small, harmless, common on the plains, and something
+    children find delightful rather than frightening."""
+    HORIZON_TREE = 300
+    FIELD_TOP = 316
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def road_span(y):
+        t = (y - HORIZON) / 420.0
+        return 622 - 112 * t, 658 + 112 * t
+
+    def mix_ok(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    SAND, SAND_D, SAND_L = '#c7b087', '#96805c', '#ded0ae'
+    STEEL, STEEL_D = '#6f6a60', '#4a4640'
+    RED, RED_D = '#b5613a', '#8f4a2c'
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f88c8"/><stop offset="0.5" stop-color="#8fbedd"/>
+      <stop offset="1" stop-color="#dfe9ec"/>
+    </linearGradient>
+    <linearGradient id="okfloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c4ac68"/><stop offset="0.4" stop-color="#b89d58"/>
+      <stop offset="1" stop-color="#a78c4a"/>
+    </linearGradient>'''
+
+    # -------------------------------------------------------------------- sky ----
+    # BIG CUMULUS. Every other scene in this set has three flat ellipses; Oklahoma's sky is
+    # the point here, so these are built as stacks of lobes with a flat shaded base, which
+    # is what a fair-weather cumulus actually is.
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+
+    def cumulus(cx, base_y, w, seed):
+        r = rnd(seed)
+        o = ['<g>']
+        h = w * (0.52 + r() * 0.2)
+        o.append(f'<ellipse cx="{cx}" cy="{base_y - h * 0.06:.0f}" rx="{w * 0.5:.0f}" '
+                 f'ry="{h * 0.16:.0f}" fill="#b9cbd8"/>')
+        lobes = [(0.0, 0.62, 0.34), (-0.3, 0.42, 0.26), (0.3, 0.44, 0.27),
+                 (-0.14, 0.8, 0.22), (0.16, 0.78, 0.24), (0.0, 0.95, 0.17),
+                 (-0.44, 0.24, 0.2), (0.45, 0.26, 0.19)]
+        for fx, fy, fr in lobes:
+            o.append(f'<ellipse cx="{cx + w * fx:.0f}" cy="{base_y - h * fy:.0f}" '
+                     f'rx="{w * fr:.0f}" ry="{w * fr * 0.86:.0f}" fill="#ffffff"/>')
+        for fx, fy, fr in lobes[:4]:
+            o.append(f'<ellipse cx="{cx + w * fx - w * 0.05:.0f}" '
+                     f'cy="{base_y - h * fy - w * 0.05:.0f}" rx="{w * fr * 0.72:.0f}" '
+                     f'ry="{w * fr * 0.6:.0f}" fill="#ffffff"/>')
+        o.append(f'<ellipse cx="{cx}" cy="{base_y}" rx="{w * 0.46:.0f}" '
+                 f'ry="{h * 0.09:.0f}" fill="#a8bccb" opacity="0.8"/>')
+        return ''.join(o) + '</g>'
+
+    for cx, by, w, sd in ((150, 150, 132, 3), (400, 118, 96, 5), (610, 168, 78, 7),
+                          (840, 126, 118, 9), (1120, 158, 104, 11), (1010, 96, 70, 13),
+                          (280, 196, 62, 15), (720, 92, 60, 17)):
+        sk.append(cumulus(cx, by, w, sd))
+
+    # -------------------------------------------------------------------- far ----
+    far = []
+    # the low treeline that closes the horizon on the plains
+    rrt = rnd(23)
+    far.append('    <rect x="0" y="288" width="1280" height="14" fill="#6f7a4e"/>')
+    x = -40
+    while x < 1320:
+        h = 8 + rrt() * 12
+        far.append(f'<ellipse cx="{x:.0f}" cy="{292 - h * 0.4:.0f}" '
+                   f'rx="{7 + rrt() * 9:.1f}" ry="{h * 0.6:.1f}" '
+                   f'fill="{"#5f6c44" if rrt() < 0.5 else "#74814f"}"/>')
+        x += 9 + rrt() * 11
+
+    # THE SKYLINE. Second attempt: the first washed every tower to the same grey-blue with
+    # too much haze, gave the tall one a plain point, and left the low mass invisible. The
+    # photographs say four things I had not drawn.
+    #
+    #   * The tall tower's crown is FACETED and NOTCHED — a tall narrow peak at one edge and
+    #     a lower angled facet beside it, not a simple spire. That silhouette is the whole
+    #     signature of this skyline and it is legible at 30px.
+    #   * There is an Art Deco tower with stepped setbacks and a thin mast in the cluster.
+    #   * The palette is warm — cream and tan masonry — with exactly ONE dark bronze slab and
+    #     ONE blue-glass box for contrast. Not twelve variations of grey.
+    #   * There are TREES all through the base, and low sprawl running out on both sides.
+    def okc_skyline():
+        r = rnd(41)
+        o = ['<g>']
+        HAZE = '#9cc2dd'
+
+        def col(c, k=0.22):
+            return mix_ok(c, HAZE, k)
+
+        def windows(x, top, w, h, kind, seed):
+            rr_ = rnd(seed)
+            out = []
+            if kind == 'band':
+                n = max(3, int(h / 9))
+                for i in range(n):
+                    out.append(f'<rect x="{x + w * 0.08:.1f}" '
+                               f'y="{top + h * (i + 0.35) / n:.1f}" '
+                               f'width="{w * 0.84:.1f}" height="{h / n * 0.4:.1f}" '
+                               f'fill="#ffffff" opacity="0.17"/>')
+            elif kind == 'flute':
+                n = max(3, int(w / 5))
+                for i in range(n):
+                    out.append(f'<rect x="{x + w * (0.1 + i * 0.8 / max(n - 1, 1)):.1f}" '
+                               f'y="{top + 3:.1f}" width="{w * 0.03:.1f}" '
+                               f'height="{h - 5:.1f}" fill="#000000" opacity="0.15"/>')
+            else:
+                cs = max(2, int(w / 7))
+                rs = max(2, int(h / 10))
+                for c_ in range(cs):
+                    for r2 in range(rs):
+                        if rr_() < 0.2:
+                            continue
+                        out.append(f'<rect x="{x + w * (0.1 + c_ * 0.8 / max(cs - 1, 1)):.1f}" '
+                                   f'y="{top + h * (0.06 + r2 * 0.88 / max(rs - 1, 1)):.1f}" '
+                                   f'width="{w * 0.055:.1f}" height="{h * 0.03:.1f}" '
+                                   f'fill="#ffffff" opacity="{0.12 + rr_() * 0.16:.2f}"/>')
+            return ''.join(out)
+
+        # low sprawl, running well out to both sides — this city sits alone on a plain and
+        # thins out rather than stopping
+        x_ = 700
+        while x_ < 1300:
+            bw = 12 + r() * 26
+            bh = 8 + r() * 20
+            if 900 < x_ < 1120:
+                bh += 8
+            o.append(f'<rect x="{x_:.0f}" y="{300 - bh:.0f}" width="{bw:.0f}" '
+                     f'height="{bh:.0f}" '
+                     f'fill="{col(("#c2b096", "#a89c88", "#cfc2a8", "#b09880")[int(r() * 4)])}"/>')
+            x_ += bw + r() * 6
+
+        # the second tier, warm masonry with two deliberate outliers
+        TOWERS = [(806, 26, 54, '#c2b096', 'punch', 3),
+                  (840, 20, 74, '#cfc2a8', 'flute', 5),
+                  (866, 30, 46, '#b09880', 'punch', 7),
+                  (904, 22, 88, '#8a8378', 'band', 9),        # the dark bronze slab
+                  (932, 26, 62, '#c8bba0', 'flute', 11),
+                  (1052, 28, 70, '#cfc2a8', 'punch', 13),
+                  (1086, 32, 96, '#7fa8c4', 'band', 15),      # the blue-glass box
+                  (1126, 24, 58, '#c2b096', 'flute', 17),
+                  (1156, 30, 108, '#b8a890', 'punch', 19),
+                  (1196, 22, 66, '#cfc2a8', 'band', 21)]
+        for tx, tw, th, c, kind, sd in TOWERS:
+            top = 300 - th
+            o.append(f'<rect x="{tx}" y="{top}" width="{tw}" height="{th}" '
+                     f'fill="{col(c)}"/>')
+            o.append(f'<rect x="{tx + tw * 0.72:.0f}" y="{top}" width="{tw * 0.28:.0f}" '
+                     f'height="{th}" fill="{col(mix_ok(c, "#3a4a5c", 0.24))}"/>')
+            o.append(windows(tx, top, tw, th, kind, sd))
+            o.append(f'<rect x="{tx - 1.5:.0f}" y="{top - 3}" width="{tw + 3:.0f}" '
+                     f'height="4" fill="{col(mix_ok(c, "#ffffff", 0.2))}"/>')
+
+        # THE ART DECO TOWER — stepped setbacks and a thin mast. One of these in a cluster
+        # is worth more than any amount of window detail.
+        AX, AW, AH = 968, 26, 104
+        atop = 300 - AH
+        o.append(f'<rect x="{AX}" y="{atop}" width="{AW}" height="{AH}" '
+                 f'fill="{col("#cfc2a8")}"/>')
+        o.append(windows(AX, atop, AW, AH, 'flute', 23))
+        yy = atop
+        for iw, ih in ((20, 9), (14, 8), (9, 7)):
+            o.append(f'<rect x="{AX + (AW - iw) / 2:.0f}" y="{yy - ih}" width="{iw}" '
+                     f'height="{ih}" fill="{col("#dbcfb6")}"/>')
+            yy -= ih
+        o.append(f'<rect x="{AX + AW / 2 - 1.2:.0f}" y="{yy - 16}" width="2.4" '
+                 f'height="16" fill="{col("#b8ab92")}"/>')
+
+        # DEVON. Blue glass, far taller than anything else, and the crown is the point:
+        # a tall narrow peak at the left edge with a lower angled facet beside it and a
+        # notch between them.
+        TX, TW, TH = 1000, 38, 194
+        top = 300 - TH
+        glass, glass_d = col('#8fb4d2', 0.18), col('#6b93b4', 0.18)
+        o.append(f'<polygon points="{TX},300 {TX + TW},300 {TX + TW},{top + 54} '
+                 f'{TX + TW - 13},{top + 16} {TX + 13},{top} {TX},{top + 30}" '
+                 f'fill="{glass}"/>')
+        o.append(f'<polygon points="{TX + TW * 0.58:.0f},300 {TX + TW},300 '
+                 f'{TX + TW},{top + 54} {TX + TW - 13},{top + 16} '
+                 f'{TX + TW * 0.58:.0f},{top + 34}" fill="{glass_d}"/>')
+        # the notch: a wedge of sky cut between the peak and the facet
+        o.append(f'<polygon points="{TX + 13},{top} {TX + TW - 13},{top + 16} '
+                 f'{TX + TW * 0.52:.0f},{top + 40}" fill="{HAZE}" opacity="0.85"/>')
+        for i in range(int(TH / 12)):
+            o.append(f'<rect x="{TX + 4}" y="{top + 44 + i * 12}" width="{TW - 8}" '
+                     f'height="4" fill="#ffffff" opacity="0.13"/>')
+        for i in range(5):
+            o.append(f'<rect x="{TX + 6 + i * (TW - 12) / 4:.1f}" y="{top + 30}" '
+                     f'width="1.4" height="{TH - 30}" fill="#ffffff" opacity="0.12"/>')
+
+        # trees all through the base, which is what stops the cluster reading as a fence
+        x_ = 690
+        while x_ < 1310:
+            th_ = 4 + r() * 8
+            o.append(f'<ellipse cx="{x_:.0f}" cy="{300 - th_ * 0.45:.0f}" '
+                     f'rx="{th_ * 0.8:.1f}" ry="{th_ * 0.58:.1f}" '
+                     f'fill="{col(("#6f8a58", "#5f7a4c", "#7d9663")[int(r() * 3)], 0.28)}"/>')
+            x_ += 7 + r() * 15
+        return ''.join(o) + '</g>'
+
+    far.append(okc_skyline())
+
+    # THE CAPITOL, small, at mid-left, with the lattice derrick that really stands beside
+    # it. This pairing exists nowhere else on earth and it is the reason the scene is sited
+    # in this city rather than in a pasture — but it is scenery, not the subject, so it is
+    # drawn small and left alone.
+    def derrick(x, base, h, col=STEEL):
+        w = h * 0.26
+        o = ['<g>']
+        o.append(f'<polygon points="{x - w / 2:.1f},{base} {x + w / 2:.1f},{base} '
+                 f'{x + w * 0.11:.1f},{base - h:.1f} {x - w * 0.11:.1f},{base - h:.1f}" '
+                 f'fill="none" stroke="{col}" stroke-width="{h * 0.022:.1f}"/>')
+        n = 7
+        for i in range(n):
+            t0, t1 = i / n, (i + 1) / n
+            y0, y1 = base - h * t0, base - h * t1
+            w0 = (w / 2) * (1 - t0) + w * 0.11 * t0
+            w1 = (w / 2) * (1 - t1) + w * 0.11 * t1
+            o.append(f'<path d="M{x - w0:.1f},{y0:.1f} L{x + w1:.1f},{y1:.1f} '
+                     f'M{x + w0:.1f},{y0:.1f} L{x - w1:.1f},{y1:.1f} '
+                     f'M{x - w1:.1f},{y1:.1f} L{x + w1:.1f},{y1:.1f}" stroke="{col}" '
+                     f'stroke-width="{h * 0.014:.1f}" fill="none"/>')
+        o.append(f'<rect x="{x - w * 0.18:.1f}" y="{base - h - h * 0.07:.1f}" '
+                 f'width="{w * 0.36:.1f}" height="{h * 0.07:.1f}" fill="{col}"/>')
+        return ''.join(o) + '</g>'
+
+    def capitol(x, base, w):
+        h = w * 0.3
+        st, st_d, st_l = '#ddd5c0', '#b8b09a', '#eae3d0'
+        o = ['<g>']
+        o.append(f'<rect x="{x - w / 2:.0f}" y="{base - h:.0f}" width="{w:.0f}" '
+                 f'height="{h:.0f}" fill="{st}"/>')
+        o.append(f'<rect x="{x - w / 2:.0f}" y="{base - h:.0f}" width="{w:.0f}" '
+                 f'height="{h * 0.12:.0f}" fill="{st_l}"/>')
+        for i in range(int(w / 7)):
+            o.append(f'<rect x="{x - w / 2 + 3 + i * 7:.0f}" y="{base - h * 0.74:.0f}" '
+                     f'width="2.6" height="{h * 0.62:.0f}" fill="{st_d}" opacity="0.6"/>')
+        # the portico
+        o.append(f'<polygon points="{x - w * 0.16:.0f},{base - h * 1.06:.0f} '
+                 f'{x + w * 0.16:.0f},{base - h * 1.06:.0f} '
+                 f'{x + w * 0.19:.0f},{base - h * 0.96:.0f} '
+                 f'{x - w * 0.19:.0f},{base - h * 0.96:.0f}" fill="{st_l}"/>')
+        # the drum and dome
+        dy = base - h * 1.06
+        o.append(f'<rect x="{x - w * 0.115:.0f}" y="{dy - h * 0.5:.0f}" '
+                 f'width="{w * 0.23:.0f}" height="{h * 0.5:.0f}" fill="{st}"/>')
+        for i in range(6):
+            o.append(f'<rect x="{x - w * 0.1 + i * w * 0.04:.0f}" '
+                     f'y="{dy - h * 0.44:.0f}" width="1.8" height="{h * 0.4:.0f}" '
+                     f'fill="{st_d}" opacity="0.65"/>')
+        o.append(f'<path d="M{x - w * 0.125:.0f},{dy - h * 0.5:.0f} '
+                 f'A{w * 0.125:.0f},{h * 0.42:.0f} 0 0 1 {x + w * 0.125:.0f},'
+                 f'{dy - h * 0.5:.0f} Z" fill="{st_l}"/>')
+        o.append(f'<path d="M{x - w * 0.125:.0f},{dy - h * 0.5:.0f} '
+                 f'A{w * 0.125:.0f},{h * 0.42:.0f} 0 0 1 {x:.0f},{dy - h * 0.92:.0f} '
+                 f'L{x:.0f},{dy - h * 0.5:.0f} Z" fill="{st}"/>')
+        o.append(f'<rect x="{x - w * 0.018:.0f}" y="{dy - h * 1.06:.0f}" '
+                 f'width="{w * 0.036:.0f}" height="{h * 0.14:.0f}" fill="{st_d}"/>')
+        o.append(f'<circle cx="{x:.0f}" cy="{dy - h * 1.1:.0f}" r="{w * 0.016:.0f}" '
+                 f'fill="#8a8f92"/>')
+        return ''.join(o) + '</g>'
+
+    far.append(capitol(232, 300, 116))
+    far.append(derrick(320, 300, 74, col=mix_ok(STEEL, '#8fbedd', 0.3)))
+
+    # ----------------------------------------------------------------- ground ----
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#okfloor)"/>']
+    # RED EARTH. The reference is emphatic — this is a proper orange-red, not brown, and it
+    # shows through the grass everywhere rather than being confined to the roads.
+    rrr = rnd(53)
+    for i in range(26):
+        px = rrr() * 1400 - 60
+        py = 330 + rrr() ** 0.7 * 380
+        pw = 60 + rrr() * 240
+        gr.append(f'<ellipse cx="{px:.0f}" cy="{py:.0f}" rx="{pw:.0f}" '
+                  f'ry="{pw * (0.1 + rrr() * 0.1):.0f}" fill="{RED}" '
+                  f'opacity="{0.2 + rrr() * 0.3:.2f}"/>')
+    gr.append('<rect x="0" y="516" width="1280" height="24" fill="#a08a54"/>')
+    gr.append(f'<path d="M0,596 Q 340,574 640,592 Q 940,610 1280,586 L1280,720 L0,720 Z" '
+              f'fill="#967c42" opacity="0.45"/>')
+
+    back = ['    ']
+
+    # ============================================================== THE PUMPJACK ===
+    # THE MECHANISM. Drawn as separable groups so the engine gets a real linkage rather
+    # than a see-saw:
+    #
+    #   .cc-pj-crank    rotates continuously about the gearbox shaft
+    #   .cc-pj-beam     rocks about the saddle bearing on top of the Sampson post
+    #     .cc-pj-pitman nested INSIDE the beam, hanging from the beam's rear pin
+    #   the horsehead is part of the beam and does not move independently
+    #
+    # Every pivot is at the local origin of its own group, so the engine only ever sets a
+    # rotation — no translation, no coordinate maths.
+    def pumpjack(x, base, L, gid, beam_deg=-7.0, crank_deg=40.0, body=SAND,
+                 dark=SAND_D, lite=SAND_L):
+        H = L * 0.60                      # saddle bearing height
+        PX, PY = x + L * 0.46, base - H   # the saddle bearing
+        CX, CY = x + L * 0.85, base - L * 0.17   # the crank shaft
+        bd = L * 0.055                    # beam depth
+        o = [f'<g id="{gid}" class="cc-pumpjack">']
+        o.append(f'{shadow(x + L * 0.5, base + 2, L * 0.5, L * 0.035, 0.2)}')
+        # skid and base
+        o.append(f'<rect x="{x:.1f}" y="{base - L * 0.045:.1f}" width="{L:.1f}" '
+                 f'height="{L * 0.045:.1f}" fill="{STEEL_D}"/>')
+        # gearbox and prime mover
+        o.append(f'<rect x="{x + L * 0.76:.1f}" y="{base - L * 0.19:.1f}" '
+                 f'width="{L * 0.18:.1f}" height="{L * 0.15:.1f}" rx="{L * 0.012:.1f}" '
+                 f'fill="{STEEL_D}"/>')
+        o.append(f'<rect x="{x + L * 0.6:.1f}" y="{base - L * 0.15:.1f}" '
+                 f'width="{L * 0.12:.1f}" height="{L * 0.11:.1f}" fill="{STEEL}"/>')
+        # THE CRANK — its own group, origin AT THE SHAFT
+        # A PALE counterweight against the dark skid, so the rotating part is the thing
+        # the eye finds. Drawn dark it merged with the gearbox into one lump.
+        o.append(f'<g class="cc-pj-crank" transform="translate({CX:.1f},{CY:.1f}) '
+                 f'rotate({crank_deg})">'
+                 f'<rect x="{-L * 0.15:.1f}" y="{-L * 0.022:.1f}" width="{L * 0.3:.1f}" '
+                 f'height="{L * 0.044:.1f}" rx="{L * 0.02:.1f}" fill="{dark}"/>'
+                 f'<ellipse cx="{-L * 0.115:.1f}" cy="0" rx="{L * 0.075:.1f}" '
+                 f'ry="{L * 0.058:.1f}" fill="{lite}"/>'
+                 f'<ellipse cx="{-L * 0.115:.1f}" cy="0" rx="{L * 0.04:.1f}" '
+                 f'ry="{L * 0.03:.1f}" fill="{body}"/>'
+                 f'<circle cx="{L * 0.13:.1f}" cy="0" r="{L * 0.026:.1f}" '
+                 f'fill="{STEEL}"/></g>')
+        o.append(f'<circle cx="{CX:.1f}" cy="{CY:.1f}" r="{L * 0.028:.1f}" '
+                 f'fill="{STEEL}"/>')
+        # the Sampson post: an A-frame, apex at the saddle bearing
+        o.append(f'<path d="M{x + L * 0.3:.1f},{base - L * 0.04:.1f} L{PX:.1f},{PY:.1f} '
+                 f'L{x + L * 0.62:.1f},{base - L * 0.04:.1f}" stroke="{body}" '
+                 f'stroke-width="{L * 0.034:.1f}" fill="none" stroke-linejoin="round"/>')
+        o.append(f'<path d="M{x + L * 0.355:.1f},{base - L * 0.3:.1f} '
+                 f'L{x + L * 0.565:.1f},{base - L * 0.3:.1f}" stroke="{body}" '
+                 f'stroke-width="{L * 0.024:.1f}"/>')
+        o.append(f'<path d="M{x + L * 0.33:.1f},{base - L * 0.16:.1f} '
+                 f'L{x + L * 0.59:.1f},{base - L * 0.16:.1f}" stroke="{body}" '
+                 f'stroke-width="{L * 0.02:.1f}"/>')
+        # THE BEAM — its own group, origin AT THE SADDLE BEARING
+        # THE BEAM IS DARK, THE FRAME IS SAND. Drawn in one colour the walking beam
+        # vanished into the A-frame behind it and the machine read as a stepladder with a
+        # stick on top — and the linkage IS the scene. A steel beam on a painted frame is
+        # also what the photographs show.
+        b = [f'<g class="cc-pj-beam" transform="translate({PX:.1f},{PY:.1f}) '
+             f'rotate({beam_deg})">']
+        b.append(f'<rect x="{-L * 0.44:.1f}" y="{-bd * 0.72:.1f}" width="{L * 0.76:.1f}" '
+                 f'height="{bd * 1.44:.1f}" fill="{STEEL_D}"/>')
+        b.append(f'<rect x="{-L * 0.44:.1f}" y="{-bd * 0.72:.1f}" width="{L * 0.76:.1f}" '
+                 f'height="{bd * 0.42:.1f}" fill="{STEEL}"/>')
+        # the horsehead: a SOLID quarter-round plate, and big. It is the single feature
+        # that says pumpjack rather than see-saw.
+        R = L * 0.17
+        b.append(f'<path d="M{-L * 0.3:.1f},{-bd * 0.72:.1f} '
+                 f'L{-L * 0.3:.1f},{bd * 0.72:.1f} '
+                 f'A{R:.1f},{R:.1f} 0 0 1 {-L * 0.3 - R:.1f},{bd * 0.72 + R:.1f} '
+                 f'L{-L * 0.3 - R:.1f},{bd * 0.72 + R * 0.62:.1f} '
+                 f'A{R * 0.62:.1f},{R * 0.62:.1f} 0 0 0 {-L * 0.3 - R * 0.38:.1f},'
+                 f'{bd * 0.72:.1f} L{-L * 0.3 - R * 0.38:.1f},{-bd * 0.72:.1f} Z" '
+                 f'fill="{STEEL_D}"/>')
+        b.append(f'<path d="M{-L * 0.3:.1f},{bd * 0.72:.1f} '
+                 f'A{R:.1f},{R:.1f} 0 0 1 {-L * 0.3 - R:.1f},{bd * 0.72 + R:.1f}" '
+                 f'stroke="{lite}" stroke-width="{L * 0.012:.1f}" fill="none"/>')
+        # the bridle: two cables from the nose of the horsehead down to the polished rod
+        b.append(f'<path d="M{-L * 0.3 - R * 0.94:.1f},{bd * 0.72 + R * 0.96:.1f} '
+                 f'L{-L * 0.44:.1f},{L * 0.5:.1f} '
+                 f'M{-L * 0.3 - R:.1f},{bd * 0.72 + R:.1f} L{-L * 0.46:.1f},'
+                 f'{L * 0.5:.1f}" stroke="{STEEL_D}" stroke-width="{L * 0.012:.1f}" '
+                 f'fill="none"/>')
+        # the pitman, NESTED, hanging from the beam's rear pin
+        b.append(f'<g class="cc-pj-pitman" transform="translate({L * 0.31:.1f},0) '
+                 f'rotate({-beam_deg * 0.55:.1f})">'
+                 f'<rect x="{-L * 0.016:.1f}" y="0" width="{L * 0.032:.1f}" '
+                 f'height="{L * 0.3:.1f}" fill="{STEEL}"/>'
+                 f'<circle cx="0" cy="0" r="{L * 0.022:.1f}" fill="{STEEL_D}"/></g>')
+        b.append('</g>')
+        o.append(''.join(b))
+        # the polished rod and wellhead, under the horsehead
+        rx = x + L * 0.02
+        o.append(f'<g class="cc-pj-rod"><rect x="{rx - L * 0.008:.1f}" '
+                 f'y="{base - L * 0.42:.1f}" width="{L * 0.016:.1f}" '
+                 f'height="{L * 0.34:.1f}" fill="{STEEL}"/></g>')
+        o.append(f'<rect x="{rx - L * 0.035:.1f}" y="{base - L * 0.11:.1f}" '
+                 f'width="{L * 0.07:.1f}" height="{L * 0.11:.1f}" fill="{RED_D}"/>')
+        o.append(f'<rect x="{rx - L * 0.05:.1f}" y="{base - L * 0.12:.1f}" '
+                 f'width="{L * 0.1:.1f}" height="{L * 0.022:.1f}" fill="{STEEL_D}"/>')
+        return ''.join(o) + '</g>'
+
+    def tank_battery(x, base, s):
+        o = ['<g>']
+        o.append(f'{shadow(x + 44 * s, base + 2, 58 * s, 6 * s, 0.18)}')
+        o.append(f'<rect x="{x - 6 * s:.0f}" y="{base - 46 * s:.0f}" width="{9 * s:.0f}" '
+                 f'height="{46 * s:.0f}" fill="{STEEL_D}"/>')
+        o.append(f'<rect x="{x - 8 * s:.0f}" y="{base - 50 * s:.0f}" width="{13 * s:.0f}" '
+                 f'height="{5 * s:.0f}" rx="{2 * s:.0f}" fill="{STEEL}"/>')
+        for i in range(3):
+            tx = x + 14 * s + i * 26 * s
+            o.append(f'<rect x="{tx:.0f}" y="{base - 34 * s:.0f}" width="{22 * s:.0f}" '
+                     f'height="{34 * s:.0f}" fill="#cfc4a8"/>')
+            o.append(f'<rect x="{tx + 15 * s:.0f}" y="{base - 34 * s:.0f}" '
+                     f'width="{7 * s:.0f}" height="{34 * s:.0f}" fill="#a89e86"/>')
+            o.append(f'<ellipse cx="{tx + 11 * s:.0f}" cy="{base - 34 * s:.0f}" '
+                     f'rx="{11 * s:.0f}" ry="{3.4 * s:.0f}" fill="#ded4ba"/>')
+            for hy in (0.35, 0.68):
+                o.append(f'<rect x="{tx:.0f}" y="{base - 34 * s + 34 * s * hy:.0f}" '
+                         f'width="{22 * s:.0f}" height="{1.6 * s:.1f}" fill="#a89e86"/>')
+        o.append(f'<path d="M{x + 12 * s:.0f},{base} L{x + 12 * s:.0f},{base - 36 * s:.0f} '
+                 f'L{x + 92 * s:.0f},{base - 36 * s:.0f}" stroke="{STEEL}" '
+                 f'stroke-width="{2 * s:.1f}" fill="none"/>')
+        return ''.join(o) + '</g>'
+
+    # --------------------------------------------------- the field, beyond the road ---
+    rrf = rnd(71)
+    # fence lines running away, which is what gives a plain its depth
+    for fy, fx0, fx1 in ((372, -40, 600), (372, 700, 1330), (416, -40, 560),
+                         (416, 740, 1330)):
+        k = ppm(fy) * 0.9
+        back.append(f'<g opacity="0.85">')
+        for wy in (1.05, 0.78, 0.5):
+            back.append(f'<rect x="{fx0}" y="{fy - wy * k:.1f}" width="{fx1 - fx0}" '
+                        f'height="{0.055 * k:.1f}" fill="#6f6a58"/>')
+        for px in range(fx0, fx1, int(26 * k / 10) + 14):
+            back.append(f'<rect x="{px}" y="{fy - 1.2 * k:.1f}" width="{0.1 * k:.1f}" '
+                        f'height="{1.24 * k:.1f}" fill="#5e5646"/>')
+        back.append('</g>')
+
+    # trees in clumps along the fence lines
+    for tx, ty, ts in ((96, 366, 0.3), (150, 362, 0.24), (466, 370, 0.28),
+                       (860, 368, 0.26), (912, 364, 0.32), (1214, 372, 0.3)):
+        back.append(oak(tx, ty, ts, canopy='#5f7a44', canopy2='#72904f', trunk='#6b5638'))
+
+    # round hay bales — the reference is full of them and they give the field a scale
+    for bx, by, bs in ((602, 404, 1.0), (646, 402, 0.92), (1108, 398, 0.86)):
+        k = ppm(by) * bs * 0.5
+        back.append(f'<g>{shadow(bx, by + 1, 2.4 * k, 0.5 * k, 0.18)}'
+                    f'<rect x="{bx - 2.2 * k:.1f}" y="{by - 2.6 * k:.1f}" '
+                    f'width="{4.4 * k:.1f}" height="{2.6 * k:.1f}" rx="{0.5 * k:.1f}" '
+                    f'fill="#c9b06a"/>'
+                    f'<ellipse cx="{bx - 2.2 * k:.1f}" cy="{by - 1.3 * k:.1f}" '
+                    f'rx="{0.7 * k:.1f}" ry="{1.3 * k:.1f}" fill="#ddc584"/></g>')
+
+    # a lease track out to the wells — a plain needs a line drawn across it or it reads as
+    # a flat sheet of colour with objects standing on it
+    for wdt, col in ((11, '#a0603a'), (5, '#c17c4c')):
+        back.append(f'<path d="M-60,446 C 120,438 240,430 352,426" stroke="{col}" '
+                    f'stroke-width="{wdt}" fill="none" stroke-linecap="round"/>')
+        back.append(f'<path d="M1340,442 C 1180,436 1060,438 984,440" stroke="{col}" '
+                    f'stroke-width="{wdt}" fill="none" stroke-linecap="round"/>')
+    back.append(tank_battery(150, 428, 0.62))
+    back.append(pumpjack(352, 424, 118, 'cc-pumpjack-1', beam_deg=6, crank_deg=210,
+                         body='#b8a074', dark='#8a7550', lite='#d2be93'))
+    back.append(pumpjack(950, 438, 146, 'cc-pumpjack-2', beam_deg=-5, crank_deg=110))
+
+    # THE DUST DEVIL. Leaning and bending, wider at the top, the colour of the dirt it is
+    # lifting, with a flare of dust where it touches the ground — all of which the
+    # reference settled and none of which I would have guessed. It is NOT a tornado, and
+    # that is a deliberate choice recorded in the docstring.
+    def dust_devil(x, base, h, gid='cc-dustdevil'):
+        # SECOND ATTEMPT. The first was widest at the top and faint all the way down, and
+        # it read as a plume of smoke rising off something — which is exactly what a dust
+        # devil is not.
+        #
+        # The reference says the readable features are: a NARROW, well-defined foot with a
+        # bright flare of dust where it touches the ground; a column that is most opaque low
+        # down and diffuses as it rises; and a lean with a bend in it rather than a straight
+        # stack. The rotation is suggested by curved streaks inside the column — without
+        # them it is just a shape.
+        import math
+        # data-foot: the group has NO transform — every point in it is authored in
+        # absolute scene coordinates — so the engine has to be told where the thing
+        # touches the ground before it can drift, sway or scale it about that point.
+        o = [f'<g id="{gid}" class="cc-dustdevil" data-foot="{x},{base}">']
+
+        def axis(t):
+            return (x + h * 0.2 * (t ** 1.7) + h * 0.05 * math.sin(t * 4.4),
+                    base - h * t)
+
+        def half_w(t):
+            return h * (0.018 + 0.075 * (t ** 1.15))
+
+        for band, (op, wf, col) in enumerate(((0.16, 1.5, '#cbab7e'),
+                                              (0.3, 1.0, '#c19c6c'),
+                                              (0.46, 0.58, '#b08a5a'))):
+            n = 16
+            pts = [(axis(i / n), half_w(i / n) * wf) for i in range(n + 1)]
+            left = ' '.join(f'L{a[0] - w:.0f},{a[1]:.0f}' for a, w in pts)
+            right = ' '.join(f'L{a[0] + w:.0f},{a[1]:.0f}' for a, w in reversed(pts))
+            o.append(f'<path d="M{pts[0][0][0] - pts[0][1]:.0f},{pts[0][0][1]:.0f} '
+                     f'{left} {right} Z" fill="{col}" opacity="{op}"/>')
+        # the streaks that say it is TURNING
+        for k_, (t0, t1, off) in enumerate(((0.12, 0.5, -0.5), (0.3, 0.72, 0.55),
+                                            (0.5, 0.9, -0.4))):
+            a0, a1 = axis(t0), axis(t1)
+            am = axis((t0 + t1) / 2)
+            w0, wm = half_w(t0), half_w((t0 + t1) / 2)
+            o.append(f'<path d="M{a0[0] + off * w0 * 1.4:.0f},{a0[1]:.0f} '
+                     f'Q{am[0] - off * wm * 1.9:.0f},{am[1]:.0f} '
+                     f'{a1[0] + off * half_w(t1) * 1.2:.0f},{a1[1]:.0f}" '
+                     f'stroke="#a8814f" stroke-width="{h * 0.014:.1f}" fill="none" '
+                     f'opacity="0.34" stroke-linecap="round"/>')
+        # the foot: a bright flare of lifted dirt, which is what anchors it to the ground
+        o.append(f'<ellipse cx="{x:.0f}" cy="{base:.0f}" rx="{h * 0.13:.0f}" '
+                 f'ry="{h * 0.03:.0f}" fill="#cbab7e" opacity="0.5"/>')
+        o.append(f'<path d="M{x - h * 0.13:.0f},{base:.0f} '
+                 f'Q{x - h * 0.05:.0f},{base - h * 0.05:.0f} {x - h * 0.02:.0f},'
+                 f'{base - h * 0.09:.0f} L{x + h * 0.02:.0f},{base - h * 0.09:.0f} '
+                 f'Q{x + h * 0.06:.0f},{base - h * 0.05:.0f} {x + h * 0.13:.0f},'
+                 f'{base:.0f} Z" fill="#bd9866" opacity="0.6"/>')
+        o.append(f'<ellipse cx="{x - h * 0.05:.0f}" cy="{base - h * 0.012:.0f}" '
+                 f'rx="{h * 0.05:.0f}" ry="{h * 0.02:.0f}" fill="#d8bb90" '
+                 f'opacity="0.55"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(f'<path id="dust-path" class="cc-path" d="M-90,392 L1370,384" '
+                f'fill="none" stroke="none"/>')
+    back.append(dust_devil(700, 396, 168))
+
+    # ================================================================ NEAR FIELD ===
+    fr = ['    ']
+    # a barbed-wire fence along the near shoulder
+    for x0, x1 in ((-40, 486), (760, 1330)):
+        K = 26.0
+        fr.append('<g opacity="0.9">')
+        for wy in (1.15, 0.85, 0.55):
+            fr.append(f'<rect x="{x0}" y="{592 - wy * K:.1f}" width="{x1 - x0}" '
+                      f'height="{0.06 * K:.1f}" fill="#6f6a58"/>')
+        for px in range(x0, x1, 78):
+            fr.append(f'<rect x="{px}" y="{592 - 1.3 * K:.0f}" width="{0.13 * K:.1f}" '
+                      f'height="{1.36 * K:.0f}" fill="#5e5646"/>')
+        fr.append('</g>')
+
+    # dry grass, and the red showing through it
+    rrg = rnd(97)
+    for i in range(360):
+        bx = rrg() * 1400 - 60
+        by = 528 + rrg() * 196
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 24 < bx < hi + 24:
+            continue
+        s = 0.8 + rrg() * 1.3
+        c = ('#c2a95e', '#a78c4a', '#d4bd76', '#8f7a3e')[int(rrg() * 4)]
+        fr.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.5 * s:.1f},{by - 7.4 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 0.3 * s:.1f},{by - 9 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 2 * s:.1f},{by - 7 * s:.1f}" '
+                  f'stroke="{c}" stroke-width="{1.15 * s:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="0.9"/>')
+
+
+    # THE HERO, drawn LAST so nothing grows through it. The grass scatter runs the full
+    # width of the near field, and appended after the machine it put weeds up the A-frame
+    # and across the counterweight. Anything with a silhouette worth reading goes on top of
+    # the texture, not under it.
+    #
+    # Near field, right of the road, at 0.55 of true scale — nothing here may rise above
+    # y=516 and a true-scale pumpjack at this depth would be 200px tall.
+    # MOVED RIGHT, off the OPEN button. At 786 the machine's HORSEHEAD — the part
+    # that nods, and the only reason to animate a pumpjack at all — sat at about
+    # x=756, and the button covers 691-871 from y 518 down. The A-frame and crank
+    # were in clear air and the one moving thing anybody would look at was behind
+    # a green circle. Everything else about the machine is unchanged; the whole
+    # thing simply stands 130px further from the road, which the lease has room
+    # for. Fourth scene the buttons have caught — see AMBIENT.md.
+    fr.append(pumpjack(916, 704, 196, 'cc-pumpjack-0', beam_deg=-9, crank_deg=52))
+    fr.append(tank_battery(1084, 690, 1.0))
+
+    fg = ['    ']
+    rrb = rnd(131)
+    for i in range(150):
+        bx = rrb() * 1400 - 60
+        by = 648 + rrb() * 84
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 30 < bx < hi + 30:
+            continue
+        # and keep clear of the machines: `foreground` paints AFTER `scenery-front`, so
+        # reordering within the near field was not enough on its own
+        if 770 < bx < 1000 or 1070 < bx < 1200:
+            continue
+        s = 1.3 + rrb() * 1.2
+        c = ('#b09a52', '#c2a95e', '#8f7a3e')[int(rrb() * 3)]
+        fg.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.7 * s:.1f},{by - 8 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 0.4 * s:.1f},{by - 9.6 * s:.1f} '
+                  f'M{bx:.0f},{by:.0f} L{bx + 2.2 * s:.1f},{by - 7.6 * s:.1f}" '
+                  f'stroke="{c}" stroke-width="{1.3 * s:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="0.92"/>')
+
+    return scene('oklahoma-city', 'Oklahoma City, Oklahoma',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fg),
+                     'roadkw': dict(surface='#5f5c58', surface2='#4c4a46',
+                                    shoulder=RED, dash='#ffe066'),
+                     'trackkw': dict(ballast='#a2937a', ballast_hi='#b2a389',
+                                     tie='#5a4634', rail='#cfd4d9'),
+                 }, defs=d)
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

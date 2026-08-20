@@ -404,6 +404,8 @@
     const flags = buildFlags(svg);
     const jets = buildJets(svg);
     const watchers = buildWatchers(svg);
+    const pumpjacks = buildPumpjacks(svg);
+    const devil = buildDustDevil(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -424,7 +426,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -2375,6 +2377,119 @@
     });
   }
 
+  // =======================================================================
+  // PUMPJACKS (.cc-pumpjack) — the set's first coupled linkage. Everything else
+  // that moves either travels along a path or turns as one rigid piece; this is
+  // three rotations that have to agree with each other, and a wrong one looks
+  // broken in a way a wrong tree does not.
+  //
+  //   .cc-pj-crank    turns CONTINUOUSLY about the gearbox shaft
+  //   .cc-pj-beam     rocks about the saddle on top of the A-frame
+  //     .cc-pj-pitman NESTED in the beam, hanging off its rear pin
+  //
+  // EVERY PIVOT IS ITS OWN GROUP'S ORIGIN, which the art did on purpose — so
+  // animating is only ever rewriting the rotate() and never touching the
+  // translate. Read each authored translate once and put it back every frame.
+  //
+  // beam = A·sin(theta) and pitman = -0.55·beam is an approximation, not a solved
+  // four-bar, and that is the right call: the exact answer moves the crank pin two
+  // or three pixels and costs a square root per machine per frame.
+  //
+  // SLOW, and NOT IN STEP. A real one runs six to twelve strokes a minute, and
+  // these are separately owned wells that would never be synchronised — three
+  // machines nodding together read as one machine copied three times, which is
+  // exactly what they are.
+  // =======================================================================
+  const PUMP = { swing: 9, pitman: -0.55, secs: 4.6, spread: 0.9 };
+
+  function buildPumpjacks(svg) {
+    const out = [];
+    const at = (el) => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)\s*\)/.exec(el.getAttribute('transform') || '');
+      return m ? 'translate(' + m[1] + ',' + m[2] + ') ' : '';
+    };
+    svg.querySelectorAll('.cc-pumpjack').forEach((node, i) => {
+      const crank = node.querySelector('.cc-pj-crank');
+      const beam = node.querySelector('.cc-pj-beam');
+      const pitman = node.querySelector('.cc-pj-pitman');
+      if (!crank || !beam) { console.warn('cc-pumpjack is missing its crank or beam'); return; }
+      out.push({
+        crank: crank, beam: beam, pitman: pitman,
+        ct: at(crank), bt: at(beam), pt: pitman ? at(pitman) : '',
+        // Each well its own rate and its own starting angle.
+        secs: PUMP.secs * (1 + (i % 3) * 0.17), phase: i * PUMP.spread,
+      });
+    });
+    return out;
+  }
+
+  function updatePumpjacks(t) {
+    const list = currentScene && currentScene.pumpjacks;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(p => {
+      const th = (secs / p.secs + p.phase) * TAU;
+      const beam = PUMP.swing * Math.sin(th);
+      p.crank.setAttribute('transform', p.ct + 'rotate(' + (th * 180 / Math.PI % 360).toFixed(1) + ')');
+      p.beam.setAttribute('transform', p.bt + 'rotate(' + beam.toFixed(2) + ')');
+      if (p.pitman) {
+        p.pitman.setAttribute('transform',
+          p.pt + 'rotate(' + (PUMP.pitman * beam).toFixed(2) + ')');
+      }
+    });
+  }
+
+  // =======================================================================
+  // A DUST DEVIL (.cc-dustdevil) — wanders across the field on #dust-path.
+  //
+  // Not a tornado, and that is not an oversight: Moore is a suburb of this city.
+  // Do not "upgrade" it.
+  //
+  // Slow enough to be scenery rather than an event — half a minute to cross —
+  // with a small sway about its FOOT, which is where the group's origin is. It
+  // fades up at one end and away at the other, because a dust devil forms and
+  // collapses rather than walking on from off stage, and it takes the depth
+  // scale so drifting toward the city shrinks it.
+  // =======================================================================
+  const DEVIL = { secs: 34, sway: 2.6, swaySecs: 5.3, fade: 0.14 };
+
+  function buildDustDevil(svg) {
+    const el = svg.querySelector('.cc-dustdevil');
+    const path = svg.querySelector('[id$="dust-path"]');
+    if (!el || !path || !path.getTotalLength) return null;
+    let total = 0;
+    try { total = path.getTotalLength(); } catch (e) { return null; }
+    if (!total) return null;
+    // WHERE IT TOUCHES THE GROUND, from the art. This group has no transform at
+    // all — its geometry is authored in absolute scene coordinates — so a bare
+    // translate ADDS to coordinates that already place it, and the column sails
+    // off the right of the frame. The handoff said the origin was at the foot; it
+    // is not, and data-foot is how the art says so instead.
+    const f = (el.getAttribute('data-foot') || '').split(',').map(Number);
+    if (f.length !== 2 || f.some(isNaN)) { console.warn('cc-dustdevil has no data-foot'); return null; }
+    return { el: el, path: path, total: total, t: 0.42,
+             fx: f[0], fy: f[1], base: depthScale(f[1]) };
+  }
+
+  function updateDustDevil(dt, t) {
+    const d = currentScene && currentScene.devil;
+    if (!d) return;
+    d.t += (dt / 1000) / DEVIL.secs;
+    if (d.t >= 1) d.t -= 1;
+    const p = d.path.getPointAtLength(d.total * d.t);
+    const sway = DEVIL.sway * Math.sin((t / 1000 / DEVIL.swaySecs) * TAU);
+    // Depth, off the same rule as everything else, normalised so it is drawn at
+    // the size the art chose when it is where the art put it.
+    const k = depthScale(p.y) / d.base;
+    const fade = Math.min(1, d.t / DEVIL.fade, (1 - d.t) / DEVIL.fade);
+    d.el.setAttribute('opacity', Math.max(0, fade).toFixed(3));
+    // Rotate and scale about the FOOT, then put the foot where the path says.
+    d.el.setAttribute('transform',
+      'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ') rotate('
+      + sway.toFixed(2) + ') scale(' + k.toFixed(3) + ') translate('
+      + (-d.fx) + ',' + (-d.fy) + ')');
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -4121,6 +4236,8 @@
     updateFlags(t);
     updateJets(t);
     updateWatchers(dt);
+    updatePumpjacks(t);
+    updateDustDevil(dt, t);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);

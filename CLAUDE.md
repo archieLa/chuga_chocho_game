@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **47 done, across 43 states + DC** — Birmingham (AL) is the newest: Sloss Furnaces, drawn COLD on purpose, with a tour party walking the site. Bentonville (AR) before it is the first scene with a SECOND signalled crossing, its bike signal green when the railway gate is down. |
+| Locations | **48 done, across 44 states + DC** — Oklahoma City (OK) is the newest: the oil field with the city behind it, and the set's first COUPLED LINKAGE in its three pumpjacks. Birmingham (AL) before it is Sloss Furnaces, drawn COLD on purpose. |
 | Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts; Bailey Yard's crane loads a container or a boxcar the same way). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |

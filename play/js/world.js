@@ -392,6 +392,18 @@
       // working furnace: no pour, no heat in the sky.
       scenery:{ theme:'iron-city', features:['stoves','stacks','skiphoist','kudzu','vulcan'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'oklahomacity', state:'Oklahoma', city:'Oklahoma City',
+      say:{ en:'Oklahoma City', pl:'Oklahoma City' },
+      scene:'oklahoma-city',
+      // Viewpoint: the oil field with the city behind it. The city is built on the Oklahoma
+      // City Oil Field and its capitol grounds are the only ones in the US carrying working
+      // rigs, so pumpjacks belong here as completely as in any pasture. Three of them, well
+      // apart; the capitol and its lattice derrick small at the left; the skyline right.
+      // The set's FIRST TRUE LINKAGE — see HANDOFF for the crank/beam/pitman contract.
+      // A dust devil crosses the field. Deliberately not a tornado; see the scene docstring.
+      scenery:{ theme:'oil-patch', features:['pumpjacks','tankbattery','dustdevil','capitol'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';
