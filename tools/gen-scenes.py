@@ -1655,18 +1655,25 @@ def nyc():
             # and it drives away, which is a beginning-middle-end and the only
             # sequence in the game.
             + passenger(962, 532, 1000, 506, 'alight', 0.72, '#e8d24a', '#37414f', '#8a5a3c',
-                        bus='944,588')
+                        bus='988,612')
             + passenger(1014, 530, 1042, 506, 'alight', 0.80, '#4f8a6a', '#2f3440', '#e0b58c',
-                        bus='966,590')
+                        bus='1016,614')
             + passenger(1064, 532, 1080, 506, 'board', 0.74, '#7a4f9e', '#4a4a52', '#c98d63', '#2f3440')
             + passenger(1104, 530, 1112, 506, 'board', 0.78, '#3f6a8c', '#2f3440', '#8a5a3c'))
 
     # THE BUS THE TRANSFER FEEDS. It leaves to the RIGHT, away from the crossing,
     # over pavement that carries nothing else — so it never has to give way to the
     # engine's road cars and never touches the gate. data-bay is where it stands.
-    BUS = (' class="cc-bus-stop" data-bay="980" data-away="1470" data-speed="165"'
+    # SIZED OFF THE TAXI AND THE DEPTH RULE, not by eye. At 0.72 the bus was 138px
+    # long and 37 tall — the same height as a person standing beside it, and
+    # barely longer than the taxi, when a bus is two and a half taxis. The taxi is
+    # 128px for about 5m at y=690, so 21.8 px/m down here, so a 12m bus is 262px:
+    # scale 1.3. It also drops off the pavement into the STREET, which is where a
+    # bus stands and which is now the only place a bus that size fits under the
+    # platform.
+    BUS = (' class="cc-bus-stop" data-bay="1005" data-away="1500" data-speed="185"'
            ' data-lead="1.0" data-gone="7"')
-    front = ('    ' + stop + bus(980, 596, 0.72, gid='cc-m14', extra=BUS) + cart(432, 700, 1.1)
+    front = ('    ' + stop + bus(1005, 622, 1.3, gid='cc-m14', extra=BUS) + cart(432, 700, 1.1)
              # somebody at the cart and somebody by the bench, so the street is not
              # empty between trains
              # Clear of the taxi (186-314) and the right-hand oak, both of which are
@@ -1676,7 +1683,10 @@ def nyc():
              + ''.join(pigeon(x, y, sc) for x, y, sc in
                        [(348, 712, 1.1), (372, 704, 0.95), (318, 700, 0.9),
                         (1096, 690, 1.05), (1120, 700, 0.9)])
-             + taxi(250, 690, 1.1) + subway_ent(1020, 660, 1.05) + steam(830, 700)
+             # The entrance stood at 1020, which a full-size bus now occupies. Moved
+             # across the street, where it fills the gap between the taxi and the
+             # CLOSE button and gives the pigeons something to be standing outside.
+             + taxi(250, 690, 1.1) + subway_ent(352, 692, 1.05) + steam(830, 700)
              + oak(90, 700, 0.95, '#3d7548', '#4a8a56') + oak(1210, 706, 0.9, '#3d7548', '#4a8a56')
              + ''.join(f'<g transform="translate({x},{y})">'
                        f'<rect x="-3" y="-74" width="7" height="74" fill="#2f333a"/>'
@@ -1689,7 +1699,7 @@ def nyc():
              '<rect x="-9" y="-34" width="18" height="40" rx="4" fill="#c0392b"/>'
              '<rect x="-15" y="-24" width="30" height="8" rx="3" fill="#c0392b"/>'
              '<circle cx="0" cy="-38" r="8" fill="#d24a3b"/></g>'
-             + f'<g transform="translate(1140,630)">{shadow(0, 6, 40, 8)}'
+             + f'<g transform="translate(1190,646)">{shadow(0, 6, 40, 8)}'
              '<rect x="-38" y="-14" width="76" height="9" rx="3" fill="#4f6b3f"/>'
              '<rect x="-38" y="-30" width="76" height="8" rx="3" fill="#5d7d4a"/>'
              '<rect x="-32" y="-6" width="8" height="18" fill="#2f333a"/>'
