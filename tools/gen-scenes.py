@@ -10859,14 +10859,26 @@ def horseshoe_curve():
                 f'<circle cx="0" cy="-110" r="6.4" fill="#31383f"/>'
                 f'<path d="M-15,-136 L15,-136 L18,-142 L-18,-142 Z" fill="#232a30"/></g>')
 
-    def person(x, y, s=1.0, top='#b8442f', bottom='#3f4650', skin='#c98d63'):
-        return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
+    def person(x, y, s=1.0, top='#b8442f', bottom='#3f4650', skin='#c98d63', watch=False):
+        """A figure, optionally one that POINTS at whatever train there is.
+
+        Horseshoe Curve is a place people go to in order to watch trains, so its
+        figures ought to notice one. Turning them to face it is no use — they are
+        drawn front-on and symmetric, so mirroring changes nothing on screen. The
+        ARM is the whole trick: a raised arm changes the silhouette, and that
+        reads at ten pixels where a turned head does not. Each arm is tagged with
+        the side of the body it is on so nobody points across their own chest."""
+        cls = ' class="cc-watch"' if watch else ''
+        def arm(ax, side):
+            g = (f'<rect x="{ax}" y="-39" width="4" height="17" rx="2" fill="{top}"/>')
+            return (f'<g class="cc-point" data-pivot="{ax + 2},-37" data-side="{side}">{g}</g>'
+                    if watch else g)
+        return (f'<g{cls} transform="translate({x},{y}) scale({s})">{shadow(0, 1, 11, 3, 0.16)}'
                 f'<g fill="{bottom}"><rect x="-6" y="-21" width="5" height="21" rx="2"/>'
                 f'<rect x="1" y="-21" width="5" height="21" rx="2"/></g>'
                 f'<rect x="-8" y="-41" width="16" height="22" rx="5" fill="{top}"/>'
-                f'<rect x="-11" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
-                f'<rect x="7" y="-39" width="4" height="17" rx="2" fill="{top}"/>'
-                f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
+                + arm(-11, -1) + arm(7, 1)
+                + f'<circle cx="0" cy="-48" r="7" fill="{skin}"/>'
                 f'<path d="M-7,-51 C -7,-57 7,-57 7,-51 Z" fill="#3f3128"/></g>')
 
     def car(x, y, s=1.0, body='#2f5f9e'):
@@ -10968,7 +10980,7 @@ def horseshoe_curve():
             + '    ' + car_park(634, 372, 150, 1.0)
             + funicular(722, 370, 818, 320)
             + visitor(836, 398, 0.44)
-            + ''.join(person(x, 382, 0.3) for x in (550, 584, 716, 748))
+            + ''.join(person(x, 382, 0.3, watch=True) for x in (550, 584, 716, 748))
             + signal(214, 428, 0.36) + signal(1058, 430, 0.36)
             + ''.join(pine(x, y, sc) for x, y, sc in
                       [(96, 440, 0.4), (1190, 442, 0.42), (330, 444, 0.3),
@@ -10993,8 +11005,16 @@ def horseshoe_curve():
                         (1168, 636, 0.9), (424, 588, 0.5), (868, 592, 0.54)])
              + signal(252, 560, 0.5) + signal(1036, 566, 0.52)
              + car(300, 700, 0.62, '#b8342c') + car(986, 690, 0.58, '#e8e2d2')
-             + person(452, 660, 0.8, '#2f6f8c') + person(486, 666, 0.74, '#e0983c')
-             + person(830, 668, 0.82, '#7a4f9e')
+             # THE PEOPLE WHO CAME HERE TO WATCH, and they can now be SEEN doing
+             # it. All three stood at 452, 486 and 830, which is behind the CLOSE
+             # and OPEN buttons (x 409-589 and 691-871 from y 518 down) — three
+             # figures in the two places on the near side where nobody can look.
+             # Moved out to either end, beside the cars they arrived in, and given
+             # arms that go up at whichever train is passing.
+             + person(348, 656, 0.8, '#2f6f8c', watch=True)
+             + person(382, 664, 0.74, '#e0983c', watch=True)
+             + person(916, 662, 0.82, '#7a4f9e', watch=True)
+             + person(948, 668, 0.76, '#c8762c', watch=True)
              + '<g>' + ''.join(
                  f'<g><ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r*0.42:.0f}" '
                  f'fill="#3f6231"/>'

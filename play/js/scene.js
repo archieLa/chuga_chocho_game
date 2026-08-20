@@ -403,6 +403,7 @@
     const drifts = buildDrifts(svg);
     const flags = buildFlags(svg);
     const jets = buildJets(svg);
+    const watchers = buildWatchers(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -423,7 +424,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -2302,6 +2303,78 @@
     });
   }
 
+  // =======================================================================
+  // WATCHERS (.cc-watch) — people at a lineside overlook, pointing at the train.
+  //
+  // Horseshoe Curve is a place people GO TO WATCH TRAINS, so the one thing its
+  // figures should do is notice one. Turning them to face it is no use: they are
+  // drawn front-on and symmetric, so a mirror changes nothing on screen. An ARM
+  // does — a raised arm is a silhouette change, and it reads at ten pixels where
+  // a turned head does not.
+  //
+  //   .cc-watch          the figure
+  //     .cc-point        an arm, with data-pivot="x,y" at the SHOULDER and
+  //                      data-side="-1|1" for which side of the body it is on.
+  //                      Only the arm on the train's side goes up, so nobody
+  //                      points across their own chest.
+  //
+  // It follows whichever train there is — the child's when one is running,
+  // otherwise the one going round the bowl — and the arms come down when it is
+  // too far off to be worth pointing at, which is what makes the raising read as
+  // a reaction rather than a pose.
+  // =======================================================================
+  // PAST HORIZONTAL. An arm hangs at 0 and horizontal is 90, so anything less
+  // than that is a shrug — the first try used 58 and the watchers stood with
+  // their elbows out. 108 puts the hand above the shoulder, pointing up at a
+  // train that is always higher up the hillside than they are.
+  const WATCH = { reach: 460, lift: 108, secs: 0.45 };
+
+  function buildWatchers(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-watch').forEach(node => {
+      const m = /translate\(\s*(-?[\d.]+)/.exec(node.getAttribute('transform') || '');
+      const arms = [].map.call(node.querySelectorAll('.cc-point'), el => {
+        const p = (el.getAttribute('data-pivot') || '0,0').split(',').map(Number);
+        return { el: el, px: p[0] || 0, py: p[1] || 0,
+                 side: parseFloat(el.getAttribute('data-side')) || 1, a: 0 };
+      });
+      if (arms.length) out.push({ x: m ? +m[1] : 0, arms: arms });
+    });
+    return out;
+  }
+
+  /** Where the nearest train is, in scene x, or null if there is none to see. */
+  function watchTarget() {
+    if (train.active) return train.head;
+    const c = currentScene && currentScene.curve;
+    if (c && c.path) {
+      try { return c.path.getPointAtLength(clamp(c.dist, 0, c.exitAt)).x; } catch (e) { return null; }
+    }
+    return null;
+  }
+
+  function updateWatchers(dt) {
+    const list = currentScene && currentScene.watchers;
+    if (!list || !list.length) return;
+    const tx = watchTarget();
+    const step = WATCH.lift * (dt / 1000) / WATCH.secs;
+    list.forEach(w => {
+      const dx = tx == null ? null : tx - w.x;
+      const near = dx != null && Math.abs(dx) < WATCH.reach;
+      w.arms.forEach(arm => {
+        // Up only if the train is on THIS arm's side of the body.
+        // NEGATIVE side, because SVG rotates clockwise: a hanging arm swung by
+        // +108 goes out to the LEFT and by -108 to the right. Getting this
+        // backwards folds both arms across the chest, where they vanish behind
+        // the torso and read as a shrug.
+        const want = (near && (dx > 0 ? 1 : -1) === arm.side) ? -arm.side * WATCH.lift : 0;
+        arm.a += clamp(want - arm.a, -step, step);
+        arm.el.setAttribute('transform',
+          'rotate(' + arm.a.toFixed(1) + ',' + arm.px + ',' + arm.py + ')');
+      });
+    });
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -4047,6 +4120,7 @@
     updateDrifts(t, dt);
     updateFlags(t);
     updateJets(t);
+    updateWatchers(dt);
     updateGeysers(t);
     updateAurora(t);
     updateCanters(dt);
