@@ -26311,7 +26311,10 @@ def oklahoma_city():
                     f'stroke-width="{wdt}" fill="none" stroke-linecap="round"/>')
         back.append(f'<path d="M1340,442 C 1180,436 1060,438 984,440" stroke="{col}" '
                     f'stroke-width="{wdt}" fill="none" stroke-linecap="round"/>')
-    back.append(tank_battery(150, 428, 0.62))
+    # Same correction out in the field, scaled off ITS pumpjack rather than the
+    # near one: 2.0 * 118/196, so the two batteries are the same size relative to
+    # the machine they serve.
+    back.append(tank_battery(150, 428, 1.2))
     back.append(pumpjack(352, 424, 118, 'cc-pumpjack-1', beam_deg=6, crank_deg=210,
                          body='#b8a074', dark='#8a7550', lite='#d2be93'))
     back.append(pumpjack(950, 438, 146, 'cc-pumpjack-2', beam_deg=-5, crank_deg=110))
@@ -26425,8 +26428,20 @@ def oklahoma_city():
     # a green circle. Everything else about the machine is unchanged; the whole
     # thing simply stands 130px further from the road, which the lease has room
     # for. Fourth scene the buttons have caught — see AMBIENT.md.
-    fr.append(pumpjack(916, 704, 196, 'cc-pumpjack-0', beam_deg=-9, crank_deg=52))
-    fr.append(tank_battery(1084, 690, 1.0))
+    # THE TANK BATTERY IS NEARLY AS TALL AS THE MACHINE. It was drawn at a third
+    # of the pumpjack's height and a stock tank is nothing like that small — in
+    # the photographs the three tanks come up to about the height of the Samson
+    # post, and the separator beside them is taller than the horsehead. Drawn
+    # short they read as oil drums standing next to a derrick.
+    #
+    # Doubled, and the pair re-laid so both still fit: the battery takes 876-1076
+    # (clear of the OPEN button, which ends at 871) and the machine 1075-1281,
+    # which is the width of the near field right of the road. Tanks now stand at
+    # 0.58 of the machine's saddle height rather than 0.29. Not the photograph's
+    # 0.8 — there is not enough frame for that and a whole pumpjack — but it is
+    # the difference between a tank farm and a row of barrels.
+    fr.append(tank_battery(892, 690, 2.0))
+    fr.append(pumpjack(1082, 704, 196, 'cc-pumpjack-0', beam_deg=-9, crank_deg=52))
 
     fg = ['    ']
     rrb = rnd(131)
@@ -26438,7 +26453,7 @@ def oklahoma_city():
             continue
         # and keep clear of the machines: `foreground` paints AFTER `scenery-front`, so
         # reordering within the near field was not enough on its own
-        if 770 < bx < 1000 or 1070 < bx < 1200:
+        if 860 < bx < 1300:
             continue
         s = 1.3 + rrb() * 1.2
         c = ('#b09a52', '#c2a95e', '#8f7a3e')[int(rrb() * 3)]
