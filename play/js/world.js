@@ -404,6 +404,18 @@
       // A dust devil crosses the field. Deliberately not a tornado; see the scene docstring.
       scenery:{ theme:'oil-patch', features:['pumpjacks','tankbattery','dustdevil','capitol'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'wisconsindells', state:'Wisconsin', city:'Wisconsin Dells',
+      say:{ en:'Wisconsin Dells', pl:'Wisconsin Dells' },
+      scene:'wisconsin-dells',
+      // Viewpoint: the water park on the left, the sandstone gorge on the right. The set
+      // had no water play in it anywhere, which for this audience was a bigger hole than
+      // any missing state. HEADLINE ANIMATION: a child rides the near flume and lands in
+      // a splash (#slide-path, .cc-slider, .cc-splash). Also a duck boat driving down the
+      // slipway into the Wisconsin River (#duck-path, .cc-duck, .cc-duck-tilt) and a
+      // rider visible as a shadow inside the translucent tube (#tube-path).
+      scenery:{ theme:'waterpark', features:['slidetower','flume','splash','gorge','duckboat','depot'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

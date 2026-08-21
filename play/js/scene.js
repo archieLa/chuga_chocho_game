@@ -407,6 +407,9 @@
     const pumpjacks = buildPumpjacks(svg);
     const devil = buildDustDevil(svg);
     const busStop = buildBusStop(svg);
+    const slide = buildSlide(svg);
+    const tube = buildTube(svg);
+    const duck = buildDuck(svg);
     const geysers = buildGeysers(svg);
     const aurora = buildAurora(svg);
     const canters = buildCanters(svg);
@@ -427,7 +430,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -2595,6 +2598,197 @@
       + (-d.fx) + ',' + (-d.fy) + ')');
   }
 
+  // =======================================================================
+  // WISCONSIN DELLS — the water park. Three separate things, one shared idea:
+  // sample a drawn path, and let the ART decide the shape of the motion.
+  //
+  // A tiny helper first, because all three want the same thing.
+  // =======================================================================
+  function pathOf(svg, name) {
+    const el = svg.querySelector('[id$="' + name + '"]');
+    if (!el || !el.getTotalLength) return null;
+    let total = 0;
+    try { total = el.getTotalLength(); } catch (e) { return null; }
+    return total ? { el: el, total: total } : null;
+  }
+
+  function pointAt(p, u) {
+    const d = clamp(u, 0, 1) * p.total;
+    const a = p.el.getPointAtLength(Math.max(0, d - 2));
+    const b = p.el.getPointAtLength(Math.min(p.total, d + 2));
+    const here = p.el.getPointAtLength(d);
+    return { x: here.x, y: here.y, vx: b.x - a.x, vy: b.y - a.y };
+  }
+
+  // ---- THE SLIDE (.cc-slider on #slide-path, .cc-splash at the bottom) ----
+  //
+  // THE SPEED IS THE POINT. A rider at constant speed down this path is a
+  // sticker being dragged along a line; what makes it a slide is accelerating
+  // into the drop and running out of steam along the flat. So the profile is
+  // written as a velocity curve over the path rather than as an easing of
+  // position — it says what it means, and the peak sits at the DROP (about a
+  // third of the way down) rather than at the middle, which is where a plain
+  // smoothstep would have put it.
+  //
+  // Each rider group is a bare translate with the pose on an inner group; the
+  // art did that so rotation and scale never fight the position. Scale comes off
+  // depthScale, normalised at the authored point, so a rider grows as it comes
+  // toward the viewer without anybody choosing numbers.
+  const SLIDE = { secs: 2.1, gap: 0.55, hold: 0.9, base: 596 };
+
+  function slideSpeed(u) {
+    if (u < 0.14) return 0.4 + 0.6 * (u / 0.14);      // push off, pick up
+    if (u < 0.48) return 1;                            // the drop
+    return 1 - 0.78 * ((u - 0.48) / 0.52);             // the runout
+  }
+
+  function buildSlide(svg) {
+    const path = pathOf(svg, 'slide-path');
+    const riders = svg.querySelectorAll('.cc-slider');
+    if (!path || !riders.length) return null;
+    const splashEl = svg.querySelector('.cc-splash');
+    let splash = null;
+    if (splashEl) {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(splashEl.getAttribute('transform') || '');
+      splash = { el: splashEl, x: m ? +m[1] : 398, y: m ? +m[2] : 662, t: 99 };
+      splashEl.setAttribute('opacity', '0.72');
+    }
+    return {
+      path: path, splash: splash,
+      riders: [].map.call(riders, (el, i) => ({
+        el: el, inner: el.firstElementChild,
+        // Staggered, so one is on the drop while the next is still at the top.
+        u: -i * SLIDE.gap, wait: 0,
+      })),
+    };
+  }
+
+  function updateSlide(dt) {
+    const s = currentScene && currentScene.slide;
+    if (!s) return;
+    const secs = dt / 1000;
+    const k0 = depthScale(SLIDE.base);
+    s.riders.forEach(r => {
+      if (r.wait > 0) { r.wait -= secs; return; }
+      r.u += slideSpeed(Math.max(0, r.u)) * secs / SLIDE.secs;
+      if (r.u >= 1) {                       // into the pool, and back to the steps
+        r.u = 0; r.wait = SLIDE.hold;
+        if (s.splash) s.splash.t = 0;
+      }
+      const at = pointAt(s.path, Math.max(0, r.u));
+      const k = depthScale(at.y) / k0;
+      r.el.setAttribute('transform', 'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ')');
+      if (r.inner) {
+        r.inner.setAttribute('transform',
+          'rotate(' + (Math.atan2(at.vy, at.vx) * 180 / Math.PI).toFixed(1)
+          + ') scale(' + k.toFixed(3) + ')');
+      }
+      r.el.setAttribute('opacity', r.u < 0 ? '0' : '1');
+    });
+    // THE PUNCH. Up hard, back down slowly — 120ms out and half a second back,
+    // which is the difference between a splash and a pulsing blob.
+    if (s.splash) {
+      const p = s.splash;
+      p.t += secs;
+      const up = clamp(p.t / 0.12, 0, 1);
+      const down = clamp((p.t - 0.12) / 0.5, 0, 1);
+      const k = 1 + 0.35 * (up - up * down);
+      p.el.setAttribute('opacity', (0.72 + 0.28 * (up - up * down)).toFixed(3));
+      p.el.setAttribute('transform',
+        'translate(' + p.x + ',' + p.y + ') scale(' + k.toFixed(3) + ') translate('
+        + (-p.x) + ',' + (-p.y) + ')');
+    }
+  }
+
+  // ---- THE ENCLOSED TUBE (.cc-tube-rider on #tube-path) ----
+  //
+  // The small one, and a different IDEA from the open flume rather than a second
+  // helping of it: a dark shape seen THROUGH the plastic. The art sandwiched it
+  // between the tube's body and its highlight, so translating it is all that is
+  // needed for it to look enclosed. Faster than the open slide, on its own clock,
+  // and faded at both ends because a rider that pops into existence at the top of
+  // a tube is a rider nobody believes is inside it.
+  // A 2.6s gap left the tube empty for two thirds of the time, which reads as a
+  // ride nobody is using. 1.4 keeps somebody in it more often than not.
+  const TUBE = { secs: 1.5, gap: 1.4, fade: 0.12 };
+
+  function buildTube(svg) {
+    const path = pathOf(svg, 'tube-path');
+    const el = svg.querySelector('.cc-tube-rider');
+    return (path && el) ? { path: path, el: el, t: 0 } : null;
+  }
+
+  function updateTube(dt) {
+    const t = currentScene && currentScene.tube;
+    if (!t) return;
+    t.t += dt / 1000;
+    const span = TUBE.secs + TUBE.gap;
+    const u = (t.t % span) / TUBE.secs;
+    if (u > 1) { t.el.setAttribute('opacity', '0'); return; }
+    const at = pointAt(t.path, u);
+    t.el.setAttribute('transform', 'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ')');
+    t.el.setAttribute('opacity',
+      Math.min(1, u / TUBE.fade, (1 - u) / TUBE.fade).toFixed(2));
+  }
+
+  // ---- THE DUCK BOAT (.cc-duck on #duck-path) ----
+  //
+  // The Dells' amphibious tours drive down a ramp and keep going straight into
+  // the river. Three nested groups and each is ONE value: the root translates,
+  // .cc-duck-tilt pitches, .cc-duck-flip carries the heading.
+  //
+  // THE HEADING IS THE NEW IDEA. The boat is drawn in profile with its prow to
+  // the left, so it can only face two ways — and it turns round by easing
+  // scale(sx,1) from +1 THROUGH ZERO to -1. Passing through zero foreshortens the
+  // hull to nothing and brings it back the other way, which is what a boat
+  // swinging beam-on to the camera actually looks like. Eased, not linear:
+  // linear through zero is a card flip.
+  //
+  // SLOWLY. Twenty seconds end to end, the turn the slowest part of it. The charm
+  // is entirely in how unhurried a heavy thing entering water is.
+  //
+  // The waterline needs no code at all: the near half of the river is painted
+  // OVER the boat, so a duck translated along the path submerges for free.
+  const DUCK = { secs: 20, hold: 4, tilt: -15, bob: 1.5, bobSecs: 3.4 };
+
+  function buildDuck(svg) {
+    const path = pathOf(svg, 'duck-path');
+    const el = svg.querySelector('.cc-duck');
+    if (!path || !el) return null;
+    const tilt = el.querySelector('.cc-duck-tilt');
+    const flip = el.querySelector('.cc-duck-flip');
+    const bow = el.querySelector('.cc-duck-bow');
+    if (bow) bow.setAttribute('opacity', '0');
+    return { path: path, el: el, tilt: tilt, flip: flip, bow: bow, t: 0 };
+  }
+
+  function updateDuck(dt, now) {
+    const d = currentScene && currentScene.duck;
+    if (!d) return;
+    d.t += dt / 1000;
+    const span = DUCK.secs + DUCK.hold;
+    if (d.t > span) d.t -= span;
+    const u = clamp(d.t / DUCK.secs, 0, 1);
+    const at = pointAt(d.path, u);
+    d.el.setAttribute('transform', 'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ')');
+    // The run, as fractions of the path — the handoff's own table.
+    const wet = clamp((u - 0.30) / 0.12, 0, 1);          // crossing the waterline
+    const turn = ease(clamp((u - 0.42) / 0.18, 0, 1));   // the swing round
+    if (d.tilt) {
+      const bob = u > 0.6 ? DUCK.bob * Math.sin(now / 1000 / DUCK.bobSecs * TAU) : 0;
+      d.tilt.setAttribute('transform',
+        'rotate(' + (DUCK.tilt * (1 - wet) + bob).toFixed(2) + ')');
+    }
+    if (d.flip) {
+      const sx = 1 - 2 * turn;
+      // Never exactly zero: a zero scale collapses the group's own bounding box
+      // and some engines stop rendering it altogether on the way through.
+      d.flip.setAttribute('transform',
+        'scale(' + (Math.abs(sx) < 0.02 ? (sx < 0 ? -0.02 : 0.02) : sx).toFixed(3) + ',1)');
+    }
+    if (d.bow) d.bow.setAttribute('opacity', (0.5 * wet).toFixed(2));
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -3832,7 +4026,6 @@
     }
     updateShunt(dt);
     updateHalt(dt);
-    updateBusStop(dt);
     train.head += train.dir * TRAIN_SPEED * shuntSpeed(dt) * haltSpeed() * dt / 1000;
     const dist = placeTrain();
 
@@ -4341,6 +4534,14 @@
     updateDrifts(t, dt);
     updateFlags(t);
     updateJets(t);
+    // AMBIENT, so they belong HERE and not in updateTrain — that returns early
+    // when no train is on screen, which would freeze the bus halfway down the
+    // street and stop the water park entirely between trains. The bus is only
+    // TRIGGERED by a transfer; everything after that is its own business.
+    updateBusStop(dt);
+    updateSlide(dt);
+    updateTube(dt);
+    updateDuck(dt, t);
     updateWatchers(dt);
     updatePumpjacks(t);
     updateDustDevil(dt, t);

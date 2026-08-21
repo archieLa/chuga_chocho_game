@@ -16,7 +16,7 @@ That makes the classic bugs structurally impossible:
 
 See SCENE_GUIDE.md for the spec this implements. Run: python3 tools/gen-scenes.py
 """
-import pathlib
+import pathlib, math
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / 'play/assets/scenes'
 OUT.mkdir(parents=True, exist_ok=True)
@@ -26567,7 +26567,1051 @@ def oklahoma_city():
                  }, defs=d)
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city()
+def wisconsin_dells():
+    """WISCONSIN DELLS — the water park on one side, the sandstone gorge on the other.
+
+    The set had no water play in it anywhere: no pool, no slide, no splash. For an
+    audience of three- to five-year-olds that was a bigger hole than any missing state,
+    and this scene exists to fill it. The headline animation is a child going down a
+    flume and landing in a splash.
+
+    The whole risk of this scene was that it becomes **a second Cedar Point**, which is
+    already in the set and is also "a tangle of ride structure above the trees". Three
+    things separate them and all three are load-bearing:
+
+      * **Tubes, not lattice.** Cedar Point is angular steel track — straight members and
+        hard angles. A water park is fat, smooth, brightly coloured plastic FLUME that
+        curls and helixes. Curves against angles does most of the work on its own, and it
+        is why the tower here is drawn as stacked ELLIPSES wrapping a thin mast rather
+        than as a truss.
+      * **Water is the medium, not the backdrop.** Cedar Point has a lake behind it. Here
+        the water is the subject at both ends of the frame: cyan pool on the left, brown
+        river on the right, and the two are deliberately different colours of water.
+      * **THE GORGE**, which matters most. Draw only slides and this is Anywhere
+        Waterpark, USA.
+
+    Four things the reference corrected, all of which the first version got wrong:
+
+      * The cliffs are **pale cream and buff**, not the saturated orange I drew from
+        memory. Orange only appears in low evening light. In daylight they are the colour
+        of weak tea with milk, with ochre and grey-tan bands.
+      * The **basal ledge is the tell**. Every photograph shows a horizontal apron of rock
+        at the waterline, undercut, sticking out beyond the tower it belongs to, with a
+        hard shadow line above it. Moab is already in this set; that apron is what stops
+        a Dells butte and a Utah butte being the same drawing — and it only works if you
+        can SEE the water it stands in, which the first version hid behind trees.
+      * A Dells butte is **wide and rounded**, not a tall column. Drawn tall and narrow
+        with straight sides it reads as a grain silo, which is exactly what happened.
+      * The river is **olive-brown and the pool is cyan**, and the gap between those two
+        is worth more than either colour on its own.
+
+    The road runs to the vanishing point. That is the third scene in a row to do so, which
+    I counted as a strike against it, but this frame already carries a pool, a slide
+    tower, a gorge, a river and a duck ramp — a junction would have been one more thing to
+    read rather than one more thing to enjoy."""
+    PARK_BASE = 448          # the park's ground line, just clear of the ballast
+    GORGE_WATER = 358        # the river surface behind the railway
+    SHORE = 430              # where that water meets its near bank
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    # Sandstone: pale, warm, LOW saturation. The single thing the reference corrected
+    # hardest. The beds have to differ in VALUE, not just in hue, or they vanish.
+    ROCK = ['#eae0c9', '#d9caa8', '#c6b18c', '#f0e8d4', '#b9a37c', '#e0d3b4', '#cdbb97']
+    ROCK_DK = '#7d6a4c'
+    PINE, PINE_D, PINE_L = '#2f5b3c', '#22422c', '#427a51'
+    CYAN = '#2fb8d8'
+    CONC, CONC_D = '#dbd8cf', '#bab6ab'
+    TOPS = ['#e04f4f', '#f0b32a', '#2f8f5b', '#8a5bc0', '#e8722c', '#2f7fd0']
+
+    DEFS = []
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d84c6"/><stop offset="0.55" stop-color="#8dbcdd"/>
+      <stop offset="1" stop-color="#dceaf0"/>
+    </linearGradient>
+    <linearGradient id="wdgrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#82a659"/><stop offset="0.45" stop-color="#719b4d"/>
+      <stop offset="1" stop-color="#5e8a41"/>
+    </linearGradient>
+    <linearGradient id="wdpool" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ce2f2"/><stop offset="0.4" stop-color="#33bcdb"/>
+      <stop offset="1" stop-color="#1a8fb0"/>
+    </linearGradient>
+    <linearGradient id="wdriverback" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fc0cf"/><stop offset="0.3" stop-color="#5c88a2"/>
+      <stop offset="1" stop-color="#33607a"/>
+    </linearGradient>
+    <linearGradient id="wdrivernear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#547c93"/><stop offset="0.45" stop-color="#3d6076"/>
+      <stop offset="1" stop-color="#2a4557"/>
+    </linearGradient>'''
+
+    # =============================================================== SKY ===
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+
+    def cumulus(cx, base_y, w, seed):
+        r = rnd(seed)
+        o = ['<g>']
+        h = w * (0.5 + r() * 0.2)
+        o.append(f'<ellipse cx="{cx}" cy="{base_y - h * 0.06:.0f}" rx="{w * 0.5:.0f}" '
+                 f'ry="{h * 0.15:.0f}" fill="#bdd0dc"/>')
+        lobes = [(0.0, 0.6, 0.33), (-0.3, 0.4, 0.25), (0.31, 0.43, 0.26),
+                 (-0.13, 0.78, 0.21), (0.17, 0.76, 0.23), (0.0, 0.92, 0.16),
+                 (-0.45, 0.22, 0.19), (0.46, 0.25, 0.18)]
+        for fx, fy, fr in lobes:
+            o.append(f'<ellipse cx="{cx + w * fx:.0f}" cy="{base_y - h * fy:.0f}" '
+                     f'rx="{w * fr:.0f}" ry="{w * fr * 0.85:.0f}" fill="#ffffff"/>')
+        for fx, fy, fr in lobes[:4]:
+            o.append(f'<ellipse cx="{cx + w * fx - w * 0.05:.0f}" '
+                     f'cy="{base_y - h * fy - w * 0.05:.0f}" rx="{w * fr * 0.7:.0f}" '
+                     f'ry="{w * fr * 0.58:.0f}" fill="#ffffff"/>')
+        return ''.join(o) + '</g>'
+
+    for cx, by, w, sd in ((104, 118, 96, 3), (346, 88, 70, 5), (548, 138, 58, 7),
+                          (700, 78, 64, 9), (1040, 112, 74, 11), (1216, 74, 58, 13)):
+        sk.append(cumulus(cx, by, w, sd))
+
+    # =============================================================== FAR ===
+    # A soft wooded ridge closing the horizon. Wisconsin rolls; it is not the plains, and
+    # the ridge line is what says so. Drawn as one continuous mass with a dappled top
+    # rather than a row of separate blobs, which is what made the first version read as a
+    # privet hedge.
+    far = ['    ']
+    far.append('<path d="M-20,302 L-20,286 Q 140,268 300,280 Q 460,292 620,274 '
+               'Q 790,256 950,276 Q 1120,294 1300,272 L1300,302 Z" fill="#95b0a0" '
+               'opacity="0.9"/>')
+    rr = rnd(21)
+    x = -30
+    while x < 1320:
+        h = 5 + rr() * 9
+        far.append(f'<ellipse cx="{x:.0f}" cy="{293 - h * 0.3:.0f}" '
+                   f'rx="{7 + rr() * 10:.1f}" ry="{h * 0.5:.1f}" '
+                   f'fill="{"#5c7d59" if rr() < 0.5 else "#6a8a63"}" opacity="0.9"/>')
+        x += 11 + rr() * 13
+
+    # ============================================================ GROUND ===
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#wdgrass)"/>']
+
+    # ====================================================== SCENERY BACK ===
+    back = ['    ']
+
+    # ---------------------------------------------------------------------
+    # A DELLS WHITE PINE. Not the generator's `conifer` — that is a tidy party hat, and
+    # the trees on these cliffs are the opposite: open, leaning, with sky showing through
+    # and a bare length of trunk under the crown.
+    def pine(x, y, s=1.0, seed=1, dark=False):
+        r = rnd(seed)
+        a = PINE_D if dark else PINE
+        b = mix(a, '#000000', 0.2)
+        c = PINE_L if not dark else PINE
+        lean = (r() - 0.5) * 0.4
+        o = [f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">']
+        o.append(f'<path d="M{-1.5:.1f},2 L{-1.0 + lean * 30:.1f},-34 '
+                 f'L{1.0 + lean * 30:.1f},-34 L{1.5:.1f},2 Z" fill="#6b5b41"/>')
+        n = 5
+        for i in range(n):
+            t = i / (n - 1.0)
+            cy = -10 - t * 40
+            cx = lean * (-cy) * 0.55
+            w = (12.5 - t * 7.6) * (0.7 + r() * 0.55)
+            hh = (6.6 - t * 2.9) * (0.75 + r() * 0.5)
+            o.append(f'<ellipse cx="{cx - w * 0.36:.1f}" cy="{cy:.1f}" rx="{w * 0.68:.1f}" '
+                     f'ry="{hh:.1f}" fill="{b}"/>')
+            o.append(f'<ellipse cx="{cx + w * 0.32:.1f}" cy="{cy - hh * 0.32:.1f}" '
+                     f'rx="{w * 0.76:.1f}" ry="{hh * 0.92:.1f}" fill="{a}"/>')
+            if i >= n - 2:
+                o.append(f'<ellipse cx="{cx + w * 0.1:.1f}" cy="{cy - hh * 0.5:.1f}" '
+                         f'rx="{w * 0.4:.1f}" ry="{hh * 0.58:.1f}" fill="{c}"/>')
+        o.append(f'<path d="M{lean * 50 - 1.2:.1f},-50 L{lean * 62:.1f},-64 '
+                 f'L{lean * 50 + 1.2:.1f},-50 Z" fill="{a}"/>')
+        return ''.join(o) + '</g>'
+
+    # ---------------------------------------------------------------------
+    # THE RIVER BEHIND THE RAILWAY. It has to read as WATER against grass, and olive
+    # water on green grass is two things the same colour becoming one thing. Three
+    # separations do the work: it is darker than the grass, it carries a band of pale
+    # SKY REFLECTION along its far edge, and it meets the land at a hard pale shore.
+    back.append(f'<rect x="620" y="{GORGE_WATER}" width="680" '
+                f'height="{SHORE - GORGE_WATER}" fill="url(#wdriverback)"/>')
+
+    # ---------------------------------------------------------------------
+    # THE GORGE. A Dells butte is a WIDE rounded buttress standing in the water, and it
+    # needs five things or it is a silo:
+    #   1. battered, CURVED sides — never two straight verticals
+    #   2. horizontal bedding whose VALUE changes bed to bed, sagging across the face
+    #      because the face is round
+    #   3. a lit side and a shadow side with a hard edge between them
+    #   4. deep vertical clefts between the buttresses
+    #   5. THE BASAL LEDGE: an apron of rock at the waterline, undercut, sticking out
+    #      past the tower on both sides
+    # A rounded-corner polygon. A Dells butte is BLOCKY — near-vertical faces, a
+    # roughly level top with notches in it — and only its corners are rounded, because
+    # the rock is soft. Drawn with curved flanks the whole way up it comes out as a loaf
+    # of bread, which is what the second attempt produced.
+    def roundpoly(pts, rad):
+        n = len(pts)
+        out = []
+        for i in range(n):
+            p0, p1, p2 = pts[(i - 1) % n], pts[i], pts[(i + 1) % n]
+            d0 = max(math.hypot(p1[0] - p0[0], p1[1] - p0[1]), 1e-6)
+            d1 = max(math.hypot(p2[0] - p1[0], p2[1] - p1[1]), 1e-6)
+            t0, t1 = min(rad / d0, 0.5), min(rad / d1, 0.5)
+            ax = p1[0] + (p0[0] - p1[0]) * t0
+            ay = p1[1] + (p0[1] - p1[1]) * t0
+            bx = p1[0] + (p2[0] - p1[0]) * t1
+            by = p1[1] + (p2[1] - p1[1]) * t1
+            out.append(('M' if i == 0 else 'L') + f'{ax:.1f},{ay:.1f}')
+            out.append(f'Q {p1[0]:.1f},{p1[1]:.1f} {bx:.1f},{by:.1f}')
+        return ' '.join(out) + ' Z'
+
+    # the profile, in fractions of width and of height-below-the-top. One shape, jittered
+    # per butte, rather than a procedural silhouette that could come out as anything.
+    PROFILE = [(0.00, 1.00), (0.025, 0.66), (0.055, 0.62), (0.075, 0.26),
+               (0.11, 0.05), (0.30, 0.015), (0.345, 0.17), (0.47, 0.09),
+               (0.63, 0.00), (0.79, 0.06), (0.855, 0.27), (0.925, 0.32),
+               (0.955, 0.70), (1.00, 1.00)]
+
+    def butte(x0, x1, base, top, seed):
+        r = rnd(seed)
+        w, h = x1 - x0, base - top
+        pts = []
+        for fx, fy in PROFILE:
+            jx = (r() - 0.5) * w * 0.015
+            jy = (r() - 0.5) * h * 0.06 if 0 < fy < 1 else 0
+            pts.append((x0 + w * fx + jx, top + h * fy + jy))
+        # THE TOP SURFACE, as a function. Anything that stands on a generated shape has
+        # to be positioned FROM that shape — planting trees at a guessed y is how the
+        # first version ended up with pines hanging in the sky beside the cliff.
+        crest = [q for q in pts if q[1] < top + h * 0.5]
+
+        def topy(qx):
+            if qx <= crest[0][0]:
+                return crest[0][1]
+            for i in range(len(crest) - 1):
+                ax, ay = crest[i]
+                bx2, by2 = crest[i + 1]
+                if ax <= qx <= bx2:
+                    f = (qx - ax) / max(bx2 - ax, 1e-6)
+                    return ay + (by2 - ay) * f
+            return crest[-1][1]
+
+        p = roundpoly(pts, w * 0.026)
+        cid = f'wdb{seed}'
+        DEFS.append(f'    <clipPath id="{cid}"><path d="{p}"/></clipPath>')
+        o = ['<g>', f'<path d="{p}" fill="{ROCK[1]}"/>',
+             f'<g clip-path="url(#{cid})">']
+
+        # --- BEDS. A seeded walk over the palette, so runs of similar beds and the odd
+        #     dark one both happen. Strict alternation gives a layer cake — the mistake
+        #     Glacier made four times over. The beds SAG, because the face is round even
+        #     though the outline is square.
+        y, idx = top - 12, 0
+        while y < base + 16:
+            hgt = 4 + r() * 8
+            idx = (idx + 2 + int(r() * 4)) % len(ROCK)
+            sag = 4 + r() * 7
+            o.append(f'<path d="M{x0 - 16},{y:.1f} Q {(x0 + x1) / 2:.0f},{y + sag:.1f} '
+                     f'{x1 + 16},{y:.1f} L{x1 + 16},{y + hgt:.1f} '
+                     f'Q {(x0 + x1) / 2:.0f},{y + hgt + sag:.1f} '
+                     f'{x0 - 16},{y + hgt:.1f} Z" fill="{ROCK[idx]}"/>')
+            if r() < 0.72:
+                px0 = x0 - 16 + r() * w * 0.3
+                px1 = x1 + 16 - r() * w * 0.3
+                o.append(f'<path d="M{px0:.0f},{y + hgt:.1f} '
+                         f'Q {(px0 + px1) / 2:.0f},{y + hgt + sag:.1f} '
+                         f'{px1:.0f},{y + hgt:.1f}" stroke="{ROCK_DK}" '
+                         f'stroke-width="{1.2 + r() * 1.9:.1f}" fill="none" '
+                         f'opacity="{0.4 + r() * 0.4:.2f}"/>')
+            y += hgt
+
+        # --- deep vertical clefts between the buttresses
+        for i in range(2 + int(r() * 2)):
+            cx = x0 + w * (0.18 + r() * 0.62)
+            cw = w * (0.022 + r() * 0.03)
+            o.append(f'<path d="M{cx:.0f},{top - 12:.0f} '
+                     f'C {cx - cw * 1.5:.0f},{top + h * 0.35:.0f} '
+                     f'{cx + cw * 1.3:.0f},{top + h * 0.7:.0f} '
+                     f'{cx - cw * 0.5:.0f},{base + 8:.0f} '
+                     f'L{cx + cw * 2.3:.0f},{base + 8:.0f} '
+                     f'C {cx + cw * 3.4:.0f},{top + h * 0.66:.0f} '
+                     f'{cx + cw * 1.5:.0f},{top + h * 0.32:.0f} '
+                     f'{cx + cw * 1.8:.0f},{top - 12:.0f} Z" fill="#4e3f2a" '
+                     f'opacity="0.36"/>')
+
+        # --- the shadow side, with a HARD edge. That edge is what makes the tower round
+        #     instead of flat, and it has to be dark enough to see across the room.
+        sxe = x0 + w * 0.62
+        o.append(f'<polygon points="{sxe:.0f},{top - 16} {x1 + 18},{top - 16} '
+                 f'{x1 + 18},{base + 18} {sxe - w * 0.06:.0f},{base + 18}" '
+                 f'fill="#4e3f2a" opacity="0.36"/>')
+        o.append(f'<polygon points="{x0 + w * 0.08:.0f},{top - 16} '
+                 f'{x0 + w * 0.17:.0f},{top - 16} {x0 + w * 0.12:.0f},{base + 18} '
+                 f'{x0 + w * 0.03:.0f},{base + 18}" fill="#ffffff" opacity="0.24"/>')
+
+        # --- the CAP: a harder bed with a small overhang
+        capy = top + h * 0.26
+        o.append(f'<path d="M{x0 - 16},{capy - 14:.0f} L{x1 + 16},{capy - 16:.0f} '
+                 f'L{x1 + 16},{capy:.0f} L{x0 - 16},{capy + 4:.0f} Z" '
+                 f'fill="{ROCK[4]}" opacity="0.6"/>')
+        o.append(f'<path d="M{x0 - 16},{capy + 4:.0f} L{x1 + 16},{capy:.0f}" '
+                 f'stroke="#4e3f2a" stroke-width="3" fill="none" opacity="0.55"/>')
+        o.append('</g>')
+
+        # --- THE BASAL LEDGE, drawn OUTSIDE the clip so it sticks out past the tower.
+        #     This apron is the tell: it is what separates a Dells butte from the Utah
+        #     butte the set already has in Moab.
+        lo, hi = x0 - w * 0.035, x1 + w * 0.035
+        o.append(f'<path d="M{lo:.0f},{base - 11:.0f} L{hi:.0f},{base - 13:.0f} '
+                 f'L{hi:.0f},{base + 2:.0f} L{lo:.0f},{base + 2:.0f} Z" '
+                 f'fill="{ROCK[3]}"/>')
+        o.append(f'<path d="M{lo:.0f},{base - 11:.0f} L{hi:.0f},{base - 13:.0f} '
+                 f'L{hi:.0f},{base - 7:.0f} L{lo:.0f},{base - 5:.0f} Z" '
+                 f'fill="#3f3320" opacity="0.72"/>')
+        rr2 = rnd(seed + 7)
+        sx = lo + 4
+        while sx < hi - 6:
+            sw = 10 + rr2() * 26
+            o.append(f'<rect x="{sx:.0f}" y="{base - 6 + rr2() * 6:.1f}" '
+                     f'width="{sw:.0f}" height="{1.3 + rr2() * 1.6:.1f}" '
+                     f'fill="{ROCK_DK}" opacity="{0.3 + rr2() * 0.35:.2f}"/>')
+            sx += sw + 6 + rr2() * 16
+        # and the reflection, which is what puts the rock IN the water rather than on it
+        o.append(f'<path d="M{lo + 4:.0f},{base + 3:.0f} L{hi - 4:.0f},{base + 3:.0f} '
+                 f'L{hi - 26:.0f},{base + 15:.0f} L{lo + 26:.0f},{base + 15:.0f} Z" '
+                 f'fill="{ROCK[2]}" opacity="0.24"/>')
+        return ''.join(o) + '</g>', (x0 + w * 0.08, x1 - w * 0.08, topy)
+
+    # A WOODED TALUS beside the rock. Every photograph has one: the cliff on one side and
+    # a steep tree-covered slope on the other. Without it a butte is an object on a shelf
+    # rather than part of a valley side.
+    def talus(x0, x1, base, top, seed, n=26):
+        r = rnd(seed)
+        o = [f'<path d="M{x0},{base} Q {(x0 + x1) / 2:.0f},{top + 8} {x1},{base} Z" '
+             f'fill="#4a6b45"/>']
+        for k in range(n):
+            t = r()
+            tx = x0 + (x1 - x0) * t
+            # the slope is a quadratic Bezier with its control point at the midpoint, so
+            # its height at fraction t is 2t(1-t) of the rise — NOT 4t(1-t). Getting that
+            # factor wrong put every tree at twice the slope's height, which is most of
+            # the trees that were hanging in mid air.
+            surf = base - (base - top - 8) * 2 * t * (1 - t)
+            ty = surf + (base - surf) * r() * 0.55
+            o.append(pine(tx, ty + 5, 0.16 + r() ** 2 * 0.42, seed=int(r() * 900) + 1,
+                          dark=r() < 0.55))
+        return ''.join(o)
+
+    # a low wooded bluff on the left of the gorge, then the two big masses with the
+    # narrow channel between them that the town is actually named for
+    back.append(talus(548, 902, GORGE_WATER + 30, 304, 131, 58))
+    back.append(talus(1096, 1176, GORGE_WATER + 22, 318, 137, 14))
+    b1, k1 = butte(876, 1112, GORGE_WATER + 26, 228, 31)
+    b2, k2 = butte(1150, 1340, GORGE_WATER + 16, 208, 37)
+    back.append(b1)
+    back.append(b2)
+    back.append(talus(1290, 1368, GORGE_WATER + 20, 296, 139, 14))
+    # the slot between them, darker than the open river: a gorge is a GAP
+    back.append(f'<polygon points="1112,{GORGE_WATER + 12} 1150,{GORGE_WATER + 8} '
+                f'1150,{GORGE_WATER + 26} 1108,{GORGE_WATER + 30}" fill="#2e2716" '
+                f'opacity="0.62"/>')
+
+    rp = rnd(53)
+    for lo_, hi_, topy in (k1, k2):
+        # on the crown, standing on the rock: x inside the tower, y read off its own
+        # top surface. The size spread is the point — an even row of equal trees is a
+        # hedge, and a hedge on top of a cliff is what the first version drew.
+        for j in range(11):
+            # inboard of the edges: a tree planted right on the lip overhangs the
+            # vertical face and reads as floating, however correct its y is
+            tx = lo_ + (hi_ - lo_) * (0.06 + rp() * 0.88)
+            back.append(pine(tx, topy(tx) + 3 + rp() * 5, 0.3 + rp() ** 2 * 0.85,
+                             seed=int(rp() * 900) + 1, dark=rp() < 0.4))
+        # A tree on the FACE needs a ledge to stand on, drawn first. Without one it is a
+        # sticker, and four of them were.
+        for j in range(2):
+            tx = lo_ + (hi_ - lo_) * (0.2 + rp() * 0.6)
+            ty = topy(tx) + 34 + rp() * 38
+            # a NOTCH in the face rather than a shelf on it: a ledge that sticks out
+            # reads as a balcony bolted to the cliff
+            back.append(f'<path d="M{tx - 12:.0f},{ty:.0f} L{tx + 12:.0f},{ty - 1:.0f} '
+                        f'L{tx + 10:.0f},{ty + 4:.0f} L{tx - 10:.0f},{ty + 5:.0f} Z" '
+                        f'fill="{ROCK[4]}" opacity="0.85"/>')
+            back.append(f'<path d="M{tx - 12:.0f},{ty:.0f} L{tx + 12:.0f},{ty - 1:.0f}" '
+                        f'stroke="#4e3f2a" stroke-width="2.2" fill="none" opacity="0.65"/>')
+            back.append(pine(tx + 1, ty + 3, 0.16 + rp() * 0.12,
+                             seed=int(rp() * 900) + 1, dark=True))
+
+    # --- the river's surface, painted OVER the cliff feet: reflections, glints, and the
+    #     pale sky band along the far side
+    rw = rnd(59)
+    for k in range(44):
+        wx = 626 + rw() * 640
+        wy = GORGE_WATER + 5 + rw() * (SHORE - GORGE_WATER - 9)
+        back.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{22 + rw() * 78:.0f}" '
+                    f'height="{1.1 + rw() * 1.4:.1f}" rx="1" '
+                    f'fill="{"#d6e6ec" if rw() < 0.55 else "#1f4257"}" '
+                    f'opacity="{0.2 + rw() * 0.34:.2f}"/>')
+    # the near shore: a hard pale strip so the water stops rather than fading into grass
+    # an irregular shore, not a ruled band: a straight edge right across the frame is the
+    # strong near-field horizontal the guide warns about, and it strands everything above
+    SH = (f'M614,{SHORE + 4} Q 720,{SHORE - 5} 830,{SHORE + 2} '
+          f'Q 950,{SHORE + 9} 1060,{SHORE - 2} Q 1180,{SHORE - 10} 1306,{SHORE + 3}')
+    back.append(f'<path d="{SH} L1306,{PARK_BASE + 4} L614,{PARK_BASE + 4} Z" '
+                f'fill="#6d9349"/>')
+    back.append(f'<path d="{SH}" stroke="#d6cca4" stroke-width="9" fill="none"/>')
+    back.append(f'<path d="{SH}" stroke="#7d7148" stroke-width="2" fill="none" '
+                f'opacity="0.55" transform="translate(0,-4)"/>')
+
+
+    back.append('<g transform="translate(1042,396) scale(0.3)">'
+                '<ellipse cx="0" cy="26" rx="120" ry="9" fill="#e8f2f4" opacity="0.45"/>'
+                '<path d="M-104,4 C -95,-10 -72,-17 -44,-18 L84,-18 L88,4 L84,17 '
+                'L-56,17 C -83,15 -100,11 -104,4 Z" fill="#2d5340"/>'
+                '<path d="M-102,6 L88,6 L87,13 L-96,13 Z" fill="#eceade"/>'
+                '<rect x="-76" y="-25" width="160" height="7" fill="#dedac9"/>'
+                '<path d="M-80,-56 L86,-56 L86,-62 L-80,-62 Z" fill="#2d5340"/>'
+                '<g fill="#eceade"><rect x="-70" y="-56" width="4" height="32"/>'
+                '<rect x="-32" y="-56" width="4" height="32"/>'
+                '<rect x="6" y="-56" width="4" height="32"/>'
+                '<rect x="46" y="-56" width="4" height="32"/>'
+                '<rect x="78" y="-56" width="4" height="32"/></g>'
+                '<g fill="#c8b28a"><rect x="-64" y="-45" width="112" height="18"/></g>'
+                '</g>')
+
+    # ---------------------------------------------------------------------
+    # THE DEPOT. Cream brick, a deep dark gable with a big overhang and timber brackets,
+    # arched openings. No lettering: the real one carries its town's name across the
+    # gable and that is precisely the thing this set does not draw.
+    def depot(x, base, w=184, h=52):
+        o = ['<g>']
+        o.append(f'<rect x="{x - 22}" y="{base - 3}" width="{w + 52}" height="8" '
+                 f'fill="{CONC}"/>')
+        o.append(f'<rect x="{x - 22}" y="{base - 3}" width="{w + 52}" height="2.5" '
+                 f'fill="{CONC_D}"/>')
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h}" fill="#e2d7ba"/>')
+        for i in range(10):
+            o.append(f'<line x1="{x}" y1="{base - h + i * h / 10.0:.1f}" x2="{x + w}" '
+                     f'y2="{base - h + i * h / 10.0:.1f}" stroke="#cec19f" '
+                     f'stroke-width="1"/>')
+        # arched openings, alternating door and window along the platform elevation
+        for i in range(7):
+            ax = x + 12 + i * (w - 40) / 6.0
+            aw = 16
+            o.append(f'<path d="M{ax:.0f},{base - 5} L{ax:.0f},{base - h * 0.56:.0f} '
+                     f'q{aw / 2:.0f},-13 {aw},0 L{ax + aw:.0f},{base - 5} Z" '
+                     f'fill="#463527"/>')
+            o.append(f'<path d="M{ax + 2.5:.0f},{base - 7} '
+                     f'L{ax + 2.5:.0f},{base - h * 0.54:.0f} '
+                     f'q{aw / 2 - 2.5:.0f},-10 {aw - 5:.0f},0 '
+                     f'L{ax + aw - 2.5:.0f},{base - 7} Z" fill="#6f8fa0" opacity="0.55"/>')
+        # the roof: shallow gable, VERY deep overhang, timber brackets under it
+        o.append(f'<polygon points="{x - 30},{base - h} {x + w / 2:.0f},{base - h - 30} '
+                 f'{x + w + 30},{base - h}" fill="#413630"/>')
+        o.append(f'<polygon points="{x + w / 2:.0f},{base - h - 30} {x + w + 30},{base - h} '
+                 f'{x + w + 16},{base - h} {x + w / 2:.0f},{base - h - 22}" '
+                 f'fill="#564a41"/>')
+        o.append(f'<rect x="{x - 30}" y="{base - h - 1}" width="{w + 60}" height="4" '
+                 f'fill="#332a22"/>')
+        for bx in (x + 4, x + w * 0.34, x + w * 0.66, x + w - 14):
+            o.append(f'<path d="M{bx:.0f},{base - h} l11,-12" stroke="#332a22" '
+                     f'stroke-width="3.4" fill="none"/>')
+        o.append(f'<rect x="{x + w * 0.2:.0f}" y="{base - h - 44}" width="11" height="22" '
+                 f'fill="#b8ab8c"/>')
+        o.append(f'<rect x="{x + w * 0.2 - 2:.0f}" y="{base - h - 47}" width="15" '
+                 f'height="4" fill="#9d906f"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(depot(706, PARK_BASE, 184, 52))
+
+    # ---------------------------------------------------------------------
+    # THE WATER PARK, left of the road. Its deck reaches well up the frame so the middle
+    # of the picture has something in it; the first version squeezed it into a strip
+    # against the ballast and left half the frame as empty mown grass.
+    PX0, PX1 = 0, 566
+    DECK_TOP = 396
+    back.append(f'<path d="M{PX0},{PARK_BASE + 4} L{PX0},{DECK_TOP + 4} '
+                f'Q 260,{DECK_TOP - 6} {PX1 - 40},{DECK_TOP + 12} L{PX1},{PARK_BASE + 4} Z" '
+                f'fill="{CONC}"/>')
+    back.append(f'<path d="M{PX0},{DECK_TOP + 4} Q 260,{DECK_TOP - 6} {PX1 - 40},'
+                f'{DECK_TOP + 12}" stroke="{CONC_D}" stroke-width="2.4" fill="none"/>')
+
+    def pool(pts, lane=False):
+        dd = 'M' + ' L'.join(f'{a:.0f},{b:.0f}' for a, b in pts) + ' Z'
+        o = [f'<path d="{dd}" fill="url(#wdpool)"/>',
+             f'<path d="{dd}" fill="none" stroke="#ffffff" stroke-width="2.6" '
+             f'opacity="0.6"/>']
+        return ''.join(o)
+
+    # the splash landing under the tower's troughs
+    back.append(pool([(12, 444), (12, 424), (140, 416), (250, 424), (250, 446)]))
+    # the LAZY RIVER: a long looping channel, which is the single most common thing in
+    # every one of these parks and reads as water at a glance
+    LZ = ('M18,412 Q 150,398 300,404 Q 420,409 470,424 Q 500,434 470,442 '
+          'Q 380,450 250,446 Q 120,442 30,448')
+    back.append(f'<path d="{LZ}" stroke="{CONC_D}" stroke-width="26" fill="none" '
+                f'stroke-linecap="round"/>')
+    back.append(f'<path d="{LZ}" stroke="#1a8fb0" stroke-width="19" fill="none" '
+                f'stroke-linecap="round"/>')
+    back.append(f'<path d="{LZ}" stroke="{CYAN}" stroke-width="14" fill="none" '
+                f'stroke-linecap="round"/>')
+    back.append(f'<path d="{LZ}" stroke="#8ce2f2" stroke-width="6" fill="none" '
+                f'stroke-linecap="round" opacity="0.8"/>')
+    # the wave pool, off to the right of the tower
+    back.append(pool([(300, 446), (300, 420), (420, 412), (520, 422), (528, 446)]))
+    rw2 = rnd(83)
+    for k in range(24):
+        wx = 306 + rw2() * 214
+        wy = 420 + rw2() * 22
+        back.append(f'<ellipse cx="{wx:.0f}" cy="{wy:.0f}" rx="{6 + rw2() * 12:.0f}" '
+                    f'ry="1.4" fill="#ffffff" opacity="{0.3 + rw2() * 0.4:.2f}"/>')
+
+    def wee(x, y, s, top='#e04f4f', bot='#2f5fa8', skin='#e8b88c'):
+        return (f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">'
+                f'<rect x="-2" y="-9" width="4" height="6" fill="{bot}"/>'
+                f'<rect x="-3" y="-16" width="6" height="8" rx="2" fill="{top}"/>'
+                f'<circle cx="0" cy="-19" r="3" fill="{skin}"/></g>')
+
+    rp2 = rnd(89)
+    for k in range(40):
+        px = 6 + rp2() * 540
+        py = 404 + rp2() * 42
+        if 250 < px < 300 and py > 418:
+            continue
+        back.append(wee(px, py, 0.42 + rp2() * 0.34,
+                        TOPS[int(rp2() * 6)], TOPS[int(rp2() * 6)]))
+    # ring floats bobbing round the lazy river
+    for k in range(9):
+        fx = 40 + rp2() * 420
+        fy = 406 + rp2() * 40
+        back.append(f'<ellipse cx="{fx:.0f}" cy="{fy:.0f}" rx="6" ry="2.6" '
+                    f'fill="{TOPS[int(rp2() * 6)]}" opacity="0.95"/>')
+
+    # striped umbrellas: blue and gold, straight off the reference deck shots
+    for ux, uy, us in ((272, 442, 0.9), (108, 448, 1.0), (470, 444, 0.85),
+                       (556, 440, 0.8), (196, 400, 0.6), (392, 404, 0.6)):
+        back.append(f'<g transform="translate({ux},{uy}) scale({us})">'
+                    f'<rect x="-0.8" y="-15" width="1.6" height="15" fill="#7a6a52"/>'
+                    f'<path d="M-15,-15 A15,9 0 0 1 15,-15 Z" fill="#2f6fb5"/>'
+                    f'<path d="M-15,-15 A15,9 0 0 1 -7,-15 Z" fill="#f0b32a"/>'
+                    f'<path d="M1,-15 A15,9 0 0 1 8,-15 Z" fill="#f0b32a"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE LODGES behind the park. Every one of these places is a big timber-and-gable
+    # resort with the water park bolted onto it, and without them the left third of the
+    # frame was mown grass from the deck to the horizon.
+    def lodge(x, base, w, h, wall, roof, seed):
+        r = rnd(seed)
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h}" fill="{wall}"/>')
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h * 0.2:.1f}" '
+                 f'fill="{mix(wall, "#000000", 0.1)}"/>')
+        # a long shallow roof with dormer gables along it — the signature of the type
+        o.append(f'<polygon points="{x - 5},{base - h} {x + w + 5},{base - h} '
+                 f'{x + w - 3},{base - h - h * 0.34:.0f} {x + 3},{base - h - h * 0.34:.0f}" '
+                 f'fill="{roof}"/>')
+        nd = max(2, int(w / 26))
+        for i in range(nd):
+            dx = x + 8 + i * (w - 16) / max(nd - 1, 1)
+            o.append(f'<polygon points="{dx - 7:.0f},{base - h - h * 0.1:.0f} '
+                     f'{dx:.0f},{base - h - h * 0.5:.0f} {dx + 7:.0f},{base - h - h * 0.1:.0f}" '
+                     f'fill="{mix(roof, "#ffffff", 0.14)}"/>')
+        nw = max(3, int(w / 11))
+        # storeys, with a balcony rail on each — the type is unmistakable once the
+        # horizontal rails are there, and invisible without them
+        rows = max(2, int((h - 8) / 17))
+        for row in range(rows):
+            ry = base - h + 8 + row * (h - 10) / rows
+            o.append(f'<rect x="{x + 2}" y="{ry + 11:.1f}" width="{w - 4}" height="2.4" '
+                     f'fill="{mix(wall, "#ffffff", 0.4)}"/>')
+            for i in range(nw):
+                if r() < 0.14:
+                    continue
+                o.append(f'<rect x="{x + 3 + i * (w - 6) / nw:.1f}" y="{ry:.1f}" '
+                         f'width="{(w - 6) / nw * 0.52:.1f}" height="9" fill="#4b6472" '
+                         f'opacity="0.85"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(lodge(2, 396, 186, 100, '#a8846a', '#4a3a2e', 141))
+    back.append(lodge(198, 394, 138, 82, '#c2ab8a', '#3f3730', 143))
+    back.append(lodge(348, 396, 166, 94, '#94886f', '#4a3a2e', 145))
+    back.append(lodge(524, 394, 82, 66, '#b09a7a', '#413830', 147))
+    rl = rnd(149)
+    for k in range(26):
+        back.append(pine(rl() * 600, 392 + rl() * 6, 0.4 + rl() * 0.45,
+                         seed=int(rl() * 900) + 1, dark=rl() < 0.45))
+
+    # ---------------------------------------------------------------------
+    # THE SLIDE TOWER. Drawn as stacked ELLIPSES wrapping a thin mast, because that is
+    # what makes it not-Cedar-Point. Each ring is a helix seen nearly edge on, so the back
+    # half passes BEHIND the mast and the front half in front of it: draw every back arc,
+    # then the mast, then every front arc, and the wrap comes out for free.
+    TCX, TBASE, TTOP = 236, 434, 142
+    STEEL, STEEL_D, STEEL_L = '#b6bcc2', '#7c848c', '#dde2e6'
+    RINGS = [(168, 22, '#e8552e'), (196, 30, '#ee7a2a'), (226, 39, '#f2a81e'),
+             (258, 49, '#f4c81c'), (290, 59, '#c8cf28'), (322, 70, '#3fb79c'),
+             (354, 82, '#35bfae'), (386, 95, '#4fc9c0')]
+
+    def arc(cx, cy, rx, ry, col, front, wdt):
+        dk = mix(col, '#000000', 0.32)
+        lt = mix(col, '#ffffff', 0.45)
+        sweep = 0 if front else 1
+        dpath = f'M{cx - rx:.0f},{cy} A{rx:.0f},{ry:.1f} 0 0 {sweep} {cx + rx:.0f},{cy}'
+        o = (f'<path d="{dpath}" stroke="{dk}" stroke-width="{wdt + 2.4:.1f}" fill="none" '
+             f'stroke-linecap="round"/>'
+             f'<path d="{dpath}" stroke="{col}" stroke-width="{wdt:.1f}" fill="none" '
+             f'stroke-linecap="round"/>')
+        if front:
+            o += (f'<path d="{dpath}" stroke="{lt}" stroke-width="{wdt * 0.3:.1f}" '
+                  f'fill="none" stroke-linecap="round" opacity="0.75" '
+                  f'transform="translate(0,{-wdt * 0.26:.1f})"/>')
+        return o
+
+    tw = ['<g>']
+    for cy, rx, col in RINGS:
+        tw.append(arc(TCX, cy, rx, rx * 0.27, col, False, 5.4 + rx * 0.035))
+    lw = 5
+    tw.append(f'<polygon points="{TCX - 9},{TTOP} {TCX + 9},{TTOP} {TCX + 17},{TBASE} '
+              f'{TCX - 17},{TBASE}" fill="{STEEL}" opacity="0.28"/>')
+    for sgn in (-1, 1):
+        tw.append(f'<polygon points="{TCX + sgn * 8:.0f},{TTOP} '
+                  f'{TCX + sgn * (8 + lw):.0f},{TTOP} {TCX + sgn * (17 + lw):.0f},{TBASE} '
+                  f'{TCX + sgn * 17:.0f},{TBASE}" fill="{STEEL}"/>')
+        tw.append(f'<polygon points="{TCX + sgn * (8 + lw * 0.6):.0f},{TTOP} '
+                  f'{TCX + sgn * (8 + lw):.0f},{TTOP} {TCX + sgn * (17 + lw):.0f},{TBASE} '
+                  f'{TCX + sgn * (17 + lw * 0.6):.0f},{TBASE}" fill="{STEEL_D}"/>')
+    ry_, i = TTOP, 0
+    while ry_ < TBASE - 8:
+        t = (ry_ - TTOP) / float(TBASE - TTOP)
+        hw = 8 + 9 * t
+        step = 13 + 5 * t
+        tw.append(f'<line x1="{TCX - hw:.0f}" y1="{ry_:.0f}" x2="{TCX + hw:.0f}" '
+                  f'y2="{ry_ + step:.0f}" stroke="{STEEL_D}" stroke-width="1.6" '
+                  f'opacity="0.8"/>')
+        tw.append(f'<line x1="{TCX + hw:.0f}" y1="{ry_:.0f}" x2="{TCX - hw:.0f}" '
+                  f'y2="{ry_ + step:.0f}" stroke="{STEEL_D}" stroke-width="1.6" '
+                  f'opacity="0.8"/>')
+        tw.append(f'<rect x="{TCX - hw * (0.9 if i % 2 else 0.1):.1f}" '
+                  f'y="{ry_ + step * 0.5:.1f}" width="{hw * 0.95:.1f}" height="2.6" '
+                  f'fill="#f2c516"/>')
+        ry_ += step
+        i += 1
+    tw.append(f'<rect x="{TCX - 15}" y="{TTOP - 6}" width="30" height="6" fill="{STEEL_L}"/>')
+    tw.append(f'<polygon points="{TCX - 19},{TTOP - 6} {TCX},{TTOP - 19} {TCX + 19},{TTOP - 6}" '
+              f'fill="#2f8f8a"/>')
+    tw.append(f'<rect x="{TCX - 15}" y="{TTOP - 13}" width="30" height="7" fill="none" '
+              f'stroke="{STEEL_D}" stroke-width="1.4"/>')
+    for cy, rx, col in RINGS:
+        tw.append(arc(TCX, cy, rx, rx * 0.27, col, True, 5.4 + rx * 0.035))
+    for cy, rx, col in RINGS[5:]:
+        for sgn in (-1, 1):
+            tw.append(f'<line x1="{TCX + sgn * rx:.0f}" y1="{cy + rx * 0.27:.0f}" '
+                      f'x2="{TCX + sgn * rx * 1.02:.0f}" y2="{TBASE}" stroke="{STEEL_D}" '
+                      f'stroke-width="2" opacity="0.85"/>')
+    back.append(''.join(tw) + '</g>')
+
+    # --- the open troughs at the foot of the tower, fanning down-left into the splash
+    #     landing. Wide, shallow half-pipe: dark rim, bright body, a white water line.
+    def trough(pts, col, wdt):
+        dk = mix(col, '#000000', 0.34)
+        dpath = 'M' + ' L'.join(f'{px:.0f},{py:.0f}' for px, py in pts)
+        return (f'<path d="{dpath}" stroke="{dk}" stroke-width="{wdt + 3:.1f}" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round"/>'
+                f'<path d="{dpath}" stroke="{col}" stroke-width="{wdt:.1f}" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round"/>'
+                f'<path d="{dpath}" stroke="#ffffff" stroke-width="{wdt * 0.28:.1f}" '
+                f'fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>')
+
+    back.append(trough([(196, 398), (160, 410), (110, 418), (62, 422), (28, 426)],
+                       '#2eb6a4', 9))
+    back.append(trough([(210, 404), (180, 416), (134, 424), (88, 428), (50, 430)],
+                       '#f4c81c', 8))
+    back.append(trough([(222, 408), (202, 420), (162, 427), (124, 431), (92, 433)],
+                       '#2f7fd0', 7))
+
+    # --- THE ENCLOSED TUBE. Translucent, with the rider visible as a dark shape moving
+    #     INSIDE it. That is the whole reason to draw an enclosed slide instead of a
+    #     second open one, and it is a different animation: the rider vanishes at the top
+    #     and reappears as a shadow behind the plastic.
+    TUBE = [(258, 250), (312, 274), (334, 310), (312, 344), (338, 378), (386, 402),
+            (424, 416)]
+    tubepath = 'M' + ' L'.join(f'{px},{py}' for px, py in TUBE)
+    back.append(f'<path d="{tubepath}" stroke="#2f6f92" stroke-width="12" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>')
+    back.append(f'<path d="{tubepath}" stroke="#9ed0e6" stroke-width="8.5" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round"/>')
+    back.append(f'<path id="tube-path" class="cc-path" d="{tubepath}" fill="none" '
+                f'stroke="none"/>')
+    back.append(f'<g id="cc-tube-rider" class="cc-tube-rider" '
+                f'transform="translate(334,310)">'
+                f'<ellipse cx="0" cy="0" rx="5.6" ry="3.8" fill="#123243" opacity="0.62"/>'
+                f'</g>')
+    back.append(f'<path d="{tubepath}" stroke="#d3ecf6" stroke-width="8.5" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>')
+    back.append(f'<path d="{tubepath}" stroke="#ffffff" stroke-width="2" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round" opacity="0.6" '
+                f'transform="translate(0,-2.4)"/>')
+    for i in (2, 4, 6):
+        mx = (TUBE[i - 1][0] + TUBE[i][0]) / 2
+        my = (TUBE[i - 1][1] + TUBE[i][1]) / 2
+        back.append(f'<ellipse cx="{mx:.0f}" cy="{my:.0f}" rx="1.6" ry="4.6" fill="none" '
+                    f'stroke="#6fa8c6" stroke-width="1.4" opacity="0.7"/>')
+    for sx_, sy_ in ((334, 316), (312, 350), (386, 406)):
+        back.append(f'<rect x="{sx_}" y="{sy_}" width="4" height="{max(6, 432 - sy_):.0f}" '
+                    f'fill="{STEEL_D}" opacity="0.8"/>')
+
+    # --- the mat racer: parallel straight lanes on the far left
+    back.append(pool([(6, 424), (6, 412), (104, 408), (112, 422)]))
+    for i, lx in enumerate((16, 34, 52, 70, 88)):
+        back.append(trough([(lx + 8, 358), (lx + 3, 380), (lx - 2, 400), (lx - 5, 414)],
+                           '#efe7d2' if i % 2 else '#dfd3b6', 9))
+    for i, lx in enumerate((16, 34, 52, 70, 88)):
+        back.append(f'<rect x="{lx - 7}" y="414" width="4" height="{PARK_BASE - 414}" '
+                    f'fill="{STEEL_D if False else "#7c848c"}"/>')
+    back.append(f'<rect x="14" y="348" width="96" height="11" fill="#8a7a62"/>')
+    back.append(f'<rect x="14" y="348" width="96" height="3" fill="#a89madd"/>'
+                .replace('a89madd', 'a8926a'))
+    back.append(f'<polygon points="8,348 62,332 116,348" fill="#2f8f8a"/>')
+    back.append(f'<rect x="20" y="359" width="5" height="{PARK_BASE - 359}" fill="#8a7a62"/>')
+    back.append(f'<rect x="98" y="359" width="5" height="{PARK_BASE - 359}" fill="#8a7a62"/>')
+    for i in range(4):
+        back.append(wee(26 + i * 22, 348, 0.5, TOPS[i], TOPS[(i + 2) % 6]))
+
+    # trees closing the park off on the right, between it and the road
+    rt = rnd(97)
+    for k in range(16):
+        back.append(pine(548 + rt() * 30, 404 + rt() * 42, 0.5 + rt() * 0.55,
+                         seed=int(rt() * 900) + 1, dark=rt() < 0.4))
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # ---------------------------------------------------------------------
+    # NEAR FIELD, RIGHT: the river, the slipway and the duck.
+    #
+    # Two things had to be true at once and the first two attempts each broke one of
+    # them. The duck has to be BIG — a 40px boat is not worth animating — and it has to be
+    # HALF IN THE WATER, which is the whole reason to draw an amphibious vehicle at all.
+    #
+    # Big means the water has to come toward the camera, so the far shore runs across the
+    # top of it and "into the water" is toward the viewer. Half-in means the boat is drawn
+    # and THEN the near half of the river is painted over it, so a real waterline cuts the
+    # hull instead of the boat being parked next to one.
+    #
+    # And the ramp's angle is what decides whether this reads as launching or as
+    # drowning. The first version pitched it at 65 degrees on screen and the duck looked
+    # like a coach going over a cliff. A slipway is shallow: about 20 degrees here, and
+    # the boat's tilt matches it, and three quarters of the hull is still on dry concrete.
+    SHORE_N = 'M800,720 L900,624 L1290,598'
+    fr.append('<polygon points="768,720 800,720 900,624 1290,598 1290,514 892,600 '
+              '742,720" fill="#7f9a52"/>')
+    fr.append('<polygon points="800,720 900,624 1290,598 1290,720" '
+              'fill="url(#wdrivernear)"/>')
+    # a soft, widening sand edge rather than a ruled diagonal: a straight line here reads
+    # as the wall of a canal, and a canal is not a river
+    fr.append('<path d="M800,720 Q 856,676 900,624 Q 1090,614 1290,598" '
+              'stroke="#d6cca4" stroke-width="15" fill="none" stroke-linecap="round"/>')
+    fr.append('<path d="M812,700 Q 862,668 902,626 Q 1092,616 1290,602" '
+              'stroke="#b9ad84" stroke-width="3" fill="none" opacity="0.6"/>')
+
+    def river_glints(n, y0, y1, seed):
+        g = rnd(seed)
+        out = []
+        for k in range(n):
+            ry0 = y0 + g() * (y1 - y0)
+            left = 900 - (900 - 800) * ((ry0 - 624) / 96.0) if ry0 > 624 else 900
+            if ry0 > 718 or left > 1260:
+                continue
+            rx0 = left + 14 + g() * (1272 - left - 34)
+            out.append(f'<rect x="{rx0:.0f}" y="{ry0:.0f}" '
+                       f'width="{26 + g() * 96:.0f}" height="{1.4 + g() * 2.4:.1f}" '
+                       f'rx="1" fill="{"#c8dde6" if g() < 0.5 else "#1c3547"}" '
+                       f'opacity="{0.16 + g() * 0.32:.2f}"/>')
+        return out
+
+    fr.extend(river_glints(46, 602, 716, 101))
+
+    # THE SLIPWAY. A road that ends in water on purpose, which the set has never had.
+    # the gravel lane that feeds it — a ramp arriving from nowhere is the Bentonville
+    # boardwalk mistake in a different costume
+    fr.append('<polygon points="1290,524 1290,556 1256,578 1208,560" fill="#c0b79a"/>')
+    # The slipway CROSSES the shoreline: it has to, or the boat never gets wet. It is
+    # also wider at the near end, because it is coming toward the camera.
+    RAMP = '1220,552 1290,580 1010,682 880,626'
+    fr.append(f'<polygon points="{RAMP}" fill="#b9b5a8"/>')
+    fr.append(f'<polygon points="{RAMP}" fill="none" stroke="#8f8b7f" stroke-width="2.4"/>')
+    for i in range(1, 10):
+        t = i / 10.0
+        fr.append(f'<line x1="{1220 + (880 - 1220) * t:.0f}" '
+                  f'y1="{552 + (626 - 552) * t:.0f}" '
+                  f'x2="{1290 + (1010 - 1290) * t:.0f}" '
+                  f'y2="{580 + (682 - 580) * t:.0f}" stroke="#8f8b7f" '
+                  f'stroke-width="1.6" opacity="0.7"/>')
+    # wet tyre tracks down the concrete, which say a vehicle has just driven this way
+    for off in (0, 34):
+        fr.append(f'<path d="M{1246 - off},{566 + off * 0.3:.0f} '
+                  f'L{946 - off},{672 + off * 0.3:.0f}" stroke="#8f8b7f" '
+                  f'stroke-width="9" fill="none" opacity="0.35"/>')
+
+    # THE DUCK BOAT. A surplus wartime amphibious truck: a boat hull on wheels with a
+    # canvas canopy and a blunt pointed prow. No operator name on the hull.
+    def duck(gid, x, y, k=1.0, rot=-15):
+        HULL, HULL_D, HULL_L = '#2d5340', '#1c3629', '#3d6b52'
+        rr3 = rnd(107)
+        # THREE nested groups, and each one is a single value the engine sets:
+        #   translate  — position along #duck-path
+        #   rotate     — pitch, matching the ramp while it is on the concrete
+        #   scale(sx,1)— HEADING. sx=+1 faces left (down the ramp), sx=-1 faces right
+        #                (upstream). Animating sx from +1 through 0 to -1 turns the boat
+        #                by foreshortening it to nothing and bringing it back the other
+        #                way, which is how a boat swings round on the spot.
+        o = [f'<g id="{gid}" class="cc-duck" transform="translate({x},{y})">',
+             f'<g class="cc-duck-tilt" transform="rotate({rot})">',
+             f'<g class="cc-duck-flip" transform="scale(1,1)">',
+             f'<g transform="scale({k})">']
+        for wx in (-58, -8, 54):
+            o.append(f'<circle cx="{wx}" cy="15" r="13.5" fill="#25272a"/>')
+            o.append(f'<circle cx="{wx}" cy="15" r="5" fill="#5d6167"/>')
+        o.append(f'<path d="M-106,3 C -97,-11 -74,-18 -46,-19 L84,-19 L88,3 L84,18 '
+                 f'L-58,18 C -85,16 -102,11 -106,3 Z" fill="{HULL}"/>')
+        o.append(f'<path d="M-106,3 C -97,-11 -74,-18 -46,-19 L84,-19 L86,-10 L-52,-10 '
+                 f'C -81,-9 -99,-3 -106,3 Z" fill="{HULL_L}"/>')
+        o.append(f'<path d="M-104,6 L88,6 L87,13 L-98,13 Z" fill="#eceade"/>')
+        o.append(f'<path d="M-106,3 C -97,-11 -74,-18 -46,-19 L-40,-19 L-46,-13 '
+                 f'C -70,-11 -91,-5 -100,5 Z" fill="{HULL_D}"/>')
+        o.append(f'<rect x="-78" y="-26" width="164" height="7" fill="#dedac9"/>')
+        for px in (-72, -34, 4, 44, 78):
+            o.append(f'<rect x="{px}" y="-58" width="3.6" height="33" fill="#eceade"/>')
+        o.append(f'<path d="M-82,-58 L88,-58 L88,-64 L-82,-64 Z" fill="{HULL}"/>')
+        o.append(f'<path d="M-86,-64 L92,-64 L88,-69 L-82,-69 Z" fill="{HULL_L}"/>')
+        for i in range(9):
+            px = -68 + i * 17.5
+            o.append(f'<rect x="{px:.0f}" y="-46" width="10" height="19" rx="3" '
+                     f'fill="{TOPS[int(rr3() * 6)]}"/>')
+            o.append(f'<circle cx="{px + 5:.0f}" cy="-50" r="4.5" fill="#e8b88c"/>')
+        o.append(f'<path d="M-86,-26 L-86,-47 L-64,-47 L-64,-26 Z" fill="#a8ccdc" '
+                 f'opacity="0.85"/>')
+        o.append(f'<path d="M-86,-26 L-86,-47 L-64,-47 L-64,-26 Z" fill="none" '
+                 f'stroke="{HULL_D}" stroke-width="2.6"/>')
+        # the bow wave, which travels WITH the boat. Authored faint; the engine hides it
+        # on the ramp and fades it up once the hull is afloat.
+        o.append(f'<g class="cc-duck-bow" opacity="0.5">'
+                 f'<path d="M-104,14 Q -134,10 -150,20" stroke="#e8f2f4" '
+                 f'stroke-width="6" fill="none" stroke-linecap="round"/>'
+                 f'<path d="M-98,19 Q -132,20 -156,30" stroke="#e8f2f4" '
+                 f'stroke-width="4" fill="none" stroke-linecap="round" opacity="0.7"/>'
+                 f'<ellipse cx="-108" cy="16" rx="26" ry="6" fill="#ffffff" '
+                 f'opacity="0.55"/></g>')
+        return ''.join(o) + '</g></g></g></g>'
+
+    # DOWN THE RAMP, INTO THE WATER, ROUND, AND AWAY. One path; the engine reads its
+    # position from it and sets pitch and heading from where along it the boat is.
+    fr.append('<path id="duck-path" class="cc-path" '
+              'd="M1310,506 L1218,548 L1096,610 '
+              'C 1042,638 998,658 962,682 '
+              'C 918,712 1004,722 1078,708 '
+              'C 1168,690 1236,668 1330,640" fill="none" stroke="none"/>')
+    fr.append('<ellipse cx="1176" cy="608" rx="90" ry="13" fill="#000000" opacity="0.14" '
+              'transform="rotate(-15,1176,608)"/>')
+    fr.append(duck('cc-duck', 1164, 591, 0.9, -15))
+
+    # the near half of the river, painted OVER the boat: this line IS the waterline
+    # THE WATERLINE: the water polygon painted a second time, over the boat, along
+    # exactly the shoreline drawn above. Slightly transparent, so the submerged concrete
+    # and the drowned bow show through as shapes under the surface.
+    fr.append('<polygon points="800,720 900,624 1290,598 1290,720" '
+              'fill="url(#wdrivernear)" opacity="0.88"/>')
+    # foam where the hull cuts the surface, and the bow wave running away from it
+    fr.append('<ellipse cx="1086" cy="620" rx="56" ry="8" fill="#e8f2f4" opacity="0.65" '
+              'transform="rotate(-11,1086,620)"/>')
+    fr.append('<ellipse cx="1062" cy="626" rx="34" ry="5" fill="#ffffff" opacity="0.65" '
+              'transform="rotate(-11,1062,626)"/>')
+    for i, (wx, wy, wr) in enumerate(((1026, 640, 54), (992, 660, 72), (958, 682, 90))):
+        fr.append(f'<path d="M{wx - wr},{wy + 8} Q {wx:.0f},{wy - 6} {wx + wr},{wy + 4}" '
+                  f'stroke="#e8f2f4" stroke-width="{3.2 - i * 0.6:.1f}" fill="none" '
+                  f'opacity="{0.4 - i * 0.09:.2f}"/>')
+    fr.extend(river_glints(28, 650, 716, 211))
+
+    # ---------------------------------------------------------------------
+    # NEAR FIELD, LEFT: the pool, the flume, and the animation this scene exists for.
+    fr.append(f'<path d="M0,700 L0,626 Q 120,600 300,590 Q 430,584 486,620 L486,720 '
+              f'L0,720 Z" fill="{CONC}"/>')
+    fr.append(f'<path d="M0,626 Q 120,600 300,590 Q 430,584 486,620" '
+              f'stroke="{CONC_D}" stroke-width="2.6" fill="none"/>')
+    fr.append('<path d="M14,716 L14,644 Q 130,620 300,612 Q 412,608 464,642 L470,716 Z" '
+              'fill="url(#wdpool)"/>')
+    fr.append('<path d="M14,644 Q 130,620 300,612 Q 412,608 464,642" stroke="#ffffff" '
+              'stroke-width="3.2" fill="none" opacity="0.55"/>')
+    rpl = rnd(109)
+    for k in range(34):
+        px = 20 + rpl() * 434
+        py = 634 + rpl() * 78
+        fr.append(f'<ellipse cx="{px:.0f}" cy="{py:.0f}" rx="{12 + rpl() * 36:.0f}" '
+                  f'ry="{1.6 + rpl() * 1.9:.1f}" fill="#ffffff" '
+                  f'opacity="{0.13 + rpl() * 0.24:.2f}"/>')
+
+    def ring(x, y, s, a='#f4c81c', b='#2f7fd0'):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<ellipse cx="0" cy="3" rx="22" ry="8" fill="#0d6a86" opacity="0.32"/>'
+                f'<ellipse cx="0" cy="0" rx="22" ry="9" fill="{a}"/>'
+                f'<path d="M-22,0 A22,9 0 0 1 -8,-8" stroke="{b}" stroke-width="5.5" '
+                f'fill="none"/>'
+                f'<path d="M8,-8 A22,9 0 0 1 22,0" stroke="{b}" stroke-width="5.5" '
+                f'fill="none"/>'
+                f'<ellipse cx="0" cy="1" rx="12" ry="4.6" fill="#1a93b4"/></g>')
+
+    fr.append(ring(86, 668, 1.05))
+    fr.append(ring(206, 698, 1.2, '#e8722c', '#ffffff'))
+
+    def bather(x, y, s, top, skin='#e8b88c', hair='#5a3a22'):
+        return (f'<g transform="translate({x},{y}) scale({s:.2f})">'
+                f'<ellipse cx="0" cy="2" rx="13" ry="4" fill="#ffffff" opacity="0.55"/>'
+                f'<rect x="-7" y="-22" width="14" height="24" rx="6" fill="{top}"/>'
+                f'<circle cx="0" cy="-28" r="7" fill="{skin}"/>'
+                f'<path d="M-7,-30 a7,7 0 0 1 14,0 z" fill="{hair}"/></g>')
+
+    fr.append(bather(336, 650, 1.0, '#e04f4f'))
+    fr.append(bather(392, 664, 1.15, '#f0b32a', hair='#2a1c12'))
+    fr.append(bather(296, 692, 1.3, '#2f8f5b', hair='#7a4a24'))
+    fr.append(bather(146, 706, 1.35, '#8a5bc0', hair='#2a1c12'))
+
+    # --- THE STAIR TOWER for the near flume. A flume that starts in mid air is the
+    #     Bentonville boardwalk mistake; this one has to say where the riders came from.
+    #     Everything in the near field is compressed to stay clear of the rails, the same
+    #     trick Detroit and Oklahoma City use for their near-field machines.
+    ST_X, ST_TOP, ST_BASE = 74, 524, 634
+    fr.append(f'<rect x="{ST_X - 3}" y="{ST_TOP}" width="6" height="{ST_BASE - ST_TOP}" '
+              f'fill="#8a6f52"/>')
+    fr.append(f'<rect x="{ST_X + 46}" y="{ST_TOP + 6}" width="6" '
+              f'height="{ST_BASE - ST_TOP - 6}" fill="#7a6146"/>')
+    sy, j = ST_BASE - 8, 0
+    while sy > ST_TOP + 6:
+        fr.append(f'<rect x="{ST_X + (2 if j % 2 else 20):.0f}" y="{sy:.0f}" width="30" '
+                  f'height="4.5" fill="#a38763"/>')
+        fr.append(f'<line x1="{ST_X + 2}" y1="{sy - 16:.0f}" x2="{ST_X + 50}" '
+                  f'y2="{sy - 16:.0f}" stroke="#8a6f52" stroke-width="2" opacity="0.7"/>')
+        sy -= 11
+        j += 1
+    fr.append(f'<rect x="{ST_X - 8}" y="{ST_TOP - 4}" width="72" height="8" fill="#a38763"/>')
+    fr.append(f'<polygon points="{ST_X - 14},{ST_TOP - 4} {ST_X + 28},{ST_TOP - 23} '
+              f'{ST_X + 70},{ST_TOP - 4}" fill="#2f8f8a"/>')
+    fr.append(f'<rect x="{ST_X - 8}" y="{ST_TOP - 14}" width="72" height="10" fill="none" '
+              f'stroke="#8a6f52" stroke-width="2"/>')
+    fr.append(wee(ST_X + 52, ST_TOP - 4, 1.5, '#e8722c', '#2f5fa8'))
+
+    # --- THE FLUME. Steep drop, flat-out, runout: a rider must ACCELERATE into the drop
+    #     and DECELERATE along the runout or the whole thing reads as a sticker sliding
+    #     down a line. The shape carries that instruction; the engine only has to ease it.
+    FL = 'M116,530 C 168,542 198,568 212,604 C 226,638 268,656 330,660 L388,662'
+    fr.append(f'<path d="{FL}" stroke="#0d6a86" stroke-width="31" fill="none" '
+              f'stroke-linecap="round" opacity="0.9"/>')
+    fr.append(f'<path d="{FL}" stroke="#2eb6a4" stroke-width="25" fill="none" '
+              f'stroke-linecap="round"/>')
+    fr.append(f'<path d="{FL}" stroke="#8ce2f2" stroke-width="13" fill="none" '
+              f'stroke-linecap="round" opacity="0.9"/>')
+    fr.append(f'<path d="{FL}" stroke="#ffffff" stroke-width="5" fill="none" '
+              f'stroke-linecap="round" opacity="0.55"/>')
+    for sx_, sy_ in ((192, 596), (248, 640), (312, 664)):
+        fr.append(f'<rect x="{sx_}" y="{sy_}" width="5" height="{max(6, 672 - sy_):.0f}" '
+                  f'fill="#7c848c"/>')
+    fr.append(f'<path id="slide-path" class="cc-path" d="{FL}" fill="none" stroke="none"/>')
+
+    # --- THE RIDERS. On a ring, because a yellow doughnut with a child in it is far more
+    #     legible at this size than a body alone, and it is a shape a small child knows.
+    def slider(gid, x, y, rot, s, top, hair='#2a1c12'):
+        return (f'<g id="{gid}" class="cc-slider" transform="translate({x},{y})">'
+                f'<g transform="rotate({rot}) scale({s:.2f})">'
+                f'<ellipse cx="0" cy="0" rx="20" ry="8.5" fill="#f4c81c"/>'
+                f'<path d="M-20,0 A20,8.5 0 0 1 -7,-7.6" stroke="#2f7fd0" '
+                f'stroke-width="5" fill="none"/>'
+                f'<path d="M7,-7.6 A20,8.5 0 0 1 20,0" stroke="#2f7fd0" '
+                f'stroke-width="5" fill="none"/>'
+                f'<rect x="-6" y="-19" width="12" height="16" rx="5" fill="{top}"/>'
+                f'<circle cx="0" cy="-24" r="6" fill="#e8b88c"/>'
+                f'<path d="M-6,-26 a6,6 0 0 1 12,0 z" fill="{hair}"/>'
+                f'<path d="M-9,-16 l-9,-7" stroke="#e8b88c" stroke-width="4" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M9,-16 l9,-8" stroke="#e8b88c" stroke-width="4" '
+                f'stroke-linecap="round"/></g></g>')
+
+    fr.append(slider('cc-slider-0', 208, 596, 58, 1.0, '#e04f4f'))
+    fr.append(slider('cc-slider-1', 122, 534, 24, 0.86, '#2f8f5b', hair='#7a4a24'))
+
+    # --- THE SPLASH. The payoff frame of the whole scene, and one drawing. Authored
+    #     visible, because the bottom of a flume is always splashing; the engine keys its
+    #     opacity and scale so that it PUNCHES when a rider arrives.
+    sp = ['<g id="cc-splash" class="cc-splash" transform="translate(398,662)">']
+    sp.append('<ellipse cx="0" cy="4" rx="50" ry="12" fill="#ffffff" opacity="0.55"/>')
+    rs = rnd(113)
+    for i in range(16):
+        a_ = -0.12 - i * (2.9 / 15.0)
+        L = 22 + rs() * 38
+        ex = math.cos(a_) * L * 1.15
+        ey = math.sin(a_) * L * 0.85
+        sp.append(f'<path d="M0,0 Q {ex * 0.55:.0f},{ey * 1.25:.0f} {ex:.0f},{ey:.0f}" '
+                  f'stroke="#ffffff" stroke-width="{2.4 + rs() * 3.6:.1f}" fill="none" '
+                  f'stroke-linecap="round" opacity="{0.5 + rs() * 0.45:.2f}"/>')
+    for i in range(12):
+        sp.append(f'<circle cx="{(rs() - 0.5) * 104:.0f}" cy="{-10 - rs() * 48:.0f}" '
+                  f'r="{1.8 + rs() * 3.6:.1f}" fill="#ffffff" '
+                  f'opacity="{0.5 + rs() * 0.4:.2f}"/>')
+    sp.append('<ellipse cx="0" cy="-2" rx="28" ry="15" fill="#ffffff" opacity="0.78"/>')
+    fr.append(''.join(sp) + '</g>')
+
+    # ======================================================== FOREGROUND ===
+    fgl = ['    ']
+    rg = rnd(127)
+    for i in range(170):
+        bx = rg() * 1400 - 60
+        by = 560 + rg() * 170
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 34 < bx < hi + 34:
+            continue
+        if bx < 500:
+            continue
+        # and out of the river, whose bank runs (800,720) -> (900,624) -> (1290,598)
+        shore = 720 - (bx - 800) * 0.96 if bx < 900 else 624 - (bx - 900) * 0.0667
+        if bx > 800 and by > shore - 4:
+            continue
+        s = 1.2 + rg() * 1.2
+        c = ('#5e8a41', '#719b4d', '#4c7434')[int(rg() * 3)]
+        fgl.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.7 * s:.1f},{by - 8 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 0.4 * s:.1f},{by - 9.6 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 2.2 * s:.1f},{by - 7.6 * s:.1f}" '
+                   f'stroke="{c}" stroke-width="{1.3 * s:.1f}" fill="none" '
+                   f'stroke-linecap="round" opacity="0.9"/>')
+
+    return scene('wisconsin-dells', 'Wisconsin Dells, Wisconsin',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface='#6e6b66', surface2='#565350',
+                                    shoulder='#cfc7ac', dash='#ffe066'),
+                     'trackkw': dict(ballast='#a3937c', ballast_hi='#b4a48c',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')
