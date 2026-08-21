@@ -2635,6 +2635,11 @@
   // depthScale, normalised at the authored point, so a rider grows as it comes
   // toward the viewer without anybody choosing numbers.
   const SLIDE = { secs: 2.1, gap: 0.55, hold: 0.9, base: 596 };
+  // A PUNCH NEEDS SOMEWHERE TO PUNCH FROM. The splash is authored always-on so the
+  // static render looks right, but resting it at 0.72 left the burst nowhere to go
+  // — it read as a permanent white smudge that got slightly brighter, which is to
+  // say as no splash at all. It rests small and faint and lands hard instead.
+  const SPLASH = { rest: 0.28, restK: 0.84, up: 0.11, down: 0.62, kick: 0.72 };
 
   function slideSpeed(u) {
     if (u < 0.14) return 0.4 + 0.6 * (u / 0.14);      // push off, pick up
@@ -2651,7 +2656,7 @@
     if (splashEl) {
       const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(splashEl.getAttribute('transform') || '');
       splash = { el: splashEl, x: m ? +m[1] : 398, y: m ? +m[2] : 662, t: 99 };
-      splashEl.setAttribute('opacity', '0.72');
+      splashEl.setAttribute('opacity', SPLASH.rest.toFixed(2));
     }
     return {
       path: path, splash: splash,
@@ -2690,13 +2695,18 @@
     if (s.splash) {
       const p = s.splash;
       p.t += secs;
-      const up = clamp(p.t / 0.12, 0, 1);
-      const down = clamp((p.t - 0.12) / 0.5, 0, 1);
-      const k = 1 + 0.35 * (up - up * down);
-      p.el.setAttribute('opacity', (0.72 + 0.28 * (up - up * down)).toFixed(3));
+      const up = clamp(p.t / SPLASH.up, 0, 1);
+      const down = ease(clamp((p.t - SPLASH.up) / SPLASH.down, 0, 1));
+      const hit = up - up * down;                      // 0 at rest, 1 at the peak
+      const k = SPLASH.restK + SPLASH.kick * hit;
+      p.el.setAttribute('opacity', (SPLASH.rest + (1 - SPLASH.rest) * hit).toFixed(3));
+      // JUST translate-then-scale. The group's geometry is authored around its OWN
+      // origin, so scaling about it is one scale after the translate — the
+      // scale-about-an-arbitrary-point sandwich belongs to groups drawn in absolute
+      // coordinates, and applied here it threw the splash to x=-315, y=-464 and off
+      // the frame. Which is why there appeared to be no splash at all.
       p.el.setAttribute('transform',
-        'translate(' + p.x + ',' + p.y + ') scale(' + k.toFixed(3) + ') translate('
-        + (-p.x) + ',' + (-p.y) + ')');
+        'translate(' + p.x + ',' + p.y + ') scale(' + k.toFixed(3) + ')');
     }
   }
 
@@ -2759,7 +2769,17 @@
     const flip = el.querySelector('.cc-duck-flip');
     const bow = el.querySelector('.cc-duck-bow');
     if (bow) bow.setAttribute('opacity', '0');
-    return { path: path, el: el, tilt: tilt, flip: flip, bow: bow, t: 0 };
+    // THE WATERLINE, declared by the art. #duck-path is the boat's track in plan
+    // and it dives to y=722, where the painted surface is at 617 — following it
+    // literally submerges the boat by a hundred pixels and it comes up the far
+    // side like a submarine. Afloat, the boat takes its x from the path and its y
+    // from the SURFACE.
+    const w = (el.getAttribute('data-water') || '').split(',').map(Number);
+    const water = (w.length === 4 && !w.some(isNaN))
+      ? { x0: w[0], y0: w[1], x1: w[2], y1: w[3] } : null;
+    if (!water) console.warn('cc-duck has no data-water; it will follow the path under the surface');
+    return { path: path, el: el, tilt: tilt, flip: flip, bow: bow, t: 0,
+             water: water, ride: parseFloat(el.getAttribute('data-ride')) || 10 };
   }
 
   function updateDuck(dt, now) {
@@ -2770,9 +2790,18 @@
     if (d.t > span) d.t -= span;
     const u = clamp(d.t / DUCK.secs, 0, 1);
     const at = pointAt(d.path, u);
-    d.el.setAttribute('transform', 'translate(' + at.x.toFixed(1) + ',' + at.y.toFixed(1) + ')');
     // The run, as fractions of the path — the handoff's own table.
     const wet = clamp((u - 0.30) / 0.12, 0, 1);          // crossing the waterline
+    let y = at.y;
+    if (d.water) {
+      const t = (at.x - d.water.x0) / (d.water.x1 - d.water.x0);
+      const surface = d.water.y0 + (d.water.y1 - d.water.y0) * t;
+      // On the concrete it is on the ramp and the path is right; afloat it rides
+      // the surface; across the waterline it eases from one to the other, which is
+      // the boat settling as it takes the water.
+      y = at.y + (surface - d.ride - at.y) * ease(wet);
+    }
+    d.el.setAttribute('transform', 'translate(' + at.x.toFixed(1) + ',' + y.toFixed(1) + ')');
     const turn = ease(clamp((u - 0.42) / 0.18, 0, 1));   // the swing round
     if (d.tilt) {
       const bob = u > 0.6 ? DUCK.bob * Math.sin(now / 1000 / DUCK.bobSecs * TAU) : 0;

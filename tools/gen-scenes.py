@@ -27370,7 +27370,7 @@ def wisconsin_dells():
 
     # THE DUCK BOAT. A surplus wartime amphibious truck: a boat hull on wheels with a
     # canvas canopy and a blunt pointed prow. No operator name on the hull.
-    def duck(gid, x, y, k=1.0, rot=-15):
+    def duck(gid, x, y, k=1.0, rot=-15, extra=''):
         HULL, HULL_D, HULL_L = '#2d5340', '#1c3629', '#3d6b52'
         rr3 = rnd(107)
         # THREE nested groups, and each one is a single value the engine sets:
@@ -27380,7 +27380,7 @@ def wisconsin_dells():
         #                (upstream). Animating sx from +1 through 0 to -1 turns the boat
         #                by foreshortening it to nothing and bringing it back the other
         #                way, which is how a boat swings round on the spot.
-        o = [f'<g id="{gid}" class="cc-duck" transform="translate({x},{y})">',
+        o = [f'<g id="{gid}" class="cc-duck"{extra} transform="translate({x},{y})">',
              f'<g class="cc-duck-tilt" transform="rotate({rot})">',
              f'<g class="cc-duck-flip" transform="scale(1,1)">',
              f'<g transform="scale({k})">']
@@ -27428,7 +27428,13 @@ def wisconsin_dells():
               'C 1168,690 1236,668 1330,640" fill="none" stroke="none"/>')
     fr.append('<ellipse cx="1176" cy="608" rx="90" ry="13" fill="#000000" opacity="0.14" '
               'transform="rotate(-15,1176,608)"/>')
-    fr.append(duck('cc-duck', 1164, 591, 0.9, -15))
+    # data-water is the WATERLINE the engine has to float it on, given as the two
+    # ends of the shoreline painted over it below, and data-ride is how far above
+    # that line the hull's own centre sits. Without them the boat follows
+    # #duck-path all the way down to y=722, where the surface is at 617 — a
+    # hundred pixels under, which is a submarine and not a duck boat.
+    fr.append(duck('cc-duck', 1164, 591, 0.9, -15,
+                   extra=' data-water="900,624,1290,598" data-ride="10"'))
 
     # the near half of the river, painted OVER the boat: this line IS the waterline
     # THE WATERLINE: the water polygon painted a second time, over the boat, along
@@ -27555,7 +27561,12 @@ def wisconsin_dells():
     # --- THE SPLASH. The payoff frame of the whole scene, and one drawing. Authored
     #     visible, because the bottom of a flume is always splashing; the engine keys its
     #     opacity and scale so that it PUNCHES when a rider arrives.
-    sp = ['<g id="cc-splash" class="cc-splash" transform="translate(398,662)">']
+    # 370, NOT 398. The CLOSE button covers x 409-589, and a burst centred on the
+    # flume's mouth at 398 put two fifths of itself behind it — the payoff of the
+    # whole scene, hidden by a control. A splash is a fan around the point of
+    # impact rather than a thing pinned to it, so 28px left costs nothing and
+    # brings the spray back into the picture. Fifth scene the buttons have caught.
+    sp = ['<g id="cc-splash" class="cc-splash" transform="translate(370,663)">']
     sp.append('<ellipse cx="0" cy="4" rx="50" ry="12" fill="#ffffff" opacity="0.55"/>')
     rs = rnd(113)
     for i in range(16):
