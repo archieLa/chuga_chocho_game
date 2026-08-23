@@ -186,6 +186,35 @@
     // Insert, never re-order. Far cars sit behind the far gate; the train and
     // its smoke sit between the far gate and the foreground; near cars sit in
     // front of the foreground but behind the near gate's arm.
+    // ON THE CARRIAGEWAY, BEHIND THE RAILS. Scenery lives in scenery-back, which
+    // is painted UNDER the road, so anything authored there that crosses the road
+    // goes beneath the tarmac. Anything tagged data-over-road moves into a group
+    // of its own between the road and the track: over the surface, still behind
+    // the rails, the far gate and the train, which is how the engine's own far
+    // cars are treated too.
+    //
+    // Its own group and NOT cc-cars-far, which looks like the same slot and is
+    // not: leaving a scene empties the two car groups, so a scene's own art
+    // parked in one would be destroyed the first time you walked away and never
+    // come back, because scenes are cached and never rebuilt.
+    //
+    // I built this for Birmingham's tour party, then solved that another way and
+    // deleted it as machinery with no foreseeable user. The foreseeable user was
+    // four days later: Los Angeles has cyclists who cross the road on purpose,
+    // and they rode along underneath it.
+    // AFTER THE FAR GATE, not merely after the road. Between road and track was
+    // the obvious slot and it is wrong: the far gate's arm comes down across
+    // y=421 and the bike path is at 426, so the riders vanished under the arm at
+    // exactly the moment the gate lets them cross. Anything on this side of the
+    // road is NEARER than a gate whose base is at 388, so it goes in front of it —
+    // and still behind the train, which is nearer than all of it.
+    const overRoad = svg.querySelectorAll('[data-over-road]');
+    if (overRoad.length) {
+      const g = el('g', { class: 'cc-over-road' });
+      gateFar.parentNode.insertBefore(g, gateFar.nextSibling);
+      [].forEach.call(overRoad, e => g.appendChild(e));
+    }
+
     const carsFar = el('g', { class: 'cc-cars-far' });
     const smokeG = el('g', { class: 'cc-smoke' });
     const trainG = el('g', { class: 'cc-train' });

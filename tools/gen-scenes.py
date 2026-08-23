@@ -752,7 +752,9 @@ def la():
             # at the kerb together and read as one.
             #
             # Drawn facing RIGHT: the handlebar is the stroke that ends at +10.
-            + ''.join(f'<g class="cc-cyclist" data-run="{run}" data-y="426"'
+            # data-over-road, or they ride along UNDERNEATH the tarmac: this
+            # layer is scenery-back, which is painted before the road.
+            + ''.join(f'<g class="cc-cyclist" data-over-road="1" data-run="{run}" data-y="426"'
                       f' data-scale="0.62" data-speed="{sp}"'
                       f' transform="translate({x},426) scale(0.62)">{shadow(0, 3, 26, 4)}'
                       f'<g stroke="#2f3a44" stroke-width="3" fill="none">'
