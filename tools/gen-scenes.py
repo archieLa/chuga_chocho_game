@@ -4921,7 +4921,19 @@ def moab():
              + juniper(76, 640, 1.7) + juniper(1224, 686, 1.5)
              + juniper(300, 592, 1.05) + juniper(340, 600, 0.8)
              + juniper(966, 604, 1.1) + juniper(1060, 596, 0.85)
-             + jeep(312, 678, 0.55, '#3f7d4a')
+             # THE THIRD ONE DRIVES TOO. It was the only parked jeep in a 4WD town,
+             # which the maintainer's son noticed. It works the near bench WEST of
+             # the carriageway — the road spans 521..759 at this height and the
+             # jeep reaches 28 either side of its origin, so 462 is as far east as
+             # it may go and it never crosses. Its west end brings it past the foot
+             # of the big block, under the one crawling over the top of it.
+             #
+             # Slower than the far one and with longer dwells, because it is
+             # NEARER: the same real speed is more pixels down here, and a jeep
+             # that pelts along the bench reads as traffic rather than as somebody
+             # out for the day.
+             + jeep(312, 678, 0.55, '#3f7d4a',
+                    route='462:1.5 150:2.3 312:1.1', speed=24)
              + ''.join(pricklypear(x, y, s) for x, y, s in
                        [(140, 594, 1.15), (446, 704, 1.3), (1146, 648, 1.1), (52, 704, 1.05),
                         (486, 694, 0.9)])

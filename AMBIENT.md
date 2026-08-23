@@ -347,7 +347,7 @@ Two traps, both already paid for once:
 | San Francisco | a ferry crosses the bay and a sailboat tacks across it, each at its own pace |
 | Sun Valley | the game's own traffic turns onto the cross street at the junction · gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
 | Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
-| Moab | one jeep crawls up over the block and down its far face · another potters the bench |
+| Moab | **all three jeeps drive** — one wanders the far bench, one crawls up over the block and down its face taking its pitch from the rock, and the near one works the trail below, west of the carriageway |
 | Bluegrass | **a family of three walks the near pasture together** — two big horses with the foal between them, in step and in formation · two more walk the far paddocks · the rest graze, and every tail swishes |
 | Yellowstone | the geyser erupts · five bison amble the sage flat and two bull elk cross it |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
