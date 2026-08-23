@@ -465,8 +465,15 @@ def la():
                                     (240, 286, 66), (560, 240, 44), (1000, 240, 50),
                                     (700, 290, 74), (120, 240, 40), (890, 250, 52)])
 
-    def sailboat(x, y, s=1.0, sail='#fdfbf4'):
-        return (f'<g transform="translate({x},{y}) scale({s})">'
+    def sailboat(x, y, s=1.0, sail='#fdfbf4', run=None, speed=22):
+        # .cc-ship on the shuttle contract — the same one the Duluth ore boat and
+        # the Seattle ferry ride. Drawn BOW-RIGHT: the little jib is on +x and the
+        # mainsail on -x, so no data-nose is needed. Each gets its own speed, or
+        # three boats in one bay read as one mechanism being copied.
+        cls = ' class="cc-ship"' if run else ''
+        data = (f' data-sail="{run}" data-speed="{speed}" data-scale="{s}"'
+                if run else '')
+        return (f'<g{cls}{data} transform="translate({x},{y}) scale({s})">'
                 f'<path d="M-11,0 L11,0 L7,5 L-7,5 Z" fill="#e8e2d4"/>'
                 f'<rect x="-0.8" y="-26" width="1.6" height="26" fill="#8a7f6c"/>'
                 f'<path d="M0,-25 L0,-3 L-13,-3 Z" fill="{sail}"/>'
@@ -490,8 +497,9 @@ def la():
              '<rect x="996" y="250" width="290" height="3" rx="1.5" fill="#c9a37a"/>'
              '<rect x="1084" y="234" width="40" height="16" rx="2" fill="#f4efe2"/>'
              '<polygon points="1080,234 1104,224 1128,234" fill="#e8574a"/></g>\n'
-             '    ' + sailboat(430, 262, 0.9) + sailboat(700, 250, 0.7)
-             + sailboat(880, 272, 1.0, '#ffe9c2') + '\n'
+             '    ' + sailboat(430, 262, 0.9, run='-70,1350,262', speed=19)
+             + sailboat(700, 250, 0.7, run='1350,-70,250', speed=14)
+             + sailboat(880, 272, 1.0, '#ffe9c2', run='-70,1350,272', speed=25) + '\n'
              '    ' + surfer(560, 286, 0.85) + surfer(792, 292, 0.95, '#f2b134')
              + surfer(628, 284, 0.75, '#4fb8d6'))
 
@@ -591,16 +599,24 @@ def la():
                 f'<rect x="-4" y="-19" width="24" height="7" rx="3" fill="{col}"/></g>')
 
     def kite(hx, hy, kx, ky, col='#e8574a', col2='#f2b134'):
-        tail = ''.join(f'<circle cx="{kx + 5 + i*4}" cy="{ky + 22 + i*13}" r="3.2" '
+        # THE TAIL MOVES WITH THE KITE, so it is drawn in the kite's own
+        # coordinates rather than the scene's — four circles at absolute
+        # positions stay hanging in the sky while the kite swings away from them.
+        tail = ''.join(f'<circle cx="{5 + i*4}" cy="{22 + i*13}" r="3.2" '
                        f'fill="{col2 if i % 2 else col}"/>' for i in range(4))
-        return (f'<path d="M{hx},{hy} Q {(hx+kx)/2 + 26:.0f},{(hy+ky)/2:.0f} {kx},{ky+14}" '
+        # The engine swings the kite about the HAND and rewrites the string to
+        # follow. data-home is where the art drew it, which is the middle of the
+        # swing; data-anchor is the hand holding the line.
+        return (f'<path class="cc-kite-string" data-anchor="{hx},{hy}" '
+                f'd="M{hx},{hy} Q {(hx+kx)/2 + 26:.0f},{(hy+ky)/2:.0f} {kx},{ky+14}" '
                 f'stroke="#efe7d4" stroke-width="1.4" fill="none" opacity="0.8"/>'
-                f'<g transform="translate({kx},{ky})">'
+                f'<g class="cc-kite" data-anchor="{hx},{hy}" data-home="{kx},{ky}" '
+                f'transform="translate({kx},{ky})">'
                 f'<polygon points="0,-16 13,0 0,16 -13,0" fill="{col}"/>'
                 f'<polygon points="0,-16 13,0 0,0" fill="{col2}"/>'
                 f'<polygon points="0,0 0,16 -13,0" fill="{col2}"/>'
-                f'<path d="M0,-16 L0,16 M-13,0 L13,0" stroke="#ffffff" stroke-width="1" opacity="0.6"/></g>'
-                f'{tail}')
+                f'<path d="M0,-16 L0,16 M-13,0 L13,0" stroke="#ffffff" stroke-width="1" opacity="0.6"/>'
+                f'{tail}</g>')
 
     def volleyball(x, y, s=1.0):
         mesh = (''.join(f'<line x1="{v}" y1="-86" x2="{v}" y2="-46"/>' for v in range(-84, 85, 12))
@@ -726,12 +742,32 @@ def la():
             + f'<g>' + person(1148, 344, 0.44, '#e8574a', arms='up')
             + kite(1142, 326, 1042, 168) + '</g>'
             # cyclists on the bike path
-            + ''.join(f'<g transform="translate({x},426) scale(0.62)">{shadow(0, 3, 26, 4)}'
+            # THEY RIDE, AND THEY CROSS THE ROAD PROPERLY. The Marvin Braude path
+            # runs the full width and the carriageway cuts it at 588..692 at this
+            # height, so there were riders stranded either side of a road they
+            # could not use. They work the whole path now and give way at the kerb
+            # to the engine's own cars — the first thing in the game that waits for
+            # traffic rather than for the gate, and the lesson every child is
+            # actually taught. Different speeds and starts, or three riders arrive
+            # at the kerb together and read as one.
+            #
+            # Drawn facing RIGHT: the handlebar is the stroke that ends at +10.
+            + ''.join(f'<g class="cc-cyclist" data-run="{run}" data-y="426"'
+                      f' data-scale="0.62" data-speed="{sp}"'
+                      f' transform="translate({x},426) scale(0.62)">{shadow(0, 3, 26, 4)}'
                       f'<g stroke="#2f3a44" stroke-width="3" fill="none">'
                       f'<circle cx="-18" cy="-8" r="9"/><circle cx="18" cy="-8" r="9"/>'
                       f'<path d="M-18,-8 L0,-28 L18,-8 M0,-28 L-6,-8 M0,-28 L10,-30"/></g>'
                       + person(0, -26, 0.62, c, arms='out') + '</g>'
-                      for x, c in [(508, '#7bc86c'), (1102, '#e8574a'), (206, '#f2b134')]))
+                      # BRISK. The engine works out the gap each rider needs from
+                      # how long IT takes to get across, and at 37-52 px/s that
+                      # came to four and a half seconds — longer than this road
+                      # ever goes quiet, so nobody crossed at all in eighteen
+                      # seconds of watching. People on the Braude path are not
+                      # dawdling anyway.
+                      for x, c, run, sp in [(508, '#7bc86c', '80,1200', 68),
+                                            (1102, '#e8574a', '1200,80', 58),
+                                            (206, '#f2b134', '80,1200', 76)]))
 
     # ---- in front of the train: the life of the beach ----
     front = ('    ' + palm(44, 716, 1.45) + palm(1254, 712, 1.5) + palm(178, 626, 0.9)

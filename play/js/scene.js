@@ -402,6 +402,8 @@
     const idles = buildIdles(svg);
     const drifts = buildDrifts(svg);
     const flags = buildFlags(svg);
+    const kites = buildKites(svg);
+    const cyclists = buildCyclists(svg);
     const jets = buildJets(svg);
     const watchers = buildWatchers(svg);
     const pumpjacks = buildPumpjacks(svg);
@@ -430,7 +432,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -2818,6 +2820,184 @@
     if (d.bow) d.bow.setAttribute('opacity', (0.5 * wet).toFixed(2));
   }
 
+  // =======================================================================
+  // A KITE (.cc-kite) — the first thing in the set that hangs off something
+  // else and has to drag its line with it.
+  //
+  //   data-anchor="x,y"   the HAND holding the string
+  //   data-home="x,y"     where the art drew it, which is the middle of the swing
+  //
+  // It swings about the hand at a roughly constant line length, with the length
+  // itself breathing a little — a kite rises as it catches and sags as it spills.
+  // The string is redrawn from the hand to wherever the kite has got to, keeping
+  // the belly the art drew into it, and the kite tips only PART of the way toward
+  // the line: fully aligned it lies over on its side, which is a kite that has
+  // stopped flying.
+  // =======================================================================
+  const KITE = { sway: 13, secs: 6.4, bob: 11, bobSecs: 3.7, tip: 0.42, belly: 26 };
+
+  function buildKites(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-kite').forEach(node => {
+      const a = (node.getAttribute('data-anchor') || '').split(',').map(Number);
+      const h = (node.getAttribute('data-home') || '').split(',').map(Number);
+      if (a.length !== 2 || h.length !== 2 || a.concat(h).some(isNaN)) {
+        console.warn('cc-kite needs data-anchor and data-home'); return;
+      }
+      // The string is whichever one names the same hand.
+      let line = null;
+      svg.querySelectorAll('.cc-kite-string').forEach(p => {
+        const b = (p.getAttribute('data-anchor') || '').split(',').map(Number);
+        if (b.length === 2 && b[0] === a[0] && b[1] === a[1]) line = p;
+      });
+      const vx = h[0] - a[0], vy = h[1] - a[1];
+      out.push({ el: node, line: line, ax: a[0], ay: a[1], vx: vx, vy: vy,
+                 len: Math.sqrt(vx * vx + vy * vy) });
+    });
+    return out;
+  }
+
+  function updateKites(t) {
+    const list = currentScene && currentScene.kites;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(k => {
+      const a = KITE.sway * Math.sin(secs / KITE.secs * TAU) * Math.PI / 180;
+      const grow = 1 + (KITE.bob * Math.sin(secs / KITE.bobSecs * TAU)) / k.len;
+      const c = Math.cos(a), sn = Math.sin(a);
+      const x = k.ax + (k.vx * c - k.vy * sn) * grow;
+      const y = k.ay + (k.vx * sn + k.vy * c) * grow;
+      k.el.setAttribute('transform',
+        'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate('
+        + (a * 180 / Math.PI * KITE.tip).toFixed(2) + ')');
+      if (k.line) {
+        k.line.setAttribute('d', 'M' + k.ax + ',' + k.ay + ' Q '
+          + ((k.ax + x) / 2 + KITE.belly).toFixed(1) + ',' + ((k.ay + y) / 2).toFixed(1)
+          + ' ' + x.toFixed(1) + ',' + (y + 14).toFixed(1));
+      }
+    });
+  }
+
+  // =======================================================================
+  // CYCLISTS ON A PATH THAT CROSSES THE ROAD (.cc-cyclist).
+  //
+  // The first thing in the game that gives way to the ENGINE'S OWN TRAFFIC.
+  // Everything else that waits is waiting for the gate; these wait for a gap in
+  // the cars, which is a different lesson and the one every child is actually
+  // taught: look, and cross when it is clear.
+  //
+  //   data-run="x0,x1"  the stretch of path it works, and it turns at each end
+  //   data-y            the path's line
+  //   data-scale · data-speed · data-nose
+  //
+  // The carriageway's edges are NOT declared — the engine already knows where the
+  // road is at any y, so a scene that moves its road cannot leave this behind.
+  //
+  // ONCE IT STARTS, IT FINISHES. A rider that changes its mind halfway is worse
+  // than one that never set off, so the gap is checked at the kerb and never
+  // again until it is across.
+  // =======================================================================
+  // band: how close a car has to be to the line to be IN THE WAY, which is about
+  // a car's own height at that depth and no more. It was 40, which is wider than
+  // a car and meant a queue stopped 30px short of the crossing counted as
+  // occupying it — so the moment the gate came down and the traffic backed up to
+  // the stop line, the riders were sealed in for as long as the child held it.
+  const BIKE = { band: 26, margin: 0.6 };
+
+  /** Is anything coming that would meet THIS rider crossing at this line?
+
+      Asked in SECONDS, not pixels. A fixed look-ahead is wrong twice over: it is
+      the same for a rider who takes three seconds to cross and one who takes four,
+      and it ignores how fast the car is actually going, which depends on how far
+      down the road it is. Both sides are times now and the number tunes itself. */
+  function trafficAt(b, y) {
+    const need = (2 * roadHalf(y) + 2 * b.half) / b.speed + BIKE.margin;
+    return cars.some(c => {
+      if (c.phase !== 'road' || c.dead) return false;
+      if (Math.abs(c.y - y) < BIKE.band) return true;          // on the crossing now
+      const toward = (c.dir > 0 && c.y < y) || (c.dir < 0 && c.y > y);
+      if (!toward) return false;
+      // A CAR THAT IS NOT MOVING IS NOT COMING. Whatever is holding it — the
+      // gate, a train, the car in front — it is not going to arrive while the
+      // rider is on the road, and treating a stationary queue as traffic is what
+      // made this crossing impassable exactly when it was safest.
+      if (Math.abs(c.y - (c.y0 == null ? c.y : c.y0)) < 0.02) return false;
+      const v = Math.max(1, c.speed * depthScale(c.y));
+      return Math.abs(c.y - y) / v < need;
+    });
+  }
+
+  function buildCyclists(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-cyclist').forEach(node => {
+      const v = (node.getAttribute('data-run') || '').split(',').map(Number);
+      const y = parseFloat(node.getAttribute('data-y'));
+      if (v.length !== 2 || v.some(isNaN) || isNaN(y)) {
+        console.warn('cc-cyclist needs data-run and data-y'); return;
+      }
+      const m = /translate\(\s*(-?[\d.]+)/.exec(node.getAttribute('transform') || '');
+      const sc = parseFloat(node.getAttribute('data-scale')) || 1;
+      out.push({ el: node, y: y, sc: sc,
+                 x0: Math.min(v[0], v[1]), x1: Math.max(v[0], v[1]),
+                 x: m ? +m[1] : v[0], dir: v[1] > v[0] ? 1 : -1,
+                 nose: parseFloat(node.getAttribute('data-nose')) || 1,
+                 speed: parseFloat(node.getAttribute('data-speed')) || 40,
+                 half: 30 * sc, state: 'ride', wait: 0 });
+    });
+    return out;
+  }
+
+  function updateCyclists(dt) {
+    const list = currentScene && currentScene.cyclists;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    const half = roadHalf(list[0].y);
+    const kerbW = ROAD_CX - half;               // the carriageway's own edges
+    const kerbE = ROAD_CX + half;
+    list.forEach(b => {
+      const stopW = kerbW - b.half, stopE = kerbE + b.half;
+      let want = b.x + b.dir * b.speed * secs;
+
+      if (b.state !== 'cross') {
+        // A LIMIT PER FRAME, never a position set at the moment of arrival. Set
+        // once on the frame it reaches the kerb, a rider already a pixel short of
+        // the line gets shoved BACKWARDS to make room for a queue — which is the
+        // trap Mystic's cars fell into and it looks exactly as wrong here.
+        let lim = null;
+        const kerb = b.dir > 0 ? stopW : stopE;
+        const before = b.dir > 0 ? b.x <= kerb : b.x >= kerb;
+        if (before && trafficAt(b, b.y)) lim = kerb;
+        // and fall in behind anyone already stopped, rather than on top of them
+        const gap = b.half * 2 + 12;
+        list.forEach(o => {
+          if (o === b || o.state !== 'wait' || o.dir !== b.dir) return;
+          const ahead = b.dir > 0 ? o.x > b.x : o.x < b.x;
+          if (!ahead) return;
+          const behind = b.dir > 0 ? o.x - gap : o.x + gap;
+          lim = lim == null ? behind
+              : (b.dir > 0 ? Math.min(lim, behind) : Math.max(lim, behind));
+        });
+        if (lim != null) want = b.dir > 0 ? Math.min(want, lim) : Math.max(want, lim);
+        b.state = (Math.abs(want - b.x) < 0.01 && lim != null) ? 'wait' : 'ride';
+        // ONCE IT SETS OFF IT FINISHES. A rider that changes its mind in the
+        // middle of the road is worse than one that never left the kerb, so the
+        // gap is checked here and not again until it is across.
+        if ((b.dir > 0 ? want > stopW : want < stopE) && !trafficAt(b, b.y)) b.state = 'cross';
+      } else if (b.dir > 0 ? b.x >= stopE : b.x <= stopW) {
+        b.state = 'ride';
+      }
+
+      b.x = want;
+      if (b.x >= b.x1) { b.x = b.x1; b.dir = -1; b.state = 'ride'; }
+      else if (b.x <= b.x0) { b.x = b.x0; b.dir = 1; b.state = 'ride'; }
+
+      const fwd = b.nose * b.dir;
+      b.el.setAttribute('transform',
+        'translate(' + b.x.toFixed(1) + ',' + b.y + ') scale('
+        + (fwd * b.sc).toFixed(3) + ',' + b.sc + ')');
+    });
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -4371,7 +4551,7 @@
     // the carriageway queue and must not be given a stop line on it.
     // Where everything was before this frame moved it. The queue uses it to
     // hold a car rather than shove it backwards — see below.
-    cars.forEach(car => { car.x0 = car.x; });
+    cars.forEach(car => { car.x0 = car.x; car.y0 = car.y; });
     cars.forEach(car => { car.offRoad = driveSideRoad(car, secs); });
     // Rim Drive is a queue too. Without this, two cars released together at the
     // gate turn together and then sit 7px apart the whole way across.
@@ -4563,6 +4743,8 @@
     updateDrifts(t, dt);
     updateFlags(t);
     updateJets(t);
+    updateKites(t);
+    updateCyclists(dt);
     // AMBIENT, so they belong HERE and not in updateTrain — that returns early
     // when no train is on screen, which would freeze the bus halfway down the
     // street and stop the water park entirely between trains. The bus is only
