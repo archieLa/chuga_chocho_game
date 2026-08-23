@@ -2932,9 +2932,16 @@ def houston():
                     '<rect x="3" y="-96" width="20" height="34" fill="#2f4d8f"/>'
                     '<path d="M13,-84 l2.6,5.4 5.8,0.8 -4.2,4.1 1,5.8 -5.2,-2.8 -5.2,2.8 1,-5.8 '
                     '-4.2,-4.1 5.8,-0.8 Z" fill="#f2f2ee"/>')
+        # The cloth is its own group so the engine can fly it, on the same contract
+        # Mount Rushmore's avenue and Kansas City's pole use: swing about the
+        # halyard and furl out of step with the swing, because rotation alone is a
+        # pendulum and the narrowing is what makes it cloth. data-pivot is the
+        # HOIST's middle — the edge tied to the pole — in the pole's own units.
         return (f'<g transform="translate({x},{y}) scale({s})">{shadow(0, 3, 14, 4)}'
                 f'<rect x="-2" y="-104" width="4" height="104" fill="#d2d6d9"/>'
-                f'<circle cx="0" cy="-107" r="4" fill="#e0b64a"/>{flag}</g>')
+                f'<circle cx="0" cy="-107" r="4" fill="#e0b64a"/>'
+                f'<g class="cc-flag" data-pivot="3,-79" data-i="{0 if kind == "us" else 1}">'
+                f'{flag}</g></g>')
 
     def person(x, y, s=1.0, shirt='#2f6fb5', skin='#c98d5e', hair='#33241c', hat=None, arms='down'):
         A = {'down': 'M-6,-30 L-11,-13 M6,-30 L11,-13',
@@ -11098,14 +11105,50 @@ def horseshoe_curve():
                           for x, y, r in [(220, 550, 170), (830, 566, 150), (1140, 542, 160),
                                           (400, 676, 180), (980, 690, 170)]) + '</g>')
 
-    front = ('    '
+    # ------------------------------------------------- THE HALT ----
+    # People come here to WATCH trains, and the maintainer's son would rather they
+    # got on one. So the observation park gets a platform: timber on a stone base,
+    # which is what a halt in a state park looks like, and no yellow line because
+    # this is not a city.
+    #
+    # It goes on the near side between the OPEN button (which ends at 871) and the
+    # right-hand signal, which had to move along the line to make room — see below.
+    def platform(x0, x1, y, h=30):
+        return (f'<g id="hc-platform">'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="{h}" rx="2" fill="#9a8f7c"/>'
+                f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="6" rx="2" fill="#b0a48e"/>'
+                f'<rect x="{x0}" y="{y + h - 5}" width="{x1 - x0}" height="5" fill="#6f6656"/>'
+                + ''.join(f'<rect x="{gx}" y="{y + 7}" width="2" height="{h - 13}" '
+                          f'fill="#8a8070"/>' for gx in range(x0 + 16, x1 - 8, 24))
+                + '</g>')
+
+    def passenger(sx, sy, dx, dy, role, sc, top, bottom, skin):
+        at = (sx, sy) if role == 'board' else (dx, dy)
+        return (f'<g class="cc-passenger" data-role="{role}" data-scale="{sc}"'
+                f' data-stand="{sx},{sy}" data-door="{dx},{dy}"'
+                f' transform="translate({at[0]},{at[1]}) scale({sc})"'
+                + (' opacity="0"' if role == 'alight' else '') + '>'
+                + person(0, 0, 1.0, top, bottom, skin) + '</g>')
+
+    halt = ('<g class="cc-platform" data-stop="1424" data-dwell="6.5"></g>'
+            + platform(880, 1120, 516)
+            + passenger(912, 528, 952, 506, 'board', 0.72, '#2f6f8c', '#3f4650', '#c98d63')
+            + passenger(958, 526, 992, 506, 'alight', 0.68, '#e0983c', '#2f3440', '#8a5a3c')
+            + passenger(1010, 528, 1038, 506, 'alight', 0.76, '#7a4f9e', '#3f4650', '#e0b58c')
+            + passenger(1062, 526, 1080, 506, 'board', 0.70, '#c8762c', '#2f3440', '#c98d63')
+            + passenger(1098, 528, 1104, 506, 'board', 0.74, '#4f8a6a', '#3f4650', '#8a5a3c'))
+
+    front = ('    ' + halt
              + ''.join(hardwood(x, y, sc) for x, y, sc in
                        [(60, 706, 1.4), (1230, 716, 1.5), (196, 650, 1.0),
                         (1096, 656, 1.05), (330, 604, 0.66), (958, 610, 0.7)])
              + ''.join(pine(x, y, sc) for x, y, sc in
                        [(128, 634, 0.85), (272, 700, 1.15), (1010, 704, 1.2),
                         (1168, 636, 0.9), (424, 588, 0.5), (868, 592, 0.54)])
-             + signal(252, 560, 0.5) + signal(1036, 566, 0.52)
+             # The right-hand signal stood at 1036 with its mast filling y 492-567,
+             # which is where the platform now is. Moved along the line, where it
+             # still reads as the pair it belongs to.
+             + signal(252, 560, 0.5) + signal(1150, 580, 0.52)
              + car(300, 700, 0.62, '#b8342c') + car(986, 690, 0.58, '#e8e2d2')
              # THE PEOPLE WHO CAME HERE TO WATCH, and they can now be SEEN doing
              # it. All three stood at 452, 486 and 830, which is behind the CLOSE
