@@ -350,7 +350,7 @@ Two traps, both already paid for once:
 | Sun Valley | the game's own traffic turns onto the cross street at the junction · gondola and chairlift run both ways · skiers turn down seven runs · two ploughs work the verge and the town street |
 | Indianapolis | six cars hold their lanes on the straight · one pits, is jacked up and has its wheels changed · the road traffic is open-wheelers |
 | Moab | **all three jeeps drive** — one wanders the far bench, one crawls up over the block and down its face taking its pitch from the rock, and the near one works the trail below, west of the carriageway |
-| Bluegrass | **a family of three walks the near pasture together** — two big horses with the foal between them, in step and in formation · two more walk the far paddocks · the rest graze, and every tail swishes |
+| Bluegrass | **every horse in the county walks** — twelve of them, none left standing, two mother-and-foal pairs holding formation on offset ranges and nobody crossing the drive |
 | Yellowstone | the geyser erupts · five bison amble the sage flat and two bull elk cross it |
 | Denali | the aurora breathes — each curtain on its own drift and fade |
 | Oʻahu | three catamarans work the reef, each at its own pace |
@@ -368,7 +368,7 @@ Two traps, both already paid for once:
 | Las Vegas | the marquee bulbs chase round every sign on the Strip |
 | Horseshoe Curve | every other train calls at the observation halt — five people get on and off, while the ambient train keeps going round the bowl above them |
 | New York | every other train calls at the platform above the M14 stop — five people get on and off, two of them carry on down to the bus, and the bus pulls away with them · the city finally has people in it at all |
-| Boston | every other Green Line car calls at the Esplanade stop — four people get on and off, and the man walking his dog comes up off the lawn to join them, the dog a beat behind |
+| Boston | fifteen boats work the Charles, each on its own stretch at its own speed — the fleet stays spread the way the art placed it instead of bunching at one end · every other Green Line car calls at the Esplanade stop, and the man walking his dog comes up off the lawn to join them, the dog a beat behind |
 | Wisconsin Dells | a child rides the near flume into a splash and climbs back for another go · a second rider inside the enclosed tube on the tower · the duck boat drives down the ramp, noses into the river, turns round and heads off upstream |
 | Oklahoma City | three pumpjacks nod, each at its own rate and its own phase · a dust devil wanders the field and collapses at the far end |
 | Kansas City | the fountain runs — three jets pulsing out of step, sheets over both basin lips, the pool shifting · the flag swings and furls on its pole |

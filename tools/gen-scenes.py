@@ -5851,20 +5851,38 @@ def boston():
                '<rect x="470" y="310" width="66" height="42"/>'
                '<rect x="906" y="310" width="72" height="34"/>'
                '<rect x="740" y="310" width="58" height="28"/></g>\n'
-               # sailboats — small, and there are always dozens
+               # SAILBOATS, AND THEY SAIL. Fourteen of them sitting perfectly still
+               # on a river is a photograph, not a river — and this is the Charles,
+               # where something is always moving.
+               #
+               # Each works a stretch either side of where it was drawn rather than
+               # the whole width, which keeps the fleet spread the way the art
+               # spaced it instead of letting them all bunch at one end. Every one
+               # gets its own speed and its own direction: a dozen boats at one
+               # speed is one boat drawn a dozen times, which is exactly what they
+               # are. Slow — these are dinghies pottering, not a race.
+               #
+               # Drawn BOW-RIGHT (the mainsail runs out to +x over a hull that is
+               # longer that way), so nothing needs a data-nose.
                + '    <g>' + ''.join(
-                   f'<g transform="translate({x},{y}) scale({s})">'
+                   f'<g class="cc-ship" data-sail="{x - 120 if i % 2 else x + 120},'
+                   f'{x + 120 if i % 2 else x - 120},{y}" data-speed="{7 + (i * 5) % 12}"'
+                   f' data-scale="{s}" transform="translate({x},{y}) scale({s})">'
                    f'<path d="M0,0 L0,-26 L15,-2 Z" fill="#f4f4ee"/>'
                    f'<path d="M-2,-24 L-11,-2 L-2,-2 Z" fill="#e2e6e6"/>'
                    f'<path d="M-15,0 L17,0 L13,5 L-11,5 Z" fill="#2f4a5c"/></g>'
-                   for x, y, s in [(148, 352, 0.86), (238, 336, 0.7), (392, 366, 0.94),
-                                   (628, 344, 0.74), (866, 358, 0.9), (1042, 338, 0.68),
-                                   (1190, 372, 1.0), (80, 386, 1.05), (960, 388, 1.0),
-                                   (466, 330, 0.6), (1108, 352, 0.82), (742, 378, 1.0),
-                                   (206, 368, 0.9), (1266, 336, 0.66)])
+                   for i, (x, y, s) in enumerate(
+                       [(148, 352, 0.86), (238, 336, 0.7), (392, 366, 0.94),
+                        (628, 344, 0.74), (866, 358, 0.9), (1042, 338, 0.68),
+                        (1190, 372, 1.0), (80, 386, 1.05), (960, 388, 1.0),
+                        (466, 330, 0.6), (1108, 352, 0.82), (742, 378, 1.0),
+                        (206, 368, 0.9), (1266, 336, 0.66)]))
                + '</g>\n'
                # a rowing eight, which is the other thing always on this water
-               '    <g transform="translate(300,392) scale(0.9)">'
+               # The eight moves too, or it is the one thing on the river holding
+               # still while fourteen boats sail past it.
+               '    <g class="cc-ship" data-sail="120,860,392" data-speed="26" '
+               'data-scale="0.9" transform="translate(300,392) scale(0.9)">'
                '<path d="M-64,0 C -40,-5 40,-5 64,0 C 40,4 -40,4 -64,0 Z" fill="#e8e4d8"/>'
                '<g fill="#2f3a44">'
                + ''.join(f'<rect x="{-46 + k * 16}" y="-4" width="4" height="5" rx="1.5"/>'
@@ -9952,10 +9970,21 @@ def bluegrass():
             + ''.join(cedar(x, 404, sc) for x, sc in
                       [(178, 0.4), (556, 0.34), (930, 0.38), (1264, 0.44)])
             # a band of horses out on the middle pasture
-            + horse(360, 448, 0.24, '#7a4a2c', '#623a20', '#241c14', grazing=True)
-            + horse(430, 446, 0.23, '#3f3630', '#2f2822', '#1f1a16', grazing=True)
-            + foal(468, 446, 0.17, '#8a5a34')
-            + horse(890, 450, 0.25, '#c2a06a', '#a8875a', '#6b5436', grazing=True)
+            # EVERY HORSE WALKS NOW. Grazing was fine when only one of them moved,
+            # but a field where two walk and seven stand reads as seven stuck.
+            #
+            # The ranges do not overlap, and where they do it is because the two
+            # are a PAIR keeping formation — same range length, offset by their
+            # spacing, so they can never meet. Everything here is also west of the
+            # carriageway (583..697 at this height) or east of it; nothing crosses.
+            + horse(360, 448, 0.24, '#7a4a2c', '#623a20', '#241c14',
+                    run='210,330,448', speed=11)
+            # the dark mare and her foal, a pair on one range
+            + horse(430, 446, 0.23, '#3f3630', '#2f2822', '#1f1a16',
+                    run='400,520,446', speed=9)
+            + foal(468, 446, 0.17, '#8a5a34', run='440,560,446', speed=9)
+            + horse(890, 450, 0.25, '#c2a06a', '#a8875a', '#6b5436',
+                    run='720,830,450', speed=10)
             # The three with their heads up were the ones reading as stuck — a
             # grazing horse at least looks busy. They walk instead. Slow, and well
             # clear of the road, which spans 582..697 at y=448 and 555..725 at
@@ -10013,11 +10042,21 @@ def bluegrass():
                      run='1200,1084,700', speed=26)
              + foal(1120, 708, 0.36, '#a8703f', run='1120,1004,708', speed=26)
              + run_in(300, 560, 0.62) + trough(770, 570, 0.6)
-             + horse(880, 578, 0.34, '#a8a29a', '#8c867e', '#4a443e', grazing=True)
-             + horse(432, 566, 0.31, '#7a4a2c', '#623a20', '#241c14', grazing=True)
+             # The near pair. The OPEN button covers 691-871 from y 518 down, and a
+             # horse at 0.34 reaches 32 ahead of its own origin, so 905 is as far
+             # west as this one may stand before its nose is behind a button.
+             + horse(905, 578, 0.34, '#a8a29a', '#8c867e', '#4a443e',
+                     run='905,1010,578', speed=13)
+             # And this one keeps west of the RUN-IN SHED at 263..337 as well as
+             # clear of the CLOSE button, which leaves it the strip out to 250.
+             + horse(432, 566, 0.31, '#7a4a2c', '#623a20', '#241c14',
+                     run='120,250,566', speed=12)
              + horse(1078, 550, 0.3, '#5c3a22', '#472b18', '#241c14',
                      run='1078,900,550', speed=17)
-             + foal(470, 566, 0.22, '#a8703f')
+             # Moved across to the grey mare and paired with her — at 470 it stood
+             # squarely behind the CLOSE button, and the only clear ground on the
+             # near left is the strip the other horse now works.
+             + foal(965, 584, 0.22, '#a8703f', run='965,1070,584', speed=13)
              # Moved across the drive: he stood at 880, which is under the OPEN
              # button, and the empty side needed somebody in it anyway.
              + person(268, 708, 0.9, '#2f6f4f', '#3f4650', '#8a5a3c', '#e8e2d4'))
