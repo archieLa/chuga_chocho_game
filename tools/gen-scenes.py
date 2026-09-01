@@ -28778,14 +28778,20 @@ def dubuque():
                   f'width="{7 + rpa() * 16:.0f}" height="2" rx="1" fill="#b4ac98" '
                   f'opacity="0.55"/>')
 
-    def person(x, y, s_, top, bot='#3a4a5c', skin='#e8b88c', hair='#3a2a1c', arm=0):
+    def person(x, y, s_, top, bot='#3a4a5c', skin='#e8b88c', hair='#3a2a1c', arm=0, i=0):
+        # A RAISED ARM WAVES. The arm is a single stroke from the shoulder at
+        # (6,-36), so it only needs its own group and that point as the pivot —
+        # the hand swings and nothing else in the figure moves. data-i keeps the
+        # three of them out of step; three arms in unison is one arm drawn three
+        # times, and children do not wave in time with each other.
         return (f'<g transform="translate({x},{y}) scale({s_:.2f})">'
                 f'<ellipse cx="0" cy="2" rx="11" ry="3.4" fill="#000" opacity="0.15"/>'
                 f'<rect x="-6" y="-22" width="5" height="22" fill="{bot}"/>'
                 f'<rect x="1" y="-22" width="5" height="22" fill="{bot}"/>'
                 f'<rect x="-7" y="-40" width="14" height="20" rx="4" fill="{top}"/>'
-                + (f'<path d="M6,-36 l13,-{8 + arm}" stroke="{skin}" stroke-width="4.4" '
-                   f'stroke-linecap="round"/>' if arm else '')
+                + (f'<g class="cc-wave" data-pivot="6,-36" data-i="{i}">'
+                   f'<path d="M6,-36 l13,-{8 + arm}" stroke="{skin}" stroke-width="4.4" '
+                   f'stroke-linecap="round"/></g>' if arm else '')
                 + f'<circle cx="0" cy="-46" r="6.4" fill="{skin}"/>'
                 f'<path d="M-6.4,-48 a6.4,6.4 0 0 1 12.8,0 z" fill="{hair}"/></g>')
 
@@ -28820,9 +28826,13 @@ def dubuque():
                   f'height="7" fill="#a38763"/>')
         fr.append(f'<rect x="{DK_L - 36 + i * 6}" y="{DK_T + 41 + i * 9}" width="36" '
                   f'height="3" fill="#7a6146"/>')
-    fr.append(person(332, DK_T + 15, 0.8, '#c0492f', arm=5))
-    fr.append(person(362, DK_T + 13, 0.6, '#f0b32a', hair='#6a4a2a', arm=3))
-    fr.append(person(418, DK_T + 9, 0.78, '#2f7fd0', arm=5))
+    # SHIFTED WEST ALONG THE DECK. The far one stood at 418 with its waving arm
+    # reaching to 433, and the CLOSE button covers 409-589 from y 518 down — so
+    # the one thing it was newly given to do happened behind a red circle. At 384
+    # its hand stops at 399. Sixth scene the buttons have caught.
+    fr.append(person(316, DK_T + 15, 0.8, '#c0492f', arm=5, i=0))
+    fr.append(person(348, DK_T + 13, 0.6, '#f0b32a', hair='#6a4a2a', arm=3, i=1))
+    fr.append(person(384, DK_T + 9, 0.78, '#2f7fd0', arm=5, i=2))
 
     # a picnic table under the trees, which is the other thing a riverfront park is for
     fr.append('<g transform="translate(150,684)">'

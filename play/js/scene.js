@@ -433,6 +433,7 @@
     const flags = buildFlags(svg);
     const kites = buildKites(svg);
     const lock = buildLock(svg);
+    const waves = buildWaves(svg);
     const swing = buildSwing(svg);
     const funi = buildFunis(svg);
     const cyclists = buildCyclists(svg);
@@ -464,7 +465,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -3218,6 +3219,40 @@
     });
   }
 
+  // =======================================================================
+  // A WAVING ARM (.cc-wave) — anywhere, not only on the Glacier bus.
+  //
+  //   data-pivot="x,y"   the SHOULDER, in the figure's own units
+  //   data-i             its place in the group, so no two wave together
+  //
+  // Arms inside a .cc-tour are skipped: the tour bus already drives its own, and
+  // two things writing one transform is how you get an arm that jitters.
+  // =======================================================================
+  const WAVER = { deg: 17, secs: 0.62, stagger: 0.29 };   // not WAVE — the tour bus owns that one
+
+  function buildWaves(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-wave').forEach(node => {
+      if (node.closest && node.closest('.cc-tour')) return;
+      const p = (node.getAttribute('data-pivot') || '').split(',').map(Number);
+      if (p.length !== 2 || p.some(isNaN)) { console.warn('cc-wave has no usable data-pivot'); return; }
+      out.push({ el: node, px: p[0], py: p[1],
+                 phase: (parseFloat(node.getAttribute('data-i')) || 0) * WAVER.stagger });
+    });
+    return out;
+  }
+
+  function updateWaves(t) {
+    const list = currentScene && currentScene.waves;
+    if (!list || !list.length) return;
+    const secs = t / 1000;
+    list.forEach(w => {
+      const a = WAVER.deg * Math.sin((secs / WAVER.secs + w.phase) * TAU);
+      w.el.setAttribute('transform',
+        'rotate(' + a.toFixed(2) + ',' + w.px + ',' + w.py + ')');
+    });
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -4965,6 +5000,7 @@
     updateJets(t);
     updateKites(t);
     updateLock(dt);
+    updateWaves(t);
     updateSwing(dt);
     updateFunis(dt);
     updateCyclists(dt);
