@@ -27754,7 +27754,1149 @@ def wisconsin_dells():
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells()
+def dubuque():
+    """DUBUQUE, IOWA — the lock, under the city on the bluff.
+
+    The set had forty-nine scenes and not one mechanism that is *about waiting*. A lock
+    is: a boat comes in, the gates shut behind it, nothing happens for a while, the water
+    changes, the gates open and it goes. That is **you are safe, you wait, then you go** —
+    the sentence this whole game is built on — happening to a boat, a hundred feet from a
+    level crossing where it is about to happen to a car.
+
+    **The second version of this scene had the lock and nothing else, and it could have
+    been any river in the Midwest.** That was the failure worth recording: I built the
+    mechanism, checked it read, and never asked whether the picture said WHERE it was.
+
+    Dubuque's own silhouette, in every photograph taken off the bluff, is four things and
+    the scene now carries all four:
+
+      * the BLUFF — steep and WOODED, with two pale outcrops in it and nothing more. The
+        reference is unambiguous, and it is what stops this being a fourth layered-rock
+        cliff after the Grand Canyon, Moab and the Wisconsin Dells.
+      * the FENELON PLACE ELEVATOR climbing it, two little green cars on a cable.
+      * the CITY below: a mass of red brick with a GOLD DOME on a courthouse tower and two
+        pale GOTHIC SPIRES standing well above it. The dome is the only warm metal in the
+        frame and it reads at thirty pixels.
+      * TWO BRIDGES, OVERLAPPING — the rusty railroad swing bridge in front and the pale
+        steel highway arch behind it. Straight off the reference, and it fixes the other
+        thing that was wrong: everything used to sit in its own horizontal band with
+        nothing crossing anything, so the frame read as a diagram. Two structures at
+        different depths over the same water is depth for free, and the arch's crown is
+        the only thing that breaks the horizon.
+
+    The dam went. It was drawn, and it was the last thing making the frame incoherent: a
+    lock and its dam are one continuous structure across a river, and split across a
+    railway into two unrelated objects it read as two components placed separately. A
+    chamber explains a lock perfectly well on its own — none of the reference photographs
+    taken inside one show the dam either.
+
+    Two more things the reference corrected:
+
+      * The wet line is the whole story. Inside a chamber the top few feet of concrete are
+        pale and dry and everything below is near-black with stain, so the level change
+        reads as a hard edge sweeping down a large light surface. That is a bigger area
+        changing than the boat occupies, and the eye catches it first.
+      * The chamber water and the open river are different colours — grey-green in the
+        box, blue-grey outside. Two waters in one frame separate better than one would.
+
+    This is deliberately not Vicksburg, which is also a Mississippi bluff with a boat
+    under it. There the river is open and the hero is the raft of barges; here the river
+    is a concrete box and the hero is the box. The towboat and barges are the SMALL thing,
+    far off, and the vessel in the lock is a low white excursion sternwheeler."""
+    LOCK_L = 792             # the chamber's left edge, clear of the road
+    COPING = 704             # top of the near lock wall — we look over it
+    FAR_TOP = 548            # top of the far wall's inner face
+    W_HIGH, W_LOW = 596, 656  # the water surface, upper pool and lower pool
+    GATE_L, GATE_R = 1106, 1194
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    CONC, CONC_D, CONC_L = '#b4afa0', '#7e796b', '#dcd7c6'
+    WET, WET_D = '#2f2a24', '#1a1713'
+    # steel, not timber. Warm brown with brown ribs was a wardrobe; a lock gate is
+    # cold grey-green painted steel that has gone rusty in streaks.
+    RUST, RUST_D, RUST_L = '#4d5750', '#232a26', '#6f7a72'
+    RED, RED_D = '#a83c2f', '#7a2820'
+    STEEL_R = '#8a4f3c'          # the bridge trusses, rusted red-brown
+    PINE, PINE_D, PINE_L = '#2f5b3c', '#22422c', '#4a8055'
+    TOPS = ['#e04f4f', '#f0b32a', '#2f8f5b', '#8a5bc0', '#e8722c', '#2f7fd0']
+
+    DEFS = []
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f86c8"/><stop offset="0.55" stop-color="#90bedd"/>
+      <stop offset="1" stop-color="#dfebf0"/>
+    </linearGradient>
+    <linearGradient id="dbriver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fb2ae"/><stop offset="0.4" stop-color="#7c8d88"/>
+      <stop offset="1" stop-color="#5e6d66"/>
+    </linearGradient>
+    <linearGradient id="dbchamber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3229"/><stop offset="0.22" stop-color="#4e5a48"/>
+      <stop offset="1" stop-color="#8a9679"/>
+    </linearGradient>
+    <linearGradient id="dbgrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#77a052"/><stop offset="1" stop-color="#5b8740"/>
+    </linearGradient>
+    <linearGradient id="dbwall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8d2c1"/><stop offset="1" stop-color="#a8a292"/>
+    </linearGradient>'''
+
+    # =============================================================== SKY ===
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+
+    def cumulus(cx, base_y, w, seed):
+        r = rnd(seed)
+        o = ['<g>']
+        h = w * (0.5 + r() * 0.2)
+        o.append(f'<ellipse cx="{cx}" cy="{base_y - h * 0.06:.0f}" rx="{w * 0.5:.0f}" '
+                 f'ry="{h * 0.15:.0f}" fill="#bdd0dc"/>')
+        lobes = [(0.0, 0.6, 0.33), (-0.3, 0.4, 0.25), (0.31, 0.43, 0.26),
+                 (-0.13, 0.78, 0.21), (0.17, 0.76, 0.23), (0.0, 0.92, 0.16),
+                 (-0.45, 0.22, 0.19), (0.46, 0.25, 0.18)]
+        for fx, fy, fr in lobes:
+            o.append(f'<ellipse cx="{cx + w * fx:.0f}" cy="{base_y - h * fy:.0f}" '
+                     f'rx="{w * fr:.0f}" ry="{w * fr * 0.85:.0f}" fill="#ffffff"/>')
+        for fx, fy, fr in lobes[:4]:
+            o.append(f'<ellipse cx="{cx + w * fx - w * 0.05:.0f}" '
+                     f'cy="{base_y - h * fy - w * 0.05:.0f}" rx="{w * fr * 0.7:.0f}" '
+                     f'ry="{w * fr * 0.58:.0f}" fill="#ffffff"/>')
+        return ''.join(o) + '</g>'
+
+    for cx, by, w, sd in ((150, 116, 92, 3), (420, 84, 66, 5), (660, 138, 56, 7),
+                          (900, 96, 78, 9), (1160, 130, 70, 11), (1010, 62, 50, 13)):
+        sk.append(cumulus(cx, by, w, sd))
+
+    # =============================================================== FAR ===
+    # the Illinois shore across the river: a low wooded line, hazed
+    far = ['    ']
+    # the shore across the river. Flat green with a blob hedge on it was the last dead
+    # horizontal band in the frame; this stretch has bluffs on BOTH banks, so the far one
+    # gets a low rolling ridge with pale outcrops in it and reads as distance.
+    far.append('<path d="M-20,312 L-20,294 Q 90,274 190,286 Q 280,296 360,278 '
+               'Q 450,258 540,274 Q 640,290 730,276 Q 830,260 930,278 '
+               'Q 1040,296 1140,274 Q 1230,256 1300,270 L1300,312 Z" fill="#a3b8ab"/>')
+    rr = rnd(21)
+    # the outcrops on the far ridge are kept faint on purpose: at that distance the
+    # atmosphere eats them, and drawn at full strength they read as sheep
+    for ox, oy, ow in ((122, 290, 22), (398, 281, 18), (692, 283, 20), (1002, 283, 19)):
+        far.append(f'<path d="M{ox},{oy} L{ox + ow},{oy - 2} L{ox + ow - 3},{oy + 5} '
+                   f'L{ox + 2},{oy + 6} Z" fill="#b5b3a4" opacity="0.35"/>')
+    x = -30
+    while x < 1320:
+        far.append(f'<ellipse cx="{x:.0f}" cy="{300 - rr() * 8:.0f}" '
+                   f'rx="{8 + rr() * 13:.1f}" ry="{4 + rr() * 6:.1f}" '
+                   f'fill="{"#7d9b83" if rr() < 0.5 else "#8aa78e"}" opacity="0.8"/>')
+        x += 13 + rr() * 15
+    far.append('<rect x="-20" y="302" width="1320" height="10" fill="#7d9b83" '
+               'opacity="0.6"/>')
+
+    # ============================================================ GROUND ===
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#dbgrass)"/>']
+
+    # ====================================================== SCENERY BACK ===
+    back = ['    ']
+
+    def pine(x, y, s=1.0, seed=1, dark=False):
+        r = rnd(seed)
+        a = PINE_D if dark else PINE
+        b = mix(a, '#000000', 0.2)
+        c = PINE_L if not dark else PINE
+        lean = (r() - 0.5) * 0.36
+        o = [f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">']
+        o.append(f'<path d="M-1.5,2 L{-1.0 + lean * 30:.1f},-34 '
+                 f'L{1.0 + lean * 30:.1f},-34 L1.5,2 Z" fill="#6b5b41"/>')
+        for i in range(5):
+            t = i / 4.0
+            cy = -10 - t * 40
+            cx = lean * (-cy) * 0.55
+            w = (12.5 - t * 7.6) * (0.7 + r() * 0.55)
+            hh = (6.6 - t * 2.9) * (0.75 + r() * 0.5)
+            o.append(f'<ellipse cx="{cx - w * 0.36:.1f}" cy="{cy:.1f}" rx="{w * 0.68:.1f}" '
+                     f'ry="{hh:.1f}" fill="{b}"/>')
+            o.append(f'<ellipse cx="{cx + w * 0.32:.1f}" cy="{cy - hh * 0.32:.1f}" '
+                     f'rx="{w * 0.76:.1f}" ry="{hh * 0.92:.1f}" fill="{a}"/>')
+            if i >= 3:
+                o.append(f'<ellipse cx="{cx + w * 0.1:.1f}" cy="{cy - hh * 0.5:.1f}" '
+                         f'rx="{w * 0.4:.1f}" ry="{hh * 0.58:.1f}" fill="{c}"/>')
+        return ''.join(o) + '</g>'
+
+    def broadleaf(x, y, s, seed, a='#4a7a44', b='#5e9155'):
+        r = rnd(seed)
+        o = [f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">',
+             f'<rect x="-2" y="-14" width="4" height="16" fill="#6b5b41"/>']
+        for i in range(5):
+            o.append(f'<ellipse cx="{(r() - 0.5) * 26:.1f}" cy="{-18 - r() * 18:.1f}" '
+                     f'rx="{9 + r() * 9:.1f}" ry="{7 + r() * 7:.1f}" '
+                     f'fill="{a if r() < 0.55 else b}"/>')
+        return ''.join(o) + '</g>'
+
+    # ---------------------------------------------------------------------
+    # THE RIVER, right of the road. It stops where the city starts, because the city is
+    # nearer and stands in front of it.
+    back.append('<rect x="596" y="310" width="708" height="138" fill="url(#dbriver)"/>')
+    rw = rnd(53)
+    back.append('<rect x="596" y="310" width="708" height="12" fill="#46584c" '
+                'opacity="0.5"/>')
+    for k in range(78):
+        wx = 600 + rw() * 698
+        wy = 318 + rw() * 124
+        back.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{16 + rw() * 74:.0f}" '
+                    f'height="{1.1 + rw() * 1.5:.1f}" rx="1" '
+                    f'fill="{"#cfdbd8" if rw() < 0.55 else "#41504a"}" '
+                    f'opacity="{0.16 + rw() * 0.3:.2f}"/>')
+
+    # ---------------------------------------------------------------------
+    # TWO BRIDGES, OVERLAPPING. This is straight off the reference: from the Iowa bank
+    # you see the rusty railroad swing bridge in front and the pale steel highway arch
+    # behind it, and the two together are the most recognisable thing on this river.
+    #
+    # It also fixes the thing that was most wrong with the first version — everything sat
+    # in its own horizontal band and nothing overlapped anything, so the frame read as a
+    # diagram. Two structures at different depths crossing the same water is depth for
+    # free, and the arch's crown breaks the horizon, which nothing else here does.
+
+    # --- the highway arch, further off: a tied arch in pale blue-grey
+    ARCH_Y = 366
+    AS_L, AS_R, AC_Y = 850, 1214, 258
+    ARCH_STEEL, ARCH_D = '#9fb2be', '#71858f'
+    for px in (AS_L, AS_R):
+        back.append(f'<rect x="{px - 13}" y="{ARCH_Y}" width="26" height="80" '
+                    f'fill="{CONC}"/>')
+        back.append(f'<rect x="{px - 13}" y="{ARCH_Y}" width="9" height="80" '
+                    f'fill="{CONC_L}"/>')
+    ACX = (AS_L + AS_R) / 2
+    back.append(f'<path d="M{AS_L},{ARCH_Y} Q {ACX:.0f},{AC_Y - 46} {AS_R},{ARCH_Y}" '
+                f'stroke="{ARCH_D}" stroke-width="13" fill="none"/>')
+    back.append(f'<path d="M{AS_L},{ARCH_Y} Q {ACX:.0f},{AC_Y - 46} {AS_R},{ARCH_Y}" '
+                f'stroke="{ARCH_STEEL}" stroke-width="9" fill="none"/>')
+    for i in range(1, 15):
+        t = i / 15.0
+        hx = AS_L + (AS_R - AS_L) * t
+        hy = (1 - t) ** 2 * ARCH_Y + 2 * (1 - t) * t * (AC_Y - 46) + t ** 2 * ARCH_Y
+        back.append(f'<line x1="{hx:.0f}" y1="{hy + 4:.0f}" x2="{hx:.0f}" '
+                    f'y2="{ARCH_Y - 2}" stroke="{ARCH_D}" stroke-width="1.8" '
+                    f'opacity="0.9"/>')
+    # cross bracing along the top of the arch
+    for i in range(2, 13):
+        t = i / 15.0
+        hx = AS_L + (AS_R - AS_L) * t
+        hy = (1 - t) ** 2 * ARCH_Y + 2 * (1 - t) * t * (AC_Y - 46) + t ** 2 * ARCH_Y
+        back.append(f'<rect x="{hx - 9:.0f}" y="{hy - 2:.0f}" width="18" height="2.4" '
+                    f'fill="{ARCH_D}" opacity="0.7"/>')
+    # the deck, running off both ends on trestles
+    back.append(f'<rect x="596" y="{ARCH_Y - 5}" width="712" height="7" '
+                f'fill="{ARCH_STEEL}"/>')
+    back.append(f'<rect x="596" y="{ARCH_Y + 2}" width="712" height="3" fill="{ARCH_D}"/>')
+    back.append(f'<rect x="596" y="{ARCH_Y - 12}" width="712" height="1.8" '
+                f'fill="{ARCH_D}" opacity="0.8"/>')
+    for px in range(614, 1310, 46):
+        if AS_L - 20 < px < AS_R + 20:
+            continue
+        back.append(f'<rect x="{px}" y="{ARCH_Y + 2}" width="5" height="70" '
+                    f'fill="{ARCH_D}" opacity="0.8"/>')
+
+    # --- the railroad swing bridge, nearer and lower, and rusty
+    BR_Y = 412
+    PIV = 828
+    back.append(f'<rect x="668" y="{BR_Y + 4}" width="420" height="10" fill="#4a3f33"/>')
+    back.append(f'<rect x="668" y="{BR_Y + 4}" width="420" height="3" fill="#5f5244"/>')
+
+    def truss(x0, x1, y, h, peak=False):
+        o = ['<g>']
+        top = (f'M{x0},{y - h * 0.55:.0f} L{(x0 + x1) / 2:.0f},{y - h} '
+               f'L{x1},{y - h * 0.55:.0f}') if peak else \
+              f'M{x0},{y - h} L{x1},{y - h}'
+        o.append(f'<path d="{top}" stroke="{STEEL_R}" stroke-width="5" fill="none"/>')
+        o.append(f'<rect x="{x0}" y="{y - 4}" width="{x1 - x0}" height="6" '
+                 f'fill="{mix(STEEL_R, "#000000", 0.25)}"/>')
+        n = max(4, int((x1 - x0) / 26))
+        for i in range(n + 1):
+            t = i / float(n)
+            px = x0 + (x1 - x0) * t
+            ty = (y - h * (0.55 + 0.45 * (1 - abs(2 * t - 1)))) if peak else y - h
+            o.append(f'<line x1="{px:.0f}" y1="{ty:.0f}" x2="{px:.0f}" y2="{y - 2}" '
+                     f'stroke="{STEEL_R}" stroke-width="2.6"/>')
+            if i < n:
+                t2 = (i + 1) / float(n)
+                px2 = x0 + (x1 - x0) * t2
+                ty2 = (y - h * (0.55 + 0.45 * (1 - abs(2 * t2 - 1)))) if peak else y - h
+                o.append(f'<line x1="{px:.0f}" y1="{y - 2}" x2="{px2:.0f}" y2="{ty2:.0f}" '
+                         f'stroke="{STEEL_R}" stroke-width="2"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(truss(620, PIV - 124, BR_Y, 24))
+    back.append(truss(PIV + 124, 1128, BR_Y, 26))
+    back.append(truss(1128, 1310, BR_Y, 26))
+    for px in (626, PIV - 124, PIV + 124, 1128, 1306):
+        back.append(f'<rect x="{px - 7:.0f}" y="{BR_Y - 2}" width="14" height="44" '
+                    f'fill="{CONC_D}"/>')
+    back.append(f'<ellipse cx="{PIV}" cy="{BR_Y + 10}" rx="21" ry="7" fill="#6b675d"/>')
+    back.append(f'<rect x="{PIV - 21}" y="{BR_Y + 4}" width="42" height="38" '
+                f'fill="{CONC_D}"/>')
+    back.append(f'<rect x="{PIV - 21}" y="{BR_Y + 4}" width="13" height="38" '
+                f'fill="{CONC}"/>')
+    back.append(f'<ellipse cx="{PIV}" cy="{BR_Y + 4}" rx="21" ry="7" fill="{CONC}"/>')
+    back.append(f'<g id="cc-swingspan"><g class="cc-swing" '
+                f'transform="translate({PIV},{BR_Y}) scale(1,1)">'
+                + truss(-124, 124, 0, 34, peak=True) + '</g></g>')
+    back.append(f'<g><rect x="{PIV + 16}" y="{BR_Y - 28}" width="27" height="23" '
+                f'fill="#eceade"/>'
+                f'<rect x="{PIV + 14}" y="{BR_Y - 32}" width="31" height="5" '
+                f'fill="#4a4a44"/>'
+                f'<rect x="{PIV + 20}" y="{BR_Y - 24}" width="7" height="8" '
+                f'fill="#5f7c8a"/>'
+                f'<rect x="{PIV + 32}" y="{BR_Y - 24}" width="7" height="8" '
+                f'fill="#5f7c8a"/></g>')
+
+    # a towboat with two barges working the river, small and far off
+    back.append('<g transform="translate(714,438) scale(0.36)">'
+                '<ellipse cx="-40" cy="16" rx="180" ry="6" fill="#e8f0ee" opacity="0.4"/>'
+                '<rect x="-230" y="-14" width="112" height="26" fill="#8a7f6a"/>'
+                '<rect x="-230" y="-14" width="112" height="5" fill="#a89c84"/>'
+                '<rect x="-114" y="-14" width="112" height="26" fill="#8a7f6a"/>'
+                '<rect x="-114" y="-14" width="112" height="5" fill="#a89c84"/>'
+                '<path d="M4,-16 L96,-16 L104,-2 L98,12 L4,12 Z" fill="#26313a"/>'
+                '<rect x="8" y="-42" width="84" height="26" fill="#f2f0e6"/>'
+                '<rect x="24" y="-60" width="52" height="18" fill="#f2f0e6"/>'
+                '<rect x="40" y="-78" width="7" height="18" fill="#2f3a42"/>'
+                '<rect x="56" y="-78" width="7" height="18" fill="#2f3a42"/>'
+                '<rect x="4" y="-4" width="100" height="3" fill="#b4382c"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE BLUFF, behind the city. Steep, WOODED — the reference is unambiguous that
+    # Dubuque's bluff is a green slope with a couple of pale outcrops in it, not a
+    # layered rock face. That is what stops this being a fourth cliff scene after the
+    # Grand Canyon, Moab and the Dells.
+    BL = ('M-20,452 L-20,240 Q -8,196 30,182 L128,176 Q 178,178 200,204 '
+          'L220,246 Q 256,254 272,292 Q 300,348 320,392 Q 344,424 360,452 Z')
+    back.append(f'<path d="{BL}" fill="#31563a"/>')
+    DEFS.append(f'    <clipPath id="dbbluff"><path d="{BL}"/></clipPath>')
+    back.append('<g clip-path="url(#dbbluff)">')
+    rb = rnd(31)
+    for ox, oy, ow in ((36, 322, 26), (146, 262, 20), (250, 356, 22)):
+        back.append(f'<path d="M{ox},{oy} L{ox + ow},{oy - 3} L{ox + ow - 4},{oy + 9} '
+                    f'L{ox + 2},{oy + 11} Z" fill="#cbc2a6"/>')
+        back.append(f'<path d="M{ox},{oy} L{ox + ow},{oy - 3}" stroke="#8f8666" '
+                    f'stroke-width="1.8" fill="none" opacity="0.7"/>')
+    # trees in CLUMPS, big low down and small on the skyline
+    for c in range(56):
+        cxx = -34 + rb() * 390
+        cyy = 174 + rb() * 280
+        depth = (cyy - 170) / 288.0
+        for k in range(5 + int(rb() * 8)):
+            bx = cxx + (rb() - 0.5) * 58
+            by = min(cyy + (rb() - 0.5) * 38, 450.0)
+            sc = (0.15 + depth * 0.46) * (0.68 + rb() * 0.66)
+            back.append(pine(bx, by, sc, seed=int(rb() * 900) + 1,
+                             dark=rb() < 0.4 + (1 - depth) * 0.35) if rb() < 0.72 else
+                        broadleaf(bx, by, sc * 1.12, int(rb() * 900) + 1))
+    back.append('</g>')
+
+    # --- THE FENELON PLACE ELEVATOR, climbing the bluff above the rooftops
+    FX_B, FY_B, FX_T, FY_T = 146, 400, 104, 232
+    back.append(f'<path d="M{FX_B - 13},{FY_B} L{FX_T - 10},{FY_T} L{FX_T + 10},{FY_T} '
+                f'L{FX_B + 13},{FY_B} Z" fill="#7a6a4e" opacity="0.55"/>')
+    for i in range(17):
+        t = i / 16.0
+        sx0 = FX_B - 11 + (FX_T - FX_B) * t
+        sy0 = FY_B + (FY_T - FY_B) * t
+        back.append(f'<rect x="{sx0:.1f}" y="{sy0:.1f}" width="{22 - t * 4:.1f}" '
+                    f'height="1.8" fill="#5f4f38" opacity="0.85"/>')
+    for off in (-5.5, 5.5):
+        back.append(f'<line x1="{FX_B + off:.1f}" y1="{FY_B}" x2="{FX_T + off * 0.8:.1f}" '
+                    f'y2="{FY_T}" stroke="#8d8478" stroke-width="1.4"/>')
+
+    def funi_car(gid, x, y, s=1.0):
+        return (f'<g id="{gid}" class="cc-funi" transform="translate({x:.1f},{y:.1f})">'
+                f'<g transform="scale({s})">'
+                f'<rect x="-7" y="-13" width="14" height="13" fill="#2f6b46"/>'
+                f'<rect x="-7" y="-9" width="14" height="5" fill="#dfe6e2"/>'
+                f'<path d="M-8.5,-13 Q 0,-19 8.5,-13 Z" fill="#f2f2ec"/>'
+                f'<rect x="-7.5" y="-13.6" width="15" height="1.8" fill="#f2f2ec"/>'
+                f'<rect x="-5" y="-1" width="10" height="1.6" fill="#3a3a34"/></g></g>')
+
+    back.append(f'<path id="funi-path-a" class="cc-path" d="M{FX_B - 5},{FY_B - 2} '
+                f'L{FX_T - 4},{FY_T + 2}" fill="none" stroke="none"/>')
+    back.append(f'<path id="funi-path-b" class="cc-path" d="M{FX_B + 6},{FY_B - 2} '
+                f'L{FX_T + 5},{FY_T + 2}" fill="none" stroke="none"/>')
+    back.append(funi_car('cc-funi-a', FX_B - 6, FY_B - 34, 0.95))
+    back.append(funi_car('cc-funi-b', FX_T + 5, FY_T + 40, 0.72))
+    back.append(f'<g><rect x="{FX_T - 24}" y="{FY_T - 21}" width="48" height="21" '
+                f'fill="#e2e0d6"/>'
+                f'<polygon points="{FX_T - 29},{FY_T - 21} {FX_T},{FY_T - 34} '
+                f'{FX_T + 29},{FY_T - 21}" fill="#6a6157"/>'
+                f'<rect x="{FX_T - 19}" y="{FY_T - 16}" width="9" height="11" '
+                f'fill="#7d99a6"/>'
+                f'<rect x="{FX_T + 5}" y="{FY_T - 16}" width="9" height="11" '
+                f'fill="#7d99a6"/></g>')
+
+    # the bluff carries on behind the town as a lower wooded rise, so the city stands in
+    # front of woods rather than in front of a lawn
+    back.append('<path d="M280,452 L280,346 Q 360,314 452,322 Q 546,330 604,362 '
+                'L616,452 Z" fill="#3d6b45"/>')
+    rbb = rnd(59)
+    for c in range(22):
+        cxx = 276 + rbb() * 330
+        cyy = 320 + rbb() * 120
+        for k in range(4 + int(rbb() * 5)):
+            back.append(broadleaf(cxx + (rbb() - 0.5) * 46,
+                                  min(cyy + (rbb() - 0.5) * 30, 450.0),
+                                  0.3 + rbb() * 0.42, int(rbb() * 900) + 1,
+                                  a='#3f7040', b='#4f8a4c'))
+
+    # ---------------------------------------------------------------------
+    # THE CITY. This is the thing the first version did not have, and its absence is why
+    # the scene could have been anywhere. Dubuque's own silhouette, from every photograph
+    # taken off the bluff, is three things standing above a mass of brick:
+    #
+    #   * a GOLD DOME on a brick tower — the county courthouse. Small, and the only warm
+    #     metal in the frame, so it reads instantly.
+    #   * two GOTHIC SPIRES in pale stone, thin and much taller than anything around them.
+    #   * a low mass of RED BRICK warehouses and three- and four-storey blocks running
+    #     down to the water.
+    #
+    # Without those three the town was four brown boxes and the pin could have said any
+    # river city in the Midwest.
+    def block(x, base, w, h, wall, seed, kind):
+        r = rnd(seed)
+        o = [f'<g><rect x="{x}" y="{base - h}" width="{w}" height="{h}" fill="{wall}"/>']
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h * 0.14:.0f}" '
+                 f'fill="{mix(wall, "#000000", 0.13)}"/>')
+        o.append(f'<rect x="{x - 2}" y="{base - h - 5}" width="{w + 4}" height="6" '
+                 f'fill="{mix(wall, "#ffffff", 0.32)}"/>')
+        nw = max(2, int(w / 12))
+        rows = max(1, int((h - 14) / 13))
+        for row in range(rows):
+            ry = base - h + 11 + row * 13
+            for i in range(nw):
+                if r() < 0.12:
+                    continue
+                wx = x + 4 + i * (w - 8) / nw
+                ww = (w - 8) / nw * 0.55
+                if kind == 'arch':
+                    o.append(f'<path d="M{wx:.1f},{ry + 9:.1f} L{wx:.1f},{ry + 3:.1f} '
+                             f'q{ww / 2:.1f},-5.5 {ww:.1f},0 L{wx + ww:.1f},{ry + 9:.1f} Z" '
+                             f'fill="#46525c"/>')
+                elif kind == 'tall':
+                    o.append(f'<rect x="{wx:.1f}" y="{ry - 1:.1f}" width="{ww:.1f}" '
+                             f'height="11" fill="#46525c"/>')
+                else:
+                    o.append(f'<rect x="{wx:.1f}" y="{ry:.1f}" width="{ww:.1f}" '
+                             f'height="8" fill="#46525c"/>')
+        o.append(f'<rect x="{x}" y="{base - 12}" width="{w}" height="12" '
+                 f'fill="{mix(wall, "#000000", 0.24)}"/>')
+        return ''.join(o) + '</g>'
+
+    BRICK = ['#9c5b46', '#8f4f3c', '#b07254', '#a86a4e', '#c2a184', '#8a6a52',
+             '#b4917a', '#96604a']
+    # the taller downtown blocks, set back
+    rct = rnd(41)
+    for bx, bw, bh, ci, kd in ((92, 46, 62, 0, 'arch'), (142, 40, 74, 2, 'tall'),
+                               (186, 52, 58, 1, 'arch'), (334, 44, 68, 3, 'tall'),
+                               (382, 38, 52, 5, 'flat'), (424, 50, 80, 0, 'arch'),
+                               (478, 40, 60, 6, 'tall'), (524, 46, 70, 2, 'flat'),
+                               (576, 42, 54, 7, 'arch')):
+        back.append(block(bx, 432, bw, bh, BRICK[ci], 41 + bx, kd))
+
+    # THE COURTHOUSE, with its gold dome
+    CX, CB = 268, 434
+    back.append(block(CX - 32, CB, 64, 58, '#a8674c', 311, 'arch'))
+    back.append(f'<rect x="{CX - 17}" y="{CB - 96}" width="34" height="40" '
+                f'fill="#b4735a"/>')
+    back.append(f'<rect x="{CX - 17}" y="{CB - 96}" width="34" height="5" '
+                f'fill="#c9917a"/>')
+    for i in range(3):
+        back.append(f'<path d="M{CX - 12 + i * 9},{CB - 62} L{CX - 12 + i * 9},{CB - 82} '
+                    f'q3,-5 6,0 L{CX - 6 + i * 9},{CB - 62} Z" fill="#3d4a54"/>')
+    back.append(f'<rect x="{CX - 21}" y="{CB - 101}" width="42" height="6" '
+                f'fill="#c9917a"/>')
+    back.append(f'<path d="M{CX - 19},{CB - 101} Q {CX},{CB - 133} {CX + 19},{CB - 101} Z" '
+                f'fill="#d9a936"/>')
+    back.append(f'<path d="M{CX - 19},{CB - 101} Q {CX - 10},{CB - 128} {CX - 2},{CB - 130} '
+                f'L{CX - 4},{CB - 101} Z" fill="#f0c85a"/>')
+    back.append(f'<rect x="{CX - 6}" y="{CB - 142}" width="12" height="12" '
+                f'fill="#d9a936"/>')
+    back.append(f'<path d="M{CX - 8},{CB - 142} Q {CX},{CB - 154} {CX + 8},{CB - 142} Z" '
+                f'fill="#f0c85a"/>')
+    back.append(f'<rect x="{CX - 1}" y="{CB - 166}" width="2" height="14" fill="#b8912e"/>')
+
+    # TWO GOTHIC SPIRES, pale stone and much taller than the brick around them
+    def spire(x, base, h, w, seed):
+        o = ['<g>']
+        o.append(f'<rect x="{x - w / 2:.0f}" y="{base - h * 0.56:.0f}" width="{w:.0f}" '
+                 f'height="{h * 0.56:.0f}" fill="#cdc7b6"/>')
+        o.append(f'<rect x="{x - w / 2:.0f}" y="{base - h * 0.56:.0f}" '
+                 f'width="{w * 0.3:.0f}" height="{h * 0.56:.0f}" fill="#dedaca"/>')
+        for i in range(2):
+            o.append(f'<path d="M{x - w * 0.28 + i * w * 0.34:.0f},{base - h * 0.2:.0f} '
+                     f'L{x - w * 0.28 + i * w * 0.34:.0f},{base - h * 0.4:.0f} '
+                     f'q{w * 0.11:.0f},-{h * 0.06:.0f} {w * 0.22:.0f},0 '
+                     f'L{x - w * 0.06 + i * w * 0.34:.0f},{base - h * 0.2:.0f} Z" '
+                     f'fill="#4a5560"/>')
+        o.append(f'<rect x="{x - w * 0.62:.0f}" y="{base - h * 0.6:.0f}" '
+                 f'width="{w * 1.24:.0f}" height="{h * 0.05:.0f}" fill="#b9b3a2"/>')
+        o.append(f'<polygon points="{x - w * 0.5:.0f},{base - h * 0.6:.0f} '
+                 f'{x:.0f},{base - h:.0f} {x + w * 0.5:.0f},{base - h * 0.6:.0f}" '
+                 f'fill="#a8a292"/>')
+        o.append(f'<polygon points="{x - w * 0.5:.0f},{base - h * 0.6:.0f} '
+                 f'{x:.0f},{base - h:.0f} {x - w * 0.08:.0f},{base - h * 0.6:.0f}" '
+                 f'fill="#c4bfae"/>')
+        for sgn in (-1, 1):
+            o.append(f'<polygon points="{x + sgn * w * 0.56 - 3:.0f},{base - h * 0.58:.0f} '
+                     f'{x + sgn * w * 0.56:.0f},{base - h * 0.74:.0f} '
+                     f'{x + sgn * w * 0.56 + 3:.0f},{base - h * 0.58:.0f}" '
+                     f'fill="#b9b3a2"/>')
+        o.append(f'<rect x="{x - 1}" y="{base - h - 12:.0f}" width="2" height="13" '
+                 f'fill="#8f8a78"/>')
+        return ''.join(o) + '</g>'
+
+    back.append(spire(160, 430, 138, 26, 313))
+    back.append(spire(452, 434, 112, 22, 317))
+
+    # the low brick riverfront: warehouses running down to the water
+    rwh = rnd(43)
+    x_ = -10
+    while x_ < 640:
+        bw_ = 34 + rwh() * 40
+        bh_ = 28 + rwh() * 26
+        back.append(block(x_, 450, bw_, bh_, BRICK[int(rwh() * 8)], int(rwh() * 700) + 3,
+                          ('arch' if rwh() < 0.4 else 'flat')))
+        x_ += bw_ + 3
+    # and trees threaded through it, which is what stops a brick mass reading as a fence
+    rt = rnd(49)
+    for c in range(16):
+        cxx = rt() * 650
+        for k in range(2 + int(rt() * 3)):
+            back.append(broadleaf(cxx + (rt() - 0.5) * 40, 440 + rt() * 11,
+                                  0.34 + rt() ** 2 * 0.8, int(rt() * 900) + 1,
+                                  a=('#3f7040' if rt() < 0.5 else '#4a7a44'),
+                                  b='#5e9155'))
+
+    # ---------------------------------------------------------------------
+    # the riverfront strip: the bank between the city and the railway, and the LOCK'S OWN
+    # LAND on the right. The first version floated the lock on a lawn, which is most of
+    # why it read as a component dropped into the corner rather than part of the place.
+    back.append('<path d="M-20,452 L-20,444 Q 300,436 640,444 Q 960,452 1300,440 '
+                'L1300,452 Z" fill="#6d9349"/>')
+    back.append('<path d="M600,448 L1300,448 L1300,452 L600,452 Z" fill="#b4afa0"/>')
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # ---------------------------------------------------------------------
+    # WHERE THE LOCK MEETS THE GROUND.
+    #
+    # The lock was a rectangle with a dead-straight vertical left edge running floor to
+    # ceiling, grass on one side and concrete on the other, and that is why it read as a
+    # picture pasted onto the scene however good the concrete was. Nothing in a landscape
+    # has an edge like that.
+    #
+    # Two things fix it and both are here. First the whole structure is CLIPPED to a
+    # sloping boundary that follows the road's verge, so its edge is a line the picture
+    # already contains rather than an arbitrary cut. Second — and this is the one that
+    # actually does the work — a grassy embankment is drawn OVER that boundary afterwards,
+    # with an irregular edge and bushes standing on it that overhang the concrete. An
+    # object crossing a seam is what makes the seam disappear.
+    LK_TOP, LK_BOT = 502, 726
+
+    def verge(y):
+        return 644 + 108 * (y - 300) / 420.0 + 10
+
+    DEFS.append(f'    <clipPath id="dblock"><path d="M{verge(LK_TOP):.0f},{LK_TOP} '
+                f'L1320,{LK_TOP} L1320,{LK_BOT} L{verge(LK_BOT):.0f},{LK_BOT} Z"/>'
+                f'</clipPath>')
+    fr.append('<g clip-path="url(#dblock)">')
+
+    # ---------------------------------------------------------------------
+    # THE LOCK. Near field, right of the road, and it is the reason the scene exists.
+    #
+    # The view is the one every photograph inside a chamber gives you: standing at the top
+    # of the near wall, looking across. You see the coping at your feet, then the water,
+    # then the far wall rising out of it, then its walkway.
+    #
+    # The far wall carries the whole animation. Its top few feet are PALE DRY concrete and
+    # everything below the high-water mark is near-black with stain, so when the level
+    # drops a band of darkness grows down the wall. That band is the thing a child will
+    # actually notice; the boat sinking is the second thing.
+    # The far wall is five hundred pixels of concrete and the first version put two
+    # ladders on it and called it done. Four things give a poured wall its character and
+    # none of them costs anything:
+    #
+    #   * HORIZONTAL LIFT SEAMS. Concrete is poured in lifts, so a wall is a stack of
+    #     bands with a faint line between each. Without them it is a painted flat.
+    #   * STAINING STREAKS running down from the coping, where sixty years of rain has
+    #     come off the walkway. Vertical, irregular, darker at the top.
+    #   * The recessed FLOATING BOLLARD SLOTS — tall dark channels, wider than a ladder,
+    #     and the most distinctive thing on a modern lock wall.
+    #   * A hard shadow directly under the coping's lip.
+    fr.append(f'<rect x="{LOCK_L - 40}" y="514" width="{1320 - LOCK_L + 40}" '
+              f'height="{FAR_TOP - 14 - 514}" fill="{CONC}"/>')
+    fr.append(f'<rect x="{LOCK_L - 40}" y="514" width="{1320 - LOCK_L + 40}" '
+              f'height="3" fill="{CONC_D}"/>')
+    for i in range(int((1320 - LOCK_L + 40) / 64) + 1):
+        fr.append(f'<rect x="{LOCK_L - 40 + i * 64}" y="516" width="2" '
+                  f'height="{FAR_TOP - 16 - 516}" fill="{CONC_D}" opacity="0.5"/>')
+    # a lamp standard over the wall, which is what a lock has and a lawn does not
+    for lx in (884, 1112):
+        fr.append(f'<rect x="{lx}" y="{FAR_TOP - 56}" width="3.4" height="30" '
+                  f'fill="#8d8a80"/>')
+        fr.append(f'<path d="M{lx + 1.7},{FAR_TOP - 56} q0,-7 9,-7" stroke="#8d8a80" '
+                  f'stroke-width="3.4" fill="none"/>')
+        fr.append(f'<ellipse cx="{lx + 12}" cy="{FAR_TOP - 62}" rx="5.4" ry="3.1" '
+                  f'fill="#ded8c6"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{FAR_TOP - 16}" width="{1300 - LOCK_L + 30}" '
+              f'height="16" fill="{CONC_L}"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{FAR_TOP - 16}" width="{1300 - LOCK_L + 30}" '
+              f'height="4" fill="#e4dfce"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{FAR_TOP - 30}" '
+              f'width="{1300 - LOCK_L + 30}" height="2.6" fill="#d8d2c0"/>')
+    for hx in range(LOCK_L - 24, 1300, 46):
+        fr.append(f'<rect x="{hx}" y="{FAR_TOP - 30}" width="2.4" height="14" '
+                  f'fill="#b8b2a0"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{FAR_TOP}" width="{1300 - LOCK_L + 30}" '
+              f'height="{W_HIGH - FAR_TOP}" fill="url(#dbwall)"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{FAR_TOP}" width="{1300 - LOCK_L + 30}" '
+              f'height="4" fill="#000000" opacity="0.26"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{W_HIGH}" width="{1300 - LOCK_L + 30}" '
+              f'height="{COPING - W_HIGH + 6}" fill="{WET}"/>')
+    rwl = rnd(89)
+    for i in range(5):
+        ty = W_HIGH + 7 + i * 9 + rwl() * 4
+        fr.append(f'<rect x="{LOCK_L - 30}" y="{ty:.0f}" '
+                  f'width="{1300 - LOCK_L + 30}" height="{1.4 + rwl() * 1.6:.1f}" '
+                  f'fill="#000000" opacity="{0.12 + rwl() * 0.16:.2f}"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{W_HIGH - 6}" width="{1300 - LOCK_L + 30}" '
+              f'height="7" fill="{WET_D}" opacity="0.6"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{COPING - 20}" width="{1300 - LOCK_L + 30}" '
+              f'height="22" fill="#3d4a34" opacity="0.28"/>')
+    for ly in range(FAR_TOP + 11, W_HIGH, 11):
+        fr.append(f'<rect x="{LOCK_L - 30}" y="{ly}" width="{1300 - LOCK_L + 30}" '
+                  f'height="1.4" fill="#000000" opacity="0.09"/>')
+    jx = LOCK_L - 20
+    while jx < 1300:
+        fr.append(f'<rect x="{jx:.0f}" y="{FAR_TOP}" width="2.4" '
+                  f'height="{COPING - FAR_TOP}" fill="#000000" opacity="0.15"/>')
+        jx += 38 + rwl() * 30
+    for i in range(34):
+        sx_ = LOCK_L - 26 + rwl() * (1320 - LOCK_L)
+        sh = 10 + rwl() * (W_HIGH - FAR_TOP - 8)
+        fr.append(f'<rect x="{sx_:.0f}" y="{FAR_TOP + 3}" '
+                  f'width="{1.6 + rwl() * 4.4:.1f}" height="{sh:.0f}" fill="#6b6252" '
+                  f'opacity="{0.1 + rwl() * 0.22:.2f}"/>')
+    for sx_ in (906, 1074):
+        fr.append(f'<rect x="{sx_}" y="{FAR_TOP + 2}" width="26" '
+                  f'height="{COPING - FAR_TOP}" fill="#000000" opacity="0.4"/>')
+        fr.append(f'<rect x="{sx_ + 4}" y="{FAR_TOP + 2}" width="18" '
+                  f'height="{COPING - FAR_TOP}" fill="#1c1a16" opacity="0.5"/>')
+        fr.append(f'<rect x="{sx_ + 7}" y="{FAR_TOP + 26}" width="12" height="18" rx="3" '
+                  f'fill="#6f6a60"/>')
+    for lx in (836, 1006):
+        fr.append(f'<rect x="{lx}" y="{FAR_TOP + 4}" width="17" '
+                  f'height="{COPING - FAR_TOP}" fill="#000000" opacity="0.32"/>')
+        for i in range(int((COPING - FAR_TOP) / 11)):
+            fr.append(f'<rect x="{lx + 1}" y="{FAR_TOP + 10 + i * 11}" width="15" '
+                      f'height="2.6" fill="{CONC_L}" opacity="0.45"/>')
+
+    # --- the upper pool, beyond the gate: ALWAYS at the high level. The step between it
+    #     and the chamber water is the clearest possible statement of what a lock does.
+    fr.append(f'<rect x="{GATE_R}" y="{W_HIGH}" width="{1300 - GATE_R}" '
+              f'height="{COPING - W_HIGH + 20}" fill="url(#dbchamber)"/>')
+    fr.append(f'<rect x="{GATE_R}" y="{W_HIGH}" width="{1300 - GATE_R}" height="4" '
+              f'fill="#cdd2c6" opacity="0.85"/>')
+    fr.append(f'<rect x="{GATE_R}" y="{W_HIGH + 4}" width="{1300 - GATE_R}" '
+              f'height="18" fill="#171c15" opacity="0.45"/>')
+    ru = rnd(67)
+    for k in range(30):
+        t_ = ru()
+        ux = GATE_R + 4 + ru() * (1292 - GATE_R)
+        uy = W_HIGH + 20 + t_ * (COPING - W_HIGH - 26)
+        fr.append(f'<rect x="{ux:.0f}" y="{uy:.0f}" '
+                  f'width="{12 + ru() * 34 + t_ * 26:.0f}" '
+                  f'height="{1.1 + t_ * 1.5:.1f}" rx="1" '
+                  f'fill="{"#dbe0cd" if ru() < 0.55 else "#252821"}" '
+                  f'opacity="{0.18 + ru() * 0.3:.2f}"/>')
+
+    # --- THE CHAMBER WATER. One rectangle. The engine moves its top edge between
+    #     y=600 (upper pool) and y=676 (lower pool) and grows its height to match.
+    # The visible band of water is not a constant: standing on the near wall you see LESS
+    # surface as the level drops, because the near wall's inner face occludes more of it.
+    # So the rect's bottom is pinned just under the coping and only its top moves — which
+    # is also the whole animation in one number.
+    fr.append(f'<rect id="cc-lock-water" class="cc-lock-water" x="{LOCK_L - 30}" '
+              f'y="{W_LOW}" width="{GATE_R - LOCK_L + 34}" height="{COPING - 6 - W_LOW}" '
+              f'fill="url(#dbchamber)"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{W_LOW}" width="{GATE_R - LOCK_L + 34}" '
+              f'height="3" fill="#a4a898" opacity="0.6"/>')
+    # water in a box, in the shade of a fifty-foot wall: darkest where it meets the far
+    # wall, and carrying a reflection. A flat fill with dashes on it read as swamp.
+    # the far wall's shadow lying on the water — the darkest thing in the chamber, and
+    # what tells you the wall is fifty feet high
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{W_LOW}" width="{GATE_R - LOCK_L + 34}" '
+              f'height="20" fill="#171c15" opacity="0.5"/>')
+    fr.append(f'<rect x="{LOCK_L - 30}" y="{W_LOW}" width="{GATE_R - LOCK_L + 34}" '
+              f'height="2.4" fill="#cfd6c4" opacity="0.75"/>')
+    rc = rnd(61)
+    for k in range(52):
+        t_ = rc()
+        cx_ = LOCK_L - 20 + rc() * (GATE_R - LOCK_L)
+        cy_ = W_LOW + 14 + t_ * (COPING - 22 - W_LOW)
+        fr.append(f'<rect x="{cx_:.0f}" y="{cy_:.0f}" '
+                  f'width="{16 + rc() * 62 + t_ * 40:.0f}" '
+                  f'height="{1.1 + t_ * 1.8:.1f}" rx="1" '
+                  f'fill="{"#dbe0cd" if rc() < 0.55 else "#2b2f24"}" '
+                  f'opacity="{0.14 + rc() * 0.32:.2f}"/>')
+
+    # --- THE TOWBOAT. Sits ON the water, so the engine translates it in y with the
+    #     level. Authored at the LOW state, deep in the box, which is the dramatic one.
+    def riverboat(gid, x, y):
+        """Origin on the waterline, bow to the RIGHT — the way it is about to leave."""
+        o = [f'<g id="{gid}" class="cc-lockboat" transform="translate({x},{y})">']
+        o.append('<ellipse cx="0" cy="9" rx="150" ry="7" fill="#1e1c12" opacity="0.35"/>')
+        # THE PADDLEWHEEL, first, so the hull covers its lower half
+        o.append('<g class="cc-paddle" transform="translate(-128,-6) rotate(0)">'
+                 '<circle cx="0" cy="0" r="23" fill="#7a2820"/>'
+                 '<circle cx="0" cy="0" r="19" fill="#b4382c"/>'
+                 + ''.join(f'<rect x="-2.6" y="-23" width="5.2" height="46" '
+                           f'fill="#8e2f24" transform="rotate({i * 30})"/>'
+                           for i in range(6))
+                 + '<circle cx="0" cy="0" r="5" fill="#5f2018"/></g>')
+        # hull: blunt stern at the left, a slight rake at the bow
+        o.append('<path d="M-124,-12 L104,-12 L124,-2 L120,10 L-124,10 Z" fill="#f2f0e6"/>')
+        o.append('<path d="M-124,4 L122,4 L120,10 L-124,10 Z" fill="#26313a"/>')
+        o.append('<rect x="-124" y="-2" width="246" height="3" fill="#b4382c"/>')
+        # main deck and the deck above it, both with rails
+        o.append('<rect x="-116" y="-38" width="222" height="26" fill="#f2f0e6"/>')
+        o.append('<rect x="-116" y="-38" width="222" height="4" fill="#cdc8b8"/>')
+        for i in range(12):
+            o.append(f'<rect x="{-108 + i * 18}" y="-33" width="11" height="13" '
+                     f'fill="#7fa2b4"/>')
+        o.append('<rect x="-100" y="-58" width="182" height="20" fill="#f2f0e6"/>')
+        o.append('<rect x="-100" y="-58" width="182" height="4" fill="#cdc8b8"/>')
+        for i in range(10):
+            o.append(f'<rect x="{-92 + i * 18}" y="-54" width="11" height="11" '
+                     f'fill="#7fa2b4"/>')
+        o.append('<rect x="-100" y="-42" width="182" height="2.4" fill="#dcd8c8"/>')
+        # the pilot house forward, and a single stack
+        o.append('<rect x="34" y="-76" width="48" height="18" fill="#f2f0e6"/>')
+        o.append('<path d="M30,-76 L86,-76 L82,-81 L34,-81 Z" fill="#2f3a42"/>')
+        for i in range(3):
+            o.append(f'<rect x="{40 + i * 15}" y="-72" width="10" height="10" '
+                     f'fill="#7fa2b4"/>')
+        o.append('<rect x="-30" y="-80" width="9" height="22" fill="#2f3a42"/>')
+        o.append('<rect x="-32" y="-82" width="13" height="4" fill="#2f3a42"/>')
+        # the paddlebox hood over the wheel, which is what names the type
+        o.append('<path d="M-152,-14 Q -128,-40 -104,-14 L-104,-8 L-152,-8 Z" '
+                 'fill="#f2f0e6"/>')
+        o.append('<path d="M-152,-14 Q -128,-40 -104,-14" stroke="#b4382c" '
+                 'stroke-width="3.4" fill="none"/>')
+        return ''.join(o) + '</g>'
+
+    fr.append('<path id="lockboat-path" class="cc-path" d="M962,0 L1460,0" '
+              'fill="none" stroke="none"/>')
+    fr.append(f'<g opacity="0.28">'
+              f'<rect x="838" y="{W_LOW + 5}" width="248" height="24" fill="#e8e6da"/>'
+              f'<rect x="838" y="{W_LOW + 8}" width="248" height="3" fill="#b4382c"/>'
+              f'<rect x="996" y="{W_LOW + 5}" width="48" height="32" fill="#e8e6da"/>'
+              f'</g>')
+    fr.append(riverboat('cc-lockboat', 962, W_LOW))
+
+    # --- THE MITRE GATE. Drawn face on, which is a cheat and a deliberate one: seen
+    #     truly side on it would be a two-pixel edge and the best object in the scene
+    #     would be invisible. Two leaves meeting in a shallow V pointing upstream, rusted
+    #     steel with vertical ribs and a pale walkway across the top.
+    GM = (GATE_L + GATE_R) / 2
+
+    def leaf(cls, hinge, tip, peak):
+        """One leaf, hinged in the wall at `hinge`, meeting its partner at `tip`.
+
+        Every pixel of it lives inside a group whose origin is the hinge, so opening the
+        gate is `scale(sx,1)` and nothing else — the leaf swings back into the wall by
+        foreshortening to nothing, which is exactly what it does. Same contract as the
+        Wisconsin Dells duck turning round, and as the swing bridge in this same scene."""
+        w_ = tip - hinge
+        o = [f'<g class="{cls}" transform="translate({hinge},0) scale(1,1)">']
+        # the leaf face, mitred: the meeting edge stands a little higher than the hinge
+        o.append(f'<path d="M0,{FAR_TOP + 2} L{w_},{peak} L{w_},{COPING + 10} '
+                 f'L0,{COPING + 10} Z" fill="{RUST}"/>')
+        # vertical ribs, alternating light and dark so the face reads as corrugated
+        # steel rather than as a plank door — which is what one flat brown did
+        n = max(5, int(abs(w_) / 7))
+        for i in range(1, n):
+            f_ = i / n
+            rx_ = w_ * f_
+            ry_ = FAR_TOP + 2 + (peak - FAR_TOP - 2) * f_
+            col = RUST_D if i % 2 else RUST_L
+            o.append(f'<rect x="{rx_ - 1.8:.1f}" y="{ry_:.1f}" width="3.6" '
+                     f'height="{COPING + 10 - ry_:.0f}" fill="{col}" '
+                     f'opacity="{0.65 if i % 2 else 0.45}"/>')
+        # the recess it swings back into: a hard dark edge at the hinge
+        o.append(f'<rect x="{-2 if w_ > 0 else -1:.0f}" y="{FAR_TOP + 2}" width="4" '
+                 f'height="{COPING + 8 - FAR_TOP:.0f}" fill="#1c1310" opacity="0.75"/>')
+        # two horizontal girders, and the darker band the water leaves on it
+        for gy in (0.34, 0.66):
+            o.append(f'<path d="M0,{FAR_TOP + 2 + (COPING - FAR_TOP) * gy:.0f} '
+                     f'L{w_},{peak + (COPING - peak) * gy:.0f}" stroke="{RUST_D}" '
+                     f'stroke-width="4" fill="none" opacity="0.8"/>')
+        o.append(f'<path d="M0,{W_HIGH} L{w_},{W_HIGH - 4} L{w_},{COPING + 10} '
+                 f'L0,{COPING + 10} Z" fill="#2f2118" opacity="0.42"/>')
+        # the lit top edge, then the walkway and its yellow rail
+        o.append(f'<path d="M0,{FAR_TOP + 2} L{w_},{peak} L{w_},{peak + 6} '
+                 f'L0,{FAR_TOP + 8} Z" fill="{RUST_L}"/>')
+        o.append(f'<path d="M0,{FAR_TOP - 4} L{w_},{peak - 6} L{w_},{peak - 1} '
+                 f'L0,{FAR_TOP + 1} Z" fill="#a8a89c"/>')
+        o.append(f'<path d="M0,{FAR_TOP - 6} L{w_},{peak - 8}" stroke="#6f6a60" '
+                 f'stroke-width="1.6" fill="none"/>')
+        o.append(f'<path d="M0,{FAR_TOP - 20} L{w_},{peak - 22}" stroke="#c9a92e" '
+                 f'stroke-width="2.4" fill="none"/>')
+        for i in range(0, n + 1, 2):
+            f_ = i / n
+            o.append(f'<rect x="{w_ * f_ - 1:.1f}" '
+                     f'y="{FAR_TOP - 20 + (peak - FAR_TOP - 2) * f_:.1f}" width="2" '
+                     f'height="13" fill="#c9a92e"/>')
+        # water leaking over the top and running down the face. Every photograph of a
+        # closed mitre gate has this, and it is what says the gate is HOLDING something.
+        rl = rnd(73)
+        for i in range(7):
+            f_ = 0.08 + rl() * 0.84
+            lx = w_ * f_
+            ly = FAR_TOP + 6 + (peak - FAR_TOP - 2) * f_
+            fr_h = 20 + rl() * 60
+            o.append(f'<rect x="{lx - 1.8:.1f}" y="{ly:.1f}" width="{2 + rl() * 3:.1f}" '
+                     f'height="{fr_h:.0f}" fill="#8a5a3a" '
+                     f'opacity="{0.2 + rl() * 0.28:.2f}"/>')
+        for i in range(6):
+            f_ = 0.1 + rl() * 0.8
+            lx = w_ * f_
+            ly = FAR_TOP + 4 + (peak - FAR_TOP - 2) * f_
+            o.append(f'<rect x="{lx - 1.4:.1f}" y="{ly:.1f}" width="2.8" '
+                     f'height="{14 + rl() * 40:.0f}" fill="#cfd8cc" '
+                     f'opacity="{0.3 + rl() * 0.3:.2f}"/>')
+        return ''.join(o) + '</g>'
+
+    fr.append('<g id="cc-lockgate">'
+              + leaf('cc-gate-l', GATE_L, GM, FAR_TOP - 26)
+              + leaf('cc-gate-r', GATE_R, GM, FAR_TOP - 26)
+              + '</g>')
+
+    # --- THE NEAR WALL. It gets a SLOPE, and that is the whole fix for this corner.
+    #
+    # Everything down here was drawn as horizontal bands stacked on horizontal bands —
+    # coping, water, stain, wall, coping again — seven parallel stripes in one value
+    # family, which reads as corduroy rather than as a pit. A lock chamber is a deep box
+    # and a box needs at least one edge that is not parallel to the others.
+    #
+    # The far waterline stays horizontal, because that is the edge the engine animates and
+    # it has to stay a plain rect. The NEAR edge slopes instead: the wall we are standing
+    # on runs away to the right, so its top rises. One sloping edge against six horizontal
+    # ones is enough to make the whole thing read as depth.
+    NW_L, NW_R = COPING + 4, COPING - 24        # the coping's inner edge, left and right
+    fr.append(f'<path d="M{LOCK_L - 30},{NW_L} L1320,{NW_R} L1320,{NW_R + 12} '
+              f'L{LOCK_L - 30},{NW_L + 14} Z" fill="{WET_D}"/>')
+    fr.append(f'<path d="M{LOCK_L - 30},{NW_L + 12} L1320,{NW_R + 12} L1320,720 '
+              f'L{LOCK_L - 30},720 Z" fill="{CONC}"/>')
+    fr.append(f'<path d="M{LOCK_L - 30},{NW_L + 12} L1320,{NW_R + 12} L1320,{NW_R + 19} '
+              f'L{LOCK_L - 30},{NW_L + 19} Z" fill="{CONC_L}"/>')
+    fr.append(f'<path d="M{LOCK_L - 30},{NW_L + 30} L1320,{NW_R + 30} L1320,{NW_R + 34} '
+              f'L{LOCK_L - 30},{NW_L + 34} Z" fill="#e8c33a" opacity="0.9"/>')
+    # expansion joints across the walkway, which also read as the perspective
+    rnw = rnd(97)
+    for i in range(9):
+        f_ = i / 8.0
+        jx0 = LOCK_L - 30 + (1320 - LOCK_L + 30) * f_
+        jy0 = NW_L + (NW_R - NW_L) * f_
+        fr.append(f'<path d="M{jx0:.0f},{jy0 + 13:.0f} L{jx0 - 16:.0f},720" '
+                  f'stroke="{CONC_D}" stroke-width="2" fill="none" opacity="0.5"/>')
+    # mooring bollards along the coping
+    # bollards, sized and placed along the sloping coping. Three of them, not eight —
+    # a metronome of identical grey lozenges was reading as stones on a pavement.
+    def coping_y(x):
+        f_ = (x - (LOCK_L - 30)) / float(1320 - LOCK_L + 30)
+        return NW_L + (NW_R - NW_L) * f_
+    for bx, bs in ((836, 1.25), (1040, 1.05), (1236, 0.9)):
+        by = coping_y(bx) + 26
+        fr.append(f'<g transform="translate({bx},{by:.0f}) scale({bs})">'
+                  f'<ellipse cx="0" cy="1" rx="13" ry="4" fill="#000" opacity="0.24"/>'
+                  f'<path d="M-8,0 L-6,-19 L6,-19 L8,0 Z" fill="#4a4a44"/>'
+                  f'<path d="M-8,0 L-6,-19 L-1,-19 L-2,0 Z" fill="#78786e"/>'
+                  f'<ellipse cx="0" cy="-19" rx="8" ry="3" fill="#8d8d84"/>'
+                  f'<ellipse cx="0" cy="-22" rx="9.5" ry="3.4" fill="#5c5c54"/></g>')
+    # a ladder head and a standpipe, so the walkway is not just bollards
+    lhy = coping_y(952)
+    fr.append(f'<g><rect x="948" y="{lhy + 10:.0f}" width="2.6" height="15" fill="#6f6a60"/>'
+              f'<rect x="964" y="{lhy + 10:.0f}" width="2.6" height="15" fill="#6f6a60"/>'
+              f'<path d="M949,{lhy + 11:.0f} q8,-9 16,0" stroke="#8d8d84" '
+              f'stroke-width="2.6" fill="none"/></g>')
+    shy = coping_y(1150)
+    fr.append(f'<g><rect x="1148" y="{shy + 4:.0f}" width="6" height="26" fill="#5c6a5c"/>'
+              f'<rect x="1144" y="{shy + 2:.0f}" width="14" height="5" rx="2" '
+              f'fill="#7c8a7c"/></g>')
+    fr.append('</g>')
+
+    # ---------------------------------------------------------------------
+    # THE EMBANKMENT that runs down from the road to the lock's land, drawn AFTER the
+    # lock so it laps over the seam. Its right edge is irregular, it carries weeds and
+    # bushes, and two of those bushes stand on the boundary itself with their crowns over
+    # the concrete. A straight edge between two materials is the thing that reads as
+    # collage; a ragged edge with something growing across it does not.
+    rem = rnd(103)
+    EMB = ('M%.0f,%d L%.0f,%d L%.0f,%d C %.0f,%d %.0f,%d %.0f,%d '
+           'C %.0f,%d %.0f,%d %.0f,%d Z') % (
+        verge(LK_TOP) - 22, LK_TOP, verge(LK_BOT) - 26, 724, 800, 724,
+        790, 694, 776, 662, 784, 626,
+        790, 590, 762, 548, 748, LK_TOP)
+    fr.append(f'<path d="{EMB}" fill="#000000" opacity="0.1" '
+              f'transform="translate(7,0)"/>')
+    fr.append(f'<path d="{EMB}" fill="#5b8740"/>')
+    # a soft roll to the bank rather than a hard stripe down it
+    fr.append('<path d="M736,510 C 754,560 748,616 740,664 C 734,694 728,710 722,724" '
+              'stroke="#6a9349" stroke-width="22" fill="none" opacity="0.4"/>')
+    for k in range(46):
+        t_ = rem()
+        gx = verge(LK_TOP + t_ * (LK_BOT - LK_TOP)) - 20 + rem() * 68
+        gy = LK_TOP + t_ * (LK_BOT - LK_TOP)
+        sc = 1.0 + t_ * 1.3
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} L{gx - 1.7 * sc:.1f},{gy - 8 * sc:.1f} '
+                  f'M{gx:.0f},{gy:.0f} L{gx + 0.4 * sc:.1f},{gy - 9.6 * sc:.1f} '
+                  f'M{gx:.0f},{gy:.0f} L{gx + 2.2 * sc:.1f},{gy - 7.6 * sc:.1f}" '
+                  f'stroke="{("#4a7136", "#5b8740", "#6f9a4c")[int(rem() * 3)]}" '
+                  f'stroke-width="{1.2 * sc:.1f}" fill="none" stroke-linecap="round"/>')
+
+    def bush(x, y, s_, seed):
+        r = rnd(seed)
+        o = [f'<g transform="translate({x},{y}) scale({s_:.2f})">',
+             '<ellipse cx="2" cy="2" rx="30" ry="7" fill="#000" opacity="0.14"/>']
+        for k in range(7):
+            o.append(f'<ellipse cx="{(r() - 0.5) * 44:.0f}" cy="{-10 - r() * 26:.0f}" '
+                     f'rx="{12 + r() * 12:.0f}" ry="{10 + r() * 10:.0f}" '
+                     f'fill="{("#3a6a3e", "#457a45", "#54904f")[int(r() * 3)]}"/>')
+        return ''.join(o) + '</g>'
+
+    # the two that matter: they stand on the seam and hang over the concrete
+    # a chain of them along the seam, at varying sizes, so no stretch of the boundary is
+    # left as a clean curve against the concrete
+    for bxx, byy, bss, bsd in ((756, 548, 0.5, 111), (770, 578, 0.6, 115),
+                               (784, 614, 0.78, 107), (778, 652, 0.58, 117),
+                               (788, 682, 0.7, 119), (792, 712, 0.9, 109),
+                               (748, 522, 0.42, 121)):
+        fr.append(bush(bxx, byy, bss, bsd))
+    # and loose tufts hanging over the edge onto the concrete
+    rov = rnd(123)
+    for k in range(22):
+        t_ = rov()
+        ox = 760 + t_ * 44 + rov() * 16
+        oy = 516 + t_ * 206
+        sc = 0.9 + t_ * 1.1
+        fr.append(f'<path d="M{ox:.0f},{oy:.0f} L{ox - 1.7 * sc:.1f},{oy - 9 * sc:.1f} '
+                  f'M{ox:.0f},{oy:.0f} L{ox + 0.5 * sc:.1f},{oy - 11 * sc:.1f} '
+                  f'M{ox:.0f},{oy:.0f} L{ox + 2.4 * sc:.1f},{oy - 8 * sc:.1f}" '
+                  f'stroke="{("#3f7040", "#4a7136", "#5b8740")[int(rov() * 3)]}" '
+                  f'stroke-width="{1.3 * sc:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # weeds along the foot of the ballast, where nothing is ever mown
+    rwd = rnd(113)
+    for k in range(46):
+        wx = 700 + rwd() * 600
+        wy = 514 + rwd() * 5
+        sc = 0.7 + rwd() * 0.6
+        fr.append(f'<path d="M{wx:.0f},{wy:.0f} L{wx - 1.6 * sc:.1f},{wy - 9 * sc:.1f} '
+                  f'M{wx:.0f},{wy:.0f} L{wx + 2.4 * sc:.1f},{wy - 7 * sc:.1f}" '
+                  f'stroke="{("#6f7a46", "#5b6a3c", "#7f8a52")[int(rwd() * 3)]}" '
+                  f'stroke-width="{1.2 * sc:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # a chain-link fence along the lock's land, crossing the seam from grass to concrete
+    FY = 528
+    fr.append(f'<path d="M756,{FY + 12} L1320,{FY - 4}" stroke="#8d8a80" '
+              f'stroke-width="2" fill="none" opacity="0.85"/>')
+    fr.append(f'<path d="M756,{FY - 16} L1320,{FY - 32}" stroke="#8d8a80" '
+              f'stroke-width="2" fill="none" opacity="0.85"/>')
+    for i in range(15):
+        f_ = i / 14.0
+        fx = 756 + (1320 - 756) * f_
+        fy = FY + 12 - 16 * f_
+        fr.append(f'<rect x="{fx:.0f}" y="{fy - 30:.0f}" width="2.6" height="32" '
+                  f'fill="#7c7a70"/>')
+    fr.append(f'<path d="M756,{FY + 12} L1320,{FY - 4} L1320,{FY - 32} L756,{FY - 16} Z" '
+              f'fill="#b8bcb4" opacity="0.16"/>')
+
+    # ---------------------------------------------------------------------
+    # NEAR FIELD, LEFT: the riverfront park you stand in to watch the lock.
+    #
+    # The first version was two beige ribbons on flat green with three paper dolls
+    # standing in a row — a quarter of the frame doing nothing, and the near field is the
+    # biggest, closest area there is. Two things fix a hollow near field and both are
+    # here: **give it a real object with HEIGHT**, and **give the people something to be
+    # doing.**
+    #
+    # The height matters twice. This frame was BANDED — sky, far shore, river, railway,
+    # near ground — with nothing crossing between the bands, which is what made it read
+    # as a diagram of a scene rather than a scene. A big near tree and a raised timber
+    # overlook each cut across two bands, and the depth arrives for free.
+    fr.append('<path d="M0,720 L0,528 Q 160,520 340,530 Q 452,536 512,560 L470,720 Z" '
+              'fill="#5b8740"/>')
+    for i in range(6):
+        yy = 556 + i * 27
+        fr.append(f'<path d="M0,{yy} Q 180,{yy - 8} 470,{yy + 6}" stroke="#67934a" '
+                  f'stroke-width="{9 + i * 2}" fill="none" opacity="0.5"/>')
+    # the retaining wall at the foot of the embankment, with a coping and the shadow
+    # under its lip — that shadow is what makes it a wall instead of a stripe
+    fr.append('<path d="M0,528 Q 160,520 340,530 Q 452,536 512,560 L512,548 '
+              'Q 452,524 340,518 Q 160,508 0,516 Z" fill="#a8a08c"/>')
+    fr.append('<path d="M0,516 Q 160,508 340,518 Q 452,524 512,548" stroke="#cbc4b0" '
+              'stroke-width="5" fill="none"/>')
+    fr.append('<path d="M0,523 Q 160,515 340,525 Q 452,531 512,555" stroke="#6f685a" '
+              'stroke-width="3" fill="none" opacity="0.45"/>')
+    for i in range(12):
+        f_ = i / 11.0
+        fr.append(f'<rect x="{f_ * 508:.0f}" y="{518 + f_ * 30:.0f}" width="2.2" '
+                  f'height="9" fill="#8d8778" opacity="0.45"/>')
+    # THE PATH: edged and textured, not a ribbon
+    PATH = 'M-10,634 Q 150,608 320,614 Q 430,619 500,648'
+    fr.append(f'<path d="{PATH}" stroke="#9c9482" stroke-width="30" fill="none"/>')
+    fr.append(f'<path d="{PATH}" stroke="#cdc6b2" stroke-width="25" fill="none"/>')
+    rpa = rnd(79)
+    for i in range(24):
+        f_ = rpa()
+        px_ = -10 + f_ * 510
+        py_ = 634 - 26 * (4 * f_ * (1 - f_)) + f_ * f_ * 34
+        fr.append(f'<rect x="{px_:.0f}" y="{py_ + (rpa() - 0.5) * 15:.0f}" '
+                  f'width="{7 + rpa() * 16:.0f}" height="2" rx="1" fill="#b4ac98" '
+                  f'opacity="0.55"/>')
+
+    def person(x, y, s_, top, bot='#3a4a5c', skin='#e8b88c', hair='#3a2a1c', arm=0):
+        return (f'<g transform="translate({x},{y}) scale({s_:.2f})">'
+                f'<ellipse cx="0" cy="2" rx="11" ry="3.4" fill="#000" opacity="0.15"/>'
+                f'<rect x="-6" y="-22" width="5" height="22" fill="{bot}"/>'
+                f'<rect x="1" y="-22" width="5" height="22" fill="{bot}"/>'
+                f'<rect x="-7" y="-40" width="14" height="20" rx="4" fill="{top}"/>'
+                + (f'<path d="M6,-36 l13,-{8 + arm}" stroke="{skin}" stroke-width="4.4" '
+                   f'stroke-linecap="round"/>' if arm else '')
+                + f'<circle cx="0" cy="-46" r="6.4" fill="{skin}"/>'
+                f'<path d="M-6.4,-48 a6.4,6.4 0 0 1 12.8,0 z" fill="{hair}"/></g>')
+
+    # THE OVERLOOK: a raised timber deck at the end of the path, with people leaning on
+    # the rail looking RIGHT, toward the lock. The eye follows where people are looking,
+    # so the park now points at the thing the scene is about.
+    DK_L, DK_R, DK_T = 286, 470, 578
+    fr.append(f'<path d="M{DK_L},{DK_T + 30} L{DK_R},{DK_T + 22} L{DK_R + 12},{DK_T + 6} '
+              f'L{DK_L - 8},{DK_T + 12} Z" fill="#a38763"/>')
+    fr.append(f'<path d="M{DK_L - 8},{DK_T + 12} L{DK_R + 12},{DK_T + 6} '
+              f'L{DK_R + 12},{DK_T + 11} L{DK_L - 8},{DK_T + 17} Z" fill="#7a6146"/>')
+    for i in range(13):
+        f_ = i / 12.0
+        fr.append(f'<line x1="{DK_L - 8 + (DK_R + 20 - DK_L) * f_:.0f}" '
+                  f'y1="{DK_T + 12 - 6 * f_:.0f}" '
+                  f'x2="{DK_L + (DK_R - DK_L) * f_:.0f}" y2="{DK_T + 30 - 8 * f_:.0f}" '
+                  f'stroke="#8a6f52" stroke-width="1.6" opacity="0.7"/>')
+    for px_ in (DK_L + 6, (DK_L + DK_R) / 2, DK_R - 10):
+        fr.append(f'<rect x="{px_:.0f}" y="{DK_T + 24}" width="7" height="36" '
+                  f'fill="#7a6146"/>')
+    fr.append(f'<path d="M{DK_L - 8},{DK_T - 16} L{DK_R + 12},{DK_T - 22}" '
+              f'stroke="#a38763" stroke-width="4" fill="none"/>')
+    fr.append(f'<path d="M{DK_L - 8},{DK_T - 5} L{DK_R + 12},{DK_T - 11}" '
+              f'stroke="#a38763" stroke-width="3" fill="none"/>')
+    for i in range(7):
+        f_ = i / 6.0
+        fr.append(f'<rect x="{DK_L - 8 + (DK_R + 20 - DK_L) * f_:.0f}" '
+                  f'y="{DK_T - 18 - 6 * f_:.0f}" width="3.4" height="30" '
+                  f'fill="#8a6f52"/>')
+    for i in range(3):
+        fr.append(f'<rect x="{DK_L - 36 + i * 6}" y="{DK_T + 34 + i * 9}" width="36" '
+                  f'height="7" fill="#a38763"/>')
+        fr.append(f'<rect x="{DK_L - 36 + i * 6}" y="{DK_T + 41 + i * 9}" width="36" '
+                  f'height="3" fill="#7a6146"/>')
+    fr.append(person(332, DK_T + 15, 0.8, '#c0492f', arm=5))
+    fr.append(person(362, DK_T + 13, 0.6, '#f0b32a', hair='#6a4a2a', arm=3))
+    fr.append(person(418, DK_T + 9, 0.78, '#2f7fd0', arm=5))
+
+    # a picnic table under the trees, which is the other thing a riverfront park is for
+    fr.append('<g transform="translate(150,684)">'
+              '<path d="M-52,-20 L52,-20 L58,-14 L-58,-14 Z" fill="#b08f66"/>'
+              '<path d="M-52,-20 L52,-20 L52,-17 L-52,-17 Z" fill="#c9a87c"/>'
+              '<path d="M-40,-14 L-30,12 L-24,12 L-34,-14 Z" fill="#8a6f52"/>'
+              '<path d="M40,-14 L30,12 L24,12 L34,-14 Z" fill="#8a6f52"/>'
+              '<path d="M-58,-4 L58,-4 L58,0 L-58,0 Z" fill="#a3856a"/></g>')
+    fr.append(person(112, 694, 0.86, '#7a4fa8', hair='#2a1c12'))
+    fr.append(person(192, 700, 0.82, '#2f8f5b'))
+
+    # THE BIG NEAR TREE. One object with real height at the left edge — the classic
+    # framing device and the cheapest depth there is in a flat illustration.
+    def big_tree(x, y, s_, seed):
+        r = rnd(seed)
+        o = [f'<g transform="translate({x},{y}) scale({s_:.2f})">',
+             '<ellipse cx="6" cy="4" rx="62" ry="12" fill="#000" opacity="0.13"/>',
+             '<path d="M-11,4 C -13,-38 -26,-58 -36,-74 L-16,-68 C -10,-84 -4,-96 0,-116 '
+             'C 6,-96 14,-84 22,-68 L42,-76 C 30,-58 14,-38 12,4 Z" fill="#6b543a"/>']
+        lobes = [(0, -132, 62, 40, 0), (-52, -114, 42, 30, 1), (54, -116, 44, 30, 1),
+                 (-26, -158, 44, 28, 0), (30, -156, 46, 28, 1), (2, -178, 36, 22, 0),
+                 (-72, -88, 30, 20, 1), (74, -92, 28, 19, 1)]
+        for lx, ly, rx_, ry_, lt in lobes:
+            o.append(f'<ellipse cx="{lx}" cy="{ly}" rx="{rx_}" ry="{ry_}" '
+                     f'fill="{"#3f7040" if lt == 0 else "#356035"}"/>')
+        for lx, ly, rx_, ry_, lt in lobes[:5]:
+            o.append(f'<ellipse cx="{lx - rx_ * 0.22:.0f}" cy="{ly - ry_ * 0.4:.0f}" '
+                     f'rx="{rx_ * 0.62:.0f}" ry="{ry_ * 0.56:.0f}" fill="#549054"/>')
+        for k in range(16):
+            o.append(f'<ellipse cx="{(r() - 0.5) * 168:.0f}" cy="{-190 + r() * 108:.0f}" '
+                     f'rx="{9 + r() * 13:.0f}" ry="{7 + r() * 9:.0f}" fill="#66a35f" '
+                     f'opacity="0.5"/>')
+        return ''.join(o) + '</g>'
+
+    fr.append(big_tree(48, 726, 0.94, 81))
+    fr.append(big_tree(250, 732, 0.62, 83))
+
+    # ======================================================== FOREGROUND ===
+    fgl = ['    ']
+    rg = rnd(127)
+    for i in range(150):
+        bx = rg() * 1400 - 60
+        by = 560 + rg() * 170
+        lo, hi = 622 - 112 * (by - 300) / 420.0, 644 + 126 * (by - 300) / 420.0
+        if lo - 34 < bx < hi + 34:
+            continue
+        if bx > 760:            # the lock's concrete: nothing grows on it
+            continue
+        if by < 600 and bx < 510:
+            continue
+        s = 1.1 + rg() * 1.1
+        c = ('#5b8740', '#6f9a4c', '#4a7136')[int(rg() * 3)]
+        fgl.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 1.7 * s:.1f},{by - 8 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 0.4 * s:.1f},{by - 9.6 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 2.2 * s:.1f},{by - 7.6 * s:.1f}" '
+                   f'stroke="{c}" stroke-width="{1.3 * s:.1f}" fill="none" '
+                   f'stroke-linecap="round" opacity="0.9"/>')
+
+    return scene('dubuque', 'Dubuque, Iowa',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface='#6e6b66', surface2='#565350',
+                                    shoulder='#cfc7ac', dash='#ffe066'),
+                     'trackkw': dict(ballast='#9e9078', ballast_hi='#b0a189',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

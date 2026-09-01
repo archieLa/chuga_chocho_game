@@ -416,6 +416,19 @@
       // rider visible as a shadow inside the translucent tube (#tube-path).
       scenery:{ theme:'waterpark', features:['slidetower','flume','splash','gorge','duckboat','depot'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'dubuque', state:'Iowa', city:'Dubuque',
+      say:{ en:'Dubuque', pl:'Dubuque' },
+      scene:'dubuque',
+      // Viewpoint: Lock and Dam No. 11 from the riverfront, with the wooded bluff and the
+      // Fenelon Place Elevator on the left and the railroad swing bridge beyond.
+      // HEADLINE ANIMATION: the lock cycle — #cc-lock-water's top edge moves between the
+      // two pool levels, #cc-lockboat rides it, then #cc-lockgate's two leaves swing open
+      // and the boat leaves. The set's first mechanism that is ABOUT WAITING.
+      // Also: the swing bridge (#cc-swingspan/.cc-swing), the paddlewheel (.cc-paddle)
+      // and the two funicular cars (#cc-funi-a/-b).
+      scenery:{ theme:'river-lock', features:['lock','dam','swingbridge','funicular','bluff','sternwheeler'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

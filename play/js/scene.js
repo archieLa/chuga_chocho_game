@@ -432,6 +432,9 @@
     const drifts = buildDrifts(svg);
     const flags = buildFlags(svg);
     const kites = buildKites(svg);
+    const lock = buildLock(svg);
+    const swing = buildSwing(svg);
+    const funi = buildFunis(svg);
     const cyclists = buildCyclists(svg);
     const jets = buildJets(svg);
     const watchers = buildWatchers(svg);
@@ -461,7 +464,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -3027,6 +3030,194 @@
     });
   }
 
+  // =======================================================================
+  // THE LOCK (.cc-lock-water + .cc-lockboat + .cc-gate-l/.cc-gate-r).
+  //
+  // The first mechanism in the set that is ABOUT WAITING. A boat comes in, the
+  // gates shut, nothing happens for a while, the water changes, the gates open
+  // and it goes — which is you are safe, you wait, then you go, happening to a
+  // boat a hundred feet from where it is about to happen to a car.
+  //
+  // Almost all of it is one number. The chamber is a single rect: set its `y`
+  // and let the height follow, and the boat rides at the SAME y because its
+  // origin is on its own waterline. Nothing is clipped, masked or duplicated.
+  //
+  // The band of visible water gets SMALLER as the level drops and that is
+  // correct — you are looking across from the top of the near wall, so the wall
+  // occludes more surface the further the water falls.
+  //
+  // What the eye actually catches is the WALL, and that needs no code at all:
+  // the far wall is pale dry concrete down to the upper-pool line and painted
+  // near-black with stain below it, so the rect uncovering it sweeps a hard dark
+  // edge down a large pale surface. Do not fade or tint it — anything extra
+  // fights the water and reads as a lighting bug.
+  //
+  // THE WAITING BEATS ARE THE POINT. A real lockage takes twenty minutes; this
+  // one takes half a minute, and cutting the two still phases to make it brisker
+  // would throw away the only reason the scene exists.
+  // =======================================================================
+  const LOCK = {
+    low: 656, high: 596, floor: 698,   // lower pool, upper pool, the rect's fixed bottom
+    shut: 1, open: 0.12,               // gate leaf scale — it foreshortens into its recess
+    wait: 5, fill: 12, settle: 1.6, gates: 3, leave: 9, close: 3, drain: 9, back: 2.5,
+    paddleSecs: 2,                     // one turn of the wheel
+  };
+
+  function buildLock(svg) {
+    const water = svg.querySelector('.cc-lock-water');
+    const boat = svg.querySelector('.cc-lockboat');
+    if (!water || !boat) return null;
+    const m = /translate\(\s*(-?[\d.]+)/.exec(boat.getAttribute('transform') || '');
+    const path = svg.querySelector('[id$="lockboat-path"]');
+    let total = 0;
+    if (path && path.getTotalLength) { try { total = path.getTotalLength(); } catch (e) { total = 0; } }
+    return {
+      water: water, boat: boat, bx: m ? +m[1] : 962,
+      paddle: boat.querySelector('.cc-paddle'),
+      pt: (function () {
+        const p = boat.querySelector('.cc-paddle');
+        const q = p && /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(p.getAttribute('transform') || '');
+        return q ? 'translate(' + q[1] + ',' + q[2] + ') ' : '';
+      })(),
+      leaves: [].map.call(svg.querySelectorAll('.cc-gate-l, .cc-gate-r'), el => {
+        const q = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+        return { el: el, t: q ? 'translate(' + q[1] + ',' + q[2] + ') ' : '' };
+      }),
+      path: path, total: total,
+      phase: 'wait', t: 0, y: LOCK.low, sx: LOCK.shut, run: 0, spin: 0,
+    };
+  }
+
+  function setLock(k) {
+    k.water.setAttribute('y', k.y.toFixed(1));
+    k.water.setAttribute('height', Math.max(0, LOCK.floor - k.y).toFixed(1));
+    let x = k.bx;
+    if (k.run > 0 && k.path && k.total) {
+      const p = k.path.getPointAtLength(Math.min(k.total, k.run));
+      x = p.x;
+    }
+    k.boat.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + k.y.toFixed(1) + ')');
+    k.leaves.forEach(l => l.el.setAttribute('transform', l.t + 'scale(' + k.sx.toFixed(3) + ',1)'));
+    // A PADDLEWHEEL TURNING WHILE THE BOAT SITS STILL is worse than one that
+    // never turns, so it is driven by distance run and not by the clock.
+    if (k.paddle) {
+      k.paddle.setAttribute('transform', k.pt + 'rotate(' + k.spin.toFixed(1) + ')');
+    }
+  }
+
+  function updateLock(dt) {
+    const k = currentScene && currentScene.lock;
+    if (!k) return;
+    const secs = dt / 1000;
+    k.t += secs;
+    const ph = LOCK[k.phase];
+    const u = ph ? clamp(k.t / ph, 0, 1) : 0;
+    let moving = 0;
+
+    if (k.phase === 'wait') {                       // shut, low, and NOTHING moves
+      if (k.t >= LOCK.wait) { k.phase = 'fill'; k.t = 0; }
+    } else if (k.phase === 'fill') {                // the chamber comes up to the upper pool
+      k.y = LOCK.low + (LOCK.high - LOCK.low) * ease(u);
+      if (u >= 1) { k.phase = 'settle'; k.t = 0; }
+    } else if (k.phase === 'settle') {              // levels match. Still nothing moves
+      if (u >= 1) { k.phase = 'gates'; k.t = 0; }
+    } else if (k.phase === 'gates') {               // forty tons of steel, eased
+      k.sx = LOCK.shut + (LOCK.open - LOCK.shut) * ease(u);
+      if (u >= 1) { k.phase = 'leave'; k.t = 0; }
+    } else if (k.phase === 'leave') {
+      const was = k.run;
+      k.run = (k.total || 500) * ease(u);
+      moving = k.run - was;
+      if (u >= 1) { k.phase = 'close'; k.t = 0; }
+    } else if (k.phase === 'close') {
+      k.sx = LOCK.open + (LOCK.shut - LOCK.open) * ease(u);
+      if (u >= 1) { k.phase = 'drain'; k.t = 0; k.run = 0; }
+    } else if (k.phase === 'drain') {               // back down, with the chamber empty
+      k.y = LOCK.high + (LOCK.low - LOCK.high) * ease(u);
+      if (u >= 1) { k.phase = 'back'; k.t = 0; }
+    } else if (k.phase === 'back') {                // the next one comes in from the left
+      k.run = -(k.total || 500) * 0.9 * (1 - ease(u));
+      moving = Math.abs(k.run) * 0.02;
+      if (u >= 1) { k.phase = 'wait'; k.t = 0; k.run = 0; }
+    }
+
+    if (moving > 0) k.spin += moving * (360 / (120 * LOCK.paddleSecs));
+    setLock(k);
+  }
+
+  // =======================================================================
+  // THE SWING BRIDGE (.cc-swing) and THE FUNICULAR (.cc-funi).
+  //
+  // The bridge is the lock gate's contract again: scale(sx,1) about the pivot,
+  // eased, so the truss foreshortens to a narrow tower over its own pier — which
+  // is what an end-on truss looks like. It runs RARELY. A bridge that is always
+  // swinging is a fairground ride; one that swings occasionally is a railway.
+  //
+  // The funicular's only rule is that the two cars are COUNTERBALANCED: as one
+  // goes up the other comes down, at the same rate. Both are sampled from one t,
+  // one forward and one reversed, so they cannot drift apart even in principle.
+  // =======================================================================
+  const SWING = { closed: 1, open: 0.12, turn: 5, hold: 9, every: 105 };
+  const FUNI = { secs: 20, hold: 3 };
+
+  function buildSwing(svg) {
+    const el = svg.querySelector('.cc-swing');
+    if (!el) return null;
+    const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+    return { el: el, t: m ? 'translate(' + m[1] + ',' + m[2] + ') ' : '',
+             sx: SWING.closed, phase: 'shut', clock: 0 };
+  }
+
+  function updateSwing(dt) {
+    const g = currentScene && currentScene.swing;
+    if (!g) return;
+    const secs = dt / 1000;
+    g.clock += secs;
+    if (g.phase === 'shut') {
+      if (g.clock >= SWING.every) { g.phase = 'opening'; g.clock = 0; }
+    } else if (g.phase === 'opening') {
+      g.sx = SWING.closed + (SWING.open - SWING.closed) * ease(clamp(g.clock / SWING.turn, 0, 1));
+      if (g.clock >= SWING.turn) { g.phase = 'open'; g.clock = 0; }
+    } else if (g.phase === 'open') {
+      if (g.clock >= SWING.hold) { g.phase = 'closing'; g.clock = 0; }
+    } else if (g.phase === 'closing') {
+      g.sx = SWING.open + (SWING.closed - SWING.open) * ease(clamp(g.clock / SWING.turn, 0, 1));
+      if (g.clock >= SWING.turn) { g.phase = 'shut'; g.clock = 0; }
+    }
+    g.el.setAttribute('transform', g.t + 'scale(' + g.sx.toFixed(3) + ',1)');
+  }
+
+  function buildFunis(svg) {
+    const cars = [].map.call(svg.querySelectorAll('.cc-funi'), (el, i) => {
+      const id = el.id || '';
+      const key = id.slice(-1);                       // ...-a / ...-b
+      const path = svg.querySelector('[id$="funi-path-' + key + '"]');
+      let total = 0;
+      if (path && path.getTotalLength) { try { total = path.getTotalLength(); } catch (e) {} }
+      return { el: el, path: path, total: total, up: i === 0 };
+    }).filter(c => c.path && c.total);
+    return cars.length ? { cars: cars, t: 0, dir: 1, wait: 0 } : null;
+  }
+
+  function updateFunis(dt) {
+    const f = currentScene && currentScene.funi;
+    if (!f) return;
+    const secs = dt / 1000;
+    if (f.wait > 0) f.wait -= secs;
+    else {
+      f.t += f.dir * secs / FUNI.secs;
+      if (f.t >= 1) { f.t = 1; f.dir = -1; f.wait = FUNI.hold; }
+      else if (f.t <= 0) { f.t = 0; f.dir = 1; f.wait = FUNI.hold; }
+    }
+    f.cars.forEach(c => {
+      // ONE t, sampled forward for one car and reversed for the other. Give them
+      // a t each and they drift; counterbalanced means they cannot.
+      const u = c.up ? f.t : 1 - f.t;
+      const p = c.path.getPointAtLength(c.total * u);
+      c.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')');
+    });
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -4773,6 +4964,9 @@
     updateFlags(t);
     updateJets(t);
     updateKites(t);
+    updateLock(dt);
+    updateSwing(dt);
+    updateFunis(dt);
     updateCyclists(dt);
     // AMBIENT, so they belong HERE and not in updateTrain — that returns early
     // when no train is on screen, which would freeze the bus halfway down the
