@@ -28906,7 +28906,805 @@ def dubuque():
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque()
+def lewes():
+    """LEWES, DELAWARE — the ferry terminal, and the road that ends inside a ship.
+
+    Every scene has to answer where the road goes. This set has now used the vanishing
+    point, a car park, a T junction, a boat landing, a slipway and a lock wall. Here the
+    road crosses the railway, turns onto the marshalling apron, climbs a steel ramp and
+    goes **into a ship** — and the ship then leaves with the cars inside it. For a
+    three-year-old, a boat that eats cars is astonishing in a way that a bridge is not.
+
+    **The scene is built in two halves that tell one story**, because the two things it
+    needs are at opposite ends of the depth range. A ship big enough to be impressive has
+    to sit beyond the railway, which makes the cars boarding it about fourteen pixels
+    long. So the near field carries the QUEUE — big cars in painted lanes under a signal —
+    and the middle distance carries the SHIP and the ramp. Green light, the queue moves
+    off up the road, and small cars appear on the ramp a moment later. Same cars, same
+    story, drawn at the two scales each half needs.
+
+    That queue is also the reason this location earns a slot at all: **cars wait in lanes
+    for a signal and then go, a hundred feet from where cars wait at a gate for a train
+    and then go.** Two waiting-and-goings in one frame. A child will connect them without
+    anybody explaining it, which is the same instinct that made the Dubuque lock worth
+    building.
+
+    Four things the reference corrected, and the first two would have wrecked it:
+
+      * **The vessel is not barge-like.** Wikipedia describes an open car deck on a hull
+        low to the water, and from that I had pictured something flat. The photographs
+        show a proper ship: deep navy hull, two decks of white superstructure, twin square
+        funnels, a bridge up forward. Drawn as a barge it would have read as a car park on
+        a raft.
+      * **Loading is through the STERN**, between two pale blue gantry towers carrying the
+        ramp hoist, with a cross-beam over the top. That gate-like frame around the ship's
+        mouth is the strongest graphic in the reference and it is what makes the loading
+        legible at this size.
+      * **The town is DUTCH.** Lewes was founded by the Dutch in 1631 and its museum is a
+        copy of the town hall at Hoorn: red brick with cream banding, a scrolled gable,
+        blue shutters. Nothing else in this set has a Dutch gable, and after Dubuque —
+        where the scene could have been any river town until the gold dome went in — that
+        is the object doing the "where" work here.
+      * **The fire control towers are a PAIR.** Plain tan concrete drums with a row of
+        slit windows near the top and a railed platform, one taller than the other,
+        standing on open sand. An unmistakable silhouette and unlike anything in the set.
+
+    The near field keeps the horseshoe crabs, which spawn on this bay in numbers found
+    nowhere else on earth and are a lovely shape for a small child: a smooth brown dome
+    with a spike."""
+    # The road ENDS at the ramp. That is the whole scene and it drove every number here.
+    #
+    # The far crossing gate is fixed furniture at y=388, so the carriageway has to run at
+    # least that high — which means the berth cannot be above y≈378, which in turn caps
+    # how big the ship can be. The first version put the ship where it would look
+    # impressive and left the road running past it into open water, which is exactly the
+    # thing a child would notice first. Ship size lost; the road wins.
+    ROAD_TOP = 378
+    WL = 396                 # the waterline at the stern, just beyond the ramp
+    ST_L, ST_R = 548, 772    # the stern face, square on to the road
+    OPEN_L, OPEN_R = 578, 702
+    OPEN_T, OPEN_B = 336, 378
+    BOW_X, BOW_WL = 1178, 366
+
+    def ppm(y):
+        t = (y - HORIZON) / 420.0
+        return ((644 + 126 * t) - (622 - 112 * t)) / 7.3
+
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    HULL, HULL_D = '#22375c', '#16233c'
+    SUP, SUP_D, SUP_L = '#f2f0e8', '#cfcabc', '#ffffff'
+    GLASS = '#7fa2b8'
+    GANTRY, GANTRY_D, GANTRY_L = '#9fb4c4', '#6f8598', '#c2d2dc'
+    HAZ = '#e8c33a'
+    CONC, CONC_D, CONC_L = '#c4bfb0', '#948f80', '#ddd8c8'
+    SAND, SAND_D = '#e2d6b6', '#c4b892'
+    MARRAM = '#93a86a'
+    BRICK, CREAM = '#9c4a3a', '#e8e0cc'
+    TOPS = ['#c0492f', '#f0b32a', '#2f8f5b', '#8a5bc0', '#e8722c', '#2f7fd0',
+            '#e8e6dc', '#3a4a5c']
+
+    DEFS = []
+
+    d = '''    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d84c6"/><stop offset="0.55" stop-color="#8fbedd"/>
+      <stop offset="1" stop-color="#dfeaf0"/>
+    </linearGradient>
+    <linearGradient id="lwbay" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9dc0d2"/><stop offset="0.3" stop-color="#5f92b2"/>
+      <stop offset="1" stop-color="#3f6f92"/>
+    </linearGradient>
+    <linearGradient id="lwsand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6dcbe"/><stop offset="1" stop-color="#cfc09a"/>
+    </linearGradient>'''
+
+    # =============================================================== SKY ===
+    sk = ['    <rect x="0" y="0" width="1280" height="320" fill="url(#skyg)"/>']
+
+    def cumulus(cx, base_y, w, seed):
+        r = rnd(seed)
+        o = ['<g>']
+        h = w * (0.5 + r() * 0.2)
+        o.append(f'<ellipse cx="{cx}" cy="{base_y - h * 0.06:.0f}" rx="{w * 0.5:.0f}" '
+                 f'ry="{h * 0.15:.0f}" fill="#c0d2de"/>')
+        lobes = [(0.0, 0.6, 0.33), (-0.3, 0.4, 0.25), (0.31, 0.43, 0.26),
+                 (-0.13, 0.78, 0.21), (0.17, 0.76, 0.23), (0.0, 0.92, 0.16),
+                 (-0.45, 0.22, 0.19), (0.46, 0.25, 0.18)]
+        for fx, fy, fr in lobes:
+            o.append(f'<ellipse cx="{cx + w * fx:.0f}" cy="{base_y - h * fy:.0f}" '
+                     f'rx="{w * fr:.0f}" ry="{w * fr * 0.85:.0f}" fill="#ffffff"/>')
+        for fx, fy, fr in lobes[:4]:
+            o.append(f'<ellipse cx="{cx + w * fx - w * 0.05:.0f}" '
+                     f'cy="{base_y - h * fy - w * 0.05:.0f}" rx="{w * fr * 0.7:.0f}" '
+                     f'ry="{w * fr * 0.58:.0f}" fill="#ffffff"/>')
+        return ''.join(o) + '</g>'
+
+    for cx, by, w, sd in ((120, 108, 84, 3), (352, 78, 62, 5), (556, 132, 52, 7),
+                          (1112, 96, 70, 9), (1268, 140, 58, 11)):
+        sk.append(cumulus(cx, by, w, sd))
+
+    # =============================================================== FAR ===
+    # THE CAPE HENLOPEN SPIT, and the two fire control towers on it. Eleven of these
+    # concrete drums were built along this coast in the war — seventeen feet across,
+    # forty to ninety feet tall, a row of slit windows near the top and a railed platform.
+    # They are the object that stops the background being Anywhere Beach.
+    far = ['    ']
+    far.append('<path d="M-20,318 L-20,306 Q 120,296 260,302 Q 420,308 560,300 '
+               'Q 720,292 880,300 Q 1040,308 1300,298 L1300,318 Z" fill="#a8b8a0" '
+               'opacity="0.9"/>')
+    rrf = rnd(21)
+    x = -30
+    while x < 1320:
+        far.append(f'<ellipse cx="{x:.0f}" cy="{306 - rrf() * 6:.0f}" '
+                   f'rx="{7 + rrf() * 11:.1f}" ry="{3.4 + rrf() * 4:.1f}" '
+                   f'fill="{"#6f8f6a" if rrf() < 0.5 else "#7d9c74"}" opacity="0.75"/>')
+        x += 13 + rrf() * 16
+
+    def fc_tower(x, base, h, w, seed):
+        o = ['<g>']
+        o.append(f'<ellipse cx="{x}" cy="{base}" rx="{w * 0.72:.0f}" ry="{w * 0.2:.0f}" '
+                 f'fill="#000000" opacity="0.12"/>')
+        o.append(f'<path d="M{x - w / 2 - 1.5:.1f},{base} L{x - w * 0.42:.1f},{base - h} '
+                 f'L{x + w * 0.42:.1f},{base - h} L{x + w / 2 + 1.5:.1f},{base} Z" '
+                 f'fill="#c0b193"/>')
+        o.append(f'<path d="M{x - w / 2 - 1.5:.1f},{base} L{x - w * 0.42:.1f},{base - h} '
+                 f'L{x - w * 0.1:.1f},{base - h} L{x - w * 0.16:.1f},{base} Z" '
+                 f'fill="#d4c7a8"/>')
+        o.append(f'<path d="M{x + w * 0.16:.1f},{base} L{x + w * 0.1:.1f},{base - h} '
+                 f'L{x + w * 0.42:.1f},{base - h} L{x + w / 2 + 1.5:.1f},{base} Z" '
+                 f'fill="#a8997c"/>')
+        # the cap: a wider slab with a railed platform on it
+        o.append(f'<rect x="{x - w * 0.56:.1f}" y="{base - h - w * 0.2:.1f}" '
+                 f'width="{w * 1.12:.1f}" height="{w * 0.22:.1f}" fill="#cabb9c"/>')
+        o.append(f'<rect x="{x - w * 0.5:.1f}" y="{base - h - w * 0.46:.1f}" '
+                 f'width="{w:.1f}" height="{w * 0.26:.1f}" fill="none" stroke="#8f8266" '
+                 f'stroke-width="1.2"/>')
+        # the slit windows, the tell
+        r = rnd(seed)
+        for i in range(4):
+            sx = x - w * 0.3 + i * w * 0.2
+            o.append(f'<rect x="{sx:.1f}" y="{base - h * 0.86:.1f}" width="{w * 0.075:.1f}" '
+                     f'height="{h * 0.1:.1f}" fill="#4a4235"/>')
+        for i in range(3):
+            o.append(f'<rect x="{x - w * 0.42 + r() * w * 0.7:.1f}" '
+                     f'y="{base - h * (0.2 + r() * 0.5):.1f}" width="{w * 0.05:.1f}" '
+                     f'height="{h * 0.06:.1f}" fill="#8f8266" opacity="0.5"/>')
+        return ''.join(o) + '</g>'
+
+    far.append(fc_tower(196, 314, 62, 15, 23))
+    far.append(fc_tower(232, 316, 42, 11, 25))
+
+    # ============================================================ GROUND ===
+    gr = ['    <rect x="0" y="300" width="1280" height="420" fill="url(#lwsand)"/>']
+
+    # ====================================================== SCENERY BACK ===
+    back = ['    ']
+
+    # ---------------------------------------------------------------------
+    # THE BAY. Delaware Bay is a proper mid blue in daylight, not the olive of a river —
+    # and it wants to be, because the terminal in front of it is all grey tarmac and pale
+    # concrete and the ship is navy and white.
+    back.append('<rect x="0" y="308" width="1280" height="148" fill="url(#lwbay)"/>')
+    rw = rnd(31)
+    for k in range(86):
+        wx = -20 + rw() * 1320
+        wy = 314 + rw() * 136
+        back.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{14 + rw() * 78:.0f}" '
+                    f'height="{1.1 + rw() * 1.5:.1f}" rx="1" '
+                    f'fill="{"#cfe2ea" if rw() < 0.55 else "#2f5d7e"}" '
+                    f'opacity="{0.16 + rw() * 0.3:.2f}"/>')
+    # the stone breakwater with its little squat red light — a Lewes fixture, and
+    # deliberately nothing like Cape Hatteras's tall striped tower
+    back.append('<path d="M960,326 L1300,318 L1300,326 L960,334 Z" fill="#8f8a7c"/>')
+    back.append('<path d="M960,326 L1300,318" stroke="#a8a294" stroke-width="2.6" '
+                'fill="none"/>')
+    back.append('<g transform="translate(978,326)">'
+                '<path d="M-7,0 L-5,-14 L5,-14 L7,0 Z" fill="#a8402e"/>'
+                '<rect x="-8" y="-17" width="16" height="4" fill="#e8e4d8"/>'
+                '<rect x="-4" y="-24" width="8" height="7" fill="#3a4450"/>'
+                '<rect x="-5.5" y="-26" width="11" height="2.6" fill="#e8e4d8"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE SHIP. Three-quarter on: the stern face square to us with the vehicle mouth in
+    # it, and the port side running away to the right, rising slightly because the far end
+    # of the ship is further away. Drawn flat-on it would be a wall with a hole; drawn
+    # pure side-on you could not see into it.
+    def ship():
+        o = ['<g id="cc-ferry" class="cc-ferry">']
+        # --- the port side, receding right and rising as it goes away
+        o.append(f'<path d="M{ST_R},{WL} L{BOW_X},{BOW_WL} L{BOW_X},{BOW_WL - 26} '
+                 f'L{ST_R},{WL - 34} Z" fill="{HULL}"/>')
+        o.append(f'<path d="M{ST_R},{WL} L{BOW_X},{BOW_WL} L{BOW_X},{BOW_WL - 5} '
+                 f'L{ST_R},{WL - 6} Z" fill="{HULL_D}"/>')
+        # the vehicle deck: a dark slot running the length of the side
+        o.append(f'<path d="M{ST_R},{WL - 34} L{BOW_X},{BOW_WL - 26} '
+                 f'L{BOW_X},{BOW_WL - 52} L{ST_R},{WL - 66} Z" fill="#2b3742"/>')
+        for i in range(15):
+            t = i / 14.0
+            px = ST_R + (BOW_X - ST_R) * t
+            py = (WL - 34) + ((BOW_WL - 26) - (WL - 34)) * t
+            o.append(f'<rect x="{px:.0f}" y="{py - 30:.0f}" width="5" height="31" '
+                     f'fill="{SUP}"/>')
+        # first passenger deck
+        o.append(f'<path d="M{ST_R},{WL - 66} L{BOW_X},{BOW_WL - 52} '
+                 f'L{BOW_X},{BOW_WL - 78} L{ST_R},{WL - 96} Z" fill="{SUP}"/>')
+        o.append(f'<path d="M{ST_R},{WL - 66} L{BOW_X},{BOW_WL - 52} '
+                 f'L{BOW_X},{BOW_WL - 57} L{ST_R},{WL - 72} Z" fill="{SUP_D}"/>')
+        for i in range(22):
+            t = i / 21.0
+            px = ST_R + 12 + (BOW_X - ST_R - 26) * t
+            py = (WL - 90) + ((BOW_WL - 72) - (WL - 90)) * t
+            o.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="11" height="12" '
+                     f'rx="2" fill="{GLASS}"/>')
+        # second passenger deck, set in
+        o.append(f'<path d="M{ST_R + 6},{WL - 96} L{BOW_X},{BOW_WL - 78} '
+                 f'L{BOW_X},{BOW_WL - 100} L{ST_R + 6},{WL - 122} Z" fill="{SUP}"/>')
+        o.append(f'<path d="M{ST_R + 6},{WL - 96} L{BOW_X},{BOW_WL - 78} '
+                 f'L{BOW_X},{BOW_WL - 83} L{ST_R + 6},{WL - 102} Z" fill="{SUP_D}"/>')
+        for i in range(19):
+            t = i / 18.0
+            px = ST_R + 20 + (BOW_X - ST_R - 40) * t
+            py = (WL - 117) + ((BOW_WL - 96) - (WL - 117)) * t
+            o.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="10" height="11" '
+                     f'rx="2" fill="{GLASS}"/>')
+        # the boat deck rail
+        o.append(f'<path d="M{ST_R + 6},{WL - 122} L{BOW_X},{BOW_WL - 100}" '
+                 f'stroke="{SUP_D}" stroke-width="4" fill="none"/>')
+        o.append(f'<path d="M{ST_R + 6},{WL - 133} L{BOW_X},{BOW_WL - 110}" '
+                 f'stroke="{SUP_L}" stroke-width="2.2" fill="none"/>')
+        for i in range(20):
+            t = i / 19.0
+            px = ST_R + 10 + (BOW_X - ST_R - 22) * t
+            py = (WL - 133) + ((BOW_WL - 110) - (WL - 133)) * t
+            o.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="1.8" height="12" '
+                     f'fill="{SUP_D}"/>')
+
+        def deck_y(x):
+            return (WL - 138) + ((BOW_WL - 114) - (WL - 138)) * ((x - ST_R) /
+                                                                 float(BOW_X - ST_R))
+
+        for lx in (846, 902, 1048):
+            o.append(f'<g transform="translate({lx},{deck_y(lx):.0f})">'
+                     f'<path d="M-15,0 L15,0 L12,5 L-12,5 Z" fill="{SUP_L}"/>'
+                     f'<rect x="-15" y="-3" width="30" height="3.4" rx="1.7" '
+                     f'fill="{SUP_D}"/></g>')
+        # TWIN FUNNELS, square and white, and the bridge forward
+        for fx in (952, 1000):
+            o.append(f'<g transform="translate({fx},{deck_y(fx):.0f})">'
+                     f'<path d="M-17,0 L17,0 L14,-56 L-14,-56 Z" fill="{SUP}"/>'
+                     f'<path d="M-17,0 L-6,0 L-5,-56 L-14,-56 Z" fill="{SUP_L}"/>'
+                     f'<rect x="-15" y="-61" width="30" height="6" fill="{SUP_D}"/>'
+                     f'<rect x="-10" y="-69" width="8" height="9" fill="#3a4450"/>'
+                     f'<rect x="2" y="-69" width="8" height="9" fill="#3a4450"/></g>')
+        BRX = 1108
+        o.append(f'<g transform="translate({BRX},{deck_y(BRX):.0f})">'
+                 f'<rect x="-46" y="-24" width="92" height="24" fill="{SUP}"/>'
+                 f'<rect x="-46" y="-24" width="92" height="4" fill="{SUP_D}"/>'
+                 f'<rect x="-52" y="-28" width="104" height="4" fill="{SUP_L}"/>'
+                 + ''.join(f'<rect x="{-40 + i * 14}" y="-19" width="10" height="11" '
+                           f'rx="2" fill="{GLASS}"/>' for i in range(6))
+                 + f'<rect x="-1.6" y="-54" width="3.2" height="30" fill="{SUP_D}"/>'
+                 f'<rect x="-13" y="-47" width="26" height="2.6" fill="{SUP_D}"/></g>')
+
+        # --- THE BOW. The ship has to END somewhere or it is a wall. The sheer rises
+        # forward and the stem rakes out, so the vehicle-deck slot is closed off at the
+        # far end and you can read the whole length of a boat in one look.
+        BX2 = BOW_X + 56
+        o.append(f'<path d="M{BOW_X},{BOW_WL} L{BX2},{BOW_WL - 22} '
+                 f'L{BX2},{BOW_WL - 86} L{BOW_X},{BOW_WL - 52} Z" fill="{HULL}"/>')
+        o.append(f'<path d="M{BOW_X},{BOW_WL} L{BX2},{BOW_WL - 22} '
+                 f'L{BX2},{BOW_WL - 28} L{BOW_X},{BOW_WL - 6} Z" fill="{HULL_D}"/>')
+        o.append(f'<path d="M{BOW_X},{BOW_WL - 52} L{BX2},{BOW_WL - 86} '
+                 f'L{BX2},{BOW_WL - 98} L{BOW_X},{BOW_WL - 66} Z" fill="{SUP}"/>')
+        o.append(f'<path d="M{BOW_X},{BOW_WL - 66} L{BX2},{BOW_WL - 98}" '
+                 f'stroke="{SUP_L}" stroke-width="2.2" fill="none"/>')
+        o.append(f'<g transform="translate({BOW_X + 24},{BOW_WL - 76})">'
+                 f'<rect x="-1.5" y="-46" width="3" height="46" fill="{SUP_D}"/>'
+                 f'<rect x="-11" y="-38" width="22" height="2.4" fill="{SUP_D}"/></g>')
+
+        # --- THE STERN FACE, square on to the road, with the mouth in it
+        o.append(f'<path d="M{ST_L},{WL + 3} L{ST_R},{WL} L{ST_R},{WL - 34} '
+                 f'L{ST_L},{WL - 30} Z" fill="{HULL}"/>')
+        o.append(f'<path d="M{ST_L},{WL + 3} L{ST_R},{WL} L{ST_R},{WL - 5} '
+                 f'L{ST_L},{WL - 2} Z" fill="{HULL_D}"/>')
+        o.append(f'<path d="M{ST_L},{WL + 3} C {ST_L - 10},{WL - 4} {ST_L - 10},{WL - 24} '
+                 f'{ST_L},{WL - 30} L{ST_L + 5},{WL - 30} L{ST_L + 5},{WL + 3} Z" '
+                 f'fill="{HULL_D}"/>')
+        # the vehicle deck band and its mouth
+        o.append(f'<path d="M{ST_L},{WL - 30} L{ST_R},{WL - 34} L{ST_R},{WL - 66} '
+                 f'L{ST_L},{WL - 60} Z" fill="{SUP}"/>')
+        o.append(f'<rect x="{OPEN_L}" y="{OPEN_T}" width="{OPEN_R - OPEN_L}" '
+                 f'height="{OPEN_B - OPEN_T}" fill="#20262c"/>')
+        o.append(f'<rect x="{OPEN_L + 4}" y="{OPEN_T + 4}" width="{OPEN_R - OPEN_L - 8}" '
+                 f'height="{OPEN_B - OPEN_T - 8}" fill="#3f4a52"/>')
+        for i in range(3):
+            o.append(f'<rect x="{OPEN_L + 14 + i * 36}" y="{OPEN_T + 7}" width="20" '
+                     f'height="3" fill="#f2eecf" opacity="0.85"/>')
+        o.append(f'<rect x="{OPEN_L + 6}" y="{OPEN_B - 8}" width="{OPEN_R - OPEN_L - 12}" '
+                 f'height="4" fill="{HAZ}" opacity="0.8"/>')
+        # two cars already aboard, so you can see what the mouth is FOR
+        for cx_, cc in ((OPEN_L + 30, '#b8402e'), (OPEN_L + 80, '#5f6b78')):
+            o.append(f'<g transform="translate({cx_},{OPEN_B - 12}) scale(0.56)">'
+                     f'<path d="M-22,0 L-19,-13 L-6,-19 L11,-19 L21,-11 L23,0 Z" '
+                     f'fill="{cc}"/>'
+                     f'<path d="M-14,-13 L-5,-17 L9,-17 L16,-12 Z" fill="#9fbccb"/>'
+                     f'<circle cx="-13" cy="1" r="5" fill="#22262a"/>'
+                     f'<circle cx="13" cy="1" r="5" fill="#22262a"/></g>')
+        # the stern's own passenger decks above the mouth
+        o.append(f'<path d="M{ST_L},{WL - 60} L{ST_R},{WL - 66} L{ST_R},{WL - 96} '
+                 f'L{ST_L},{WL - 88} Z" fill="{SUP}"/>')
+        o.append(f'<path d="M{ST_L},{WL - 60} L{ST_R},{WL - 66} L{ST_R},{WL - 71} '
+                 f'L{ST_L},{WL - 65} Z" fill="{SUP_D}"/>')
+        for i in range(7):
+            o.append(f'<rect x="{ST_L + 14 + i * 30}" y="{WL - 87}" width="16" '
+                     f'height="14" rx="2" fill="{GLASS}"/>')
+        o.append(f'<path d="M{ST_L + 6},{WL - 88} L{ST_R},{WL - 96} L{ST_R},{WL - 122} '
+                 f'L{ST_L + 6},{WL - 114} Z" fill="{SUP}"/>')
+        for i in range(6):
+            o.append(f'<rect x="{ST_L + 26 + i * 30}" y="{WL - 111}" width="15" '
+                     f'height="13" rx="2" fill="{GLASS}"/>')
+        # the curved open stern promenade, and people on it watching the cars come aboard
+        o.append(f'<path d="M{ST_L + 6},{WL - 114} L{ST_R},{WL - 122} L{ST_R},{WL - 131} '
+                 f'L{ST_L + 6},{WL - 122} Z" fill="{SUP_D}"/>')
+        o.append(f'<path d="M{ST_L + 6},{WL - 133} L{ST_R},{WL - 142}" stroke="{SUP_L}" '
+                 f'stroke-width="2.2" fill="none"/>')
+        for i in range(9):
+            o.append(f'<rect x="{ST_L + 10 + i * 25}" y="{WL - 133 - i * 1.1:.0f}" '
+                     f'width="1.8" height="12" fill="{SUP_D}"/>')
+        for i, px in enumerate((600, 646, 700, 736)):
+            py = WL - 133 - (px - ST_L - 10) * 0.045
+            o.append(f'<g transform="translate({px},{py:.0f}) scale(0.46)">'
+                     f'<rect x="-6" y="-2" width="12" height="20" rx="4" '
+                     f'fill="{TOPS[i * 2]}"/>'
+                     f'<circle cx="0" cy="-8" r="6" fill="#e8b88c"/></g>')
+        return ''.join(o) + '</g>'
+
+    back.append(ship())
+
+    # ---------------------------------------------------------------------
+    # THE GANTRY TOWERS and the ramp. Two pale blue towers straddle the stern, carrying
+    # the ramp hoist, with a beam across the top. That frame around the ship's mouth is
+    # the strongest graphic in the reference, and it does the same job here that a
+    # crossing gate does: it says THIS IS THE WAY IN.
+    TOW_Y = 404
+
+    def gantry(x, w, top):
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{top}" width="{w}" height="{TOW_Y - top}" '
+                 f'fill="{GANTRY}"/>')
+        o.append(f'<rect x="{x}" y="{top}" width="{w * 0.3:.0f}" height="{TOW_Y - top}" '
+                 f'fill="{GANTRY_L}"/>')
+        o.append(f'<rect x="{x + w * 0.76:.0f}" y="{top}" width="{w * 0.24:.0f}" '
+                 f'height="{TOW_Y - top}" fill="{GANTRY_D}"/>')
+        n = int((TOW_Y - top) / 26)
+        for i in range(n):
+            yy = top + 8 + i * 26
+            o.append(f'<line x1="{x + 2}" y1="{yy}" x2="{x + w - 2}" y2="{yy + 24}" '
+                     f'stroke="{GANTRY_D}" stroke-width="1.8" opacity="0.7"/>')
+            o.append(f'<line x1="{x + w - 2}" y1="{yy}" x2="{x + 2}" y2="{yy + 24}" '
+                     f'stroke="{GANTRY_D}" stroke-width="1.8" opacity="0.7"/>')
+        o.append(f'<rect x="{x - 3}" y="{TOW_Y - 26}" width="{w + 6}" height="10" '
+                 f'fill="{HAZ}"/>')
+        o.append(f'<rect x="{x - 3}" y="{TOW_Y - 16}" width="{w + 6}" height="16" '
+                 f'fill="{GANTRY_D}"/>')
+        o.append(f'<rect x="{x - 5}" y="{top - 7}" width="{w + 10}" height="8" '
+                 f'fill="{GANTRY_L}"/>')
+        return ''.join(o) + '</g>'
+
+    G_TOP = 246
+    back.append(gantry(524, 24, G_TOP))
+    back.append(gantry(732, 24, G_TOP))
+    back.append(f'<rect x="518" y="{G_TOP - 18}" width="242" height="12" '
+                f'fill="{GANTRY}"/>')
+    back.append(f'<rect x="518" y="{G_TOP - 18}" width="242" height="4" '
+                f'fill="{GANTRY_L}"/>')
+    back.append(f'<rect x="518" y="{G_TOP - 29}" width="242" height="11" fill="none" '
+                f'stroke="{GANTRY_D}" stroke-width="1.8"/>')
+    for sx in (542, 740):
+        back.append(f'<circle cx="{sx}" cy="{G_TOP + 6}" r="6.4" fill="{HAZ}"/>')
+        back.append(f'<circle cx="{sx}" cy="{G_TOP + 6}" r="2.8" fill="{GANTRY_D}"/>')
+        back.append(f'<line x1="{sx}" y1="{G_TOP + 12}" x2="{sx + (16 if sx < 640 else -16)}" '
+                    f'y2="{OPEN_B - 10}" stroke="{GANTRY_D}" stroke-width="1.6"/>')
+
+    # THE RAMP: hinged at the apron, landing in the ship's mouth. One rotation about the
+    # hinge, which is the crossing gate's contract again.
+    # THE RAMP. Hinged at the shore end, landing on the ship's sill — one rotation about
+    # a fixed pivot, which is the crossing gate's contract again. It is nearly flat,
+    # because a ferry ramp is: the drama is that the road simply KEEPS GOING onto a ship.
+    back.append('<g id="cc-ramp"><g class="cc-ramp-lift" '
+                'transform="translate(578,386) rotate(0)">'
+                '<path d="M0,0 L0,9 L128,3 L128,-6 Z" fill="#8d9298"/>'
+                '<path d="M0,0 L128,-6 L128,-2 L0,4 Z" fill="#b8bdc2"/>'
+                + ''.join(f'<line x1="{i * 10}" y1="{1.5 - i * 0.7:.1f}" '
+                          f'x2="{i * 10}" y2="{8 - i * 0.75:.1f}" stroke="#6f747a" '
+                          f'stroke-width="1.5"/>' for i in range(1, 13))
+                + '<rect x="-6" y="-1" width="8" height="12" rx="2" fill="#6f747a"/>'
+                '</g></g>')
+
+    # ---------------------------------------------------------------------
+    # THE APRON: the terminal's paved land, running from the crossing to the ship's foot.
+    # THE QUAY. The land the terminal stands on, running out to the berth. It stops at
+    # the water on the right, which is why the road can end where it does.
+    back.append('<path d="M-20,456 L-20,404 Q 180,396 400,400 Q 500,402 540,412 '
+                'L560,456 Z" fill="#6e6b66"/>')
+    back.append('<path d="M-20,404 Q 180,396 400,400 Q 500,402 540,412" '
+                'stroke="#87837c" stroke-width="3" fill="none"/>')
+    back.append('<path d="M540,412 L560,456 L1300,456 L1300,436 Q 900,442 700,420 '
+                'L616,392 Z" fill="#6e6b66"/>')
+    back.append('<path d="M616,392 L700,420 Q 900,442 1300,436" stroke="#87837c" '
+                'stroke-width="3" fill="none"/>')
+    # the quay edge with its fendering, along the water
+    back.append(f'<path d="M540,410 L616,390 L620,398 L544,418 Z" fill="{CONC}"/>')
+    back.append(f'<path d="M700,418 Q 900,440 1300,434 L1300,442 Q 900,448 698,426 Z" '
+                f'fill="{CONC}"/>')
+    for i in range(11):
+        fx = 720 + i * 56
+        fy = 420 + (436 - 420) * (i / 10.0) ** 0.7
+        back.append(f'<rect x="{fx:.0f}" y="{fy:.0f}" width="8" height="12" '
+                    f'fill="#4a453c"/>')
+    # MOORING LINES. Two catenaries from the ship's quarter down to bollards on the quay.
+    # Cheap, and they are the only thing in the frame that physically JOINS the ship to
+    # the land — without them the vessel floats beside the scene rather than in it.
+    for bx, sx_, sy_ in ((880, 806, 400), (1046, 968, 384)):
+        back.append(f'<path d="M{sx_},{sy_} Q {(sx_ + bx) / 2:.0f},{sy_ + 34} '
+                    f'{bx},{424 + (bx - 800) * 0.014:.0f}" stroke="#3f4a52" '
+                    f'stroke-width="2" fill="none" opacity="0.8"/>')
+        by = 424 + (bx - 800) * 0.014
+        back.append(f'<g transform="translate({bx},{by:.0f})">'
+                    f'<path d="M-7,0 L-5,-11 L-8,-15 L8,-15 L5,-11 L7,0 Z" '
+                    f'fill="#4a453c"/></g>')
+
+    # QUAY FURNITURE. The stripe between the water and the railway was flat grey for its
+    # whole width, which is the empty-mid-ground bug again. Lamps give it height, the
+    # tractor unit gives it a job, and both are small enough not to compete with the ship.
+    for lx_ in (830, 986, 1142, 1272):
+        ly = 434 + (lx_ - 800) * 0.008
+        back.append(f'<g transform="translate({lx_},{ly:.0f})">'
+                    f'<rect x="-1.6" y="-58" width="3.2" height="58" fill="#7d8288"/>'
+                    f'<path d="M-1.6,-58 L-1.6,-62 L11,-64 L11,-60 Z" fill="#9aa0a6"/>'
+                    f'<ellipse cx="11" cy="-60" rx="5" ry="2.4" fill="#e8e4d8"/></g>')
+    back.append('<g transform="translate(1092,446)">'
+                '<rect x="-38" y="-26" width="52" height="19" rx="2" fill="#c4b9a4"/>'
+                '<rect x="14" y="-33" width="22" height="26" rx="3" fill="#5f7a8c"/>'
+                '<rect x="18" y="-29" width="14" height="9" rx="2" fill="#9fbccb"/>'
+                '<rect x="-40" y="-8" width="78" height="5" fill="#3a4450"/>'
+                '<circle cx="-24" cy="-2" r="5" fill="#22262a"/>'
+                '<circle cx="-4" cy="-2" r="5" fill="#22262a"/>'
+                '<circle cx="26" cy="-2" r="5" fill="#22262a"/></g>')
+
+    # painted lanes on the quay, converging with everything else
+    for i in range(6):
+        lx = 60 + i * 82
+        back.append(f'<path d="M{lx},454 L{lx + 14},408" stroke="#e2ded0" '
+                    f'stroke-width="2.4" fill="none" opacity="0.75"/>')
+
+    # ---------------------------------------------------------------------
+    # THE TERMINAL BUILDING. An octagonal tower with a blue standing-seam pyramid roof and
+    # a spire, glass gables with dark diagonal bracing, low wings either side under the
+    # same blue metal. It is the second thing that names this place.
+    TB_X, TB_B = 330, 452
+    ROOF, ROOF_D = '#4a6d8c', '#35526b'
+    back.append(f'<g><rect x="{TB_X - 148}" y="{TB_B - 40}" width="126" height="40" '
+                f'fill="{CONC_L}"/>'
+                f'<path d="M{TB_X - 154},{TB_B - 40} L{TB_X - 85},{TB_B - 58} '
+                f'L{TB_X - 16},{TB_B - 40} Z" fill="{ROOF}"/>'
+                f'<path d="M{TB_X - 85},{TB_B - 58} L{TB_X - 16},{TB_B - 40} '
+                f'L{TB_X - 26},{TB_B - 40} L{TB_X - 85},{TB_B - 52} Z" fill="{ROOF_D}"/>'
+                + ''.join(f'<rect x="{TB_X - 140 + i * 22}" y="{TB_B - 32}" width="14" '
+                          f'height="22" fill="{GLASS}"/>' for i in range(6))
+                + '</g>')
+    back.append(f'<g><rect x="{TB_X + 34}" y="{TB_B - 36}" width="150" height="36" '
+                f'fill="{CONC_L}"/>'
+                f'<path d="M{TB_X + 28},{TB_B - 36} L{TB_X + 109},{TB_B - 52} '
+                f'L{TB_X + 190},{TB_B - 36} Z" fill="{ROOF}"/>'
+                + ''.join(f'<rect x="{TB_X + 44 + i * 24}" y="{TB_B - 29}" width="15" '
+                          f'height="20" fill="{GLASS}"/>' for i in range(6))
+                + '</g>')
+    back.append(f'<g><rect x="{TB_X - 34}" y="{TB_B - 76}" width="68" height="76" '
+                f'fill="{CONC_L}"/>'
+                f'<rect x="{TB_X - 34}" y="{TB_B - 76}" width="20" height="76" '
+                f'fill="{CONC}"/>'
+                f'<path d="M{TB_X - 28},{TB_B - 10} L{TB_X - 28},{TB_B - 62} '
+                f'L{TB_X + 28},{TB_B - 62} L{TB_X + 28},{TB_B - 10} Z" fill="{GLASS}"/>'
+                + ''.join(f'<rect x="{TB_X - 22 + k * 14}" y="{TB_B - 62}" '
+                          f'width="2.4" height="52" fill="{ROOF_D}"/>' for k in range(4))
+                + f'<rect x="{TB_X - 28}" y="{TB_B - 40}" width="56" height="2.4" '
+                f'fill="{ROOF_D}"/>'
+                f'<rect x="{TB_X - 30}" y="{TB_B - 88}" width="60" height="14" '
+                f'fill="{CONC_L}"/>'
+                + ''.join(f'<rect x="{TB_X - 24 + i * 16}" y="{TB_B - 85}" width="10" '
+                          f'height="9" fill="{GLASS}"/>' for i in range(4))
+                + f'<path d="M{TB_X - 38},{TB_B - 88} L{TB_X},{TB_B - 122} '
+                f'L{TB_X + 38},{TB_B - 88} Z" fill="{ROOF}"/>'
+                f'<path d="M{TB_X},{TB_B - 122} L{TB_X + 38},{TB_B - 88} '
+                f'L{TB_X + 16},{TB_B - 88} Z" fill="{ROOF_D}"/>'
+                f'<rect x="{TB_X - 1.4}" y="{TB_B - 144}" width="2.8" height="24" '
+                f'fill="#8f9aa4"/>'
+                f'<circle cx="{TB_X}" cy="{TB_B - 146}" r="3.4" fill="#b4bec6"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE TOWN, left. The Dutch gable is the point — Lewes was founded by the Dutch in
+    # 1631 and this shape exists nowhere else in the set. Around it, the cedar-shingled
+    # and clapboard houses the town is actually made of.
+    def dutch_gable(x, base, w, h):
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h}" fill="{BRICK}"/>')
+        for i in range(6):
+            o.append(f'<rect x="{x}" y="{base - h + 8 + i * 13}" width="{w}" height="3" '
+                     f'fill="{CREAM}" opacity="0.85"/>')
+        # the scrolled gable: steps with rounded shoulders and a pedimented top
+        gy = base - h
+        o.append(f'<path d="M{x},{gy} L{x},{gy - 6} L{x + w * 0.16:.0f},{gy - 6} '
+                 f'L{x + w * 0.16:.0f},{gy - 20} L{x + w * 0.3:.0f},{gy - 20} '
+                 f'L{x + w * 0.3:.0f},{gy - 34} L{x + w * 0.4:.0f},{gy - 42} '
+                 f'L{x + w * 0.5:.0f},{gy - 50} L{x + w * 0.6:.0f},{gy - 42} '
+                 f'L{x + w * 0.7:.0f},{gy - 34} L{x + w * 0.7:.0f},{gy - 20} '
+                 f'L{x + w * 0.84:.0f},{gy - 20} L{x + w * 0.84:.0f},{gy - 6} '
+                 f'L{x + w},{gy - 6} L{x + w},{gy} Z" fill="{BRICK}"/>')
+        o.append(f'<path d="M{x + w * 0.3:.0f},{gy - 34} L{x + w * 0.5:.0f},{gy - 50} '
+                 f'L{x + w * 0.7:.0f},{gy - 34}" stroke="{CREAM}" stroke-width="3" '
+                 f'fill="none"/>')
+        o.append(f'<rect x="{x + w * 0.14:.0f}" y="{gy - 22}" width="{w * 0.72:.0f}" '
+                 f'height="3" fill="{CREAM}"/>')
+        o.append(f'<circle cx="{x + w * 0.5:.0f}" cy="{gy - 58}" r="4" fill="#b8ab8c"/>')
+        # blue windows in white surrounds
+        for r_ in range(2):
+            for c_ in range(3):
+                wx = x + w * (0.16 + c_ * 0.28)
+                wy = base - h + 14 + r_ * 26
+                o.append(f'<rect x="{wx - 1.5:.0f}" y="{wy - 1.5:.0f}" '
+                         f'width="{w * 0.16 + 3:.0f}" height="18" fill="{CREAM}"/>')
+                o.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{w * 0.16:.0f}" '
+                         f'height="15" fill="#2f5f9c"/>')
+        o.append(f'<rect x="{x + w * 0.44:.0f}" y="{base - 20}" width="{w * 0.14:.0f}" '
+                 f'height="20" rx="{w * 0.07:.0f}" fill="#2f5f9c"/>')
+        return ''.join(o) + '</g>'
+
+    def house(x, base, w, h, wall, roof, seed, shingle=False):
+        r = rnd(seed)
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{base - h}" width="{w}" height="{h}" fill="{wall}"/>')
+        if shingle:
+            for i in range(int(h / 7)):
+                o.append(f'<rect x="{x}" y="{base - h + i * 7}" width="{w}" height="1.6" '
+                         f'fill="#000000" opacity="0.08"/>')
+        o.append(f'<polygon points="{x - 5},{base - h} {x + w / 2:.0f},'
+                 f'{base - h - h * 0.44:.0f} {x + w + 5},{base - h}" fill="{roof}"/>')
+        o.append(f'<polygon points="{x + w / 2:.0f},{base - h - h * 0.44:.0f} '
+                 f'{x + w + 5},{base - h} {x + w - 4},{base - h} {x + w / 2:.0f},'
+                 f'{base - h - h * 0.34:.0f}" fill="{mix(roof, "#ffffff", 0.2)}"/>')
+        nw = max(2, int(w / 15))
+        for i in range(nw):
+            if r() < 0.14:
+                continue
+            o.append(f'<rect x="{x + 4 + i * (w - 8) / nw:.0f}" y="{base - h * 0.62:.0f}" '
+                     f'width="{(w - 8) / nw * 0.5:.0f}" height="{h * 0.3:.0f}" '
+                     f'fill="#3f4e5c"/>')
+        o.append(f'<rect x="{x - 3}" y="{base - 8}" width="{w + 6}" height="8" '
+                 f'fill="{mix(wall, "#000000", 0.2)}"/>')
+        return ''.join(o) + '</g>'
+
+    rt = rnd(41)
+    HW = ['#e8e4d8', '#d9d2be', '#c8bfa8', '#b8ac92', '#e0dcc8']
+    HR = ['#5a5a54', '#4a4a44', '#6a6459', '#3f4a52']
+    x_ = -16
+    while x_ < 250:
+        w_ = 30 + rt() * 26
+        h_ = 30 + rt() * 20
+        back.append(house(x_, 448, w_, h_, HW[int(rt() * 5)], HR[int(rt() * 4)],
+                          int(rt() * 700) + 3, shingle=rt() < 0.45))
+        x_ += w_ + 4
+    back.append(dutch_gable(150, 448, 90, 64))
+    # a Second Empire house with a mansard tower, which the town is full of
+    back.append(f'<g><rect x="216" y="392" width="52" height="56" fill="#a8bca0"/>'
+                f'<rect x="216" y="392" width="52" height="4" fill="#c2d2ba"/>'
+                f'<path d="M212,392 L216,368 L268,368 L272,392 Z" fill="#4a4a44"/>'
+                f'<rect x="230" y="352" width="26" height="18" fill="#a8bca0"/>'
+                f'<path d="M226,352 L243,336 L260,352 Z" fill="#4a4a44"/>'
+                + ''.join(f'<rect x="{224 + i * 16}" y="404" width="10" height="16" '
+                          f'fill="#3f4e5c"/>' for i in range(3))
+                + f'<rect x="212" y="424" width="60" height="4" fill="#e8e4d8"/>'
+                + ''.join(f'<rect x="{216 + i * 13}" y="428" width="2.6" height="20" '
+                          f'fill="#e8e4d8"/>' for i in range(5))
+                + '</g>')
+    # masts in the marina behind the town — the canal is right there
+    rm = rnd(43)
+    for k in range(9):
+        mx = 6 + rm() * 250
+        back.append(f'<rect x="{mx:.0f}" y="{382 + rm() * 14:.0f}" width="1.8" '
+                    f'height="{22 + rm() * 22:.0f}" fill="#e2ded0" opacity="0.9"/>')
+
+    def tree(x, y, s, seed, a='#4a7a44', b='#5e9155'):
+        r = rnd(seed)
+        o = [f'<g transform="translate({x:.0f},{y:.0f}) scale({s:.2f})">',
+             f'<rect x="-2.4" y="-16" width="5" height="18" fill="#6b5b41"/>']
+        for i in range(6):
+            o.append(f'<ellipse cx="{(r() - 0.5) * 30:.1f}" cy="{-22 - r() * 20:.1f}" '
+                     f'rx="{10 + r() * 10:.1f}" ry="{8 + r() * 8:.1f}" '
+                     f'fill="{a if r() < 0.55 else b}"/>')
+        return ''.join(o) + '</g>'
+
+    for k in range(22):
+        tx = rt() * 500
+        if 128 <= tx <= 268 or 276 <= tx <= 396:
+            continue
+        back.append(tree(tx, 440 + rt() * 8, 0.5 + rt() * 0.5,
+                         int(rt() * 900) + 1))
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # ---------------------------------------------------------------------
+    # NEAR FIELD, RIGHT: THE QUEUE. The scene's other half. The ship has to sit beyond the
+    # railway to be big, which makes the cars boarding it fourteen pixels long — so the
+    # waiting happens down here where a car is a hundred and forty.
+    fr.append('<path d="M770,720 L742,516 L1300,516 L1300,720 Z" fill="#6e6b66"/>')
+    fr.append('<path d="M770,720 L742,516" stroke="#87837c" stroke-width="4" '
+              'fill="none"/>')
+    # lane markings, converging on the vanishing point like everything else
+    for lx0, lx1 in ((900, 806), (1064, 900), (1240, 998)):
+        fr.append(f'<path d="M{lx0},720 L{lx1},516" stroke="#e2ded0" stroke-width="5" '
+                  f'fill="none" opacity="0.85"/>')
+    rap = rnd(47)
+    for k in range(34):
+        px = 760 + rap() * 540
+        py = 520 + rap() * 196
+        fr.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="{18 + rap() * 40:.0f}" '
+                  f'height="2" rx="1" fill="#000000" opacity="0.1"/>')
+
+    def car(gid, x, y, s, body, seed=5):
+        dark = mix(body, '#000000', 0.34)
+        return (f'<g id="{gid}" class="cc-queuecar" transform="translate({x},{y})">'
+                f'<g transform="scale({s:.2f})">'
+                f'<ellipse cx="0" cy="6" rx="52" ry="8" fill="#000" opacity="0.2"/>'
+                f'<path d="M-50,2 L-46,-22 L-30,-38 L26,-38 L44,-20 L50,2 L44,10 '
+                f'L-44,10 Z" fill="{body}"/>'
+                f'<path d="M-50,2 L-46,-22 L-30,-38 L-14,-38 L-16,10 L-44,10 Z" '
+                f'fill="{mix(body, "#ffffff", 0.12)}"/>'
+                f'<path d="M-38,-22 L-27,-33 L23,-33 L37,-21 Z" fill="#9fbccb"/>'
+                f'<path d="M-2,-33 L-2,-21 L2,-21 L2,-33 Z" fill="{dark}"/>'
+                f'<rect x="-50" y="-4" width="100" height="5" fill="{dark}"/>'
+                f'<circle cx="-30" cy="6" r="11" fill="#22262a"/>'
+                f'<circle cx="-30" cy="6" r="4.6" fill="#8d9298"/>'
+                f'<circle cx="30" cy="6" r="11" fill="#22262a"/>'
+                f'<circle cx="30" cy="6" r="4.6" fill="#8d9298"/>'
+                f'<rect x="-52" y="-14" width="7" height="6" rx="2" fill="#f2e8c0"/>'
+                f'<rect x="45" y="-14" width="7" height="6" rx="2" fill="#c0392b"/>'
+                f'</g></g>')
+
+    fr.append(car('cc-queuecar-0', 856, 694, 1.05, '#2f6fb5'))
+    fr.append(car('cc-queuecar-1', 838, 612, 0.82, '#c0492f'))
+    fr.append(car('cc-queuecar-2', 826, 556, 0.64, '#e8e4d8'))
+    fr.append(car('cc-queuecar-3', 1046, 668, 0.96, '#3f8f5b'))
+    fr.append(car('cc-queuecar-4', 1010, 578, 0.74, '#f0b32a'))
+
+    # THE LANE SIGNAL. Red, then green — the same idea as the gate behind it, and the
+    # reason this location is in the game.
+    fr.append('<g id="cc-lane-signal" transform="translate(768,556)">'
+              '<rect x="-3" y="0" width="6" height="70" fill="#4a4e52"/>'
+              '<rect x="-13" y="-46" width="26" height="50" rx="5" fill="#2f3438"/>'
+              '<circle class="cc-lamp-red" cx="0" cy="-33" r="8" fill="#ff3b30"/>'
+              '<circle class="cc-lamp-green" cx="0" cy="-12" r="8" fill="#1f4a2c"/>'
+              '<path d="M-15,-52 L15,-52 L11,-46 L-11,-46 Z" fill="#4a4e52"/></g>')
+
+    # ---------------------------------------------------------------------
+    # NEAR FIELD, LEFT: the dune the terminal is built against, and the crabs.
+    fr.append('<path d="M0,720 L0,516 L560,516 L520,720 Z" fill="url(#lwsand)"/>')
+    fr.append('<path d="M0,562 Q 150,540 320,548 Q 450,556 540,588 L520,720 L0,720 Z" '
+              'fill="#dccfa8"/>')
+    fr.append('<path d="M0,562 Q 150,540 320,548 Q 450,556 540,588" stroke="#eee6ce" '
+              'stroke-width="7" fill="none"/>')
+    # the sand fence, which crosses the seam between sand and tarmac
+    FZ = 'M-10,604 Q 170,578 350,588 Q 470,596 566,632'
+    fr.append(f'<path d="{FZ}" stroke="#a88f66" stroke-width="3" fill="none" '
+              f'transform="translate(0,-26)"/>')
+    fr.append(f'<path d="{FZ}" stroke="#a88f66" stroke-width="3" fill="none" '
+              f'transform="translate(0,-12)"/>')
+    rf = rnd(53)
+    for i in range(30):
+        t = i / 29.0
+        fx = -10 + t * 576
+        fy = 604 - 26 * (1 - abs(2 * t - 1)) * 0.6 + t * t * 30
+        fr.append(f'<rect x="{fx:.0f}" y="{fy - 34:.0f}" width="{3.4 + t * 2:.1f}" '
+                  f'height="{36 + t * 8:.0f}" fill="{"#b89a6e" if i % 2 else "#a88f66"}"/>')
+    rg = rnd(59)
+    for k in range(90):
+        gx = rg() * 570
+        gy = 546 + rg() * 174
+        if gy > 560 + gx * 0.28:
+            pass
+        s = 0.8 + (gy - 540) / 180.0 * 1.5
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} L{gx - 3 * s:.1f},{gy - 15 * s:.1f} '
+                  f'M{gx:.0f},{gy:.0f} L{gx + 0.6 * s:.1f},{gy - 19 * s:.1f} '
+                  f'M{gx:.0f},{gy:.0f} L{gx + 4 * s:.1f},{gy - 14 * s:.1f}" '
+                  f'stroke="{("#93a86a", "#a8b878", "#7f9459")[int(rg() * 3)]}" '
+                  f'stroke-width="{1.5 * s:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # HORSESHOE CRABS. Delaware Bay has the largest spawning population on earth, and a
+    # smooth brown dome with a spike is a wonderful shape for a small child.
+    def crab(x, y, s, rot, seed):
+        return (f'<g transform="translate({x},{y}) rotate({rot}) scale({s:.2f})">'
+                f'<ellipse cx="0" cy="4" rx="30" ry="8" fill="#000" opacity="0.16"/>'
+                f'<path d="M-34,2 L-32,-12 L-22,-22 L0,-26 L22,-22 L32,-12 L34,2 '
+                f'C 20,8 -20,8 -34,2 Z" fill="#8a6a4a"/>'
+                f'<path d="M-34,2 L-32,-12 L-22,-22 L-6,-25 L-8,4 Z" fill="#a4835f"/>'
+                f'<path d="M-24,3 L-20,-6 M24,3 L20,-6" stroke="#6b5138" '
+                f'stroke-width="2.4" fill="none"/>'
+                f'<circle cx="-9" cy="-16" r="2.2" fill="#4a3927"/>'
+                f'<circle cx="9" cy="-16" r="2.2" fill="#4a3927"/>'
+                f'<path d="M0,2 L2,34" stroke="#6b5138" stroke-width="3.4" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M-30,2 L-40,10 M30,2 L40,10" stroke="#7a5d40" '
+                f'stroke-width="2.6" fill="none" stroke-linecap="round"/></g>')
+
+    # Scale matters more than count here. A crab is half a metre and a car is four and a
+    # half, so at this depth a crab is a fifth of the length of one of the queueing cars —
+    # drawn any bigger they read as boulders, which is what the first version did.
+    for cx_, cy_, cs_, cr_, cq_ in ((104, 688, 0.44, -12, 61), (268, 706, 0.48, 8, 63),
+                                    (58, 640, 0.30, 24, 65), (372, 668, 0.36, -20, 67),
+                                    (176, 712, 0.46, 30, 69), (322, 690, 0.40, -4, 71),
+                                    (222, 662, 0.34, 14, 73)):
+        fr.append(crab(cx_, cy_, cs_, cr_, cq_))
+
+    # a gull on a post, because a working quay always has one
+    fr.append('<g transform="translate(516,570)">'
+              '<rect x="-5" y="0" width="10" height="52" fill="#7a6650"/>'
+              '<rect x="-7" y="-4" width="14" height="6" rx="2" fill="#8d7a60"/>'
+              '<g transform="translate(0,-6)">'
+              '<path d="M-13,0 C -10,-9 6,-11 13,-4 L9,2 L-10,3 Z" fill="#f2f0e8"/>'
+              '<path d="M-13,0 C -8,-5 4,-6 11,-3" stroke="#c9c4b4" stroke-width="2" '
+              'fill="none"/>'
+              '<circle cx="10" cy="-10" r="5" fill="#f2f0e8"/>'
+              '<path d="M14,-10 L21,-8 L14,-6 Z" fill="#e8a12f"/>'
+              '<circle cx="11.6" cy="-11" r="1.2" fill="#2b2b28"/></g></g>')
+
+    # ======================================================== FOREGROUND ===
+    fgl = ['    ']
+    rgz = rnd(71)
+    for i in range(90):
+        bx = rgz() * 620
+        by = 600 + rgz() * 130
+        s = 1.2 + rgz() * 1.4
+        fgl.append(f'<path d="M{bx:.0f},{by:.0f} L{bx - 3 * s:.1f},{by - 14 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 0.6 * s:.1f},{by - 18 * s:.1f} '
+                   f'M{bx:.0f},{by:.0f} L{bx + 4 * s:.1f},{by - 13 * s:.1f}" '
+                   f'stroke="{("#93a86a", "#a8b878", "#7f9459")[int(rgz() * 3)]}" '
+                   f'stroke-width="{1.5 * s:.1f}" fill="none" stroke-linecap="round" '
+                   f'opacity="0.95"/>')
+    for k in range(40):
+        sx = rgz() * 640
+        sy = 640 + rgz() * 84
+        fgl.append(f'<ellipse cx="{sx:.0f}" cy="{sy:.0f}" rx="{2 + rgz() * 5:.1f}" '
+                   f'ry="{1 + rgz() * 1.6:.1f}" fill="{SAND_D}" opacity="0.5"/>')
+
+    return scene('lewes', 'Lewes, Delaware',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface='#6e6b66', surface2='#565350',
+                                    shoulder='#d8ccaa', dash='#ffe066',
+                                    top=ROAD_TOP, cars='ferry'),
+                     'trackkw': dict(ballast='#a99b82', ballast_hi='#b9ab92',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

@@ -38,6 +38,10 @@
   const STOP_NEAR = 566;           // a car coming up waits below the near gate (arm at y≈528)
   const CROSS_MID = 483;           // middle of the track band, y 450–516
   const CAR_FADE = 46;             // how far before the road's far end a car fades out
+  // Lewes: the road ends inside a ship. `from` is where a car starts steering for
+  // the opening, `aim` is the middle of the dark interior, `minS` how small it is
+  // by the time the hold has it.
+  const FERRY = { from: 410, aimX: 640, aimY: 364, minS: 0.3 };
   const BRIDGE_STOP = 386;         // where northbound traffic waits for a lifted span
   const CROSS_KEEP = [438, 530];   // no car may come to REST between these — the rails
   const CROSSING_X = [500, 780];   // where the road meets the rails
@@ -433,6 +437,7 @@
     const flags = buildFlags(svg);
     const kites = buildKites(svg);
     const lock = buildLock(svg);
+    const berth = buildBerth(svg);
     const waves = buildWaves(svg);
     const swing = buildSwing(svg);
     const funi = buildFunis(svg);
@@ -465,7 +470,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -3253,6 +3258,101 @@
     });
   }
 
+  // =======================================================================
+  // THE FERRY BERTH — lane signal, ramp and the waiting queue, as ONE sequence.
+  //
+  // This is the second waiting-and-going in the frame and the reason the scene
+  // was chosen: cars wait in painted lanes for a signal and then go, a hundred
+  // feet from where cars wait at a gate for a train and then go. Nobody has to
+  // explain the connection, but it only works if the two are the SAME wait —
+  // so the lane signal is red while the crossing gate is down and green a beat
+  // after it lifts. The beat is the whole point: instant would read as one
+  // switch, a beat reads as the berth noticing the road has cleared.
+  //
+  // Unlike Bentonville's bike signal this one is not a courtesy — the gate is
+  // physically what is holding these cars, so the signal is reporting the road's
+  // own state rather than borrowing the gate's.
+  //
+  // The ramp follows the signal, not the gate: down to load, and it lifts during
+  // the long red when nothing is boarding. About fourteen degrees and no more —
+  // a ferry ramp barely moves, and the drama is the road simply KEEPING GOING
+  // onto a ship. Raise it further and the carriageway appears to break.
+  //
+  // The queue mostly holds its pose, because it is the picture of waiting. On
+  // green each car shuffles a few pixels up its lane and stops; over the next red
+  // it drifts back, which reads as the queue being refilled from behind. Driving
+  // them off the frame empties the near field and costs more than it gains.
+  // =======================================================================
+  const BERTH = {
+    beat: 1.3,          // after the gate lifts, before the lane goes green
+    lift: -14,          // ramp, degrees
+    rampSecs: 3.6, rampHold: 2.2,
+    nudge: 9, nudgeSecs: 1.1,
+    lane: { x: -0.25, y: -0.97 },       // the direction the lanes run
+    redLit: '#ff3b30', redDark: '#5a1f1c',
+    grnLit: '#34c759', grnDark: '#1f4a2c',
+  };
+
+  function buildBerth(svg) {
+    const ramp = svg.querySelector('.cc-ramp-lift');
+    const sig = svg.querySelector('[id$="cc-lane-signal"]');
+    const cars = [].map.call(svg.querySelectorAll('.cc-queuecar'), el => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      return { el: el, x: m ? +m[1] : 0, y: m ? +m[2] : 0 };
+    });
+    if (!ramp && !sig && !cars.length) return null;
+    const rm = ramp && /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(ramp.getAttribute('transform') || '');
+    return {
+      ramp: ramp, rt: rm ? 'translate(' + rm[1] + ',' + rm[2] + ') ' : '',
+      red: sig && sig.querySelector('.cc-lamp-red'),
+      green: sig && sig.querySelector('.cc-lamp-green'),
+      cars: cars, go: false, t: 0, redT: 0, a: 0, k: 0, was: null,
+    };
+  }
+
+  function updateBerth(dt) {
+    const b = currentScene && currentScene.berth;
+    if (!b) return;
+    const secs = dt / 1000;
+    const clear = !CC.gate.isBlocking();
+
+    // The signal. Red the instant the gate drops; green only after the beat.
+    // TWO CLOCKS, not one. `t` counts the beat before green and `redT` counts how
+    // long the road has been shut — sharing one made the red branch reset it every
+    // frame, so the ramp's hold never expired and it never lifted at all.
+    if (!clear) { b.go = false; b.t = 0; b.redT += secs; }
+    else { b.redT = 0; if (!b.go) { b.t += secs; if (b.t >= BERTH.beat) { b.go = true; b.t = 0; } } }
+    if (b.go !== b.was) {
+      b.was = b.go;
+      if (b.red) b.red.setAttribute('fill', b.go ? BERTH.redDark : BERTH.redLit);
+      if (b.green) b.green.setAttribute('fill', b.go ? BERTH.grnLit : BERTH.grnDark);
+    }
+
+    // The ramp. It waits out a brief red before bothering to lift.
+    // Driven by the ROAD being shut, not by the lamp: it must come back down the
+    // moment the gate lifts, not wait out the beat, or the first car up the
+    // carriageway meets a ramp still on its way home.
+    if (b.ramp) {
+      const want = clear ? 0 : BERTH.lift;
+      if (clear || b.redT >= BERTH.rampHold) {
+        const step = Math.abs(BERTH.lift) * secs / BERTH.rampSecs;
+        b.a += clamp(want - b.a, -step, step);
+      }
+      b.ramp.setAttribute('transform', b.rt + 'rotate(' + b.a.toFixed(2) + ')');
+    }
+
+    // The queue shuffles forward on green and drifts back on red.
+    const wantK = b.go ? 1 : 0;
+    b.k += clamp(wantK - b.k, -secs / BERTH.nudgeSecs, secs / BERTH.nudgeSecs);
+    const e = ease(b.k);
+    b.cars.forEach((c, i) => {
+      const d = BERTH.nudge * (0.7 + 0.15 * (i % 3)) * e;
+      c.el.setAttribute('transform',
+        'translate(' + (c.x + BERTH.lane.x * d).toFixed(1) + ','
+        + (c.y + BERTH.lane.y * d).toFixed(1) + ')');
+    });
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -3415,6 +3515,10 @@
   function carEndY() {
     const base = currentScene ? currentScene.roadTop : HORIZON;
     if (currentScene && currentScene.bascule && !bridgeShut()) return base - 62;
+    // Same idea as the bascule: the road CARRIES ON, so the car's run does too —
+    // here up the ramp and into the vehicle deck. The existing fade over the last
+    // 46px then does the swallowing for nothing.
+    if (currentScene && currentScene.carStyle === 'ferry') return base - 14;
     return base;
   }
 
@@ -4629,8 +4733,22 @@
     // Traffic keeps right: cars coming toward us use the left half of the road.
     // A car on the side road steers by an explicit x instead of by its lane.
     const half = roadHalf(car.y);
-    const x = car.x != null ? car.x : ROAD_CX + (car.dir > 0 ? -half * 0.5 : half * 0.5);
-    const s = depthScale(car.y);
+    let x = car.x != null ? car.x : ROAD_CX + (car.dir > 0 ? -half * 0.5 : half * 0.5);
+    let s = depthScale(car.y);
+    // DRIVING ABOARD. Where the road ends inside a ship, a car going away does
+    // not stop at the tarmac — it keeps going up the ramp and into the hold. Over
+    // the last stretch it steers to the middle of the mouth, shrinks, and the
+    // dark takes it. NOT CLIPPED: the obvious instinct is to mask the car against
+    // the opening so it is properly occluded, and it cannot work, because the
+    // road is painted after the ship — a clip that hides the car in the mouth
+    // hides it on the road too. Shrink and fade is cheaper and is closer to what
+    // driving into a dark hold actually looks like.
+    if (currentScene && currentScene.carStyle === 'ferry'
+        && car.phase === 'road' && car.dir < 0 && car.y < FERRY.from) {
+      const k = ease(clamp((FERRY.from - car.y) / (FERRY.from - FERRY.aimY), 0, 1));
+      x += (FERRY.aimX - x) * k;
+      s *= 1 + (FERRY.minS - 1) * k;
+    }
     // A car sprite is drawn nose-up/nose-down for a vertical carriageway. On the
     // side road it is travelling across the picture, so it has to be turned a
     // quarter. Both directions want the SAME +90: an outbound car carries a
@@ -5000,6 +5118,7 @@
     updateJets(t);
     updateKites(t);
     updateLock(dt);
+    updateBerth(dt);
     updateWaves(t);
     updateSwing(dt);
     updateFunis(dt);

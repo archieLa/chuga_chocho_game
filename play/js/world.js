@@ -429,6 +429,22 @@
       // and the two funicular cars (#cc-funi-a/-b).
       scenery:{ theme:'river-lock', features:['lock','dam','swingbridge','funicular','bluff','sternwheeler'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'lewes', state:'Delaware', city:'Lewes',
+      say:{ en:'Lewes', pl:'Lewes' },
+      scene:'lewes',
+      // Viewpoint: the ferry berth, looking straight down the marshalling road at the
+      // stern of a ro-ro between its two gantry towers. The road crosses the railway and
+      // then ENDS INSIDE THE SHIP — the only destination in the set where the carriageway
+      // finishes somewhere that can sail away.
+      // HEADLINE ANIMATION: cars driving aboard. The road carries data-cars="ferry", so
+      // the engine's own road traffic should continue past the sill at y=378 and vanish
+      // into the mouth. Also: the ramp (#cc-ramp/.cc-ramp-lift, one rotation about its
+      // hinge — the crossing gate's contract), the lane signal (#cc-lane-signal with
+      // .cc-lamp-red/.cc-lamp-green), the waiting queue (#cc-queuecar-0..4) and, if
+      // wanted, the whole ship (#cc-ferry) translating right to leave.
+      scenery:{ theme:'ferry-terminal', features:['ferry','ramp','gantries','dunes','firetowers','horseshoecrabs'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

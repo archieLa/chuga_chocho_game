@@ -23,9 +23,9 @@ Motion is always **gate-blind**. Nothing here reacts to the crossing, waits
 for it, or is blocked by it. If a thing needs to know about the gate it is not
 ambient motion, it is gameplay, and it belongs somewhere else.
 
-### Three things now read the gate, and here is the whole of it
+### Four things now read the gate, and here is the whole of it
 
-The rule is still the rule and everything that can be gate-blind is. Three are not,
+The rule is still the rule and everything that can be gate-blind is. Four are not,
 all in one direction: they **listen, and the crossing never hears back**. The gate's
 own behaviour, its two buttons and the physical endpoint are byte for byte what they
 were, and no child can tell the difference at the crossing itself.
@@ -36,10 +36,11 @@ were, and no child can tell the difference at the crossing itself.
   word.
 * **Glacier's tour bus** does not set off while the gate is down, because it would
   drive out of frame just as the child looks up.
+* **Lewes's lane signal** is red while the gate is down and green a beat after it lifts. This one is barely a  concession: the gate is physically what is holding those cars, so the signal reports the road's own state  rather than borrowing the crossing's. Two waiting-and-goings in one frame, and nobody has to explain the  connection.
 * **Bailey Yard's shuffle** puts its wagon down and gets out of the way, because the
   same crane is about to load the train.
 
-If a fourth wants in, it needs a reason of that size.
+If a fifth wants in, it needs a reason of that size.
 
 ---
 
@@ -55,6 +56,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Shuttle** — travels between two x, turns at each end | `.cc-el-train` / `.cc-plane` / `.cc-ship` with `data-run` / `data-fly` / `data-sail` = `"from,to,y"`. Optional `data-nose="-1"` if the art is drawn nose-LEFT, `data-scale` if it is drawn at another size, and `data-speed` to override the per-class default — two boats in one bay at the same speed read as one mechanism. | Chicago L, Chicago plane, both Duluth boats, the Seattle ferry, the New Orleans riverboat |
 | **Balloons** — drift, bob and burn | `.cc-balloon` with `data-i` `data-x` `data-y` `data-s` `data-maxy`. Drift amplitude scales with `data-s` so the near ones swing and the far ones barely stir; `data-maxy` is the lowest the basket may go, computed for ±90px either side of that balloon's OWN x — so the drift oscillates rather than wrapping. Burners are any `.cc-flame` in a scene that has no `.cc-rocket`. | Albuquerque |
 | **Launch** — one balloon at a time leaves the field | `#cc-launch-N` (ids, so namespaced — found by substring). The engine reads each pad's own `translate`/`scale` as the place to come home to. Each goes in turn — idle, burner up, then a smoothstep climb that SHRINKS her to 0.3 — and STAYS gone until all of them have gone, at which point the whole field fades back together. Her ground shadow is a tagged sibling, `.cc-launch-shade` with `data-pad`, and fades out over the first third of the climb. **The id must wrap the balloon and nothing else** — see the trap below. | Albuquerque |
+| **The road ends inside a ship** | `data-cars="ferry"` on the road polygon — it extends the ENGINE'S OWN traffic rather than adding scene elements, the same way `data-cars="race"` does. `carEndY()` gains 14px so a car's run does not stop at the tarmac, and over the last stretch the car steers to the middle of the opening and shrinks while the existing fade swallows it. **Do not clip it to the mouth** — the road is painted after the ship, so a clip that hides the car inside also hides it on the road. Shrink and fade is cheaper and closer to what a dark hold looks like. | Lewes |
+| **A berth** — lane signal, ramp and queue as ONE sequence | `.cc-ramp-lift` (rotate about its hinge, about -14 degrees and no more: a ferry ramp barely moves and the drama is the road KEEPING GOING onto a ship), `#cc-lane-signal` with `.cc-lamp-red`/`.cc-lamp-green`, `.cc-queuecar` figures that shuffle a few px up their lane on green and drift back on red. Needs TWO clocks — one for the beat before green, one for how long the road has been shut — because sharing one lets the red branch reset it every frame and the ramp never lifts at all. | Lewes |
 | **A waving arm** | `.cc-wave` with `data-pivot="x,y"` at the SHOULDER and `data-i` for its place in the group. Rotates the arm and nothing else. Arms inside a `.cc-tour` are SKIPPED — the tour bus already drives its own, and two things writing one transform is how you get an arm that jitters. | Dubuque's overlook · (Glacier's bus arms use the same class, driven by the tour) |
 | **A lock** — the first mechanism about WAITING | `.cc-lock-water` (one rect: set `y`, height follows), `.cc-lockboat` (rides at the SAME y — its origin is its own waterline, so there is no draft to model), `.cc-gate-l`/`.cc-gate-r` (`scale(sx,1)` about each hinge, eased 1 -> 0.12: a mitre leaf swings back into its recess by foreshortening), `.cc-paddle` driven by DISTANCE RUN so it never turns while the boat sits. The wall does the real work and needs no code: pale concrete above the upper-pool line and painted stain below it, so the rect uncovers a hard dark edge sweeping down a large pale surface. **Do not cut the two still beats** — a child should get that the boat is being MADE to wait. Free-running, so its clock and the gate's drift against each other, which is more interesting than syncing them. | Dubuque |
 | **Jets** — water thrown UP | `.cc-jet` with `data-pivot="x,y"` at the NOZZLE and `data-i` for its place in the group. Scales in HEIGHT ONLY about the pivot, so the plume grows out of the pipe rather than inflating around its middle — the geyser's rule. One group per jet: three breathing in step are one jet. | Kansas City's fountain |
@@ -360,6 +363,7 @@ Two traps, both already paid for once:
 | Duluth | a thousand-footer crosses the lake · a tug works the canal, under the span |
 | Quechee | the falls pour over the dam · the boil churns at the base |
 | Dubuque | three children wave from the overlook, out of step with each other · the lock fills, its gates swing open and the sternwheeler leaves, on a 45-second clock of its own · the swing bridge turns once every couple of minutes, because one that is always swinging is a fairground ride · the funicular's two cars counterbalance |
+| Lewes | cars released by the gate drive up the ramp and into the ship, two or three at a time · the lane signal turns green a beat after the crossing lifts and the queue shuffles forward · the ramp lifts through the long red |
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
 | Bailey Yard | the portal crane shuffles wagons about the loading track · **not ambient** — every other train stops and the same crane lifts a wagon onto it. See below. |
 | Albuquerque | nineteen balloons drift and bob in parallax · ten burners pulse out of step · the three on the field go up one at a time ~20s apart, then all come back together |
