@@ -3291,10 +3291,17 @@
     lane: { x: -0.25, y: -0.97 },       // the direction the lanes run
     redLit: '#ff3b30', redDark: '#5a1f1c',
     grnLit: '#34c759', grnDark: '#1f4a2c',
-    // THE SAILING. Rare on purpose — the loading is the good part and a berth
-    // with no ship in it is a much poorer picture, so she is alongside for two
-    // minutes and away for half of one.
-    alongside: 125, cast: 2.4, sail: 13, gone: 26, ret: 15, dx: 790,
+    // THE SAILING. Rare, but not INVISIBLE, which is what 125 seconds alongside
+    // turned out to be: this clock only advances while the scene is on screen, so
+    // "once every couple of minutes" meant two unbroken minutes of watching one
+    // location before anything happened, and nobody ever saw it.
+    //
+    // She is now alongside for a minute and away for twenty-seven seconds, and
+    // `first` starts her clock part-wound so the opening sailing comes about
+    // ten seconds after you arrive. Scenes are cached, so that head start is
+    // spent once, on the visit where somebody is finding out what this place
+    // does; every sailing after it is on the full cycle.
+    alongside: 60, first: 50, cast: 2.4, sail: 9, gone: 7, ret: 11, dx: 790,
   };
 
   function buildBerth(svg) {
@@ -3316,7 +3323,7 @@
       // home is the ONLY thing the rest of the scene asks about: no ship, no
       // loading, no green light, and above all no cars driving off the ramp into
       // open water.
-      home: true, voyage: 'alongside', vt: 0, sx: 0,
+      home: true, voyage: 'alongside', vt: BERTH.first, sx: 0,
     };
   }
 
@@ -3369,17 +3376,16 @@
     }
 
     // The ramp. It waits out a brief red before bothering to lift.
-    // Driven by the ROAD being shut, not by the lamp: it must come back down the
-    // moment the gate lifts, not wait out the beat, or the first car up the
-    // carriageway meets a ramp still on its way home.
+    // THE RAMP FOLLOWS THE SHIP, NOT THE CROSSING. It was driven by the gate, so
+    // it lifted every time a train came — which reads as the ferry closing up
+    // because a train is passing, and a train has nothing whatever to do with a
+    // ferry's ramp. At a real berth the ramp is down all day while the ship is
+    // there and lifts once, before she sails. So: down whenever she is alongside,
+    // up from the moment she casts off until she is back and moored.
     if (b.ramp) {
-      const want = clear ? 0 : BERTH.lift;
-      // With no ship at the berth the ramp has nothing to land on, so it goes up
-      // at once rather than waiting out the hold.
-      if (clear || !b.home || b.redT >= BERTH.rampHold) {
-        const step = Math.abs(BERTH.lift) * secs / BERTH.rampSecs;
-        b.a += clamp(want - b.a, -step, step);
-      }
+      const want = b.home ? 0 : BERTH.lift;
+      const step = Math.abs(BERTH.lift) * secs / BERTH.rampSecs;
+      b.a += clamp(want - b.a, -step, step);
       b.ramp.setAttribute('transform', b.rt + 'rotate(' + b.a.toFixed(2) + ')');
     }
 
