@@ -3286,7 +3286,16 @@
   // =======================================================================
   const BERTH = {
     beat: 1.3,          // after the gate lifts, before the lane goes green
-    lift: -14,          // ramp, degrees
+    // RAMP, DEGREES — and it is steep on purpose. At -14 it lay as a shallow
+    // diagonal plank over the road, which is precisely the shape this game uses
+    // to mean A GATE ARM IS RAISED, GO. A child who has learned the crossing
+    // reads it that way instantly, and reads it while the traffic is stopped, so
+    // the scene says two opposite things at once. Stood almost upright it stops
+    // being an arm and becomes what it is: a linkspan stowed at an empty berth.
+    // The handoff warned that raising it further makes the carriageway look
+    // broken, and it does — but the road being shut is now the point, and the
+    // queue holding on the apron says so with it.
+    lift: -62,          // ramp, degrees
     rampSecs: 3.6, rampHold: 2.2,
     nudge: 9, nudgeSecs: 1.1,
     lane: { x: -0.25, y: -0.97 },       // the direction the lanes run
