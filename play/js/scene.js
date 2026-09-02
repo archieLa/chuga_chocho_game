@@ -43,6 +43,7 @@
   // by the time the hold has it.
   const FERRY = { from: 410, aimX: 640, aimY: 364, minS: 0.3 };
   const BRIDGE_STOP = 386;         // where northbound traffic waits for a lifted span
+  const BERTH_STOP = 404;          // and where it waits for a ferry that is not there
   const CROSS_KEEP = [438, 530];   // no car may come to REST between these — the rails
   const CROSSING_X = [500, 780];   // where the road meets the rails
 
@@ -3557,6 +3558,15 @@
     return !boom || boom.a > -60;              // the arm anywhere near down
   }
 
+  /** Is the way onto the ship shut? Exactly the bascule's question, and it has
+      exactly the bascule's three answers: nobody drives on, nobody queues past
+      the stop line, and NOBODY ARRIVES FROM THE FAR SIDE either — with no ship
+      at the berth there is nothing for a car to have driven off. */
+  function berthShut() {
+    const b = currentScene && currentScene.berth;
+    return !!(b && !b.home);
+  }
+
   /** Where a car's run ends. Normally the far edge of the tarmac — but where the
       road carries ON over a bridge, a northbound car drives across and off the
       far bank instead of evaporating on the near abutment. */
@@ -4740,8 +4750,10 @@
     // drives past the tarmac.
     const top = currentScene ? currentScene.roadTop : HORIZON;
     const ex = currentScene ? currentScene.roadExit : null;
-    // Nothing comes over a bridge that is shut.
-    if (down && bridgeShut()) return;
+    // Nothing comes over a bridge that is shut, and nothing drives off a ferry
+    // that has sailed. A car coming DOWN this road has just come off the ship;
+    // with the berth empty there is nowhere it can have come from.
+    if (down && (bridgeShut() || berthShut())) return;
     // Where the road carries on over a bridge, traffic coming towards us starts
     // at the FAR end of that run and drives across, rather than appearing on the
     // near abutment with the bridge behind it.
@@ -5027,6 +5039,11 @@
         let lim = limit;
         const closer = (a, b) => a == null ? b : b == null ? a : (dir > 0 ? Math.min(a, b) : Math.max(a, b));
         if (dir < 0 && bridgeShut()) lim = closer(lim, BRIDGE_STOP);
+        // WAIT FOR THE SHIP. They used to keep driving at the empty berth and
+        // fade out over open water, which is a car going swimming. Now they hold
+        // on the apron the way they hold at the gate — a second thing to wait
+        // for, in a scene that is already about waiting for things.
+        if (dir < 0 && berthShut()) lim = closer(lim, BERTH_STOP);
         if (car.holdY != null) lim = closer(lim, car.holdY);
         // NOBODY WAITS ON THE CROSSING. A driver does not stop on a level
         // crossing and this game least of all should draw one parked on the
