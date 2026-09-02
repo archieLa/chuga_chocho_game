@@ -3371,7 +3371,9 @@
     }
     if (b.ship) b.ship.setAttribute('transform', 'translate(' + b.sx.toFixed(1) + ',0)');
 
-    const clear = !CC.gate.isBlocking() && b.home;
+    // Green needs the crossing clear AND the ramp actually down — the same test
+    // the traffic uses, or the lamp says go while the ramp is still in the air.
+    const clear = !CC.gate.isBlocking() && b.home && b.a >= -0.5;
 
     // The signal. Red the instant the gate drops; green only after the beat.
     // TWO CLOCKS, not one. `t` counts the beat before green and `redT` counts how
@@ -3573,8 +3575,18 @@
       at the berth there is nothing for a car to have driven off. */
   function berthShut() {
     const b = currentScene && currentScene.berth;
-    return !!(b && !b.home);
+    if (!b) return false;
+    // NOT SHE IS MOORED — THE RAMP IS DOWN. Mooring only starts the ramp on its
+    // way, and it takes three and a half seconds to get there, so releasing the
+    // traffic the moment she is alongside sent cars at a ramp still in the air.
+    // You cannot drive onto a ship until the thing you drive over is resting on
+    // it, and this is the one place in the scene where that has to be a rule
+    // rather than a look.
+    return !b.home || b.a < -0.5;
   }
+
+  /** The berth is usable: ship alongside AND the ramp down on her deck. */
+  function berthOpen() { return !berthShut(); }
 
   /** Where a car's run ends. Normally the far edge of the tarmac — but where the
       road carries ON over a bridge, a northbound car drives across and off the
@@ -3588,8 +3600,7 @@
     // ...but only while there is a ship to drive into. With the berth empty the
     // road stops at the tarmac like anywhere else, or cars drive off the ramp
     // into the bay, which is a very different lesson from the one intended.
-    if (currentScene && currentScene.carStyle === 'ferry'
-        && (!currentScene.berth || currentScene.berth.home)) return base - 14;
+    if (currentScene && currentScene.carStyle === 'ferry' && berthOpen()) return base - 14;
     return base;
   }
 
@@ -4816,8 +4827,7 @@
     // road is painted after the ship — a clip that hides the car in the mouth
     // hides it on the road too. Shrink and fade is cheaper and is closer to what
     // driving into a dark hold actually looks like.
-    if (currentScene && currentScene.carStyle === 'ferry'
-        && (!currentScene.berth || currentScene.berth.home)
+    if (currentScene && currentScene.carStyle === 'ferry' && berthOpen()
         && car.phase === 'road' && car.dir < 0 && car.y < FERRY.from) {
       const k = ease(clamp((FERRY.from - car.y) / (FERRY.from - FERRY.aimY), 0, 1));
       x += (FERRY.aimX - x) * k;
