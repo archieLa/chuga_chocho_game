@@ -224,9 +224,9 @@
 <rect x="1168" y="434" width="8" height="12" fill="#4a453c"/>
 <rect x="1224" y="435" width="8" height="12" fill="#4a453c"/>
 <rect x="1280" y="436" width="8" height="12" fill="#4a453c"/>
-<path d="M806,400 Q 843,434 880,425" stroke="#3f4a52" stroke-width="2" fill="none" opacity="0.8"/>
+<path class="cc-mooring" d="M806,400 Q 843,434 880,425" stroke="#3f4a52" stroke-width="2" fill="none" opacity="0.8"/>
 <g transform="translate(880,425)"><path d="M-7,0 L-5,-11 L-8,-15 L8,-15 L5,-11 L7,0 Z" fill="#4a453c"/></g>
-<path d="M968,384 Q 1007,418 1046,427" stroke="#3f4a52" stroke-width="2" fill="none" opacity="0.8"/>
+<path class="cc-mooring" d="M968,384 Q 1007,418 1046,427" stroke="#3f4a52" stroke-width="2" fill="none" opacity="0.8"/>
 <g transform="translate(1046,427)"><path d="M-7,0 L-5,-11 L-8,-15 L8,-15 L5,-11 L7,0 Z" fill="#4a453c"/></g>
 <g transform="translate(830,434)"><rect x="-1.6" y="-58" width="3.2" height="58" fill="#7d8288"/><path d="M-1.6,-58 L-1.6,-62 L11,-64 L11,-60 Z" fill="#9aa0a6"/><ellipse cx="11" cy="-60" rx="5" ry="2.4" fill="#e8e4d8"/></g>
 <g transform="translate(986,435)"><rect x="-1.6" y="-58" width="3.2" height="58" fill="#7d8288"/><path d="M-1.6,-58 L-1.6,-62 L11,-64 L11,-60 Z" fill="#9aa0a6"/><ellipse cx="11" cy="-60" rx="5" ry="2.4" fill="#e8e4d8"/></g>

@@ -3291,6 +3291,10 @@
     lane: { x: -0.25, y: -0.97 },       // the direction the lanes run
     redLit: '#ff3b30', redDark: '#5a1f1c',
     grnLit: '#34c759', grnDark: '#1f4a2c',
+    // THE SAILING. Rare on purpose — the loading is the good part and a berth
+    // with no ship in it is a much poorer picture, so she is alongside for two
+    // minutes and away for half of one.
+    alongside: 125, cast: 2.4, sail: 13, gone: 26, ret: 15, dx: 790,
   };
 
   function buildBerth(svg) {
@@ -3307,6 +3311,12 @@
       red: sig && sig.querySelector('.cc-lamp-red'),
       green: sig && sig.querySelector('.cc-lamp-green'),
       cars: cars, go: false, t: 0, redT: 0, a: 0, k: 0, was: null,
+      ship: svg.querySelector('.cc-ferry'),
+      lines: [].slice.call(svg.querySelectorAll('.cc-mooring')),
+      // home is the ONLY thing the rest of the scene asks about: no ship, no
+      // loading, no green light, and above all no cars driving off the ramp into
+      // open water.
+      home: true, voyage: 'alongside', vt: 0, sx: 0,
     };
   }
 
@@ -3314,7 +3324,37 @@
     const b = currentScene && currentScene.berth;
     if (!b) return;
     const secs = dt / 1000;
-    const clear = !CC.gate.isBlocking();
+
+    // ---- the voyage, which everything else below defers to -----------------
+    b.vt += secs;
+    const V = BERTH;
+    if (b.voyage === 'alongside') {
+      if (b.vt >= V.alongside) { b.voyage = 'cast'; b.vt = 0; b.home = false; }
+    } else if (b.voyage === 'cast') {
+      // LET GO FIRST, and lift the ramp first — a ship leaving with the ramp
+      // still in her mouth is a crash, and the mooring lines are not part of
+      // #cc-ferry, so sailing without casting off leaves two ropes stretched
+      // across open water behind her.
+      const u = clamp(b.vt / V.cast, 0, 1);
+      b.lines.forEach(l => l.setAttribute('opacity', (0.8 * (1 - u)).toFixed(2)));
+      if (u >= 1 && b.a <= V.lift + 0.5) { b.voyage = 'sail'; b.vt = 0; }
+    } else if (b.voyage === 'sail') {
+      b.sx = V.dx * ease(clamp(b.vt / V.sail, 0, 1));
+      if (b.vt >= V.sail) { b.voyage = 'gone'; b.vt = 0; }
+    } else if (b.voyage === 'gone') {
+      if (b.vt >= V.gone) { b.voyage = 'return'; b.vt = 0; }
+    } else if (b.voyage === 'return') {
+      // ASTERN. A stern-loading ro-ro backs into its berth so the ramp faces the
+      // shore, so coming back this way is not a compromise, it is the manoeuvre.
+      b.sx = V.dx * (1 - ease(clamp(b.vt / V.ret, 0, 1)));
+      if (b.vt >= V.ret) {
+        b.voyage = 'alongside'; b.vt = 0; b.home = true; b.sx = 0;
+        b.lines.forEach(l => l.setAttribute('opacity', '0.8'));
+      }
+    }
+    if (b.ship) b.ship.setAttribute('transform', 'translate(' + b.sx.toFixed(1) + ',0)');
+
+    const clear = !CC.gate.isBlocking() && b.home;
 
     // The signal. Red the instant the gate drops; green only after the beat.
     // TWO CLOCKS, not one. `t` counts the beat before green and `redT` counts how
@@ -3334,7 +3374,9 @@
     // carriageway meets a ramp still on its way home.
     if (b.ramp) {
       const want = clear ? 0 : BERTH.lift;
-      if (clear || b.redT >= BERTH.rampHold) {
+      // With no ship at the berth the ramp has nothing to land on, so it goes up
+      // at once rather than waiting out the hold.
+      if (clear || !b.home || b.redT >= BERTH.rampHold) {
         const step = Math.abs(BERTH.lift) * secs / BERTH.rampSecs;
         b.a += clamp(want - b.a, -step, step);
       }
@@ -3518,7 +3560,11 @@
     // Same idea as the bascule: the road CARRIES ON, so the car's run does too —
     // here up the ramp and into the vehicle deck. The existing fade over the last
     // 46px then does the swallowing for nothing.
-    if (currentScene && currentScene.carStyle === 'ferry') return base - 14;
+    // ...but only while there is a ship to drive into. With the berth empty the
+    // road stops at the tarmac like anywhere else, or cars drive off the ramp
+    // into the bay, which is a very different lesson from the one intended.
+    if (currentScene && currentScene.carStyle === 'ferry'
+        && (!currentScene.berth || currentScene.berth.home)) return base - 14;
     return base;
   }
 
@@ -4744,6 +4790,7 @@
     // hides it on the road too. Shrink and fade is cheaper and is closer to what
     // driving into a dark hold actually looks like.
     if (currentScene && currentScene.carStyle === 'ferry'
+        && (!currentScene.berth || currentScene.berth.home)
         && car.phase === 'road' && car.dir < 0 && car.y < FERRY.from) {
       const k = ease(clamp((FERRY.from - car.y) / (FERRY.from - FERRY.aimY), 0, 1));
       x += (FERRY.aimX - x) * k;

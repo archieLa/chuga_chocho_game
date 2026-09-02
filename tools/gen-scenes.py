@@ -29356,8 +29356,12 @@ def lewes():
     # MOORING LINES. Two catenaries from the ship's quarter down to bollards on the quay.
     # Cheap, and they are the only thing in the frame that physically JOINS the ship to
     # the land — without them the vessel floats beside the scene rather than in it.
+    # Tagged, because they are NOT part of #cc-ferry — sail the ship without
+    # letting go and they stay behind, stretched across open water. Casting off
+    # is a two-second fade on this class.
     for bx, sx_, sy_ in ((880, 806, 400), (1046, 968, 384)):
-        back.append(f'<path d="M{sx_},{sy_} Q {(sx_ + bx) / 2:.0f},{sy_ + 34} '
+        back.append(f'<path class="cc-mooring" d="M{sx_},{sy_} '
+                    f'Q {(sx_ + bx) / 2:.0f},{sy_ + 34} '
                     f'{bx},{424 + (bx - 800) * 0.014:.0f}" stroke="#3f4a52" '
                     f'stroke-width="2" fill="none" opacity="0.8"/>')
         by = 424 + (bx - 800) * 0.014
