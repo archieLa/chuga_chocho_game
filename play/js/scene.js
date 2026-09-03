@@ -438,6 +438,8 @@
     const flags = buildFlags(svg);
     const kites = buildKites(svg);
     const lock = buildLock(svg);
+    const graze = buildGraze(svg);
+    const osprey = buildOsprey(svg);
     const berth = buildBerth(svg);
     const waves = buildWaves(svg);
     const swing = buildSwing(svg);
@@ -471,7 +473,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -3413,6 +3415,111 @@
     });
   }
 
+  // =======================================================================
+  // A GRAZING BAND (.cc-hhead / .cc-htail) and the water it drinks from
+  // (.cc-ripple).
+  //
+  // The heads are the whole vocabulary of the Assateague scene: about +46 is a
+  // muzzle in the grass, 0 is a resting pony's low carriage, -38 is alert. Each
+  // animal eases between its OWN two angles, declared by the art, on a long
+  // clock with a long hold at the bottom — because what these animals do for
+  // most of a morning is stand and eat.
+  //
+  // NEVER TWO HEADS AT ONCE. A band where everything lifts together is a herd
+  // startled by something, which is a different and much less calm scene. The
+  // cycle is a minute long and the moving part of it is ten seconds, so five
+  // animals staggered by data-i can never overlap.
+  //
+  // Tails are +-7 degrees and slow. A metronome tail is worse than a still one,
+  // so the swish is two sines beating against each other rather than one.
+  //
+  // The ripples run ONLY while the muzzle is down — a ring spreading from a
+  // raised head is the kind of mistake that is invisible while you build it and
+  // obvious forever after.
+  // =======================================================================
+  const GRAZE = { secs: 60, up: 3.5, hold: 3, down: 4.5, tail: 7, ripple: 4.2 };
+
+  function buildGraze(svg) {
+    const heads = [].map.call(svg.querySelectorAll('.cc-hhead'), el => {
+      const t = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      return {
+        el: el, t: t ? 'translate(' + t[1] + ',' + t[2] + ') ' : '',
+        lo: parseFloat(el.getAttribute('data-lo')),
+        hi: parseFloat(el.getAttribute('data-hi')),
+        i: parseFloat(el.getAttribute('data-i')) || 0,
+        down: 1,
+      };
+    }).filter(h => !isNaN(h.lo) && !isNaN(h.hi));
+    const tails = [].map.call(svg.querySelectorAll('.cc-htail'), el => {
+      const t = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      return { el: el, t: t ? 'translate(' + t[1] + ',' + t[2] + ') ' : '',
+               i: parseFloat(el.getAttribute('data-i')) || 0 };
+    });
+    const ripples = [].map.call(svg.querySelectorAll('.cc-ripple'), (el, k) => ({ el: el, k: k }));
+    if (!heads.length && !ripples.length) return null;
+    // The ripples belong to whichever head is drinking — the one inside the
+    // group that owns them, which is the drinker.
+    const dr = svg.querySelector('[id$="cc-drinker"]');
+    return { heads: heads, tails: tails, ripples: ripples,
+             drinker: dr ? dr.querySelector('.cc-hhead') : null };
+  }
+
+  function updateGraze(t) {
+    const g = currentScene && currentScene.graze;
+    if (!g) return;
+    const secs = t / 1000;
+    const span = GRAZE.up + GRAZE.hold + GRAZE.down;
+    g.heads.forEach(h => {
+      // Staggered by a full slot each, so the moving windows cannot overlap.
+      let u = (secs + h.i * (GRAZE.secs / 6)) % GRAZE.secs;
+      let k = 0;                                        // 0 = down, 1 = up
+      if (u < GRAZE.up) k = ease(u / GRAZE.up);
+      else if (u < GRAZE.up + GRAZE.hold) k = 1;
+      else if (u < span) k = 1 - ease((u - GRAZE.up - GRAZE.hold) / GRAZE.down);
+      h.down = 1 - k;
+      h.el.setAttribute('transform',
+        h.t + 'rotate(' + (h.lo + (h.hi - h.lo) * k).toFixed(2) + ')');
+    });
+    g.tails.forEach(q => {
+      const a = GRAZE.tail * 0.6 * (Math.sin(secs / 3.1 + q.i * 1.7)
+                                  + Math.sin(secs / 4.7 + q.i * 2.3) * 0.6);
+      q.el.setAttribute('transform', q.t + 'rotate(' + a.toFixed(2) + ')');
+    });
+    // Only while the muzzle is actually in the water.
+    const dr = g.heads.find(h => h.el === g.drinker);
+    const wet = dr ? dr.down : 1;
+    g.ripples.forEach(r => {
+      const u = ((secs + r.k * (GRAZE.ripple / 2)) % GRAZE.ripple) / GRAZE.ripple;
+      r.el.setAttribute('rx', (2 + 28 * u).toFixed(2));
+      r.el.setAttribute('ry', (0.8 + 9.2 * u).toFixed(2));
+      r.el.setAttribute('opacity', (0.8 * (1 - u) * wet).toFixed(3));
+    });
+  }
+
+  // A SOARING OSPREY (.cc-osprey) — one slow lap of #osprey-path, half a minute
+  // or more. Its whole value is being at a completely different speed and scale
+  // from the horses; run it fast and it becomes a fly. No wing flap: a soaring
+  // bird holds them still, which is also the cheap answer.
+  const OSPREY = { secs: 36 };
+
+  function buildOsprey(svg) {
+    const el = svg.querySelector('.cc-osprey');
+    const path = svg.querySelector('[id$="osprey-path"]');
+    if (!el || !path || !path.getTotalLength) return null;
+    let total = 0;
+    try { total = path.getTotalLength(); } catch (e) { return null; }
+    return total ? { el: el, path: path, total: total, t: 0 } : null;
+  }
+
+  function updateOsprey(dt) {
+    const o = currentScene && currentScene.osprey;
+    if (!o) return;
+    o.t += (dt / 1000) / OSPREY.secs;
+    if (o.t >= 1) o.t -= 1;
+    const p = o.path.getPointAtLength(o.total * o.t);
+    o.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')');
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -5207,6 +5314,8 @@
     updateJets(t);
     updateKites(t);
     updateLock(dt);
+    updateGraze(t);
+    updateOsprey(dt);
     updateBerth(dt);
     updateWaves(t);
     updateSwing(dt);

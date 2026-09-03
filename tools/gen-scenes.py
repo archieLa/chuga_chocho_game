@@ -29708,7 +29708,779 @@ def lewes():
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes()
+def assateague():
+    """ASSATEAGUE ISLAND, MARYLAND — the wild horses on the salt marsh.
+
+    Maryland had zero locations and every other subject in the state was a second
+    version of something this set already owns: Baltimore's Inner Harbor is Boston and
+    Duluth again, the C&O lift lock at Great Falls is Dubuque, Fort McHenry draws as a
+    lawn with a flagpole. Assateague is the only one that is not a repeat, and the reason
+    is one word: **loose.** There is no fence anywhere in this frame and there must never
+    be one. That absence is the entire picture.
+
+    **Two risks, and both are scenes we already have.**
+
+    It must not be a second Cape Hatteras, so this is the MARSH side, not the ocean side:
+    flat, wet, green and gold, cut by tidal creeks, with the bay behind it. The ocean is
+    not in the frame at all — it is over the dune on the right, which is where the road
+    goes. Helpfully this is also just true, because the Assateague lighthouse is at the
+    Virginia end and there is nothing to draw here even if I wanted it.
+
+    It must not be a second Kentucky bluegrass. That scene is thoroughbreds — tall,
+    glossy, long-legged, behind white four-board fence on mown grass. **These are the
+    opposite animal in the opposite place** and the reference is emphatic about it: a
+    deep round hay-belly, a short thick neck carried LOW with the head below the withers,
+    short legs, a heavy mane, and many of them pinto with a flaxen tail. If I draw an
+    elegant horse this scene dies, and it dies in a way that is hard to see until it is
+    finished.
+
+    **THE ROAD.** Assateague's road runs the length of the island between the bay marsh
+    and the dune, and ends at a sandy parking area with a timber crossover boardwalk
+    climbing over the dune to the beach. That is what is drawn, and it does two jobs at
+    once: it is a destination nothing else in the set has — a road that ends at a wooden
+    walkway over sand — and it puts the WET half of the island on the left of the
+    carriageway and the DRY half on the right. The road is the boundary between them, so
+    a child can see in one look that the island is narrow.
+
+    **THE ANIMATION IS THE CHEAP ONE, ON PURPOSE.** A four-legged walk cycle is hard and
+    a bad one is worse than none; the reference gave one clean side-on walking frame, not
+    a sequence, which is enough to draw a walking pose and not enough to animate it. So
+    the band is authored standing, and what moves is small and true: heads lower to the
+    grass and lift, a tail swishes, and one horse drinks from the creek and sends a ring
+    of ripple across a still reflection. Horses at rest are mostly still. This is not a
+    compromise — it is what they actually look like.
+    """
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    # Colours straight off the reference. The marsh is a YELLOW-green, much warmer and
+    # more acid than pasture green, and the creeks are a desaturated grey-blue that is
+    # mostly reflected sky. Getting those two into different hue families is what stops
+    # the whole left half reading as one flat mat.
+    MARSH, MARSH_L, MARSH_D = '#8fae4e', '#a8c25e', '#6f8e3c'
+    SEDGE, SEDGE_D = '#b3ab6c', '#9a9057'
+    CREEK, CREEK_D = '#8ea9b2', '#75949e'
+    BAY, BAY_L = '#9db8c4', '#b4c9d2'
+    MUD = '#5f5f43'
+    SAND, SAND_D, SAND_L = '#e4d9bd', '#cdbf9c', '#f0e8d2'
+    SCRUB, SCRUB_L, SCRUB_D = '#4f7a44', '#639055', '#3c5f34'
+    PINE, PINE_D = '#4a6b4a', '#37503a'
+    TIMBER, TIMBER_D, TIMBER_L = '#a08a6c', '#7d6a50', '#bda98a'
+    ROADC, ROADC_D = '#7a746c', '#635e57'
+
+    ROAD_TOP = 352
+    WATER = 620          # the reflection mirror line
+
+    def CK_T(x):
+        """The creek's near edge. It slopes DOWN toward the road, which is what lets the
+        drinking horse stand in shallow water at x=330 while the reflections of the band
+        further left still sit on a surface high enough to hold them."""
+        return 606 + 54 * max(0.0, min(1.0, (x + 10) / 570.0)) ** 1.3
+    DUNE_BASE = 470      # where the dune's foot meets the road on the right
+
+    DEFS = []
+    d = (sky_defs('#4b8fcb', '#9dc6e4', '#dfeef5')
+         + '\n' + grass_defs(MARSH_L, MARSH, 'grassg'))
+    DEFS.append('    <linearGradient id="asbayg" x1="0" y1="0" x2="0" y2="1">'
+                f'<stop offset="0" stop-color="{BAY_L}"/>'
+                f'<stop offset="1" stop-color="{BAY}"/></linearGradient>')
+    DEFS.append('    <linearGradient id="ascreekg" x1="0" y1="0" x2="0" y2="1">'
+                f'<stop offset="0" stop-color="{CREEK_D}"/>'
+                f'<stop offset="1" stop-color="{mix(CREEK, "#ffffff", 0.22)}"/>'
+                '</linearGradient>')
+    # The reflections are clipped to the creek and to nothing else. Without the clip they
+    # spill onto the bank and read as shadows cast by a light source under the ground.
+    DEFS.append('    <clipPath id="ascreek"><path d="M-10,604 Q 200,610 400,632 '
+                'L560,660 L580,720 L-10,720 Z"/></clipPath>')
+
+    # ===================================================== SKY ===
+    sk = [sky('#4b8fcb', '#9dc6e4', '#dfeef5'),
+          clouds([(180, 62, 52), (520, 40, 38), (940, 70, 46), (1180, 44, 34)])]
+
+    # THE OSPREY. A second motion at a completely different scale from the horses, and
+    # slower. It fills the sky, which on a flat island is most of the frame.
+    DEFS.append('    <path id="osprey-path" class="cc-path" d="M300,150 '
+                'C 470,96 700,110 812,164 C 900,208 720,246 520,232 '
+                'C 360,220 220,196 300,150"/>')
+    sk.append('<g id="cc-osprey" class="cc-osprey" transform="translate(300,150)">'
+              '<path d="M0,0 C -8,-12 -22,-18 -38,-14 C -24,-6 -14,-2 -3,2 Z" '
+              'fill="#6b6152"/>'
+              '<path d="M0,0 C 8,-12 22,-18 38,-14 C 24,-6 14,-2 3,2 Z" fill="#6b6152"/>'
+              '<path d="M0,0 C -6,-11 -18,-15 -30,-12 C -19,-6 -11,-3 -2,1 Z" '
+              'fill="#efeae0"/>'
+              '<path d="M0,0 C 6,-11 18,-15 30,-12 C 19,-6 11,-3 2,1 Z" fill="#efeae0"/>'
+              '<ellipse cx="0" cy="1" rx="5" ry="7" fill="#efeae0"/>'
+              '<ellipse cx="0" cy="-5" rx="3.2" ry="3" fill="#6b6152"/>'
+              '<path d="M0,7 L-3,15 L3,15 Z" fill="#efeae0"/></g>')
+
+    # ===================================================== FAR ===
+    far = []
+    # the mainland across the bay: a thin dark loblolly line and nothing else. It is far
+    # and it is LOW — this whole coast is, and a hill anywhere would be a lie.
+    rf = rnd(11)
+    tl = ['M-10,304']
+    tx = -10
+    while tx < 840:
+        tx += 18 + rf() * 34
+        tl.append(f'L{tx:.0f},{292 - rf() * 7:.0f}')
+    tl.append('L840,304 Z')
+    far.append(f'<path d="{" ".join(tl)}" fill="{mix(PINE, BAY_L, 0.55)}"/>')
+    for k in range(70):
+        tx = rf() * 830
+        th = 5 + rf() * 9
+        far.append(f'<path d="M{tx:.0f},292 L{tx - 3:.0f},292 L{tx:.0f},{292 - th:.0f} '
+                   f'L{tx + 3:.0f},292 Z" fill="{mix(PINE, BAY_L, 0.5)}"/>')
+    # a few roofs on the far shore — Chincoteague-side houses, tiny
+    for hx in (96, 132, 208, 256, 300, 392, 448):
+        far.append(f'<rect x="{hx}" y="{285 + (hx % 3)}" width="{7 + hx % 5}" height="6" '
+                   f'fill="{mix("#e8e2d4", BAY_L, 0.42)}"/>')
+
+    # ===================================================== GROUND ===
+    gr = [ground(f'{MARSH}')]
+
+    # THE BAY, top-left: a wide sheet of pale water behind the marsh. This is the piece
+    # that says "barrier island" — land, then water, then more land on the horizon.
+    gr.append(f'<path d="M0,300 L860,300 L826,346 '
+              f'C 760,352 742,338 700,344 C 660,350 648,364 600,362 '
+              f'C 552,360 540,346 496,350 C 452,354 440,370 392,368 '
+              f'C 344,366 330,352 286,356 C 240,360 224,374 176,372 '
+              f'C 128,370 108,358 64,362 L0,368 Z" fill="url(#asbayg)"/>')
+    # grass islands standing out in the bay, which is what makes it read as a marsh edge
+    for ix, iy, iw in ((132, 340, 46), (268, 332, 34), (438, 336, 40), (612, 328, 30),
+                       (742, 334, 38)):
+        gr.append(f'<ellipse cx="{ix}" cy="{iy}" rx="{iw}" ry="{iw * 0.16:.0f}" '
+                  f'fill="{MARSH_D}" opacity="0.8"/>')
+        gr.append(f'<ellipse cx="{ix - iw * 0.2:.0f}" cy="{iy - 2}" '
+                  f'rx="{iw * 0.62:.0f}" ry="{iw * 0.12:.0f}" fill="{SEDGE_D}"/>')
+    rb = rnd(13)
+    for k in range(26):
+        bx = rb() * 800
+        by = 306 + rb() * 58
+        gr.append(f'<rect x="{bx:.0f}" y="{by:.0f}" width="{16 + rb() * 54:.0f}" '
+                  f'height="2" fill="{BAY_L}" opacity="0.6"/>')
+
+    # THE CAUSEWAY. The bridge from the mainland, side-on and small, on its forest of
+    # closely spaced piles with a gentle hump in the middle. It is the second thing that
+    # names this place after the horses, and it is drawn deliberately as background —
+    # after Dubuque, where the scene could have been any river town until the gold dome
+    # went in, that is the lesson being applied on purpose.
+    CW_Y = 322
+    cw = ['<g>']
+    cw.append(f'<path d="M8,{CW_Y + 4} Q 210,{CW_Y - 16} 412,{CW_Y + 2} '
+              f'L412,{CW_Y + 7} Q 210,{CW_Y - 11} 8,{CW_Y + 9} Z" fill="#a49e90"/>')
+    for k in range(34):
+        t = k / 33.0
+        px = 8 + 404 * t
+        py = (CW_Y + 4) + (-20 * t * (1 - t) * 4) * 0.85 + 6 * t
+        cw.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="1.6" height="{9 - 2 * t:.1f}" '
+                  f'fill="#8d8778"/>')
+    cw.append(f'<path d="M8,{CW_Y + 2} Q 210,{CW_Y - 18} 412,{CW_Y}" stroke="#c9c3b3" '
+              f'stroke-width="1.6" fill="none"/>')
+    gr.append(''.join(cw) + '</g>')
+
+    # THE MARSH, receding. Bands of grass with tidal creeks lying between them, each band
+    # a little taller and a little greener as it comes forward. The creeks are what make
+    # it read as SALT marsh rather than a field: a field does not have water in it.
+    def band(y0, y1, col, seed, wob=10):
+        r = rnd(seed)
+        pts = [f'M-10,{y0}']
+        x = -10
+        while x < 1300:
+            x += 60 + r() * 90
+            pts.append(f'L{x:.0f},{y0 - wob + r() * wob * 2:.0f}')
+        pts.append(f'L1300,{y1} L-10,{y1} Z')
+        return f'<path d="{" ".join(pts)}" fill="{col}"/>'
+
+    gr.append(band(360, 396, MARSH_D, 17, 7))
+    gr.append(band(372, 400, SEDGE_D, 19, 6))
+    gr.append(band(384, 424, MARSH, 23, 8))
+    # a tidal creek lying across the middle distance
+    gr.append('<path d="M-10,404 Q 220,394 470,404 Q 700,414 1000,406 L1300,410 '
+              'L1300,428 Q 980,424 700,430 Q 420,436 -10,424 Z" '
+              f'fill="{CREEK}" opacity="0.95"/>')
+    gr.append(band(420, 452, MARSH_L, 29, 9))
+    gr.append(band(438, 470, MARSH, 31, 10))
+
+    # ===================================================== SCENERY BACK ===
+    back = []
+
+    # THE DUNE, right. It climbs from the road's shoulder to the right edge, covered in
+    # the dense low scrub the reference shows — bayberry and beach plum, rounded and
+    # wind-flattened — with pale sand showing through. The ocean is on the far side of
+    # it and is deliberately not in the frame.
+    # The crest runs from behind the apron out to the right edge, and the ocean is on
+    # the far side of it and never in the frame. A dune you can see over is not a dune.
+    back.append(f'<path d="M796,468 C 838,420 878,340 962,306 '
+                f'C 1060,266 1190,258 1300,262 L1300,470 Z" fill="{SAND}"/>')
+    back.append(f'<path d="M796,468 C 838,420 878,340 962,306 '
+                f'C 1060,266 1190,258 1300,262" stroke="{SAND_L}" stroke-width="5" '
+                f'fill="none"/>')
+    back.append(f'<path d="M812,468 C 852,424 890,356 966,324 '
+                f'C 1058,288 1190,282 1300,286 L1300,470 L812,470 Z" '
+                f'fill="{mix(SAND, "#a89878", 0.22)}" opacity="0.5"/>')
+    def dune_y(x):
+        t = max(0.0, min(1.0, (x - 796) / 504.0))
+        return 468 - 206 * (t ** 0.55)
+
+    rs = rnd(37)
+    # Clustered, and every clump a different size. Nine evenly spaced equal circles is
+    # a caterpillar; three clumps of four is vegetation.
+    for cx0 in (846, 928, 1010, 1092, 1180, 1268):
+        n = 3 + int(rs() * 4)
+        for k in range(n):
+            sx = cx0 + (rs() - 0.5) * 96
+            sy = dune_y(sx) + 6 + rs() * 74
+            r_ = 8 + rs() * rs() * 34
+            back.append(f'<g><ellipse cx="{sx:.0f}" cy="{sy:.0f}" rx="{r_:.0f}" '
+                        f'ry="{r_ * 0.6:.0f}" fill="{SCRUB}"/>'
+                        f'<ellipse cx="{sx - r_ * 0.3:.0f}" cy="{sy - r_ * 0.3:.0f}" '
+                        f'rx="{r_ * 0.58:.0f}" ry="{r_ * 0.38:.0f}" fill="{SCRUB_L}"/>'
+                        f'<ellipse cx="{sx + r_ * 0.34:.0f}" cy="{sy + r_ * 0.16:.0f}" '
+                        f'rx="{r_ * 0.42:.0f}" ry="{r_ * 0.26:.0f}" fill="{SCRUB_D}"/></g>')
+
+    # Two wind-shaped trees on the dune crest. The reference has one leaning hard away
+    # from the sea with all its growth on the lee side, and it is such an unmistakable
+    # shape that one is worth drawing carefully rather than three drawn generically.
+    def windtree(x, y, s):
+        return (f'<g transform="translate({x},{y}) scale({s})">'
+                f'<path d="M0,0 C 2,-16 -2,-30 6,-40 C 12,-48 22,-52 30,-54" '
+                f'stroke="{TIMBER_D}" stroke-width="5" fill="none" stroke-linecap="round"/>'
+                f'<path d="M6,-40 C 14,-46 26,-48 36,-50" stroke="{TIMBER_D}" '
+                f'stroke-width="3" fill="none" stroke-linecap="round"/>'
+                f'<path d="M2,-34 C 24,-56 60,-62 92,-56 C 66,-48 40,-44 16,-40 '
+                f'C 26,-38 42,-38 56,-40 C 40,-32 18,-30 2,-34 Z" fill="{PINE}"/>'
+                f'<path d="M14,-44 C 40,-58 68,-60 88,-56 C 62,-52 38,-48 18,-42 Z" '
+                f'fill="{mix(PINE, "#ffffff", 0.18)}"/></g>')
+    back.append(windtree(1002, 306, 1.0))
+    back.append(windtree(1188, 272, 0.86))
+
+    # A STAND OF LOBLOLLY, left of the road beyond the marsh. Tall bare trunks with the
+    # green only at the very top — nothing else in the set looks like this, and it is
+    # what the island's woods actually are.
+    def loblolly(x, y, s, seed):
+        r = rnd(seed)
+        h = 62 * s
+        o = [f'<g transform="translate({x},{y})">']
+        o.append(f'<path d="M-1.6,0 L-1,{-h:.0f} L1,{-h:.0f} L1.6,0 Z" fill="{TIMBER_D}"/>')
+        for k in range(3):
+            ly = -h + 6 + k * 8
+            o.append(f'<path d="M0,{ly:.0f} L{-9 - r() * 7:.0f},{ly - 5:.0f}" '
+                     f'stroke="{TIMBER_D}" stroke-width="1.4" fill="none"/>')
+            o.append(f'<path d="M0,{ly:.0f} L{9 + r() * 7:.0f},{ly - 6:.0f}" '
+                     f'stroke="{TIMBER_D}" stroke-width="1.4" fill="none"/>')
+        for k in range(4):
+            ex = (r() - 0.5) * 22 * s
+            ey = -h - 2 - r() * 16 * s
+            o.append(f'<ellipse cx="{ex:.0f}" cy="{ey:.0f}" rx="{(7 + r() * 9) * s:.0f}" '
+                     f'ry="{(4 + r() * 5) * s:.0f}" '
+                     f'fill="{PINE if k % 2 else mix(PINE, "#ffffff", 0.15)}"/>')
+        return ''.join(o) + '</g>'
+
+    rl = rnd(41)
+    for k in range(8):
+        lx = 16 + k * 44 + rl() * 22
+        back.append(loblolly(lx, 444 + rl() * 8, 0.9 + rl() * 0.5, int(rl() * 800) + 3))
+
+    # THE OSPREY NEST on its platform. A single post with angled braces and a stick nest
+    # on top, standing out in the open marsh — a shape that exists in this landscape and
+    # essentially nowhere else in the set.
+    NX, NY = 388, 452
+    back.append(f'<g><rect x="{NX - 2}" y="{NY - 52}" width="4" height="52" '
+                f'fill="{TIMBER_D}"/>'
+                f'<path d="M{NX - 2},{NY - 34} L{NX - 13},{NY - 46} M{NX + 2},{NY - 34} '
+                f'L{NX + 13},{NY - 46}" stroke="{TIMBER_D}" stroke-width="2.6" '
+                f'fill="none"/>'
+                f'<rect x="{NX - 15}" y="{NY - 56}" width="30" height="4" '
+                f'fill="{TIMBER}"/>'
+                f'<path d="M{NX - 16},{NY - 56} C {NX - 12},{NY - 68} {NX + 12},{NY - 68} '
+                f'{NX + 16},{NY - 56} Z" fill="#8a7a5c"/>'
+                + ''.join(f'<path d="M{NX - 14 + k * 4},{NY - 58} '
+                          f'l{5 - k % 3 * 3},{-4 - k % 2 * 3}" stroke="#6f6148" '
+                          f'stroke-width="1.4"/>' for k in range(8))
+                + f'<ellipse cx="{NX + 2}" cy="{NY - 68}" rx="5" ry="4" fill="#6b6152"/>'
+                f'<circle cx="{NX + 6}" cy="{NY - 71}" r="3" fill="#efeae0"/></g>')
+
+    # THE PARKING APRON at the head of the road, and the crossover boardwalk. This is
+    # where the road GOES: it stops on sand and a timber walkway carries on over the dune
+    # on posts, and then it is gone. A road that ends at a wooden walkway over a hill of
+    # sand is a destination nothing else in this set has.
+    back.append(f'<path d="M492,372 C 570,364 706,364 816,372 L802,330 '
+                f'C 762,324 700,321 656,322 C 604,323 566,326 538,330 Z" fill="{SAND}"/>')
+    back.append(f'<path d="M492,372 C 570,364 706,364 816,372 L810,360 '
+                f'C 700,352 590,352 500,360 Z" fill="{SAND_D}" opacity="0.35"/>')
+    # tyre tracks, so it reads as ground people drive on rather than a slab
+    for tx0 in (566, 600, 690, 724):
+        back.append(f'<path d="M{tx0},368 C {tx0 + 6},354 {tx0 + 10},342 {tx0 + 14},332" '
+                    f'stroke="{SAND_D}" stroke-width="2.4" fill="none" opacity="0.55"/>')
+    rap = rnd(67)
+    for k in range(30):
+        gx = 496 + rap() * 322
+        gy = 322 + rap() * 8 if rap() < 0.5 else 366 + rap() * 6
+        s_ = 0.6 + rap() * 0.7
+        back.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-11 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-14 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-10 * s_:.1f}" '
+                    f'stroke="{(MARSH_D, SEDGE, SCRUB_L)[int(rap() * 3)]}" '
+                    f'stroke-width="{1.3 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    for k in range(6):
+        lx = 546 + k * 42
+        back.append(f'<rect x="{lx}" y="{329 + k % 2}" width="26" height="4" rx="2" '
+                    f'fill="{TIMBER_D}" opacity="0.75"/>')
+    # two cars nose-in at the far side of the apron, drawn small and generic
+    for cx_, cc in ((586, '#c9c3b4'), (712, '#5f7f6a')):
+        back.append(f'<g transform="translate({cx_},344) scale(0.42)">'
+                    f'<path d="M-24,0 L-21,-14 L-7,-21 L12,-21 L23,-12 L25,0 Z" '
+                    f'fill="{cc}"/>'
+                    f'<path d="M-15,-14 L-6,-18 L10,-18 L18,-13 Z" fill="#9fb6c2"/>'
+                    f'<circle cx="-14" cy="1" r="5" fill="#2a2a2c"/>'
+                    f'<circle cx="14" cy="1" r="5" fill="#2a2a2c"/></g>')
+
+    # the boardwalk: a deck on posts climbing the dune, with a handrail on the seaward
+    # side, going over the crest and out of sight. Where it goes is invisible on purpose.
+    bw = ['<g id="cc-boardwalk">']
+    def bw_pt(t):
+        """Every deck point is 15px above the dune's own surface, so the walkway climbs
+        the hill instead of floating over it. The first version had it hanging in open
+        sky because the deck curve and the dune curve were written independently."""
+        x = 806 + 268 * t
+        return (x, dune_y(x) - 15)
+    for k in range(16):
+        t = k / 15.0
+        px, py = bw_pt(t)
+        bw.append(f'<rect x="{px:.0f}" y="{py:.0f}" width="3" height="{16 - 7 * t:.0f}" '
+                  f'fill="{TIMBER_D}"/>')
+    pts_a = ' '.join(f'{bw_pt(k / 24.0)[0]:.0f},{bw_pt(k / 24.0)[1]:.0f}' for k in range(25))
+    pts_b = ' '.join(f'{bw_pt(k / 24.0)[0]:.0f},{bw_pt(k / 24.0)[1] + 9 - 3 * (k / 24.0):.0f}'
+                     for k in range(24, -1, -1))
+    bw.append(f'<polygon points="{pts_a} {pts_b}" fill="{TIMBER}"/>')
+    bw.append(f'<polyline points="{pts_a}" fill="none" stroke="{TIMBER_L}" '
+              f'stroke-width="2.4"/>')
+    for k in range(13):
+        t = k / 12.0
+        px, py = bw_pt(t)
+        bw.append(f'<rect x="{px:.0f}" y="{py - 15 + 5 * t:.0f}" width="2.4" '
+                  f'height="{16 - 5 * t:.0f}" fill="{TIMBER_D}"/>')
+    rail_a = ' '.join(f'{bw_pt(k / 24.0)[0]:.0f},{bw_pt(k / 24.0)[1] - 15 + 5 * (k / 24.0):.0f}'
+                      for k in range(25))
+    bw.append(f'<polyline points="{rail_a}" fill="none" stroke="{TIMBER_L}" '
+              f'stroke-width="3"/>')
+    back.append(''.join(bw) + '</g>')
+
+    # marram tufts breaking the edge of the apron and the foot of the dune, so the sand
+    # does not meet the marsh along a drawn line. Same lesson as the Dubuque lock seam:
+    # something has to GROW ACROSS the join.
+    rm = rnd(43)
+    for k in range(58):
+        gx = 470 + rm() * 420
+        gy = 356 + rm() * 46
+        s_ = 0.7 + rm() * 0.7
+        back.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-13 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-16 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-12 * s_:.1f}" '
+                    f'stroke="{(MARSH_D, SEDGE, SCRUB_L)[int(rm() * 3)]}" '
+                    f'stroke-width="{1.4 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # ===================================================== THE HORSES ===
+    # One function, drawn side-on facing left in a canonical frame with the origin on the
+    # ground between the hooves. The animation contract is CLASSES on inner groups:
+    #   .cc-hhead  pivots at the withers  — 0 is head up and alert, +60 is muzzle in grass
+    #   .cc-htail  pivots at the croup    — a small swish
+    # Everything about the silhouette is fighting one specific failure: this must not
+    # look like a thoroughbred. Deep round belly, short thick neck, head carried LOW,
+    # short legs, heavy mane.
+    def ID(v): return f' id="{v}"' if v else ''
+    def CL(v): return f' class="{v}"' if v else ''
+
+    def horse(x, y, s, face, head_a, body, mane, tail_c, patch=None, socks=True,
+              hid=None, cls='', run=None, speed=9,
+              head_lo=None, head_hi=None, hi_i=0):
+        """`run` puts the animal on the CANTER contract — the same one the Kentucky
+        thoroughbreds use, legs and all.
+
+        The handoff says there is no walk cycle and there should not be one,
+        because a bad four-legged gait is worse than none. That reasoning is
+        sound and it is answered rather than ignored: the gait already exists,
+        tuned and shipping in the bluegrass, so this is not inventing one. What
+        was missing was the RIG — the four legs are drawn as four tidy stacks
+        with a clear attachment point each, they were simply never wrapped.
+        Wrapping them costs nothing and a still band reads as a diorama.
+
+        Legs are always wrapped; the engine only drives ones inside a .cc-canter,
+        so this changes nothing for an animal that is standing."""
+        dark = mix(body, '#3a2a20', 0.42)
+        lite = mix(body, '#ffffff', 0.13)
+        cc = (cls + ' cc-canter').strip() if run else cls
+        data = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                f' data-nose="1" data-stride="62"' if run else '')
+        o = [f'<g{ID(hid)}{CL(cc)}{data} transform="translate({x},{y}) scale({s*face},{s})">']
+        # The shadow stays OUTSIDE the bobbing group, flat on the marsh.
+        o.append(shadow(-4, 2, 58, 7, 0.13))
+        if run:
+            o.append('<g class="cc-canter-body">')
+
+        # --- the tail, drawn FIRST so it hangs from behind the rump.  Narrow, long and
+        #     falling nearly straight down; the first version was a wide rounded shape sitting
+        #     on top of the croup and read as an ear.
+        o.append(f'<g class="cc-htail" data-i="{hi_i}" transform="translate(-48,-96) rotate(0)">'
+                 f'<path d="M4,0 C -1,8 -5,28 -6,52 C -7,72 -5,84 -3,88 '
+                 f'C -1,84 1,68 2,48 C 3,26 4,10 5,1 Z" fill="{tail_c}"/>'
+                 f'<path d="M1,6 C -2,18 -4,36 -4,54 C -4,68 -3,78 -2,82 '
+                 f'C -1,74 0,60 1,44 C 2,28 2,14 2,7 Z" '
+                 f'fill="{mix(tail_c,"#8a7a5c",0.42)}" opacity="0.7"/></g>')
+
+        # --- far legs (behind the barrel, darker)
+        #   foreleg
+        o.append('<g class="cc-leg" data-pivot="26,-62">')
+        o.append(f'<path d="M22,-62 C 20,-46 19,-30 19,-14 L27,-14 C 27,-30 28,-46 31,-60 Z" fill="{dark}"/>')
+        o.append(f'<path d="M19,-16 L27,-16 L26,-3 L19,-3 Z" fill="{dark}"/>')
+        o.append(f'<rect x="18" y="-4" width="10" height="5" rx="2" fill="{mix(dark,"#000000",0.3)}"/>')
+        o.append('</g>')
+        #   hind leg: gaskin, then a straight cannon
+        o.append('<g class="cc-leg" data-pivot="-36,-66">')
+        o.append(f'<path d="M-40,-66 C -47,-52 -46,-40 -42,-30 L-33,-32 C -35,-44 -34,-56 -31,-64 Z" fill="{dark}"/>')
+        o.append(f'<path d="M-42,-32 L-34,-33 L-33,-3 L-40,-3 Z" fill="{dark}"/>')
+        o.append(f'<rect x="-42" y="-4" width="10" height="5" rx="2" fill="{mix(dark,"#000000",0.3)}"/>')
+        o.append('</g>')
+
+        # --- the barrel.  Deep, round, and it SAGS.  The hay-belly is the identifying
+        #     feature of these animals and the reason they never look like a riding horse.
+        o.append(f'<path d="M-46,-70 '
+                 f'C -52,-86 -44,-100 -26,-101 '        # croup
+                 f'C -6,-102 12,-100 28,-99 '           # back, slightly dipped
+                 f'L40,-95 '                            # withers into the neck
+                 f'C 47,-84 48,-70 44,-58 '             # shoulder / chest
+                 f'C 36,-49 16,-45 -8,-47 '             # BELLY, hanging low
+                 f'C -30,-49 -42,-56 -46,-70 Z" fill="{body}"/>')
+        # a soft highlight along the spine only — never across the belly
+        o.append(f'<path d="M-46,-72 C -52,-88 -44,-100 -26,-101 C -6,-102 12,-100 28,-99 '
+                 f'L34,-97 C 10,-94 -14,-93 -34,-89 C -42,-86 -45,-79 -46,-72 Z" fill="{lite}"/>')
+        if patch:
+            o.append(f'<path d="M-14,-100 C 2,-102 16,-100 26,-97 '
+                     f'C 24,-88 26,-78 20,-70 C 14,-62 16,-54 6,-52 '
+                     f'C -6,-50 -12,-58 -20,-58 C -28,-60 -30,-72 -27,-84 '
+                     f'C -25,-94 -20,-99 -14,-100 Z" fill="{patch}"/>')
+
+        # --- near legs
+        o.append('<g class="cc-leg" data-pivot="34,-64">')
+        o.append(f'<path d="M28,-64 C 26,-46 25,-30 25,-14 L36,-14 C 36,-30 37,-46 40,-62 Z" fill="{body}"/>')
+        o.append(f'<path d="M26,-16 L36,-16 L35,-3 L26,-3 Z" fill="{"#efe9db" if socks else body}"/>')
+        o.append(f'<rect x="25" y="-4" width="12" height="6" rx="2" fill="#3a2f26"/>')
+        o.append('</g>')
+        o.append('<g class="cc-leg" data-pivot="-29,-70">')
+        o.append(f'<path d="M-34,-70 C -42,-54 -41,-40 -36,-30 L-25,-32 C -28,-44 -27,-58 -23,-68 Z" fill="{body}"/>')
+        o.append(f'<path d="M-36,-32 L-26,-33 L-25,-3 L-34,-3 Z" fill="{body}"/>')
+        o.append(f'<path d="M-35,-18 L-25,-18 L-25,-3 L-34,-3 Z" fill="{"#efe9db" if socks else body}"/>')
+        o.append(f'<rect x="-36" y="-4" width="12" height="6" rx="2" fill="#3a2f26"/>')
+        o.append('</g>')
+
+        # --- head and neck.  The neck already points forward and DOWN at rest, because
+        #     that is how these ponies carry a head; rotate(0) is relaxed, +46 grazes,
+        #     -28 is alert.  Reach from pivot to muzzle is 92, about the height of the
+        #     withers, which is what lets the muzzle reach the ground at all.
+        o.append(f'<g class="cc-hhead" data-lo="{head_lo if head_lo is not None else head_a}"'
+                 f' data-hi="{head_hi if head_hi is not None else head_a - 52}"'
+                 f' data-i="{hi_i}" transform="translate(32,-92) rotate({head_a})">')
+        #   the neck: thick at the base, tapering to the throat
+        o.append(f'<path d="M-10,-2 C 6,-2 26,4 44,16 L58,26 L48,40 '
+                 f'C 34,32 20,26 6,23 C -4,21 -11,21 -13,21 Z" fill="{body}"/>')
+        #   the head: a long wedge with a straight profile and a squared muzzle
+        o.append(f'<path d="M50,18 C 62,22 74,32 82,42 '
+                 f'C 88,50 86,58 78,58 C 68,58 56,50 49,40 '
+                 f'C 43,31 44,17 50,18 Z" fill="{body}"/>')
+        o.append(f'<path d="M76,42 C 85,44 89,50 87,55 C 84,59 76,58 72,53 '
+                 f'C 69,48 71,41 76,42 Z" fill="{mix(body,"#2a1a12",0.26)}"/>')
+        o.append(f'<path d="M52,24 C 60,26 66,32 68,40 C 62,38 55,34 50,30 Z" '
+                 f'fill="{mix(body,"#ffffff",0.1)}"/>')
+        o.append(f'<ellipse cx="83" cy="51" rx="2.4" ry="1.8" fill="#241c16"/>')
+        o.append(f'<circle cx="62" cy="33" r="2.8" fill="#241c16"/>')
+        #   two small ears at the poll, and nowhere else
+        o.append(f'<path d="M55,20 C 53,15 53,11 55,10 C 57,12 59,16 60,21 Z" fill="{body}"/>')
+        o.append(f'<path d="M61,22 C 60,17 62,13 64,13 C 66,15 67,19 66,24 Z" '
+                 f'fill="{mix(body,"#000000",0.24)}"/>')
+        #   the mane: ONE narrow band along the crest with a wavy lower edge.  Drawn as a
+        #   broad shape it reads as a hood; drawn as strokes it reads as a zebra.
+        o.append(f'<path d="M-10,-2 C 6,-2 26,4 44,16 L53,22 L47,29 '
+                 f'C 39,22 29,17 20,13 C 18,18 13,19 10,16 '
+                 f'C 6,19 0,19 -4,16 C -7,17 -11,14 -11,9 Z" fill="{mane}"/>')
+        #   forelock over the brow
+        o.append(f'<path d="M49,19 C 56,21 62,26 66,31 C 60,29 54,26 48,25 Z" fill="{mane}"/>')
+        o.append('</g>')
+        if run:
+            o.append('</g>')                       # close .cc-canter-body
+        return ''.join(o) + '</g>'
+
+
+    def foal(x, y, s, face, head_a, body, mane, hid=None, cls='', run=None, speed=8,
+             hi_i=0):
+        """Long legs, short body, big head.  A scaled-down adult reads as a toy.
+
+        Same rig as the adult — see horse() for why the handoff's "no walk cycle"
+        is answered rather than overruled."""
+        dark = mix(body, '#3a2a20', 0.42)
+        cc = (cls + ' cc-canter').strip() if run else cls
+        data = (f' data-run="{run}" data-y="{y}" data-scale="{s}" data-speed="{speed}"'
+                f' data-nose="1" data-stride="44"' if run else '')
+        o = [f'<g{ID(hid)}{CL(cc)}{data} transform="translate({x},{y}) scale({s*face},{s})">']
+        o.append(shadow(-2, 2, 32, 5, 0.12))
+        if run:
+            o.append('<g class="cc-canter-body">')
+        o.append(f'<g class="cc-htail" data-i="{hi_i}" transform="translate(-28,-72) rotate(0)">'
+                 f'<path d="M3,0 C -2,6 -6,20 -6,38 C -6,52 -5,60 -3,63 '
+                 f'C -1,60 1,48 2,34 C 3,18 3,6 4,1 Z" fill="{mane}"/></g>')
+        o.append('<g class="cc-leg" data-pivot="14,-46">')
+        o.append(f'<path d="M12,-46 C 11,-32 10,-18 10,-3 L17,-3 C 17,-18 18,-32 20,-45 Z" fill="{dark}"/>')
+        o.append('</g><g class="cc-leg" data-pivot="-20,-48">')
+        o.append(f'<path d="M-24,-48 C -29,-34 -28,-20 -25,-3 L-18,-3 C -20,-20 -20,-34 -17,-46 Z" fill="{dark}"/>')
+        o.append('</g>')
+        o.append(f'<path d="M-26,-56 C -31,-70 -23,-78 -10,-77 C 4,-76 16,-75 24,-74 '
+                 f'L31,-70 C 35,-60 35,-50 30,-44 C 22,-39 8,-37 -8,-38 '
+                 f'C -20,-40 -25,-48 -26,-56 Z" fill="{body}"/>')
+        # HOOF WITH ITS OWN LEG. They were appended after both legs, so grouping
+        # naively would have swung a leg and left its foot on the ground.
+        o.append('<g class="cc-leg" data-pivot="21,-46">')
+        o.append(f'<path d="M18,-46 C 17,-32 16,-18 16,-3 L24,-3 C 24,-18 25,-32 27,-45 Z" fill="{body}"/>')
+        o.append(f'<rect x="15" y="-4" width="10" height="5" rx="2" fill="#3a2f26"/>')
+        o.append('</g><g class="cc-leg" data-pivot="-15,-50">')
+        o.append(f'<path d="M-19,-50 C -24,-34 -23,-20 -20,-3 L-12,-3 C -14,-20 -14,-36 -11,-48 Z" fill="{body}"/>')
+        o.append(f'<rect x="-21" y="-4" width="10" height="5" rx="2" fill="#3a2f26"/>')
+        o.append('</g>')
+
+        o.append(f'<g class="cc-hhead" data-lo="{head_a}" data-hi="{head_a - 30}"'
+                 f' data-i="{hi_i}" transform="translate(22,-70) rotate({head_a})">')
+        o.append(f'<path d="M-8,-2 C 4,-2 18,3 30,12 L40,20 L33,30 '
+                 f'C 23,22 13,16 3,13 C -4,11 -8,11 -9,11 Z" fill="{body}"/>')
+        o.append(f'<path d="M34,14 C 43,18 51,26 55,34 C 58,40 55,45 49,44 '
+                 f'C 41,43 33,36 30,28 C 27,20 29,12 34,14 Z" fill="{body}"/>')
+        o.append(f'<path d="M50,35 C 56,37 58,42 55,45 C 51,48 46,45 44,41 '
+                 f'C 43,36 46,33 50,35 Z" fill="{mix(body,"#2a1a12",0.42)}"/>')
+        o.append(f'<circle cx="40" cy="26" r="2.4" fill="#241c16"/>')
+        o.append(f'<path d="M33,15 C 30,9 30,3 32,1 C 35,3 37,9 38,15 Z" fill="{body}"/>')
+        o.append(f'<path d="M39,17 C 38,11 40,5 42,4 C 45,7 46,13 45,19 Z" '
+                 f'fill="{mix(body,"#000000",0.24)}"/>')
+        o.append(f'<path d="M-8,-2 C 4,-2 18,3 30,12 L37,17 L33,22 '
+                 f'C 27,17 20,13 14,11 C 12,14 9,15 7,13 '
+                 f'C 4,15 0,15 -3,13 C -6,13 -9,11 -9,8 Z" fill="{mane}"/>')
+        o.append('</g>')
+        if run:
+            o.append('</g>')                       # close .cc-canter-body
+        return ''.join(o) + '</g>'
+
+
+    # Two more of the band, far out on the marsh beyond the railway. They cost nothing
+    # and they are what make the marsh read as large: five animals in one corner is a
+    # paddock, five plus two out on the horizon is a herd with room to move. Appended
+    # here rather than up in the scenery-back section because horse() is defined below it.
+    back.append(horse(196, 436, 0.2, -1, 42, '#8a5a34', '#463024', '#463024'))
+    back.append(horse(268, 430, 0.17, 1, 40, '#a8623a', '#463024', '#dccfae'))
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # THE NEAR MARSH, left of the road: a grass bank, then the still creek. The horses
+    # stand on the bank and the creek lies between them and the camera, which is exactly
+    # what the reference photograph shows and exactly what makes the reflections possible.
+    #
+    # THE ORDER OF THIS BLOCK IS THE WHOLE TRICK and it is worth stating:
+    #   bank → horses on the bank → water → reflections → the drinker → WATER AGAIN.
+    # Drawing the water a second time over the drinker's feet is what puts him IN the
+    # creek rather than on it. Same move as the Dells duck and the Dubuque hull.
+    fr.append(f'<path d="M-10,516 L520,516 L544,{WATER + 10} L-10,{WATER + 2} Z" '
+              f'fill="{MARSH_L}"/>')
+    # darker sedge lying in bands across the bank — flat green is a lawn, and a lawn is
+    # the one thing this scene cannot be
+    for by, bc, bo in ((524, MARSH_D, 0.7), (548, SEDGE_D, 0.5), (570, MARSH, 0.75),
+                       (592, SEDGE_D, 0.42), (610, MARSH_D, 0.5)):
+        fr.append(f'<path d="M-10,{by} Q 150,{by - 8} 320,{by + 3} '
+                  f'Q 450,{by + 9} 546,{by + 14} L546,{by + 26} '
+                  f'Q 300,{by + 15} -10,{by + 22} Z" fill="{bc}" opacity="{bo}"/>')
+    rn = rnd(47)
+    for k in range(170):
+        gx = -10 + rn() * 560
+        gy = 520 + rn() * 108
+        s_ = 0.8 + rn() * 1.1
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-14 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{0.9 * s_:.1f},{-18 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-13 * s_:.1f}" '
+                  f'stroke="{(MARSH_D, SEDGE, MARSH_L, SEDGE_D)[int(rn() * 4)]}" '
+                  f'stroke-width="{1.5 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # THE BAND. Three adults and a foal, and one of the adults is standing in the creek
+    # drinking. Nothing here is fenced, tacked, handled or led, and that is the point.
+    CHEST, CHEST_D = '#a8623a', '#8d4e2c'
+    BAY_H, MANE_D = '#8a5a34', '#463024'
+    FLAX = '#dccfae'
+    WHITE = '#f0ece0'
+
+    fr.append(horse(452, 578, 0.46, 1, 44, CHEST, MANE_D, MANE_D,
+                    hid='cc-horse-d', cls='cc-horse',
+                    # Out from behind the CLOSE button, which covers 409-589 from
+                    # y 518 down: at 452 this one was drawn where it can never be
+                    # seen. It walks out to 380 and back.
+                    run='452,380,578', speed=7, hi_i=1))
+    # The dam and her foal on ONE range length, offset by their spacing, so they
+    # keep station and can never walk through each other — the bluegrass rule.
+    fr.append(horse(126, 600, 0.58, 1, 46, CHEST, MANE_D, FLAX, patch=WHITE,
+                    hid='cc-horse-a', cls='cc-horse', run='96,166,600', speed=8, hi_i=2))
+    fr.append(foal(186, 606, 0.44, 1, 4, CHEST_D, MANE_D,
+                   hid='cc-foal', cls='cc-horse', run='156,226,606', speed=8, hi_i=3))
+    fr.append(horse(276, 588, 0.52, -1, -34, BAY_H, MANE_D, MANE_D,
+                    hid='cc-horse-b', cls='cc-horse', run='242,302,588', speed=6, head_lo=46, head_hi=-34, hi_i=4))
+
+    # the muddy lip where the bank drops into the water — always darker than both
+    fr.append(f'<path d="M-10,{CK_T(-10) - 5:.0f} Q 200,{CK_T(200) - 5:.0f} '
+              f'400,{CK_T(400) - 4:.0f} L560,{CK_T(560):.0f} L560,{CK_T(560) + 6:.0f} '
+              f'Q 200,{CK_T(200) + 4:.0f} -10,{CK_T(-10) + 4:.0f} Z" '
+              f'fill="{MUD}" opacity="0.62"/>')
+
+    # THE CREEK
+    creek_d = (f'M-10,{CK_T(-10):.0f} Q 200,{CK_T(200):.0f} 400,{CK_T(400):.0f} '
+               f'L560,{CK_T(560):.0f} L580,720 L-10,720 Z')
+    fr.append(f'<path d="{creek_d}" fill="url(#ascreekg)"/>')
+
+    # THE REFLECTIONS, mirrored about the surface and clipped to the creek and to nothing
+    # else. Without the clip they spill onto the bank and read as shadows cast by a light
+    # source underneath the ground.
+    def reflect(inner, mirror):
+        return (f'<g clip-path="url(#ascreek)" opacity="0.5">'
+                f'<g transform="translate(0,{2 * mirror}) scale(1,-1)">{inner}</g></g>')
+
+    for k in range(10):
+        ry = WATER + 14 + k * 9 + (k % 3) * 4
+        fr.append(f'<rect x="-10" y="{ry}" width="{580 - k * 6}" height="{2 + k % 2}" '
+                  f'fill="{mix(CREEK, "#ffffff", 0.4)}" opacity="0.45"/>')
+
+    # THE DRINKING HORSE. The headline. Everything else in this scene is arranged to be
+    # still so that this one small motion is the thing a child's eye finds.
+    fr.append(horse(348, 644, 0.66, -1, 46, CHEST_D, MANE_D, FLAX,
+                    hid='cc-drinker', cls='cc-horse', head_lo=46, head_hi=-8, hi_i=0))
+    fr.append(reflect(horse(348, 644, 0.66, -1, 46, CHEST_D, MANE_D, FLAX), 644))
+    fr.append(f'<path d="{creek_d}" fill="{CREEK}" opacity="0.14"/>')
+    # ...and the water again, over his feet. This is the line that puts him in the creek.
+    fr.append(f'<path d="{creek_d}" fill="{CREEK}" opacity="0.26"/>')
+    fr.append(f'<ellipse cx="330" cy="{CK_T(330) + 12:.0f}" rx="46" ry="7" '
+              f'fill="{mix(CREEK, "#ffffff", 0.35)}" opacity="0.4"/>')
+
+    # THE RIPPLE, going out from the muzzle. Authored at r=3 so a build with no animation
+    # still shows a horse touching still water rather than standing beside two circles.
+    MUZ_X, MUZ_Y = 313, 641
+    for i_, cid in enumerate(('cc-ripple-a', 'cc-ripple-b')):
+        fr.append(f'<ellipse id="{cid}" class="cc-ripple" cx="{MUZ_X}" cy="{MUZ_Y}" '
+                  f'rx="{2 + i_ * 5}" ry="{0.8 + i_ * 1.7:.1f}" fill="none" '
+                  f'stroke="{mix(CREEK, "#ffffff", 0.65)}" stroke-width="1.4" '
+                  f'opacity="{0.8 - i_ * 0.34:.2f}"/>')
+
+    # THE DRY SIDE, right of the road: sand, ripples, bayberry thickets, marram. The road
+    # is the boundary between wet and dry and showing that is most of its job here.
+    fr.append(f'<path d="M560,516 L1300,516 L1300,720 L620,720 Z" fill="{SAND}"/>')
+    fr.append(f'<path d="M560,516 Q 800,540 1040,528 Q 1180,520 1300,532 L1300,516 Z" '
+              f'fill="{SAND_D}" opacity="0.5"/>')
+    rd = rnd(53)
+    for k in range(120):
+        sx = 570 + rd() * 720
+        sy = 524 + rd() * 192
+        fr.append(f'<ellipse cx="{sx:.0f}" cy="{sy:.0f}" rx="{6 + rd() * 26:.0f}" '
+                  f'ry="{1.3 + rd() * 2.4:.1f}" fill="{SAND_D}" opacity="0.4"/>')
+    for k in range(70):
+        gx = 580 + rd() * 700
+        gy = 530 + rd() * 186
+        s_ = 0.7 + rd() * 1.1
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-15 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-20 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-13 * s_:.1f}" '
+                  f'stroke="{(SEDGE, "#9db06a", SCRUB_L, SEDGE_D)[int(rd() * 4)]}" '
+                  f'stroke-width="{1.4 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    def bayberry(bx, by, r_, seed):
+        b = rnd(seed)
+        o = [f'<g>{shadow(bx, by + 3, r_ * 1.05, r_ * 0.22, 0.11)}']
+        o.append(f'<ellipse cx="{bx:.0f}" cy="{by - r_ * 0.34:.0f}" rx="{r_:.0f}" '
+                 f'ry="{r_ * 0.7:.0f}" fill="{SCRUB_D}"/>')
+        for m in range(5):
+            ex = bx + (b() - 0.5) * r_ * 1.5
+            ey = by - r_ * (0.36 + b() * 0.72)
+            er = r_ * (0.34 + b() * 0.36)
+            o.append(f'<ellipse cx="{ex:.0f}" cy="{ey:.0f}" rx="{er:.0f}" '
+                     f'ry="{er * 0.84:.0f}" '
+                     f'fill="{SCRUB if m % 2 else SCRUB_L}"/>')
+        o.append(f'<ellipse cx="{bx:.0f}" cy="{by - r_ * 0.06:.0f}" rx="{r_ * 0.92:.0f}" '
+                 f'ry="{r_ * 0.26:.0f}" fill="{SCRUB_D}"/>')
+        return ''.join(o) + '</g>'
+
+    # clustered in three thickets, not scattered evenly
+    for cx0, cy0 in ((676, 646), (932, 700), (1178, 618)):
+        for k in range(4):
+            bx = cx0 + (rd() - 0.5) * 190
+            by = cy0 + (rd() - 0.5) * 76
+            fr.append(bayberry(bx, by, 15 + rd() * rd() * 40, int(rd() * 700) + 5))
+        for m in range(4):
+            gx = bx + (rd() - 0.5) * r_ * 2.4
+            gy = by + r_ * 0.5
+            s_ = 1.0 + rd() * 0.9
+            fr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-17 * s_:.1f} '
+                      f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-22 * s_:.1f} '
+                      f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-15 * s_:.1f}" '
+                      f'stroke="{(SEDGE, "#9db06a")[m % 2]}" '
+                      f'stroke-width="{1.5 * s_:.1f}" fill="none" '
+                      f'stroke-linecap="round"/>')
+
+    # A lone stallion on the DRY side, standing in the sand and looking back across the
+    # road at the band. He stops the right half being an empty sandbank and he makes the
+    # two halves one island rather than two pictures. Drawn AFTER the thickets, because
+    # the first version put him before them and they swallowed him whole.
+    # The one on the dry side. Right of the OPEN button, which ends at 871.
+    fr.append(horse(1002, 618, 0.56, -1, -40, BAY_H, MANE_D, MANE_D, patch=WHITE,
+                    hid='cc-horse-c', cls='cc-horse', run='956,1046,618', speed=9, head_lo=10, head_hi=-40, hi_i=5))
+    fr.append(bayberry(1054, 636, 24, 91))
+
+    # ===================================================== FOREGROUND ===
+    fgl = ['    ']
+    # near marram and marsh grass along the very bottom, both sides, tall enough to frame
+    # and short enough never to touch the train.
+    rz = rnd(59)
+    for k in range(34):
+        gx = rz() * 200
+        gy = 700 + rz() * 26
+        s_ = 1.4 + rz() * 1.6
+        fgl.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-16 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-21 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-15 * s_:.1f}" '
+                   f'stroke="{(MARSH_D, SEDGE, "#7f9c44")[int(rz() * 3)]}" '
+                   f'stroke-width="{1.7 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    for k in range(52):
+        gx = 700 + rz() * 600
+        gy = 686 + rz() * 38
+        s_ = 1.2 + rz() * 1.5
+        fgl.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-17 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-22 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-14 * s_:.1f}" '
+                   f'stroke="{(SEDGE, "#9db06a", SCRUB_L)[int(rz() * 3)]}" '
+                   f'stroke-width="{1.6 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    return scene('assateague', 'Assateague Island, Maryland',
+                 {
+                     'sky': '\n'.join(sk),
+                     'far': '\n'.join(far),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface=ROADC, surface2=ROADC_D, shoulder=SAND_D,
+                                    dash='#f0e26a', top=ROAD_TOP),
+                     'trackkw': dict(ballast='#b0a184', ballast_hi='#c0b194',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **51 done, across 47 states + DC** — Lewes (DE) is the newest and the only one where THE ROAD ENDS INSIDE A SHIP: cars released by the gate drive up the ramp and into the hold, and the queue waiting at its lane signal is the crossing's own lesson told twice in one frame. |
+| Locations | **52 done, across 48 states + DC** — Assateague (MD) is the newest and the first with a wild animal as the subject: a band of ponies loose on a salt marsh, one drinking from a creek with its reflection under it. **There is no fence in that scene and there must never be one** — it is the whole reason Maryland is that place and not Baltimore. |
 | Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts; Bailey Yard's crane loads a container or a boxcar the same way). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |

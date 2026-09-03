@@ -445,6 +445,20 @@
       // wanted, the whole ship (#cc-ferry) translating right to leave.
       scenery:{ theme:'ferry-terminal', features:['ferry','ramp','gantries','dunes','firetowers','horseshoecrabs'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'assateague', state:'Maryland', city:'Assateague Island',
+      say:{ en:'Assateague Island', pl:'Wyspa Assateague' },
+      scene:'assateague',
+      // Viewpoint: the bay side of the island, looking across the salt marsh at the dune.
+      // The road runs between the wet half and the dry half and ends at a sand parking
+      // area where a timber boardwalk climbs over the dune and out of sight.
+      // HEADLINE ANIMATION: the drinking horse. #cc-drinker's .cc-hhead lowers to the
+      // creek and the two #cc-ripple ellipses expand and fade from its muzzle. The rest
+      // of the band grazes (.cc-hhead on #cc-horse-a/-b/-c and #cc-foal) and swishes
+      // (.cc-htail). Deliberately NO walk cycle — see HANDOFF_ASSATEAGUE.md.
+      // Also: #cc-osprey follows #osprey-path around the sky.
+      scenery:{ theme:'salt-marsh', features:['wildhorses','marsh','dune','boardwalk','osprey','causeway'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';
