@@ -438,6 +438,8 @@
     const flags = buildFlags(svg);
     const kites = buildKites(svg);
     const lock = buildLock(svg);
+    const pdogs = buildPdogs(svg);
+    const surrey = buildSurrey(svg);
     const graze = buildGraze(svg);
     const osprey = buildOsprey(svg);
     const berth = buildBerth(svg);
@@ -473,7 +475,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, pdogs: pdogs, surrey: surrey, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -3520,6 +3522,175 @@
     o.el.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')');
   }
 
+  // =======================================================================
+  // A PRAIRIE DOG TOWN (.cc-pdog).
+  //
+  // Nineteen burrows, and the only thing the engine ever changes is the second
+  // number in one translate: 0 is up in the mouth of the hole, 40 is gone. The
+  // art does the rest — each animal sits inside a clip cut at its own burrow's
+  // centre line, with the near lip of the hole drawn ON TOP of it, so dropping
+  // it goes behind the rim and into the ground instead of merely downward.
+  //
+  // NINETEEN CLOCKS, NOT ONE. Up for three to ten seconds, down for two to
+  // eight, re-rolled every cycle. On a shared timer this is a chorus line; the
+  // joke is that nobody is in charge.
+  //
+  // FAST DOWN, SLOWER UP. Dropping is a fall — 0.15s and near enough linear.
+  // Coming back up is a climb and a look, 0.6s and eased. Making those the same
+  // speed is the single thing most likely to turn a colony into a machine.
+  //
+  // And when a train is coming the four nearest drop together and STAY down
+  // until it has gone, which is what actually happens and gives a child
+  // something to predict.
+  // =======================================================================
+  const PDOG = { drop: 40, downSecs: 0.15, upSecs: 0.6,
+                 upMin: 3, upMax: 10, dnMin: 2, dnMax: 8, scared: 4 };
+
+  function buildPdogs(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-pdog').forEach(node => {
+      // Where it is on screen, for picking the ones nearest the crossing. The
+      // wrapper is translate(0,0) and the drawing inside carries the position.
+      const inner = node.querySelector('g');
+      const m = inner && /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(inner.getAttribute('transform') || '');
+      const a0 = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(node.getAttribute('transform') || '');
+      out.push({
+        el: node, x: m ? +m[1] : 0, y: m ? +m[2] : 0,
+        // Five are authored part way down so a still build already looks busy.
+        v: a0 ? +a0[2] : 0,
+        up: (a0 ? +a0[2] : 0) < PDOG.drop * 0.5,
+        t: Math.random() * 4, hold: PDOG.upMin + Math.random() * (PDOG.upMax - PDOG.upMin),
+      });
+    });
+    if (!out.length) return null;
+    // The nearest to the viewer are the ones that react to a train.
+    const near = out.slice().sort((a, b) => b.y - a.y).slice(0, PDOG.scared);
+    near.forEach(p => { p.scares = true; });
+    return out;
+  }
+
+  function updatePdogs(dt) {
+    const list = currentScene && currentScene.pdogs;
+    if (!list) return;
+    const secs = dt / 1000;
+    // A train on the way, or standing at the platform, counts as danger.
+    const danger = train.active || CC.gate.isBlocking();
+    list.forEach(p => {
+      const forced = p.scares && danger;
+      p.t += secs;
+      if (!forced && p.t >= p.hold) {
+        p.up = !p.up;
+        p.t = 0;
+        p.hold = p.up ? PDOG.upMin + Math.random() * (PDOG.upMax - PDOG.upMin)
+                      : PDOG.dnMin + Math.random() * (PDOG.dnMax - PDOG.dnMin);
+      }
+      const want = (forced || !p.up) ? PDOG.drop : 0;
+      if (p.v < want) {                                  // falling
+        p.v = Math.min(want, p.v + PDOG.drop * secs / PDOG.downSecs);
+      } else if (p.v > want) {                           // climbing, eased
+        const step = PDOG.drop * secs / PDOG.upSecs;
+        p.v = Math.max(want, p.v - step * (0.35 + 0.65 * (p.v / PDOG.drop)));
+      }
+      p.el.setAttribute('transform', 'translate(0,' + p.v.toFixed(2) + ')');
+    });
+  }
+
+  // =======================================================================
+  // THE SURREY AND TEAM (.cc-wagon) — out to the street, round, and away.
+  //
+  // It drives EAST to the kerb, turns, goes off the left of the frame, waits,
+  // and comes back to where it was parked. The east limit is NOT the exported
+  // path's end: the road spans 595..685 at this height and the wagon is 264px
+  // wide, so a wagon whose origin reached the path's 560 would have its team
+  // standing in the carriageway — and the road is painted after scenery-back,
+  // so anything overlapping it loses that half of itself.
+  //
+  // The turn is a mirror through scaleX 0, the way Glacier's bus turns in its
+  // bay: the art faces RIGHT, so driving west with it unflipped is a team of
+  // horses walking backwards, which is the one thing anybody would notice.
+  //
+  // Legs and wheels are driven by DISTANCE RUN and freeze the moment it stops —
+  // legs swinging on a stationary vehicle is the paddlewheel mistake from
+  // Dubuque. Fore and hind swing in OPPOSITION, which is a real walk's diagonal
+  // read at four legs' worth of abstraction, and at this size that is all the
+  // information that survives.
+  // =======================================================================
+  const SURREY = {
+    speed: 55, swing: 16, cyclesPerPx: 1.6 / 55,
+    east: 452, west: -300, turn: 0.9, park: 4, kerb: 1.6, gone: 5,
+  };
+
+  function buildSurrey(svg) {
+    const el = svg.querySelector('.cc-surrey');
+    if (!el) return null;
+    const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+    if (!m) return null;
+    const leg = (sel, sign) => [].map.call(el.querySelectorAll(sel), g => {
+      const t = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(g.getAttribute('transform') || '');
+      return { el: g, t: t ? 'translate(' + t[1] + ',' + t[2] + ') ' : '', sign: sign };
+    });
+    return {
+      el: el, home: +m[1], y: +m[2], x: +m[1], sx: 1, run: 0,
+      legs: leg('.cc-leg-a', 1).concat(leg('.cc-leg-b', -1)),
+      wheels: [].map.call(el.querySelectorAll('.cc-surrey-wheel'), g => {
+        const t = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(g.getAttribute('transform') || '');
+        // The hub's own y IS the radius here, and the two differ — 11 and 8.5.
+        return { el: g, t: t ? 'translate(' + t[1] + ',' + t[2] + ') ' : '',
+                 r: t ? Math.abs(+t[2]) || 10 : 10 };
+      }),
+      phase: 'park', t: 0,
+    };
+  }
+
+  function updateSurrey(dt) {
+    const w = currentScene && currentScene.surrey;
+    if (!w) return;
+    const secs = dt / 1000;
+    let moved = 0;
+    const drive = (to) => {
+      const step = SURREY.speed * secs * (to > w.x ? 1 : -1);
+      const nx = Math.abs(to - w.x) <= Math.abs(step) ? to : w.x + step;
+      moved = Math.abs(nx - w.x); w.x = nx;
+      return w.x === to;
+    };
+
+    if (w.phase === 'park') {
+      w.t += secs;
+      if (w.t >= SURREY.park) { w.phase = 'toKerb'; w.t = 0; }
+    } else if (w.phase === 'toKerb') {
+      if (drive(SURREY.east)) { w.phase = 'kerb'; w.t = 0; }
+    } else if (w.phase === 'kerb') {                     // a look at the street
+      w.t += secs;
+      if (w.t >= SURREY.kerb) { w.phase = 'turnW'; w.t = 0; }
+    } else if (w.phase === 'turnW') {
+      w.t += secs;
+      w.sx = 1 - 2 * clamp(w.t / SURREY.turn, 0, 1);
+      if (w.t >= SURREY.turn) { w.sx = -1; w.phase = 'away'; w.t = 0; }
+    } else if (w.phase === 'away') {
+      if (drive(SURREY.west)) { w.phase = 'gone'; w.t = 0; }
+    } else if (w.phase === 'gone') {
+      w.t += secs;
+      if (w.t >= SURREY.gone) { w.phase = 'turnE'; w.t = 0; }
+    } else if (w.phase === 'turnE') {
+      w.t += secs;
+      w.sx = -1 + 2 * clamp(w.t / SURREY.turn, 0, 1);
+      if (w.t >= SURREY.turn) { w.sx = 1; w.phase = 'home'; w.t = 0; }
+    } else if (w.phase === 'home') {
+      if (drive(w.home)) { w.phase = 'park'; w.t = 0; }
+    }
+
+    w.run += moved;
+    w.el.setAttribute('transform',
+      'translate(' + w.x.toFixed(1) + ',' + w.y + ') scale(' + w.sx.toFixed(3) + ',1)');
+    // Frozen when it is not going anywhere.
+    const a = moved > 0
+      ? SURREY.swing * Math.sin(w.run * SURREY.cyclesPerPx * TAU) : 0;
+    w.legs.forEach(L => L.el.setAttribute('transform',
+      L.t + 'rotate(' + (a * L.sign).toFixed(2) + ')'));
+    w.wheels.forEach(q => q.el.setAttribute('transform',
+      q.t + 'rotate(' + (w.run / q.r * 180 / Math.PI % 360).toFixed(1) + ')'));
+  }
+
   function buildFlags(svg) {
     const out = [];
     svg.querySelectorAll('.cc-flag').forEach(node => {
@@ -5314,6 +5485,8 @@
     updateJets(t);
     updateKites(t);
     updateLock(dt);
+    updatePdogs(dt);
+    updateSurrey(dt);
     updateGraze(t);
     updateOsprey(dt);
     updateBerth(dt);
@@ -5394,6 +5567,28 @@
       const next = mount(loc);
       if (!next || next === currentScene) return;
       const prev = currentScene;
+      // GIVE THE SCENE WE ARE LEAVING ITS TRAIN BACK. A halt and a shunt both
+      // hold on to elements of the scene they started in — the passengers on
+      // that platform, the wagon lifted off that rack — and buildConsist() below
+      // throws away the vehicles a shunt is indexing into. Left alone, walking
+      // away from Detroit while the crane had a wagon in the air threw on every
+      // frame afterwards, and the wagon it had hidden never came back, because a
+      // shunt is only ever tidied up when its train leaves the frame and that
+      // train no longer exists. Neither of these is a hypothetical: a map button
+      // is two taps from anywhere and a three-year-old presses it mid-anything.
+      if (train.halt) { resetPlatform(train.halt); train.halt = null; }
+      if (train.shunt) {
+        train.shunt.rack.el.setAttribute('visibility', 'visible');
+        train.shunt = null;
+      }
+      if (prev) {
+        if (prev.crane) setCrane(prev.crane, SHUNT.park, null, 0);
+        if (prev.gantry) {
+          const g = prev.gantry;
+          g.load = null; g.phase = 'idle'; g.t = -1.2; g.y = g.homeY;
+          setGantry(g);
+        }
+      }
       currentScene = next;
       clearSmoke();
       clearCars();

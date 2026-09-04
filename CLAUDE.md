@@ -58,7 +58,7 @@ Conventions every vehicle honours:
 ## Where the project actually is (read this first)
 
 **Phase 1 is built and playable.** The art was already finished; the engine now exists.
-Open `play/index.html` and you get the map, all forty-five destinations, both gates, cars, a
+Open `play/index.html` and you get the map, every destination, both gates, cars, a
 train you can build and colour, English and Polish, and two-way sync with a real gate.
 The definition-of-done checklist in `BUILD_PLAN.md` §9 is ticked, with a note on how each
 box was actually checked. Next up is Phase 2 — the mission modes in `DESIGN.md` §11.
@@ -69,7 +69,7 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **52 done, across 48 states + DC** — Assateague (MD) is the newest and the first with a wild animal as the subject: a band of ponies loose on a salt marsh, one drinking from a creek with its reflection under it. **There is no fence in that scene and there must never be one** — it is the whole reason Maryland is that place and not Baltimore. |
+| Locations | **53 done, across 49 states + DC** — Medora (ND) is the newest: a Northern Pacific depot on the edge of a prairie dog town, with a horse-drawn surrey working the street. Assateague (MD) is the one with a wild animal as the subject — a band of ponies loose on a salt marsh, one drinking from a creek with its reflection under it. **There is no fence in that scene and there must never be one** — it is the whole reason Maryland is that place and not Baltimore. **Virginia is the last state left.** |
 | Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts; Bailey Yard's crane loads a container or a boxcar the same way). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
@@ -88,7 +88,7 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
 | `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
-| `world.js` | The 45 locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
+| `world.js` | The locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
 | `map.js` | The map overlay — and the game's front door. Also **Surprise me**, the random-destination draw. |
 | `trains.js` | The consist data layer: 1 loco + 3 wagons, per-slot colours, cycling helpers, preset latch. **Was given; don't redesign it.** |
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |

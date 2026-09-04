@@ -459,6 +459,21 @@
       // Also: #cc-osprey follows #osprey-path around the sky.
       scenery:{ theme:'salt-marsh', features:['wildhorses','marsh','dune','boardwalk','osprey','causeway'] },
       trainPreset:{ engine:'diesel' } },
+
+    { id:'medora', state:'North Dakota', city:'Medora',
+      say:{ en:'Medora', pl:'Medora' },
+      scene:'medora',
+      // Viewpoint: the prairie south of town, looking across the BNSF main line at
+      // Medora's false-front street with the badlands wall standing directly behind the
+      // rooftops. The road crosses the railway and stops at the T in front of the
+      // boardwalk, where the wagon team is hitched.
+      // HEADLINE ANIMATION: the prairie dog town. #cc-pdog-0..18 (class cc-pdog) each sit
+      // inside a clip cut at their own burrow rim, so translate(0, +40) drops one INTO
+      // its hole and translate(0,0) brings it back up. Nothing else is needed — no walk
+      // cycle anywhere in this scene.
+      // Also static and deliberately so: #cc-wagon, standing hitched at the boardwalk.
+      scenery:{ theme:'badlands-town', features:['badlands','falsefronts','chimney','prairiedogs','bison','windmill'] },
+      trainPreset:{ engine:'diesel' } },
   ];
 
   const STORAGE_KEY = 'cc.location';

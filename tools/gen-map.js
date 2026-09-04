@@ -33,6 +33,7 @@ const r1 = v => Math.round(v * 10) / 10;
 // A state has as many destinations as it has visually distinct looks.
 // Must stay in sync with play/js/world.js.
 const SUPPORTED = {
+  'North Dakota': ['Medora'],
   'Maryland': ['Assateague Island'],
   'Delaware': ['Lewes'],
   'Iowa': ['Dubuque'],

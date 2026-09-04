@@ -30535,7 +30535,1082 @@ def assateague():
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague()
+def medora():
+    """MEDORA, NORTH DAKOTA — the cowboy town under the badlands wall.
+
+    North Dakota's one slot, and the argument for spending it here rather than on a
+    sunflower field is that Medora is a PLACE. It is a town of 121 people sitting on the
+    Little Missouri bottomland with the badlands rising directly behind the rooftops, and
+    the **BNSF transcontinental main line runs through it** — so for once in this set the
+    level crossing is not a polite fiction, it is the railway that made the town.
+
+    **What names this place**, in the order a stranger would notice it:
+
+    * **The wall.** Pale banded badlands standing immediately behind the buildings, close
+      enough that the street ends against it. Not a distant range — a backdrop.
+    * **The chimney.** A lone brick stack, eighty-four feet of it, standing by itself in
+      an open field with the foundations of a vanished building at its foot. It is all
+      that is left of the Marquis de Morès's 1883 refrigerated-beef plant, which failed.
+      A very tall chimney with no building attached is a strange and slightly sad
+      silhouette and nothing else in this set looks remotely like it.
+    * **The false fronts.** Honey-coloured board, flat parapets nailed above single-storey
+      shops to make them look taller, boardwalks under shed awnings, a barn-red gable and
+      a white church with a green spire. The set has old towns — Savannah, Stonington,
+      Quechee, Bentonville — and no Western ones.
+
+    **THE RISK was that this became the fifth layered-rock scene** after Grand Canyon,
+    Moab, the Dells and Rushmore, and the reference settled how to avoid it. These
+    badlands are **pale** — cream, buff and grey, with one thin charcoal coal seam and
+    only an occasional flash of brick-red scoria — and they are **half green**: grass caps
+    every bench and runs down every draw, with dark juniper scattered through it. Red rock
+    everywhere is Utah. Here the green and the bare clay are interleaved, and that is the
+    whole difference.
+
+    **WHERE THE ROAD GOES.** Up the street, across the railway, and it stops at the T in
+    front of the boardwalk, with the wagon team standing hitched outside. The road's own
+    end is the town, which is honest — Medora's grid is four blocks and every street in it
+    ends against something.
+
+    **RATIOS.** A locomotive is 96px tall on screen. Everything here was sized off that:
+    a two-storey false front at the town's depth is about 100px, the cottonwoods about
+    140, and the chimney — which really is twenty-six metres — about 250, which makes it
+    the one thing in the frame that breaks the skyline. The prairie dogs are the single
+    deliberate exception and are noted where they are drawn.
+    """
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    # Colours read off the reference. The badlands are PALE and the prairie is a
+    # yellow-green; getting either of those wrong turns this into Utah or into Kentucky.
+    BAD_TOP = '#efe7d2'
+    BAD_2, BAD_3 = '#cbb98f', '#b8a680'
+    BAD_SEAM = '#5e5648'
+    BAD_4, BAD_5 = '#ded4bb', '#9d8460'
+    BAD_RED = '#a5644a'
+    CAP = '#8d9f52'
+    JUNIPER, JUNIPER_L = '#3f5d3c', '#4e7146'
+    PRAIRIE, PRAIRIE_L, PRAIRIE_D = '#a3aa60', '#b8bd72', '#87914c'
+    SAGE, SAGE_L = '#93a077', '#aab48c'
+    DIRT, DIRT_L, HOLE = '#c6b78d', '#dacca4', '#584c35'
+    BRICK, BRICK_D, BRICK_L = '#a8543a', '#88412c', '#bd6b4d'
+    WOOD, WOOD_D, WOOD_G = '#b98a4c', '#8c6434', '#9c8d76'
+    BARN, BARN_D = '#9c3b32', '#7c2c25'
+    TRIM = '#f2eee2'
+    ROOF, ROOF_D = '#7d7a71', '#605d56'
+    SPIRE = '#3f6b4a'
+    COTTON, COTTON_L, TRUNK = '#5f8b42', '#7aa457', '#8a8073'
+    RIVER, BAR = '#a9b5b2', '#d0c7af'
+    ROADC, ROADC_D = '#77726a', '#605c55'
+    STREET, STREET_D, STREET_L = '#a8977a', '#8e7d63', '#c0b192'
+
+    WG_LANE = 400           # the frontage the wagon stands on, east of the road
+    BLD_BASE = 382          # the shopfronts stand on the frontage either side
+
+    DEFS = []
+    d = (sky_defs('#3f86c8', '#8fbfe2', '#dcecf5')
+         + '\n' + grass_defs(PRAIRIE_L, PRAIRIE, 'grassg'))
+
+    # ===================================================== SKY ===
+    sk = [sky('#3f86c8', '#8fbfe2', '#dcecf5'),
+          clouds([(190, 66, 60), (500, 42, 40), (760, 74, 52), (1090, 50, 44),
+                  (330, 108, 30)]),
+          birds([(560, 122), (612, 138)])]
+
+    # ===================================================== GROUND ===
+    gr = [ground(f'url(#grassg)')]
+
+    # ---------------------------------------------------------------------
+    # THE BADLANDS WALL. One silhouette, then horizontal bands clipped inside it —
+    # because badlands strata really are horizontal, and drawing each band as its own
+    # wobbly shape is how you end up with a cake instead of a landscape.
+    # THE STRATA ARE AT ABSOLUTE ELEVATIONS and every landform in the scene uses this
+    # one table. That is the whole reason badlands read as a single eroded surface rather
+    # than as a row of unrelated layer cakes: the same seam runs through every butte at
+    # exactly the same height, which is what a horizontal bed actually does.
+    BANDS = ((120, 196, BAD_TOP), (196, 214, BAD_2), (214, 219, BAD_SEAM),
+             (219, 242, BAD_4), (242, 262, BAD_3), (262, 267, BAD_SEAM),
+             (267, 286, BAD_5), (286, 310, BAD_4), (310, 346, BAD_3))
+
+    # A FURTHER RIDGE, seen through the notch. Without it the road's far end is against
+    # open sky and reads as lifting off; with it the road runs out onto land. Hazed toward
+    # the sky colour because it is a long way off, and drawn first so everything else
+    # stands in front of it.
+    gr.append(f'<path d="M556,336 C 576,300 606,282 640,282 C 674,282 704,300 724,336 Z" '
+              f'fill="{mix(BAD_TOP, "#a8c6dc", 0.42)}"/>')
+    gr.append(f'<path d="M566,318 C 584,296 610,286 640,286 C 670,286 696,296 714,318 '
+              f'C 694,304 668,296 640,296 C 612,296 586,304 566,318 Z" '
+              f'fill="{mix(CAP, "#a8c6dc", 0.48)}"/>')
+    gr.append(f'<path d="M556,336 C 576,300 606,282 640,282 C 674,282 704,300 724,336 '
+              f'L724,346 L556,346 Z" fill="{mix(CAP, "#b2ccdd", 0.4)}" opacity="0.5"/>')
+
+    rw = rnd(7)
+    prof = [(-20, 214)]
+    # The two masses close in over the road's end: high shoulders right beside the gap
+    # and a steep drop into it, so the carriageway runs out under them instead of into an
+    # open wedge of sky. Everything from y=312 down is the notch the road disappears into.
+    for (cx_, cy_) in ((90, 196), (190, 212), (270, 250), (350, 258), (440, 196),
+                       (534, 150), (580, 186), (606, 268), (620, 312), (640, 318),
+                       (660, 312), (674, 268), (700, 186), (748, 150), (836, 200),
+                       (932, 176), (1036, 152), (1140, 180), (1242, 214), (1310, 230)):
+        prof.append((cx_, cy_ if cy_ >= 320 else cy_ + (rw() - 0.5) * 8))
+    BASE = 322
+    sil = 'M-20,%d ' % prof[0][1]
+    for k in range(1, len(prof)):
+        x0, y0 = prof[k - 1]
+        x1, y1 = prof[k]
+        sil += f'C {x0 + (x1 - x0) * 0.4:.0f},{y0:.0f} {x0 + (x1 - x0) * 0.6:.0f},{y1:.0f} {x1},{y1:.0f} '
+    sil += f'L1310,{BASE} L-20,{BASE} Z'
+    DEFS.append(f'    <clipPath id="mdwall"><path d="{sil}"/></clipPath>')
+    gr.append(f'<path d="{sil}" fill="{BAD_TOP}"/>')
+    gr.append('<g clip-path="url(#mdwall)">')
+    # the strata, top to bottom. One thin charcoal seam only — it is the coal, and two
+    # of them would read as a stripe pattern rather than as geology.
+    for y0, y1, col in BANDS:
+        gr.append(f'<rect x="-20" y="{y0}" width="1330" height="{y1 - y0}" fill="{col}"/>')
+    # a single flash of brick-red scoria, where a coal seam once burned underground
+    gr.append(f'<path d="M940,278 L1130,272 L1142,294 L950,300 Z" fill="{BAD_RED}" '
+              f'opacity="0.85"/>')
+    gr.append(f'<path d="M96,284 L246,281 L250,296 L100,299 Z" fill="{BAD_RED}" '
+              f'opacity="0.55"/>')
+    # vertical fluting on the lower slopes — the rills that make badlands badlands
+    for k in range(150):
+        fx = -20 + rw() * 1340
+        fy = 210 + rw() * 100
+        gr.append(f'<rect x="{fx:.0f}" y="{fy:.0f}" width="{1.1 + rw() * 1.8:.1f}" '
+                  f'height="{14 + rw() * 40:.0f}" fill="#000" '
+                  f'opacity="{0.035 + rw() * 0.04:.3f}"/>')
+    # gullies: broad soft V-shadows
+    for gx in (60, 240, 330, 470, 640, 740, 880, 1000, 1160, 1270):
+        gr.append(f'<path d="M{gx},188 L{gx + 30},342 L{gx - 30},342 Z" fill="#000" '
+                  f'opacity="0.07"/>')
+    gr.append('</g>')
+
+    # the grass cap: it sits ON the profile and runs down into every draw, and it is what
+    # stops this being Moab
+    cap = 'M-20,%d ' % (prof[0][1] + 10)
+    for k in range(1, len(prof)):
+        x0, y0 = prof[k - 1]
+        x1, y1 = prof[k]
+        cap += (f'C {x0 + (x1 - x0) * 0.4:.0f},{y0 + 10:.0f} '
+                f'{x0 + (x1 - x0) * 0.6:.0f},{y1 + 10:.0f} {x1},{y1 + 10:.0f} ')
+    cap += f'L1310,{prof[-1][1]:.0f} '
+    for k in range(len(prof) - 1, 0, -1):
+        x1, y1 = prof[k]
+        x0, y0 = prof[k - 1]
+        cap += (f'C {x0 + (x1 - x0) * 0.6:.0f},{y1:.0f} '
+                f'{x0 + (x1 - x0) * 0.4:.0f},{y0:.0f} {x0},{y0:.0f} ')
+    cap += 'Z'
+    gr.append(f'<path d="{cap}" fill="{CAP}"/>')
+    # grass in the draws, as soft irregular patches inside the wall's own clip. Drawn as
+    # vertical tongues they read as green paint running down the rock — which is exactly
+    # what the first version looked like.
+    gr.append('<g clip-path="url(#mdwall)">')
+    for k in range(38):
+        tx = -20 + rw() * 1340
+        if 598 < tx < 682:
+            continue
+        ty = 250 + rw() * 92
+        tr = 12 + rw() * 34
+        gr.append(f'<ellipse cx="{tx:.0f}" cy="{ty:.0f}" rx="{tr:.0f}" '
+                  f'ry="{tr * 0.42:.0f}" fill="{CAP}" opacity="{0.35 + rw() * 0.4:.2f}"/>')
+    gr.append('</g>')
+    # juniper: small, dark, rounded, and denser toward the foot of the slope
+    for k in range(80):
+        jx = -20 + rw() * 1340
+        if 602 < jx < 678:           # nothing floats in the opening
+            continue
+        jy = 246 + rw() * rw() * 100 + 8
+        jr = 2.6 + rw() * 4.6
+        gr.append(f'<g><ellipse cx="{jx:.0f}" cy="{jy:.0f}" rx="{jr:.1f}" '
+                  f'ry="{jr * 0.85:.1f}" fill="{JUNIPER}"/>'
+                  f'<ellipse cx="{jx - jr * 0.3:.1f}" cy="{jy - jr * 0.3:.1f}" '
+                  f'rx="{jr * 0.55:.1f}" ry="{jr * 0.45:.1f}" fill="{JUNIPER_L}"/></g>')
+
+    # ---------------------------------------------------------------------
+    # BUTTES standing in front of the wall. A single banded silhouette is a dune; what
+    # makes badlands read is NESTED forms — a flat-capped mound in front of a ridge in
+    # front of another ridge, each one showing the same strata at a different height.
+    def butte(bid, cx_, w, topy, basey, seed):
+        """A FLAT cap with hard shoulders and steep fluted flanks, asymmetric. The first
+        version was a symmetrical dome and six of them in a row read as a tray of bread
+        rolls."""
+        r = rnd(seed)
+        half = w / 2.0
+        lin = half * (0.34 + r() * 0.24)      # how far in the left shoulder sits
+        rin = half * (0.30 + r() * 0.28)
+        sag = 3 + r() * 5                     # the cap is never quite level
+        sh = (f'M{cx_ - half:.0f},{basey} '
+              f'L{cx_ - half + lin * 0.42:.0f},{topy + (basey - topy) * 0.40:.0f} '
+              f'L{cx_ - lin:.0f},{topy + 9:.0f} '
+              f'Q {cx_ - lin * 0.72:.0f},{topy + 1:.0f} {cx_ - lin * 0.4:.0f},{topy:.0f} '
+              f'L{cx_ + rin * 0.5:.0f},{topy + sag:.0f} '
+              f'Q {cx_ + rin * 0.86:.0f},{topy + sag + 2:.0f} '
+              f'{cx_ + rin:.0f},{topy + sag + 9:.0f} '
+              f'L{cx_ + half - rin * 0.38:.0f},{topy + (basey - topy) * 0.44:.0f} '
+              f'L{cx_ + half:.0f},{basey} Z')
+        DEFS.append(f'    <clipPath id="{bid}"><path d="{sh}"/></clipPath>')
+        o = [f'<path d="{sh}" fill="{BAD_TOP}"/>', f'<g clip-path="url(#{bid})">']
+        for y0, y1, col in BANDS:
+            o.append(f'<rect x="{cx_ - half - 4:.0f}" y="{y0}" width="{w + 8:.0f}" '
+                     f'height="{y1 - y0}" fill="{col}"/>')
+        # the caprock: a harder, slightly darker ledge right at the top, which is what
+        # holds a butte up and why it has a flat top at all
+        o.append(f'<rect x="{cx_ - half - 4:.0f}" y="{topy:.0f}" width="{w + 8:.0f}" '
+                 f'height="7" fill="{mix(BAD_2, "#6b5f4a", 0.3)}"/>')
+        for k in range(int(w / 3.4)):
+            fx = cx_ - half + r() * w
+            fy = topy + 14 + r() * (basey - topy) * 0.44
+            o.append(f'<rect x="{fx:.0f}" y="{fy:.0f}" width="{1 + r() * 1.8:.1f}" '
+                     f'height="{(basey - fy) * (0.14 + r() * 0.3):.0f}" fill="#000" '
+                     f'opacity="{0.035 + r() * 0.045:.3f}"/>')
+        for k in range(7):
+            o.append(f'<ellipse cx="{cx_ - half + r() * w:.0f}" '
+                     f'cy="{basey - r() * (basey - topy) * 0.26:.0f}" '
+                     f'rx="{10 + r() * 24:.0f}" ry="{5 + r() * 10:.0f}" fill="{CAP}" '
+                     f'opacity="{0.4 + r() * 0.4:.2f}"/>')
+        o.append('</g>')
+        for k in range(6):
+            jx = cx_ - half * 0.86 + r() * w * 0.82
+            jy = basey - r() * (basey - topy) * 0.3
+            jr = 2.8 + r() * 4
+            o.append(f'<g><ellipse cx="{jx:.0f}" cy="{jy:.0f}" rx="{jr:.1f}" '
+                     f'ry="{jr * 0.85:.1f}" fill="{JUNIPER}"/>'
+                     f'<ellipse cx="{jx - jr * 0.3:.1f}" cy="{jy - jr * 0.3:.1f}" '
+                     f'rx="{jr * 0.55:.1f}" ry="{jr * 0.45:.1f}" fill="{JUNIPER_L}"/></g>')
+        return ''.join(o)
+
+    # Four, not six, and no two the same width or height. A butte that tops out inside a
+    # lower band shows a DIFFERENT rock at its cap than its taller neighbour, which is
+    # correct and is most of what sells the geology.
+    for bid, cx_, w, topy, basey, seed in (
+            ('mdb0', 88, 330, 176, 324, 61), ('mdb1', 396, 356, 142, 326, 63),
+            ('mdb2', 878, 320, 200, 322, 65), ('mdb3', 1176, 350, 128, 326, 67)):
+        gr.append(butte(bid, cx_, w, topy, basey, seed))
+
+    # ---------------------------------------------------------------------
+    # THE BOTTOMLAND. Rolling green benches between the wall and the town.
+    def bench(y0, y1, col, seed, wob=9):
+        r = rnd(seed)
+        pts = [f'M-20,{y0}']
+        x = -20
+        while x < 1320:
+            x += 70 + r() * 120
+            pts.append(f'L{x:.0f},{y0 - wob + r() * wob * 2:.0f}')
+        pts.append(f'L1320,{y1} L-20,{y1} Z')
+        return f'<path d="{" ".join(pts)}" fill="{col}"/>'
+
+    # what you see through the gap: flat country a long way off, hazed almost to the
+    # colour of the sky. Without it the opening reads as a hole cut in a wall.
+
+
+    # a dark scrub line along the foot of the badlands — the same job Yellowstone's
+    # treeline does: it separates the distance from the ground you are standing on.
+    rsc = rnd(101)
+    for k in range(150):
+        sx_ = -20 + rsc() * 1340
+        if 604 < sx_ < 676:          # keep the opening clear
+            continue
+        sr_ = 5 + rsc() * 9
+        gr.append(f'<ellipse cx="{sx_:.0f}" cy="{318 + rsc() * 12:.0f}" rx="{sr_:.1f}" '
+                  f'ry="{sr_ * 0.72:.1f}" '
+                  f'fill="{JUNIPER if k % 3 else JUNIPER_L}"/>')
+    gr.append(bench(330, 360, PRAIRIE_D, 11, 6))
+    gr.append(bench(348, 392, PRAIRIE, 13, 7))
+
+    # THE LITTLE MISSOURI, glimpsed at the right: wide, shallow, pale, with big sandbars.
+    gr.append(f'<path d="M1148,340 C 1200,344 1240,352 1310,354 L1310,372 '
+              f'C 1240,370 1196,362 1150,356 Z" fill="{BAR}"/>')
+    gr.append(f'<path d="M1156,344 C 1206,348 1244,355 1310,357 L1310,366 '
+              f'C 1242,364 1204,358 1158,352 Z" fill="{RIVER}"/>')
+
+    # bison, far out on a bench. Static, small, and only two — the set has just done
+    # large mammals and this is background, not a second animal scene.
+    for bx, by, bs in ((372, 352, 0.5), (414, 356, 0.44), (338, 357, 0.4)):
+        gr.append(f'<g transform="translate({bx},{by}) scale({bs})">'
+                  f'<path d="M-18,0 L-18,-14 C -18,-22 -10,-26 0,-26 '
+                  f'C 10,-26 16,-22 16,-14 L16,0 Z" fill="#4a3b30"/>'
+                  f'<path d="M14,-14 C 24,-16 28,-22 26,-30 C 22,-36 12,-36 8,-30 '
+                  f'C 6,-24 8,-17 14,-14 Z" fill="#332821"/>'
+                  f'<rect x="-14" y="-4" width="4" height="6" fill="#241c18"/>'
+                  f'<rect x="8" y="-4" width="4" height="6" fill="#241c18"/></g>')
+
+    # ===================================================== SCENERY BACK ===
+    back = []
+
+    def cottonwood(x, y, s, seed):
+        """The one big tree of this valley: a pale furrowed trunk that forks low, and a
+        broad billowing crown. They line the street and they surround the chimney, and
+        they are the scale reference for everything else in the middle distance."""
+        r = rnd(seed)
+        o = [f'<g transform="translate({x},{y}) scale({s})">']
+        o.append(shadow(0, 3, 30, 7, 0.13))
+        o.append(f'<path d="M-5,0 L-3,-42 L-14,-72 L-9,-74 L0,-48 L9,-76 L14,-73 '
+                 f'L4,-44 L6,0 Z" fill="{TRUNK}"/>')
+        for k in range(9):
+            ex = (r() - 0.5) * 74
+            ey = -78 - r() * 46
+            er = 20 + r() * 20
+            o.append(f'<ellipse cx="{ex:.0f}" cy="{ey:.0f}" rx="{er:.0f}" '
+                     f'ry="{er * 0.82:.0f}" '
+                     f'fill="{COTTON if k % 2 else COTTON_L}"/>')
+        return ''.join(o) + '</g>'
+
+    # ---------------------------------------------------------------------
+    # THE CHIMNEY. Twenty-six metres of brick with nothing attached to it. At this depth
+    # that is about 250px, which makes it the tallest thing in the frame and the only one
+    # that breaks the skyline — and that is correct, not a mistake to be corrected.
+    CH_X, CH_B, CH_TOP = 150, 372, 176
+    # the mown field it stands in, and the low foundation walls of the vanished plant
+    back.append(f'<path d="M20,378 C 120,366 236,366 320,378 C 236,390 106,390 20,378 Z" '
+                f'fill="{PRAIRIE_L}"/>')
+    for fx0, fw in ((44, 70), (126, 52), (194, 62)):
+        back.append(f'<path d="M{fx0},378 L{fx0 + fw},376 L{fx0 + fw},369 L{fx0},371 Z" '
+                    f'fill="#b3a68a"/>')
+        back.append(f'<path d="M{fx0},371 L{fx0 + fw},369 L{fx0 + fw},366 L{fx0},368 Z" '
+                    f'fill="#c8bda1"/>')
+    ch = ['<g>']
+    ch.append(shadow(CH_X, CH_B + 2, 26, 6, 0.16))
+    # a slight taper: 30 wide at the foot, 20 at the throat
+    ch.append(f'<path d="M{CH_X - 18},{CH_B} L{CH_X - 12},{CH_TOP + 22} '
+              f'L{CH_X + 12},{CH_TOP + 22} L{CH_X + 18},{CH_B} Z" fill="{BRICK}"/>')
+    ch.append(f'<path d="M{CH_X - 15},{CH_B} L{CH_X - 10},{CH_TOP + 22} '
+              f'L{CH_X - 4},{CH_TOP + 22} L{CH_X - 7},{CH_B} Z" fill="{BRICK_L}"/>')
+    ch.append(f'<path d="M{CH_X + 6},{CH_TOP + 22} L{CH_X + 10},{CH_TOP + 22} '
+              f'L{CH_X + 15},{CH_B} L{CH_X + 9},{CH_B} Z" fill="{BRICK_D}"/>')
+    # the corbelled cap: two stepped courses, which is the whole character of the top
+    ch.append(f'<rect x="{CH_X - 14}" y="{CH_TOP + 10}" width="28" height="13" '
+              f'fill="{BRICK}"/>')
+    ch.append(f'<rect x="{CH_X - 14}" y="{CH_TOP + 10}" width="9" height="13" '
+              f'fill="{BRICK_L}"/>')
+    ch.append(f'<rect x="{CH_X - 17}" y="{CH_TOP}" width="34" height="11" '
+              f'fill="{BRICK_D}"/>')
+    ch.append(f'<rect x="{CH_X - 17}" y="{CH_TOP}" width="11" height="11" '
+              f'fill="{BRICK}"/>')
+    # a wider plinth at the foot
+    ch.append(f'<path d="M{CH_X - 21},{CH_B} L{CH_X - 18},{CH_B - 22} '
+              f'L{CH_X + 18},{CH_B - 22} L{CH_X + 21},{CH_B} Z" fill="{BRICK_D}"/>')
+    ch.append(f'<path d="M{CH_X - 21},{CH_B} L{CH_X - 18},{CH_B - 22} '
+              f'L{CH_X - 10},{CH_B - 22} L{CH_X - 12},{CH_B} Z" fill="{BRICK}"/>')
+    # weathering: a few horizontal course lines, very faint
+    for k in range(11):
+        cy_ = CH_TOP + 34 + k * 20
+        w_ = 15 - (CH_B - cy_) / (CH_B - CH_TOP) * 5
+        ch.append(f'<rect x="{CH_X - w_:.0f}" y="{cy_}" width="{w_ * 2:.0f}" height="1.6" '
+                  f'fill="#000" opacity="0.07"/>')
+    back.append(''.join(ch) + '</g>')
+
+    back.append(cottonwood(40, 396, 0.6, 21))
+    back.append(cottonwood(306, 392, 0.52, 23))
+
+    # ---------------------------------------------------------------------
+    # THE TOWN. A false-front block across the head of the road, and the road stops
+    # against it. Two storeys is about 8 metres, which at this depth is a hundred pixels —
+    # roughly a locomotive's height, which is the sanity check that keeps the whole
+    # middle distance honest.
+    def falsefront(x, w, h, wall, seed, storeys=2, awning=True):
+        r = rnd(seed)
+        o = ['<g>']
+        o.append(f'<rect x="{x}" y="{BLD_BASE - h}" width="{w}" height="{h}" '
+                 f'fill="{wall}"/>')
+        # vertical board lines
+        for k in range(int(w / 9)):
+            o.append(f'<rect x="{x + 3 + k * 9}" y="{BLD_BASE - h}" width="1.4" '
+                     f'height="{h}" fill="#000" opacity="0.07"/>')
+        # the FALSE FRONT: a flat parapet standing above the real roof
+        o.append(f'<rect x="{x - 3}" y="{BLD_BASE - h - 9}" width="{w + 6}" height="10" '
+                 f'fill="{mix(wall, "#ffffff", 0.14)}"/>')
+        o.append(f'<rect x="{x - 3}" y="{BLD_BASE - h - 9}" width="{w + 6}" height="3" '
+                 f'fill="{mix(wall, "#000000", 0.2)}"/>')
+        # windows
+        rows = storeys
+        for rr_ in range(rows):
+            wy = BLD_BASE - h + 12 + rr_ * (h - 26) / max(1, rows)
+            n = max(2, int(w / 22))
+            for k in range(n):
+                wx = x + 7 + k * (w - 14) / n
+                o.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{(w - 14) / n * 0.6:.0f}" '
+                         f'height="{16 if rr_ else 18}" fill="#3b4450"/>')
+                o.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{(w - 14) / n * 0.6:.0f}" '
+                         f'height="4" fill="#6f7f8c"/>')
+        if awning:
+            o.append(f'<path d="M{x - 6},{BLD_BASE - 30} L{x + w + 6},{BLD_BASE - 30} '
+                     f'L{x + w + 2},{BLD_BASE - 22} L{x - 2},{BLD_BASE - 22} Z" '
+                     f'fill="{WOOD_D}"/>')
+            for k in range(int(w / 26) + 1):
+                px = x + 2 + k * 26
+                o.append(f'<rect x="{px}" y="{BLD_BASE - 24}" width="2.4" height="24" '
+                         f'fill="{WOOD_D}"/>')
+            # the boardwalk itself
+            o.append(f'<rect x="{x - 6}" y="{BLD_BASE - 4}" width="{w + 12}" height="5" '
+                     f'fill="{WOOD_G}"/>')
+        return ''.join(o) + '</g>'
+
+    STREET, STREET_D, STREET_L = '#a8977a', '#8e7d63', '#c0b192'
+    back.append(f'<path d="M-20,{BLD_BASE} L1320,{BLD_BASE} L1320,418 L-20,418 Z" '
+                f'fill="{STREET}"/>')
+    back.append(f'<path d="M-20,{BLD_BASE} L1320,{BLD_BASE} L1320,{BLD_BASE + 4} '
+                f'L-20,{BLD_BASE + 4} Z" fill="{STREET_D}"/>')
+    rfr = rnd(79)
+    for k in range(110):
+        back.append(f'<ellipse cx="{-20 + rfr() * 1340:.0f}" '
+                    f'cy="{BLD_BASE + 5 + rfr() * 28:.0f}" rx="{7 + rfr() * 26:.0f}" '
+                    f'ry="{1.6 + rfr() * 3:.1f}" fill="{STREET_L}" '
+                    f'opacity="{0.2 + rfr() * 0.26:.2f}"/>')
+    for k in range(50):
+        gx_ = -20 + rfr() * 1340
+        gy_ = 414 + rfr() * 8
+        s_ = 0.5 + rfr() * 0.6
+        back.append(f'<path d="M{gx_:.0f},{gy_:.0f} l{-3 * s_:.1f},{-10 * s_:.1f} '
+                    f'M{gx_:.0f},{gy_:.0f} l{0.8 * s_:.1f},{-13 * s_:.1f} '
+                    f'M{gx_:.0f},{gy_:.0f} l{4 * s_:.1f},{-9 * s_:.1f}" '
+                    f'stroke="{(PRAIRIE_D, "#b9ad62")[k % 2]}" '
+                    f'stroke-width="{1.2 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # the block, left to right: weathered grey shop, honey two-storey, barn-red gable,
+    # white church with a green spire beyond it
+    back.append(falsefront(430, 96, 84, WOOD_G, 31, storeys=1))
+    back.append(falsefront(694, 142, 122, WOOD, 33, storeys=2))
+    back.append(falsefront(848, 80, 88, mix(WOOD, '#ffffff', 0.18), 35, storeys=1))
+
+    # the barn-red gable — the one building that is not a false front, and the reference
+    # has it right on the corner
+    BR_X, BR_W, BR_H = 940, 112, 92
+    back.append(f'<g><rect x="{BR_X}" y="{BLD_BASE - BR_H}" width="{BR_W}" '
+                f'height="{BR_H}" fill="{BARN}"/>'
+                f'<path d="M{BR_X - 7},{BLD_BASE - BR_H} L{BR_X + BR_W / 2:.0f},'
+                f'{BLD_BASE - BR_H - 44} L{BR_X + BR_W + 7},{BLD_BASE - BR_H} Z" '
+                f'fill="{ROOF}"/>'
+                f'<path d="M{BR_X + BR_W / 2:.0f},{BLD_BASE - BR_H - 44} '
+                f'L{BR_X + BR_W + 7},{BLD_BASE - BR_H} L{BR_X + BR_W - 6},{BLD_BASE - BR_H} '
+                f'L{BR_X + BR_W / 2:.0f},{BLD_BASE - BR_H - 34} Z" fill="{ROOF_D}"/>'
+                f'<rect x="{BR_X + 34}" y="{BLD_BASE - 44}" width="24" height="44" '
+                f'fill="{TRIM}"/>'
+                f'<rect x="{BR_X + 38}" y="{BLD_BASE - 40}" width="16" height="40" '
+                f'fill="{BARN_D}"/>'
+                f'<rect x="{BR_X + 12}" y="{BLD_BASE - BR_H + 16}" width="14" '
+                f'height="16" fill="{TRIM}"/>'
+                f'<rect x="{BR_X + 70}" y="{BLD_BASE - BR_H + 16}" width="14" '
+                f'height="16" fill="{TRIM}"/></g>')
+
+    # the white church with the green spire, set back behind the block
+    CX_, CB = 1106, 400
+    back.append(f'<g><rect x="{CX_ - 28}" y="{CB - 52}" width="56" height="52" '
+                f'fill="{TRIM}"/>'
+                f'<path d="M{CX_ - 34},{CB - 52} L{CX_},{CB - 76} L{CX_ + 34},{CB - 52} Z" '
+                f'fill="{ROOF}"/>'
+                f'<rect x="{CX_ - 11}" y="{CB - 92}" width="22" height="26" '
+                f'fill="{TRIM}"/>'
+                f'<rect x="{CX_ - 13}" y="{CB - 94}" width="26" height="4" '
+                f'fill="{ROOF_D}"/>'
+                f'<path d="M{CX_ - 13},{CB - 94} L{CX_},{CB - 128} L{CX_ + 13},{CB - 94} Z" '
+                f'fill="{SPIRE}"/>'
+                f'<path d="M{CX_},{CB - 128} L{CX_ + 13},{CB - 94} L{CX_ + 5},{CB - 94} Z" '
+                f'fill="{mix(SPIRE, "#000000", 0.25)}"/>'
+                f'<rect x="{CX_ - 6}" y="{CB - 86}" width="12" height="14" '
+                f'fill="#3b4450"/>'
+                f'<path d="M{CX_ - 8},{CB - 34} L{CX_ - 8},{CB - 18} '
+                f'C {CX_ - 8},{CB - 26} {CX_ + 8},{CB - 26} {CX_ + 8},{CB - 18} '
+                f'L{CX_ + 8},{CB - 34} Z" fill="#3b4450"/>'
+                f'<rect x="{CX_ - 9}" y="{CB - 18}" width="18" height="18" '
+                f'fill="#3b4450"/></g>')
+
+    # a low livery/stable shed at the left end of the block, and a windmill behind it —
+    # the two things that say this is a working western town rather than a film set
+    back.append(f'<g><rect x="294" y="{BLD_BASE - 58}" width="124" height="58" '
+                f'fill="{WOOD_D}"/>'
+                f'<rect x="288" y="{BLD_BASE - 66}" width="136" height="10" '
+                f'fill="{ROOF}"/>'
+                f'<rect x="288" y="{BLD_BASE - 66}" width="136" height="3" '
+                f'fill="{ROOF_D}"/>'
+                f'<rect x="328" y="{BLD_BASE - 40}" width="32" height="38" '
+                f'fill="#3b4450"/>'
+                f'<rect x="382" y="{BLD_BASE - 34}" width="18" height="20" '
+                f'fill="#3b4450"/>'
+                f'<rect x="300" y="{BLD_BASE - 34}" width="18" height="20" '
+                f'fill="#3b4450"/></g>')
+    WM_X, WM_B = 236, 376
+    back.append(f'<g><path d="M{WM_X - 9},{WM_B} L{WM_X - 3},{WM_B - 56} '
+                f'L{WM_X + 3},{WM_B - 56} L{WM_X + 9},{WM_B} Z" fill="{WOOD_D}"/>'
+                f'<path d="M{WM_X - 7},{WM_B - 16} L{WM_X + 7},{WM_B - 16} '
+                f'M{WM_X - 5},{WM_B - 34} L{WM_X + 5},{WM_B - 34}" stroke="{WOOD_D}" '
+                f'stroke-width="1.6"/>'
+                + ''.join(f'<ellipse cx="{WM_X}" cy="{WM_B - 56}" rx="11" ry="3" '
+                          f'fill="#9aa0a4" transform="rotate({a} {WM_X} {WM_B - 56})"/>'
+                          for a in range(0, 180, 30))
+                + f'<circle cx="{WM_X}" cy="{WM_B - 56}" r="3" fill="#6f7478"/>'
+                f'<path d="M{WM_X + 2},{WM_B - 58} L{WM_X + 22},{WM_B - 64} '
+                f'L{WM_X + 22},{WM_B - 54} Z" fill="#9aa0a4"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE WAGON AND TEAM. Drivable: the engine translates #cc-wagon along #wagon-path
+    # and swings four leg groups and four wheels. It is authored standing still at the
+    # boardwalk, which is also where a run should start and end.
+    #
+    # ON SCALE, because it is the second deliberate exception in this scene. At the
+    # street's depth the ruler makes a 1.6m horse eighteen pixels, which is a smudge with
+    # a tail. The team is drawn at about twice life size — 34px at the withers — because
+    # the whole point of having it is that a child can see the horses. That is still
+    # about a third of a locomotive and well under a third of the shopfront behind it.
+    def carriage(x, y, s):
+        """Side on, facing RIGHT, origin on the ground under the rear wheel. Two horses
+        abreast: the near one drawn whole, the far one offset back and up so you read two
+        animals rather than one with spare legs."""
+        # NOT .cc-wagon / .cc-wheel: those two class names are reserved recolour and
+        # wheel-spin hooks on the ROLLING STOCK, and a scene that borrows them hands the
+        # customizer a horse to paint. Its own names, its own contract.
+        o = [f'<g id="cc-wagon" class="cc-surrey" transform="translate({x},{y}) scale({s})">']
+        o.append(shadow(-16, 1, 62, 6, 0.16))
+
+        def horse(hx, dy, coat, mane, far):
+            c = mix(coat, '#6b4a2a', 0.34) if far else coat
+            m = mix(mane, '#6b4a2a', 0.3) if far else mane
+            lg = mix(c, '#3a2a1c', 0.34)
+            g = [f'<g transform="translate({hx},{dy})">']
+            # hind legs, then the barrel, then the fore legs, so the near foreleg is on top
+            g.append(f'<g class="cc-leg-b" transform="translate(-14,-19) rotate(0)">'
+                     f'<path d="M-3,0 L-4,13 L1,13 L2,0 Z" fill="{lg}"/>'
+                     f'<path d="M-4,11 L1,11 L1,19 L-4,19 Z" fill="{lg}"/>'
+                     f'<rect x="-5" y="18" width="7" height="3" rx="1" fill="#2f2318"/>'
+                     f'<path d="M5,0 L4,13 L8,13 L9,0 Z" fill="{c}"/>'
+                     f'<path d="M4,11 L8,11 L8,19 L4,19 Z" fill="{c}"/>'
+                     f'<rect x="3" y="18" width="7" height="3" rx="1" fill="#2f2318"/></g>')
+            g.append(f'<path d="M-20,-24 C -23,-31 -18,-35 -10,-35 '
+                     f'C 0,-35 8,-34 13,-33 L17,-30 '
+                     f'C 20,-24 20,-19 17,-15 C 11,-11 0,-9 -10,-10 '
+                     f'C -18,-11 -21,-17 -20,-24 Z" fill="{c}"/>')
+            g.append(f'<path d="M-20,-25 C -23,-31 -18,-35 -10,-35 C 0,-35 8,-34 13,-33 '
+                     f'L14,-31 C 2,-30 -10,-29 -17,-27 Z" '
+                     f'fill="{mix(c, "#ffffff", 0.13)}"/>')
+            g.append(f'<g class="cc-leg-a" transform="translate(11,-19) rotate(0)">'
+                     f'<path d="M-3,0 L-4,13 L1,13 L2,0 Z" fill="{lg}"/>'
+                     f'<path d="M-4,11 L1,11 L1,19 L-4,19 Z" fill="{lg}"/>'
+                     f'<rect x="-5" y="18" width="7" height="3" rx="1" fill="#2f2318"/>'
+                     f'<path d="M5,0 L4,13 L8,13 L9,0 Z" fill="{c}"/>'
+                     f'<path d="M4,11 L8,11 L8,19 L4,19 Z" fill="{c}"/>'
+                     f'<rect x="3" y="18" width="7" height="3" rx="1" fill="#2f2318"/></g>')
+            # tail
+            g.append(f'<path d="M-19,-30 C -25,-27 -28,-18 -27,-9 C -24,-9 -21,-14 -19,-21 Z" '
+                     f'fill="{m}"/>')
+            # neck, head, blinkered bridle
+            g.append(f'<path d="M12,-33 C 19,-37 25,-41 30,-44 L36,-38 '
+                     f'C 31,-35 24,-30 19,-26 Z" fill="{c}"/>')
+            g.append(f'<path d="M30,-45 C 35,-47 39,-44 40,-40 C 41,-36 37,-33 34,-34 '
+                     f'C 30,-36 28,-42 30,-45 Z" fill="{c}"/>')
+            g.append(f'<path d="M37,-37 C 41,-37 43,-35 42,-32 C 39,-30 36,-32 36,-35 Z" '
+                     f'fill="{mix(c, "#2a1a12", 0.3)}"/>')
+            g.append(f'<path d="M30,-48 L31,-53 L34,-47 Z" fill="{c}"/>')
+            g.append(f'<path d="M35,-47 L38,-52 L39,-46 Z" fill="{mix(c, "#000000", 0.2)}"/>')
+            g.append(f'<circle cx="35" cy="-41" r="1.5" fill="#241c16"/>')
+            g.append(f'<rect x="31" y="-43" width="5" height="4" rx="1" fill="#4a3524"/>')
+            # mane along the crest
+            g.append(f'<path d="M13,-34 C 20,-38 26,-42 31,-45 L33,-42 '
+                     f'C 27,-39 21,-35 15,-31 Z" fill="{m}"/>')
+            # collar and trace running back to the shafts
+            g.append(f'<path d="M14,-33 L19,-25" stroke="#5a3f28" stroke-width="2.6" '
+                     f'fill="none"/>')
+            g.append(f'<path d="M-19,-24 L14,-26" stroke="#5a3f28" stroke-width="1.6" '
+                     f'fill="none"/>')
+            return ''.join(g) + '</g>'
+
+        o.append(horse(46, -8, '#9c6b3a', '#3f2c1c', True))
+        o.append(horse(66, 0, '#c08a4a', '#8a6a3a', False))
+        # shafts
+        o.append(f'<path d="M18,-22 L52,-24 M18,-18 L52,-21" stroke="#7a5a38" '
+                 f'stroke-width="2.2" fill="none"/>')
+        # the surrey: floor, two benches, four posts and a fringed canopy
+        o.append(f'<path d="M-48,-22 L20,-24 L20,-30 L-48,-28 Z" fill="#3a3d44"/>')
+        o.append(f'<path d="M-48,-28 L20,-30 L20,-33 L-48,-31 Z" fill="#5a5f68"/>')
+        for px_ in (-44, 16):
+            o.append(f'<rect x="{px_}" y="-58" width="2.4" height="30" fill="#4a4d54"/>')
+        for px_ in (-24, -4):
+            o.append(f'<rect x="{px_}" y="-58" width="2" height="26" fill="#4a4d54"/>')
+        o.append(f'<path d="M-52,-58 L24,-61 L24,-66 L-52,-63 Z" fill="#8c6434"/>')
+        o.append(f'<path d="M-52,-63 L24,-66 L24,-68 L-52,-65 Z" fill="#d8c69a"/>')
+        for k in range(17):
+            fx_ = -50 + k * 4.6
+            o.append(f'<rect x="{fx_:.0f}" y="-58" width="1.4" height="4" fill="#8c6434"/>')
+        # bench backs
+        o.append(f'<path d="M-46,-30 L-30,-31 L-30,-42 L-46,-41 Z" fill="#4a3524"/>')
+        o.append(f'<path d="M-12,-31 L4,-32 L4,-43 L-12,-42 Z" fill="#4a3524"/>')
+        # THE PASSENGERS. Cowboys under the canopy and two more on the rear bench facing
+        # back, which is how these things are actually loaded.
+        def rider(rx, ry, shirt, hat, sk='#e2b48c', back=False):
+            g = [f'<g transform="translate({rx},{ry})">']
+            g.append(f'<path d="M-4,0 L-4,-13 C -4,-16 4,-16 4,-13 L4,0 Z" fill="{shirt}"/>')
+            g.append(f'<path d="M{-5 if back else 3},-11 L{-8 if back else 7},-5" '
+                     f'stroke="{shirt}" stroke-width="2.4" stroke-linecap="round"/>')
+            g.append(f'<circle cx="0" cy="-17" r="3.6" fill="{sk}"/>')
+            if hat:
+                g.append(f'<ellipse cx="0" cy="-19.5" rx="7" ry="1.8" fill="{hat}"/>')
+                g.append(f'<path d="M-3.6,-20 C -3.6,-25 3.6,-25 3.6,-20 Z" fill="{hat}"/>')
+            return ''.join(g) + '</g>'
+        o.append(rider(-38, -30, '#3f5f7a', '#6b4a2a'))          # the driver
+        o.append(rider(-30, -31, '#b8452e', '#4a3524'))
+        o.append(rider(-6, -32, '#e8d9b0', '#8a6a3a'))
+        o.append(rider(3, -32, '#4a6f4a', None, '#c9926a'))
+        o.append(rider(-45, -31, '#7a5a8c', '#3a2f24', back=True))
+        # wheels
+        for wx_, wr_ in ((-34, 11), (10, 8.5)):
+            o.append(f'<g class="cc-surrey-wheel" transform="translate({wx_},{-wr_}) rotate(0)">'
+                     f'<circle cx="0" cy="0" r="{wr_}" fill="none" stroke="#2f3238" '
+                     f'stroke-width="2"/>'
+                     + ''.join(f'<line x1="0" y1="0" x2="{wr_ * math.cos(a * 3.14159 / 4):.1f}" '
+                               f'y2="{wr_ * math.sin(a * 3.14159 / 4):.1f}" stroke="#2f3238" '
+                               f'stroke-width="1.1"/>' for a in range(8))
+                     + f'<circle cx="0" cy="0" r="2" fill="#2f3238"/></g>')
+        return ''.join(o) + '</g>'
+
+    # The street runs flat across the frame, so the path is a straight line at the wheels'
+    # own level. Authored parked at the boardwalk; the engine drives it either way.
+    DEFS.append(f'    <path id="wagon-path" class="cc-path" '
+                f'd="M-140,{WG_LANE} L560,{WG_LANE}"/>')
+    back.append(carriage(170, WG_LANE, 1.0))
+
+    # cottonwoods along the street
+    back.append(cottonwood(524, 402, 0.62, 41))
+    back.append(cottonwood(818, 398, 0.56, 43))
+    back.append(cottonwood(1042, 402, 0.62, 45))
+    back.append(cottonwood(1216, 406, 0.68, 47))
+
+    # hitching rail and a water trough on the boardwalk edge
+    back.append(f'<g><rect x="700" y="{BLD_BASE + 6}" width="80" height="2.6" '
+                f'fill="{WOOD_D}"/>'
+                f'<rect x="702" y="{BLD_BASE + 6}" width="2.6" height="10" fill="{WOOD_D}"/>'
+                f'<rect x="775" y="{BLD_BASE + 6}" width="2.6" height="10" fill="{WOOD_D}"/>'
+                f'<rect x="700" y="{BLD_BASE - 6}" width="30" height="11" rx="2" '
+                f'fill="{WOOD_D}"/>'
+                + '</g>')
+
+    # The right-of-way strip between the street and the rails. It was a flat green
+    # ribbon across the whole frame; grass, sage and a few fence posts give it a surface.
+    rrg = rnd(73)
+    for k in range(90):
+        gx = -20 + rrg() * 1340
+        gy = 422 + rrg() * 26
+        s_ = 0.5 + rrg() * 0.6
+        back.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-10 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-13 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-9 * s_:.1f}" '
+                    f'stroke="{(PRAIRIE_D, "#b9ad62", "#8b9a4c")[int(rrg() * 3)]}" '
+                    f'stroke-width="{1.2 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    for k in range(12):
+        sx = -20 + rrg() * 1340
+        sy = 424 + rrg() * 22
+        sr = 6 + rrg() * 10
+        back.append(f'<g><ellipse cx="{sx:.0f}" cy="{sy - sr * 0.2:.0f}" rx="{sr:.0f}" '
+                    f'ry="{sr * 0.5:.0f}" fill="{SAGE}"/>'
+                    f'<ellipse cx="{sx - sr * 0.3:.0f}" cy="{sy - sr * 0.44:.0f}" '
+                    f'rx="{sr * 0.56:.0f}" ry="{sr * 0.32:.0f}" fill="{SAGE_L}"/></g>')
+    # a plain wire fence on the railway boundary — three strands and leaning cedar posts,
+    # which is what actually runs beside a main line out here
+    for px_ in range(-10, 1320, 46):
+        back.append(f'<rect x="{px_}" y="{430 - (px_ % 7)}" width="2.4" '
+                    f'height="{18 + px_ % 5}" fill="{WOOD_D}" opacity="0.8"/>')
+    for fy_ in (432, 438, 444):
+        back.append(f'<rect x="-20" y="{fy_}" width="1340" height="1" fill="{WOOD_D}" '
+                    f'opacity="0.45"/>')
+
+    # ---------------------------------------------------------------------
+    # THE DEPOT. Board-and-batten with the deep overhanging eaves every Northern Pacific
+    # station on this line had, and the operator's bay window pushed out toward the track
+    # so he could see both ways. It sits on the FAR side of the rails, which is where a
+    # depot goes; the passengers wait on the near platform where the camera can see them.
+    DP_X, DP_B, DP_H = 1218, 448, 76
+    back.append(f'<g><rect x="{DP_X - 82}" y="{DP_B - DP_H}" width="164" height="{DP_H}" '
+                f'fill="#8a4a34"/>'
+                + ''.join(f'<rect x="{DP_X - 78 + k * 11}" y="{DP_B - DP_H}" width="2.4" '
+                          f'height="{DP_H}" fill="#6f3a28"/>' for k in range(15))
+                + f'<path d="M{DP_X - 40},{DP_B - 42} L{DP_X - 40},{DP_B - 6} '
+                f'L{DP_X - 12},{DP_B - 6} L{DP_X - 12},{DP_B - 46} Z" fill="#5f4a34"/>'
+                f'<rect x="{DP_X - 4}" y="{DP_B - 44}" width="26" height="22" '
+                f'fill="#3b4450"/>'
+                f'<rect x="{DP_X + 34}" y="{DP_B - 44}" width="20" height="22" '
+                f'fill="#3b4450"/>'
+                f'<rect x="{DP_X - 66}" y="{DP_B - 44}" width="20" height="22" '
+                f'fill="#3b4450"/>'
+                f'<path d="M{DP_X - 104},{DP_B - DP_H + 4} L{DP_X},{DP_B - DP_H - 30} '
+                f'L{DP_X + 104},{DP_B - DP_H + 4} Z" fill="{ROOF}"/>'
+                f'<path d="M{DP_X},{DP_B - DP_H - 30} L{DP_X + 104},{DP_B - DP_H + 4} '
+                f'L{DP_X + 86},{DP_B - DP_H + 4} L{DP_X},{DP_B - DP_H - 22} Z" '
+                f'fill="{ROOF_D}"/>'
+                f'<rect x="{DP_X - 106}" y="{DP_B - DP_H + 2}" width="212" height="6" '
+                f'fill="{ROOF_D}"/>'
+                f'<rect x="{DP_X + 30}" y="{DP_B - DP_H - 34}" width="9" height="18" '
+                f'fill="#7c3f2c"/></g>')
+
+    # street furniture: barrels, a trough, a buckboard parked at the far kerb and a
+    # loose saddle horse at the rail. All at the far lane so the junction stays clear.
+    for bx_, by_, bs_ in ((300, 396, 0.9), (316, 398, 0.8), (874, 394, 0.85)):
+        back.append(f'<g transform="translate({bx_},{by_}) scale({bs_})">'
+                    f'<path d="M-7,0 L-6,-16 L6,-16 L7,0 Z" fill="#a0764a"/>'
+                    f'<rect x="-7" y="-9" width="14" height="2" fill="#5f4a30"/>'
+                    f'<ellipse cx="0" cy="-16" rx="6" ry="2.6" fill="#b98d5c"/></g>')
+    back.append(f'<g><rect x="1020" y="392" width="34" height="10" rx="2" '
+                f'fill="{WOOD_D}"/>'
+                f'<rect x="1020" y="392" width="34" height="3" fill="#6f8a92"/></g>')
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # ---------------------------------------------------------------------
+    # THE CARRIAGEWAY IS CUT OUT OF THE NEAR FIELD. scenery-front is drawn after the
+    # road, so a full-width ground fill here paints straight over it — which is exactly
+    # what this scene shipped with, and the crossing had no road in front of the gate.
+    # Everything that covers ground goes inside this clip; props stay outside it.
+    DEFS.append('    <clipPath id="mdnf">'
+                '<path d="M-20,514 L562,514 L508,722 L-20,722 Z"/>'
+                '<path d="M711,514 L1320,514 L1320,722 L772,722 Z"/></clipPath>')
+    fr.append('<g clip-path="url(#mdnf)">')
+
+    # THE PRAIRIE, near. A prairie dog town is not a lawn: the animals crop it to the
+    # roots and the ground between the mounds is worn to bare dust, with silver sagebrush
+    # standing in what is left. Painting it flat green was the single worst thing about
+    # the first version of this half of the frame.
+    fr.append(f'<path d="M-20,516 L1320,516 L1320,720 L-20,720 Z" fill="{PRAIRIE}"/>')
+    rp = rnd(53)
+    for by, bc, bo in ((524, PRAIRIE_D, 0.45), (566, '#a8a860', 0.5),
+                       (618, PRAIRIE_D, 0.35), (668, '#b3ad66', 0.45)):
+        fr.append(f'<path d="M-20,{by} Q 300,{by - 12} 640,{by + 4} '
+                  f'Q 980,{by + 14} 1320,{by - 4} L1320,{by + 34} '
+                  f'Q 900,{by + 44} 400,{by + 34} Q 140,{by + 28} -20,{by + 32} Z" '
+                  f'fill="{bc}" opacity="{bo}"/>')
+    # the grazed ground: big soft patches of bare pale dirt, heaviest where the mounds are
+    for k in range(38):
+        px = -20 + rp() * 1340
+        py = 556 + rp() * 160 if px > 690 else 520 + rp() * 196
+        fr.append(f'<ellipse cx="{px:.0f}" cy="{py:.0f}" rx="{24 + rp() * 62:.0f}" '
+                  f'ry="{6 + rp() * 13:.0f}" fill="{DIRT}" '
+                  f'opacity="{0.6 + rp() * 0.3:.2f}"/>')
+    for k in range(24):
+        px = -20 + rp() * 1340
+        py = 556 + rp() * 160 if px > 690 else 520 + rp() * 196
+        fr.append(f'<ellipse cx="{px:.0f}" cy="{py:.0f}" rx="{14 + rp() * 38:.0f}" '
+                  f'ry="{4 + rp() * 9:.0f}" fill="{DIRT_L}" '
+                  f'opacity="{0.5 + rp() * 0.3:.2f}"/>')
+    # worn trails running between the burrows
+    for k in range(16):
+        tx = -20 + rp() * 1340
+        ty = 528 + rp() * 180
+        fr.append(f'<path d="M{tx:.0f},{ty:.0f} q{60 + rp() * 120:.0f},{rp() * 30 - 15:.0f} '
+                  f'{160 + rp() * 200:.0f},{rp() * 24 - 12:.0f}" stroke="{DIRT_L}" '
+                  f'stroke-width="{5 + rp() * 9:.0f}" fill="none" opacity="0.55" '
+                  f'stroke-linecap="round"/>')
+    for k in range(34):
+        sx = -20 + rp() * 1340
+        sy = 562 + rp() * 150 if sx > 690 else 526 + rp() * 186
+        sr = 9 + rp() * rp() * 24
+        o_ = [f'<g>{shadow(sx, sy + 2, sr * 0.9, sr * 0.2, 0.1)}']
+        o_.append(f'<ellipse cx="{sx:.0f}" cy="{sy - sr * 0.26:.0f}" rx="{sr:.0f}" '
+                  f'ry="{sr * 0.56:.0f}" fill="{SAGE}"/>')
+        o_.append(f'<ellipse cx="{sx - sr * 0.3:.0f}" cy="{sy - sr * 0.52:.0f}" '
+                  f'rx="{sr * 0.58:.0f}" ry="{sr * 0.36:.0f}" fill="{SAGE_L}"/>')
+        for m_ in range(int(sr / 2.4) + 3):
+            bx_ = sx + (rp() - 0.5) * sr * 1.9
+            by_ = sy - sr * 0.1
+            o_.append(f'<path d="M{bx_:.0f},{by_:.0f} l{(rp() - 0.5) * 5:.1f},'
+                      f'{-sr * (0.5 + rp() * 0.7):.1f}" '
+                      f'stroke="{SAGE_L if m_ % 2 else SAGE}" '
+                      f'stroke-width="{1.4 + rp() * 1.4:.1f}" fill="none" '
+                      f'stroke-linecap="round"/>')
+        fr.append(''.join(o_) + '</g>')
+    for k in range(230):
+        gx = -20 + rp() * 1340
+        gy = 558 + rp() * 160 if gx > 690 else 520 + rp() * 198
+        s_ = 0.6 + rp() * 1.0
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-11 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-14 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-10 * s_:.1f}" '
+                  f'stroke="{(PRAIRIE_D, "#b9ad62", "#c2b878", "#8b9a4c")[int(rp() * 4)]}" '
+                  f'stroke-width="{1.3 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # ---------------------------------------------------------------------
+    fr.append('</g>')   # end of the near-field ground clip
+
+    # ---------------------------------------------------------------------
+    # THE PLATFORM. On the NEAR side of the rails on purpose: the train renders behind
+    # scenery-front, so anyone standing here stays visible while it is stopped. Put them
+    # on the far side and the train hides the very thing the animation is about.
+    PF_L, PF_R, PF_TOP, PF_NEAR, PF_FOOT = 704, 1294, 520, 534, 550
+    fr.append(f'<path d="M{PF_L},{PF_TOP} L{PF_R},{PF_TOP} L{PF_R},{PF_NEAR} '
+              f'L{PF_L},{PF_NEAR} Z" fill="#b09873"/>')
+    for k in range(int((PF_R - PF_L) / 15)):
+        fr.append(f'<rect x="{PF_L + 4 + k * 15}" y="{PF_TOP}" width="2" '
+                  f'height="{PF_NEAR - PF_TOP}" fill="#8f7a5c" opacity="0.7"/>')
+    fr.append(f'<path d="M{PF_L},{PF_NEAR} L{PF_R},{PF_NEAR} L{PF_R},{PF_FOOT} '
+              f'L{PF_L},{PF_FOOT} Z" fill="#7d6a50"/>')
+    fr.append(f'<path d="M{PF_L},{PF_NEAR} L{PF_R},{PF_NEAR} L{PF_R},{PF_NEAR + 4} '
+              f'L{PF_L},{PF_NEAR + 4} Z" fill="#c8b08a"/>')
+    for px_ in range(PF_L + 16, PF_R, 62):
+        fr.append(f'<rect x="{px_}" y="{PF_FOOT - 2}" width="7" height="12" '
+                  f'fill="#6b5a44"/>')
+    # freight waiting to go: barrels, crates and a baggage handcart
+    for bx_ in (742, 758, 750):
+        fr.append(f'<g><ellipse cx="{bx_}" cy="{PF_TOP + 12}" rx="9" ry="4" '
+                  f'fill="#8a6434"/>'
+                  f'<path d="M{bx_ - 9},{PF_TOP + 12} L{bx_ - 8},{PF_TOP - 10} '
+                  f'L{bx_ + 8},{PF_TOP - 10} L{bx_ + 9},{PF_TOP + 12} Z" fill="#a0764a"/>'
+                  f'<rect x="{bx_ - 9}" y="{PF_TOP - 4}" width="18" height="2.4" '
+                  f'fill="#5f4a30"/>'
+                  f'<ellipse cx="{bx_}" cy="{PF_TOP - 10}" rx="8" ry="3.4" '
+                  f'fill="#b98d5c"/></g>')
+    for cx0, cw, ch in ((1146, 34, 22), (1180, 26, 16)):
+        fr.append(f'<g><rect x="{cx0}" y="{PF_TOP + 8 - ch}" width="{cw}" height="{ch}" '
+                  f'fill="#b5915e"/>'
+                  f'<rect x="{cx0}" y="{PF_TOP + 8 - ch}" width="{cw}" height="3" '
+                  f'fill="#cfae7c"/>'
+                  f'<path d="M{cx0},{PF_TOP + 8 - ch} L{cx0 + cw},{PF_TOP + 8}" '
+                  f'stroke="#8a6a3e" stroke-width="1.6"/></g>')
+    fr.append(f'<g><rect x="1224" y="{PF_TOP - 6}" width="46" height="8" rx="2" '
+              f'fill="#7d6a50"/>'
+              f'<rect x="1224" y="{PF_TOP + 2}" width="46" height="3" fill="#5f4a34"/>'
+              f'<circle cx="1234" cy="{PF_TOP + 8}" r="6" fill="none" stroke="#3f3629" '
+              f'stroke-width="2"/>'
+              f'<circle cx="1260" cy="{PF_TOP + 8}" r="6" fill="none" stroke="#3f3629" '
+              f'stroke-width="2"/>'
+              f'<path d="M1268,{PF_TOP - 6} L1282,{PF_TOP - 18}" stroke="#7d6a50" '
+              f'stroke-width="3"/></g>')
+
+    # THE PEOPLE. Six of them, waiting. Ids so the engine can move them one at a time;
+    # a class so it can address them all. A cowboy is a hat, a waistcoat and boots — at
+    # thirty-five pixels that is the entire vocabulary available.
+    def person(px, py, ps, shirt, trous, hat, skin='#e2b48c', case=None, child=False):
+        h = 22 if child else 34
+        o = [f'<g transform="translate({px},{py}) scale({ps})">']
+        o.append(shadow(0, 1, h * 0.26, h * 0.07, 0.16))
+        o.append(f'<path d="M{-h * 0.1:.1f},{-h * 0.4:.1f} L{-h * 0.12:.1f},0 '
+                 f'L{-h * 0.02:.1f},0 L{h * 0.02:.1f},{-h * 0.4:.1f} Z" fill="{trous}"/>')
+        o.append(f'<path d="M{h * 0.02:.1f},{-h * 0.4:.1f} L{h * 0.04:.1f},0 '
+                 f'L{h * 0.14:.1f},0 L{h * 0.12:.1f},{-h * 0.4:.1f} Z" fill="{trous}"/>')
+        o.append(f'<rect x="{-h * 0.15:.1f}" y="{-h * 0.06:.1f}" width="{h * 0.15:.1f}" '
+                 f'height="{h * 0.07:.1f}" rx="1" fill="#3a2b1e"/>')
+        o.append(f'<rect x="{h * 0.02:.1f}" y="{-h * 0.06:.1f}" width="{h * 0.15:.1f}" '
+                 f'height="{h * 0.07:.1f}" rx="1" fill="#3a2b1e"/>')
+        o.append(f'<path d="M{-h * 0.17:.1f},{-h * 0.38:.1f} '
+                 f'C {-h * 0.19:.1f},{-h * 0.66:.1f} {h * 0.19:.1f},{-h * 0.66:.1f} '
+                 f'{h * 0.17:.1f},{-h * 0.38:.1f} Z" fill="{shirt}"/>')
+        o.append(f'<path d="M{-h * 0.17:.1f},{-h * 0.6:.1f} L{-h * 0.24:.1f},{-h * 0.4:.1f}" '
+                 f'stroke="{shirt}" stroke-width="{h * 0.08:.1f}" stroke-linecap="round"/>')
+        o.append(f'<path d="M{h * 0.17:.1f},{-h * 0.6:.1f} L{h * 0.24:.1f},{-h * 0.4:.1f}" '
+                 f'stroke="{shirt}" stroke-width="{h * 0.08:.1f}" stroke-linecap="round"/>')
+        o.append(f'<circle cx="0" cy="{-h * 0.76:.1f}" r="{h * 0.11:.1f}" fill="{skin}"/>')
+        if hat == 'stetson':
+            o.append(f'<ellipse cx="0" cy="{-h * 0.84:.1f}" rx="{h * 0.22:.1f}" '
+                     f'ry="{h * 0.05:.1f}" fill="#5f4326"/>')
+            o.append(f'<path d="M{-h * 0.11:.1f},{-h * 0.85:.1f} '
+                     f'C {-h * 0.11:.1f},{-h * 1.0:.1f} {h * 0.11:.1f},{-h * 1.0:.1f} '
+                     f'{h * 0.11:.1f},{-h * 0.85:.1f} Z" fill="#5f4326"/>')
+        elif hat == 'bonnet':
+            o.append(f'<path d="M{-h * 0.14:.1f},{-h * 0.78:.1f} '
+                     f'C {-h * 0.16:.1f},{-h * 0.96:.1f} {h * 0.14:.1f},{-h * 0.96:.1f} '
+                     f'{h * 0.15:.1f},{-h * 0.8:.1f} '
+                     f'L{h * 0.2:.1f},{-h * 0.78:.1f} L{-h * 0.14:.1f},{-h * 0.72:.1f} Z" '
+                     f'fill="#e8dcc2"/>')
+        elif hat == 'bowler':
+            o.append(f'<ellipse cx="0" cy="{-h * 0.85:.1f}" rx="{h * 0.16:.1f}" '
+                     f'ry="{h * 0.04:.1f}" fill="#3a3128"/>')
+            o.append(f'<path d="M{-h * 0.1:.1f},{-h * 0.86:.1f} '
+                     f'C {-h * 0.1:.1f},{-h * 0.98:.1f} {h * 0.1:.1f},{-h * 0.98:.1f} '
+                     f'{h * 0.1:.1f},{-h * 0.86:.1f} Z" fill="#3a3128"/>')
+        if case:
+            o.append(f'<rect x="{h * 0.2:.1f}" y="{-h * 0.36:.1f}" width="{h * 0.24:.1f}" '
+                     f'height="{h * 0.2:.1f}" rx="1.5" fill="{case}"/>')
+        return ''.join(o) + '</g>'
+
+    # Some of them are TRAVELLING. Anyone with a role is handed to the engine's
+    # station-halt contract (.cc-platform + .cc-passenger, data-stand -> data-door),
+    # which is the same one Boston and New York already use, so this scene gets a
+    # tested arrival rather than a second implementation of one.
+    #
+    # Not all six, deliberately. Two cowboys stay put and watch the train, because a
+    # depot where every single person on the platform gets on is a bus stop; the
+    # ones who came to see the train arrive are half of why anybody is there.
+    #
+    # The wrapper carries the POSITION and the drawing sits at its own origin —
+    # that is what lets the engine move somebody. Drawn the other way round (the
+    # position baked into the artwork, the wrapper at 0,0) they cannot walk.
+    #
+    # (x, scale, shirt, trousers, hat, case, child, role, door x)
+    WAITERS = [(792, 1.0, '#4a6f8c', '#3f3a34', 'stetson', None, False, None, 0),
+               (826, 0.98, '#9c4436', '#4a4238', 'stetson', None, False, None, 0),
+               (884, 1.0, '#3f5f4a', '#2f3a42', 'bowler', '#6b4a2a', False, 'board', 926),
+               (916, 1.0, '#c9a24a', '#5f4a34', None, None, True, 'board', 958),
+               (952, 1.0, '#7a5a8c', '#5a4a5f', 'bonnet', None, False, 'board', 992),
+               (1084, 0.98, '#e8d9b0', '#4a4238', 'stetson', '#7d5a3a', False, 'alight', 1046)]
+    for k, (px_, ps_, sh_, tr_, ht_, cs_, ch_, role_, dx_) in enumerate(WAITERS):
+        sy_, dy_ = PF_NEAR - 4, 508
+        at = (px_, sy_) if role_ != 'alight' else (dx_, dy_)
+        cls = 'cc-person' + (' cc-passenger' if role_ else '')
+        fr.append(f'<g id="cc-person-{k}" class="{cls}"'
+                  + (f' data-role="{role_}" data-stand="{px_},{sy_}" '
+                     f'data-door="{dx_},{dy_}" data-scale="{ps_ * 1.25:.3f}"'
+                     if role_ else '')
+                  + f' transform="translate({at[0]},{at[1]}) scale({ps_ * 1.25:.3f})"'
+                  + (' opacity="0"' if role_ == 'alight' else '') + '>'
+                  + person(0, 0, 1.0, sh_, tr_, ht_, case=cs_, child=ch_)
+                  + '</g>')
+    # data-stop is the HEAD of the train, and the head is the ENGINE, so it is aimed
+    # past the platform: what has to end up beside these people is a COACH DOOR.
+    fr.append('<g class="cc-platform" data-stop="1272" data-dwell="7"></g>')
+    DEFS.append('    <path id="board-path" class="cc-path" '
+                'd="M900,530 L946,522 L980,514"/>')
+
+    # ---------------------------------------------------------------------
+    # THE PRAIRIE DOG TOWN — the headline animation.
+    #
+    # ON SCALE, because it is a deliberate exception and should be stated rather than
+    # discovered. A prairie dog is 30cm tall standing. At this depth the ruler says nine
+    # pixels, which is not an animal, it is a speck. They are drawn at about two and a
+    # half times life size — 24 to 32px — which still leaves them a quarter of the
+    # locomotive's height, and the burrow mounds are enlarged to match so the system is
+    # internally consistent. Everything else in this scene is at true scale.
+    #
+    # THE CONTRACT is a clip, not a mask. Each animal sits inside a group clipped to
+    # everything ABOVE its own burrow rim, so translating it straight down by its own
+    # height makes it vanish INTO the hole. That is the whole trick, and it is why
+    # nothing here needs a walk cycle.
+    COAT, COAT_D, BELLY = '#c9a473', '#a4804f', '#e6d6b4'
+    PD_DARK = '#3a2c1c'
+
+    def pdog(x, y, s, face):
+        """Chunky. A prairie dog is a barrel that happens to be standing up; the first
+        version came out slim and long-necked and read as a meerkat."""
+        o = [f'<g transform="translate({x},{y}) scale({s * face},{s})">']
+        o.append(f'<path d="M10,-9 C 15,-7 18,-3 18,1 C 14,0 10,-3 8,-6 Z" '
+                 f'fill="{COAT_D}"/>')
+        o.append(f'<path d="M15,-2 C 17,-1 18,0 18,1 C 16,1 14,0 13,-1 Z" '
+                 f'fill="{PD_DARK}"/>')
+        o.append(f'<ellipse cx="-4" cy="-1.5" rx="7" ry="3" fill="{COAT_D}"/>')
+        o.append(f'<path d="M-6,-29 C -12,-26 -14,-19 -14,-13 C -14,-6 -11,-1 -5,-1 '
+                 f'C 4,0 12,-4 13,-12 C 14,-20 11,-27 5,-30 '
+                 f'C 1,-32 -3,-31 -6,-29 Z" fill="{COAT}"/>')
+        o.append(f'<path d="M-6,-28 C -11,-25 -12,-19 -12,-13 C -12,-7 -10,-2 -6,-2 '
+                 f'C -3,-2 -2,-7 -2,-14 C -2,-21 -4,-26 -6,-28 Z" fill="{BELLY}"/>')
+        o.append(f'<path d="M4,-29 C 10,-25 13,-19 12,-11 C 11,-5 8,-1 5,-1 '
+                 f'C 8,-7 10,-18 7,-25 Z" fill="{COAT_D}"/>')
+        o.append(f'<circle cx="-4" cy="-34" r="9" fill="{COAT}"/>')
+        o.append(f'<path d="M-11,-37 C -16,-36 -18,-33 -17,-31 C -15,-29 -11,-29 -8,-30 '
+                 f'C -6,-32 -7,-36 -11,-37 Z" fill="{BELLY}"/>')
+        o.append(f'<ellipse cx="-17" cy="-32" rx="1.7" ry="1.4" fill="{PD_DARK}"/>')
+        o.append(f'<circle cx="1" cy="-40" r="2.4" fill="{COAT_D}"/>')
+        o.append(f'<circle cx="-7" cy="-41" r="2.1" fill="{COAT_D}"/>')
+        o.append(f'<circle cx="-9" cy="-36" r="2" fill="{PD_DARK}"/>')
+        o.append(f'<ellipse cx="-12" cy="-19" rx="3.4" ry="2.4" fill="{COAT}" '
+                 f'transform="rotate(-24 -12 -19)"/>')
+        o.append(f'<ellipse cx="-11" cy="-15" rx="3.2" ry="2.2" fill="{COAT_D}" '
+                 f'transform="rotate(-18 -11 -15)"/>')
+        return ''.join(o) + '</g>'
+
+    def burrow_spoil(hx, hy, hw):
+        """The crater of pale spoil a colony throws up around its entrance. Drawn BEFORE
+        the hole, because it is what the hole is cut into."""
+        return (f'<g><ellipse cx="{hx:.0f}" cy="{hy + hw * 0.26:.1f}" '
+                f'rx="{hw * 2.4:.1f}" ry="{hw * 0.86:.1f}" fill="{DIRT}"/>'
+                f'<ellipse cx="{hx:.0f}" cy="{hy + hw * 0.1:.1f}" rx="{hw * 1.8:.1f}" '
+                f'ry="{hw * 0.62:.1f}" fill="{DIRT_L}"/></g>')
+
+    def burrow_hole(hx, hy, hw):
+        """The mouth itself: a dark throat with the far wall catching a little light, so
+        it reads as a hole going DOWN rather than as a dark patch painted on the grass."""
+        return (f'<g><ellipse cx="{hx:.0f}" cy="{hy:.0f}" rx="{hw:.1f}" '
+                f'ry="{hw * 0.46:.1f}" fill="{HOLE}"/>'
+                f'<path d="M{hx - hw:.1f},{hy:.0f} '
+                f'A {hw:.1f},{hw * 0.46:.1f} 0 0 1 {hx + hw:.1f},{hy:.0f} '
+                f'A {hw * 0.9:.1f},{hw * 0.3:.1f} 0 0 0 {hx - hw:.1f},{hy:.0f} Z" '
+                f'fill="#3b3325"/></g>')
+
+    def burrow_lip(hx, hy, hw):
+        """The NEAR rim, drawn on top of the animal. This is the piece that makes the
+        whole thing work: with a lip in front of its feet the animal is standing IN the
+        entrance, and when it drops it goes behind the lip and into the ground. Without
+        it — which is how the first version was built — it is a squirrel standing on a
+        bare patch with nowhere to go."""
+        return (f'<path d="M{hx - hw * 1.04:.1f},{hy - 1:.0f} '
+                f'A {hw * 1.04:.1f},{hw * 0.5:.1f} 0 0 0 {hx + hw * 1.04:.1f},{hy - 1:.0f} '
+                f'A {hw * 1.5:.1f},{hw * 0.74:.1f} 0 0 1 {hx - hw * 1.04:.1f},{hy - 1:.0f} Z" '
+                f'fill="{DIRT_L}"/>')
+
+    # Left and right of the carriageway, and kept clear of it: the checker rejects a prop
+    # inside the road and, more to the point, an animal standing in the road is the one
+    # thing this game must never show.
+    #   (x, ground y, scale, facing, how far DOWN it is authored)
+    PDOGS = [(118, 566, 0.34, 1, 0), (250, 580, 0.34, -1, 0), (440, 572, 0.34, 1, 0),
+             (86, 612, 0.36, 1, 26), (330, 620, 0.38, -1, 0), (470, 638, 0.42, 1, 0),
+             (196, 660, 0.47, -1, 0), (420, 696, 0.55, -1, 22), (60, 690, 0.52, 1, 0),
+             (280, 704, 0.65, 1, 0),
+             (742, 588, 0.34, -1, 0), (1010, 596, 0.34, 1, 0), (1226, 580, 0.34, -1, 0),
+             (790, 618, 0.38, -1, 30), (1064, 626, 0.39, 1, 0), (920, 654, 0.44, -1, 0),
+             (1240, 664, 0.49, 1, 0), (800, 700, 0.56, 1, 0), (1084, 702, 0.64, -1, 16)]
+    # Empty burrows, so a child can see that the holes are holes before anything comes out
+    # of one. A town has far more entrances than it has animals above ground.
+    for hx, hy, hs in ((352, 560, 0.34), (150, 596, 0.35), (446, 668, 0.44),
+                       (108, 726, 0.60), (330, 596, 0.38), (884, 604, 0.34),
+                       (1136, 616, 0.36), (960, 716, 0.60), (1284, 640, 0.47),
+                       (836, 716, 0.53)):
+        hw = 15 * hs
+        fr.append(burrow_spoil(hx, hy, hw))
+        fr.append(burrow_hole(hx, hy, hw))
+        fr.append(burrow_lip(hx, hy, hw))
+
+    for i_, (px, py, ps, pf, pdown) in enumerate(PDOGS):
+        hw = 15 * ps
+        fr.append(burrow_spoil(px, py, hw))
+        fr.append(burrow_hole(px, py, hw))
+        # the clip is cut at the mouth's own centre line, so a single generous downward
+        # translate hides any of them regardless of scale
+        DEFS.append(f'    <clipPath id="mdpd{i_}"><rect x="{px - 70:.0f}" y="0" '
+                    f'width="150" height="{py:.0f}"/></clipPath>')
+        fr.append(f'<g clip-path="url(#mdpd{i_})">'
+                  f'<g id="cc-pdog-{i_}" class="cc-pdog" transform="translate(0,{pdown})">'
+                  + pdog(px - 2 * ps, py, ps, pf) + '</g></g>')
+        fr.append(burrow_lip(px, py, hw))
+
+    # ===================================================== FOREGROUND ===
+    fgl = ['    ']
+
+    def on_road(x, y, m=12):
+        """The foreground layer draws over EVERYTHING, road included. Anything scattered
+        here has to be asked whether it is standing on the carriageway — grass was growing
+        out of the tarmac for several revisions because nothing ever asked."""
+        t = (y - 300) / 420.0
+        return (622 - 112 * t) - m < x < (644 + 126 * t) + m
+
+    rz = rnd(59)
+    for k in range(115):
+        gx = rz() * 1340 - 20
+        gy = 688 + rz() * 40
+        if on_road(gx, gy):
+            continue
+        s_ = 1.3 + rz() * 1.6
+        fgl.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-15 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-20 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-14 * s_:.1f}" '
+                   f'stroke="{(PRAIRIE_D, "#b9ad62", "#8b9a4c")[int(rz() * 3)]}" '
+                   f'stroke-width="{1.7 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    return scene('medora', 'Medora, North Dakota',
+                 {
+                     'sky': '\n'.join(sk),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface=ROADC, surface2=ROADC_D, shoulder='#c9bc98',
+                                    dash='#e8dc74', top=314),
+                     'trackkw': dict(ballast='#a89a80', ballast_hi='#b8aa90',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague(); medora()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')
