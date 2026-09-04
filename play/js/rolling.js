@@ -85,9 +85,16 @@
         never reaches outside it, which is what keeps three wagons three colours. */
     paint(root, colours) {
       if (!root || !colours) return;
+      // A LIVERY IS A PAINT SCHEME, NOT A COLOUR. The vehicle carries the artwork
+      // for it already and this only decides which one is showing — the base
+      // colours that go with it arrive through `colours` like any other.
+      root.querySelectorAll('.cc-livery').forEach(el => {
+        el.setAttribute('display',
+          el.getAttribute('data-livery') === colours.livery ? 'inline' : 'none');
+      });
       Object.keys(colours).forEach(part => {
         const hex = colours[part];
-        if (!hex) return;
+        if (!hex || part === 'livery') return;
         root.querySelectorAll('.cc-' + part).forEach(el => el.setAttribute('fill', hex));
         // A container wagon carries a second box. Give it a darker shade of the
         // same colour unless the child has explicitly chosen one for it.

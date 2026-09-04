@@ -116,7 +116,8 @@
 
     chooseColour(entry) {
       CC.audio.blip();
-      CC.trains.setBodyColour(this.slot, entry.hex);
+      if (entry.livery) CC.trains.setLivery(this.slot, entry);
+      else CC.trains.setBodyColour(this.slot, entry.hex);
       this.render();
       CC.speech.say(CC.i18n.t('colors.' + entry.key), { interrupt: true });
     },
@@ -180,11 +181,21 @@
       const box = this.root.querySelector('.tc-colours');
       box.textContent = '';
       const bodyPart = this.slot === 'engine' ? 'loco' : 'wagon';
-      const chosen = (this.currentColours() || {})[bodyPart];
+      const now = this.currentColours() || {};
+      const chosen = now[bodyPart];
       CC.trains.PALETTE.forEach(entry => {
+        // ASK THE DRAWING, not the type. A livery swatch is only offered on a
+        // vehicle that actually carries that artwork, so adding the scheme to a
+        // second locomotive one day needs no change here at all.
+        if (entry.livery && !(this.previewGroup
+            && this.previewGroup.querySelector('[data-livery="' + entry.livery + '"]'))) return;
         const b = document.createElement('button');
-        b.className = 'tc-swatch' + (entry.hex === chosen ? ' is-on' : '');
-        b.style.background = entry.hex;
+        const on = entry.livery ? now.livery === entry.livery
+                                : (!now.livery && entry.hex === chosen);
+        b.className = 'tc-swatch' + (on ? ' is-on' : '');
+        b.style.background = entry.livery
+          ? 'linear-gradient(180deg,#c8202e 0 40%,#f2f4f7 40% 70%,#1f3f7a 70% 100%)'
+          : entry.hex;
         b.setAttribute('aria-label', CC.i18n.t('colors.' + entry.key));
         b.addEventListener('click', () => this.chooseColour(entry));
         box.appendChild(b);

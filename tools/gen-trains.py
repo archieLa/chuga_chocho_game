@@ -139,6 +139,26 @@ def diesel():
     # short nose
     b.append('<path class="cc-loco" d="M204,-118 L226,-108 L232,-54 L204,-54 Z" fill="#e8b62c"/>')
     b.append('<rect class="cc-trim" x="204" y="-70" width="30" height="8" fill="#c0392b"/>')
+    # THE STARS-AND-STRIPES LIVERY, off unless a child asks for it.
+    #
+    # Three bands and nothing else. A flag drawn on the flank is 2px of blue and
+    # a smear at the size this locomotive is actually seen — 278px long on
+    # screen — so what carries the idea is the BANDING: red nose and upper hood,
+    # a white flank, a blue skirt. That reads at a glance and it is what the
+    # photograph reads as too.
+    #
+    # It goes in HERE, after the body and before the details, so the windows,
+    # the headlight, the ditch lights and the horn all paint over it. Appended at
+    # the end it covered the cab glass and the loco went blind.
+    #
+    # The white stops at x=204 so the nose stays the base colour, and the blue
+    # follows the nose's own taper rather than running square through it.
+    b.append('<g class="cc-livery" data-livery="flag" display="none">')
+    b.append('<path d="M-212,-112 L118,-112 L118,-82 L-212,-82 Z" fill="#f2f4f7"/>')
+    b.append('<path d="M118,-108 L204,-108 L204,-82 L118,-82 Z" fill="#f2f4f7"/>')
+    b.append('<path d="M-212,-82 L229,-82 L232,-54 L-212,-54 Z" fill="#1f3f7a"/>')
+    b.append('<path d="M-212,-84 L229,-84 L229,-79 L-212,-79 Z" fill="#c8202e"/>')
+    b.append('</g>')
     # headlight + ditch lights + horn
     b.append('<rect x="208" y="-104" width="20" height="14" rx="3" fill="#2f343c"/>')
     b.append('<circle cx="224" cy="-97" r="6" fill="#fff3c4"/>')

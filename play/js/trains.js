@@ -44,6 +44,11 @@
     // shading, and at pure black a wagon flattens into a silhouette — you lose
     // the roof, the panel lines and the windows. This still reads as black.
     { key: 'black',  hex: '#26292f' },
+    // NOT A COLOUR — a paint scheme. It only appears on a vehicle whose artwork
+    // carries it (today the diesel-electric alone), and the customizer works that
+    // out by asking the drawing rather than by knowing the type.
+    { key: 'flag', livery: 'flag', hex: '#c8202e',
+      set: { loco: '#c8202e', roof: '#e9edf1', trim: '#1f3f7a' } },
   ];
 
   const STORAGE_KEY = 'cc.train';
@@ -144,6 +149,31 @@
       if (!target) return;
       const next = Object.assign({}, target.colours);
       next[part] = hex;
+      // Choosing a plain colour takes the livery off. Otherwise the bands stay
+      // painted over whatever the child picks and the swatch appears broken.
+      //
+      // And it takes the livery's OTHER parts with it. A scheme sets the roof and
+      // the frame stripe as well as the body, and the customizer only ever offers
+      // the body — so leaving them behind stranded a blue stripe and a white roof
+      // on every colour the child picked afterwards, with no way back. Deleting
+      // them returns those parts to the fills the artwork was drawn with.
+      if (next.livery) {
+        const liv = PALETTE.filter(q => q.livery === next.livery)[0];
+        if (liv && liv.set) {
+          Object.keys(liv.set).forEach(k => { if (k !== part) delete next[k]; });
+        }
+      }
+      next.livery = null;
+      target.colours = next;
+      changed();
+    },
+
+    /** A livery sets several parts at once and turns on artwork with them. */
+    setLivery(slot, entry) {
+      const target = slot === 'engine' ? consist.engine : consist.wagons[slot];
+      if (!target) return;
+      const next = Object.assign({}, target.colours, entry.set || {});
+      next.livery = entry.livery || null;
       target.colours = next;
       changed();
     },
