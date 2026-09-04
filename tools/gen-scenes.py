@@ -23930,6 +23930,56 @@ def glacier():
                 f'<path d="M-15,-4 L-9,-8 M9,-10 L15,-14" stroke="#d8d2c2" '
                 f'stroke-width="3.2" stroke-linecap="round"/></g>')
 
+    # PADDLEBOARDS, on the same water and at the kayaks' exaggerated scale — the
+    # note below about not correcting toward perspective applies to these too.
+    #
+    # A board reads as a board rather than a kayak because the rider STANDS: the
+    # figure is nearly twice a paddler's height above a hull that is barely there,
+    # and the paddle is one long shaft going down into the water instead of a
+    # blade each side. Those two things are the whole difference at this size.
+    def sup_rider(px, s_, shirt, skin, hair='#2f3438'):
+        return (f'<g transform="translate({px},0) scale({s_})">'
+                f'<path d="M-3.6,-1 L3.6,-1 L2.8,-9 L-2.8,-9 Z" fill="#3a4550"/>'
+                f'<path d="M-3.8,-8 L3.8,-8 L3,-19 L-3,-19 Z" fill="{shirt}"/>'
+                f'<circle cx="0" cy="-22.4" r="3.2" fill="{skin}"/>'
+                f'<path d="M-3.4,-22.8 A3.4,3.4 0 0 1 3.4,-22.8 Z" fill="{hair}"/>'
+                f'<path d="M-6,-19 L10,1" stroke="#c9c3b2" stroke-width="1.5" '
+                f'stroke-linecap="round"/>'
+                f'<path d="M8,-1 L13,2.6 L10.4,5 L6,1.6 Z" fill="#d8d2c2"/></g>')
+
+    def paddleboard(x, y, board, gid, riders, flip=False, drift=''):
+        f = -1 if flip else 1
+        v = ' cc-vessel" ' + drift if drift else '"'
+        return (f'<g id="{gid}" class="cc-sup{v} transform="translate({x},{y}) '
+                f'scale({f},1)">'
+                f'<ellipse cx="0" cy="4" rx="27" ry="3.2" fill="#a9dcd6" opacity="0.55"/>'
+                f'<path d="M-25,1.2 Q-22,4.2 0,4.2 Q22,4.2 25,1.2 L22,-0.8 L-22,-0.8 Z" '
+                f'fill="{board}"/>'
+                f'<path d="M-14,-0.8 L14,-0.8 L13,0.9 L-13,0.9 Z" '
+                f'fill="{mix(board, "#000000", 0.22)}"/>'
+                + ''.join(sup_rider(*r) for r in riders) + '</g>')
+
+    # THE ONE THAT MATTERS: a woman and a small child on one board, the child in
+    # front where a child actually stands. A maintainer's-son request, and it is
+    # his own memory of paddleboarding with his mother, so it is drawn as two
+    # figures on one board rather than two boards side by side.
+    wa.append(paddleboard(700, 326, '#e8e2d0', 'cc-sup-0',
+                          # The CHILD leads and the mother is behind her. The board
+                          # drifts right to left and is mirrored to do it, so the
+                          # positive offset is the leading end — drawn the other way
+                          # round the small one was trailing, and a parent steers a
+                          # board from the back with the child out in front.
+                          [(7, 0.62, '#f2d24a', '#f0d0aa', '#4a3524'),
+                           (-7, 1.0, '#c8503f', '#e8c49a')],
+                          False,
+                          'data-path="river" data-speed="14" data-t="0.44" '
+                          'data-nose="-1" data-bob="1.1"'))
+    wa.append(paddleboard(300, 320, '#6fc4d8', 'cc-sup-1',
+                          [(0, 0.94, '#4a7f5c', '#dcae86')],
+                          False,
+                          'data-path="river" data-speed="17" data-t="0.72" '
+                          'data-nose="-1" data-bob="0.9"'))
+
     # All three drift DOWNSTREAM, which here is right to left — #river-path runs that
     # way because the Middle Fork does. So all three are mirrored (data-nose="-1"):
     # the art is drawn facing right, and a paddler going backwards down a river is the
@@ -24326,12 +24376,17 @@ def glacier():
                      f'height="{H * 0.14:.1f}" fill="#5a5550"/>')
         o.append(f'<rect x="{L * 0.845:.1f}" y="{-H * 1.2:.1f}" width="{L * 0.15:.1f}" '
                  f'height="{H * 0.19:.1f}" rx="{H * 0.09:.1f}" fill="#6f6a60"/>')
-        # passengers standing up through the roof, three of them waving
+        # Passengers standing up through the roof, and NOBODY WAVES. They used to,
+        # and the request to stop came three times from the one customer who
+        # matters, which is three more than a reason is needed. The arms are gone
+        # rather than lowered: they existed only to wave, and a frozen raised arm
+        # is worse than none. No .cc-wave is emitted here now, so the tour's own
+        # wave handler simply finds nothing.
         for fx, skin, shirt, arm in ((0.40, '#e8c49a', '#3f6a8c', 0),
-                                     (0.48, '#e0b088', '#d8b03c', 1),
+                                     (0.48, '#e0b088', '#d8b03c', 0),
                                      (0.56, '#f0d0aa', '#c8503f', 0),
-                                     (0.645, '#e8c49a', '#efe7d6', 2),
-                                     (0.73, '#dcae86', '#4a7f5c', 1)):
+                                     (0.645, '#e8c49a', '#efe7d6', 0),
+                                     (0.73, '#dcae86', '#4a7f5c', 0)):
             px, ty = L * fx, -H * 1.06
             o.append(f'<path d="M{px - L * 0.026:.1f},{ty:.1f} '
                      f'L{px + L * 0.026:.1f},{ty:.1f} '
