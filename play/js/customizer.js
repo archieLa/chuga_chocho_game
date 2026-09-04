@@ -194,7 +194,7 @@
                                 : (!now.livery && entry.hex === chosen);
         b.className = 'tc-swatch' + (on ? ' is-on' : '');
         b.style.background = entry.livery
-          ? 'linear-gradient(180deg,#c8202e 0 40%,#f2f4f7 40% 70%,#1f3f7a 70% 100%)'
+          ? 'linear-gradient(112deg,#1f3f7a 0 34%,#f2f4f7 34% 62%,#c8202e 62% 100%)'
           : entry.hex;
         b.setAttribute('aria-label', CC.i18n.t('colors.' + entry.key));
         b.addEventListener('click', () => this.chooseColour(entry));

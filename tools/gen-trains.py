@@ -115,14 +115,70 @@ def emit(name, vb, body, note, length, origin_from_rear, kind, label):
 # ============================================================ LOCOMOTIVES ====
 
 def diesel():
-    """Big American diesel-electric road unit (Union Pacific / Metra flavour)."""
+    """Big American diesel-electric road unit (Union Pacific / Metra flavour).
+
+    BUILT IN THREE PASSES — shells, then livery, then details — rather than in
+    drawing order. The livery has to sit over every painted surface and under
+    every fitting, and with the pieces interleaved that is impossible: the cab
+    glass is drawn before the nose, so a livery placed late enough to cover the
+    nose also covered the windows, and the hood ribs ended up ON the blue and
+    UNDER the white. Grouping the passes makes both correct by construction.
+    """
     b = [shadow(-230, 235)]
     # frame / walkway
     b.append('<rect x="-228" y="-54" width="462" height="12" rx="3" fill="#3a4049"/>')
     b.append('<rect class="cc-trim" x="-228" y="-46" width="462" height="5" fill="#c0392b"/>')
-    # long hood
+
+    # ---- pass 1: the painted shells --------------------------------------
     b.append('<rect class="cc-loco" x="-212" y="-120" width="330" height="66" rx="6" fill="#e8b62c"/>')
+    b.append('<rect class="cc-loco" x="118" y="-146" width="86" height="92" rx="7" fill="#e8b62c"/>')
+    b.append('<path class="cc-loco" d="M204,-118 L226,-108 L232,-54 L204,-54 Z" fill="#e8b62c"/>')
+
+    # ---- pass 2: the paint scheme ----------------------------------------
+    # THE STARS-AND-STRIPES LIVERY, off unless a child asks for it.
+    #
+    # RAKED, NOT BANDED. The first attempt divided the body into three horizontal
+    # stripes and the maintainer was right that it missed the point: on the real
+    # unit the colours are separated by steeply ANGLED lines running up and
+    # forward, and there is a row of stars along the flank. Those two things are
+    # the whole signature — horizontal bands are just a painted train.
+    #
+    # Two parallel rakes divide it: blue behind, white between, red in front over
+    # the cab and the nose. The base body IS the blue, so only the white and the
+    # red are drawn.
+    #
+    # The polygons follow the SILHOUETTE rather than being clipped to it. The
+    # hood stops at y=-120 and the cab goes up to -146, so a rake drawn straight
+    # across the full height spills into open sky above the hood; each region is
+    # emitted per body section instead, which needs no clipPath and so nothing
+    # for the id-namespacing in inline-assets.py to rewrite.
+    #
+    # It goes in HERE, after the body and before the details, so the cab glass,
+    # the headlight, the ditch lights and the horn all paint over it. Appended at
+    # the end it covered the windows and the loco went blind.
+    def star(cx, cy, r):
+        import math
+        pts = []
+        for k in range(10):
+            rr = r if k % 2 == 0 else r * 0.4
+            a = math.radians(-90 + k * 36)
+            pts.append(f'{cx + rr * math.cos(a):.1f},{cy + rr * math.sin(a):.1f}')
+        return '<polygon points="' + ' '.join(pts) + '" fill="#f2f4f7"/>'
+
+    WHITE, RED = '#f2f4f7', '#c8202e'
+    b.append('<g class="cc-livery" data-livery="flag" display="none">')
+    #   white, from the rear rake forward — over the hood, then over the cab
+    b.append(f'<path d="M10,-54 L43,-120 L118,-120 L118,-54 Z" fill="{WHITE}"/>')
+    b.append(f'<path d="M118,-54 L118,-146 L196,-146 L150,-54 Z" fill="{WHITE}"/>')
+    #   red, forward of the front rake: the cab front and the whole nose
+    b.append(f'<path d="M150,-54 L196,-146 L204,-146 L204,-54 Z" fill="{RED}"/>')
+    b.append(f'<path d="M204,-118 L226,-108 L232,-54 L204,-54 Z" fill="{RED}"/>')
+    #   and the stars along the blue, which is the bit nothing else in the set has
+    b.append(''.join(star(x, -88, 9) for x in (-186, -148, -110, -72, -34)))
+    b.append('</g>')
+    # ---- pass 3: everything bolted to the outside ------------------------
     b.append('<rect class="cc-roof" x="-212" y="-128" width="330" height="12" rx="5" fill="#8d959e"/>')
+    b.append('<rect class="cc-roof" x="114" y="-154" width="94" height="12" rx="5" fill="#8d959e"/>')
     # radiator fans + exhaust
     b.append('<g fill="#6f7883"><circle cx="-176" cy="-128" r="13"/><circle cx="-140" cy="-128" r="13"/></g>')
     b.append('<g fill="#4a515b"><circle cx="-176" cy="-128" r="7"/><circle cx="-140" cy="-128" r="7"/></g>')
@@ -130,35 +186,11 @@ def diesel():
     # side grilles + louvres
     b.append(ribs(-206, 110, -114, -60, 20, '#000', 0.13))
     b.append('<rect x="-60" y="-112" width="120" height="34" rx="4" fill="#000" opacity="0.14"/>')
-    # cab
-    b.append('<rect class="cc-loco" x="118" y="-146" width="86" height="92" rx="7" fill="#e8b62c"/>')
-    b.append('<rect class="cc-roof" x="114" y="-154" width="94" height="12" rx="5" fill="#8d959e"/>')
+    # cab glazing
     b.append('<rect x="126" y="-138" width="34" height="30" rx="3" fill="#bfe3f5"/>')
     b.append('<path d="M168,-138 L198,-138 L202,-108 L168,-108 Z" fill="#bfe3f5"/>')
     b.append('<path d="M168,-138 L198,-138 L200,-124 L168,-124 Z" fill="#dff2fc"/>')
-    # short nose
-    b.append('<path class="cc-loco" d="M204,-118 L226,-108 L232,-54 L204,-54 Z" fill="#e8b62c"/>')
     b.append('<rect class="cc-trim" x="204" y="-70" width="30" height="8" fill="#c0392b"/>')
-    # THE STARS-AND-STRIPES LIVERY, off unless a child asks for it.
-    #
-    # Three bands and nothing else. A flag drawn on the flank is 2px of blue and
-    # a smear at the size this locomotive is actually seen — 278px long on
-    # screen — so what carries the idea is the BANDING: red nose and upper hood,
-    # a white flank, a blue skirt. That reads at a glance and it is what the
-    # photograph reads as too.
-    #
-    # It goes in HERE, after the body and before the details, so the windows,
-    # the headlight, the ditch lights and the horn all paint over it. Appended at
-    # the end it covered the cab glass and the loco went blind.
-    #
-    # The white stops at x=204 so the nose stays the base colour, and the blue
-    # follows the nose's own taper rather than running square through it.
-    b.append('<g class="cc-livery" data-livery="flag" display="none">')
-    b.append('<path d="M-212,-112 L118,-112 L118,-82 L-212,-82 Z" fill="#f2f4f7"/>')
-    b.append('<path d="M118,-108 L204,-108 L204,-82 L118,-82 Z" fill="#f2f4f7"/>')
-    b.append('<path d="M-212,-82 L229,-82 L232,-54 L-212,-54 Z" fill="#1f3f7a"/>')
-    b.append('<path d="M-212,-84 L229,-84 L229,-79 L-212,-79 Z" fill="#c8202e"/>')
-    b.append('</g>')
     # headlight + ditch lights + horn
     b.append('<rect x="208" y="-104" width="20" height="14" rx="3" fill="#2f343c"/>')
     b.append('<circle cx="224" cy="-97" r="6" fill="#fff3c4"/>')

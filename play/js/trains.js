@@ -48,7 +48,9 @@
     // carries it (today the diesel-electric alone), and the customizer works that
     // out by asking the drawing rather than by knowing the type.
     { key: 'flag', livery: 'flag', hex: '#c8202e',
-      set: { loco: '#c8202e', roof: '#e9edf1', trim: '#1f3f7a' } },
+      // The BODY is the blue — the white and the red are drawn over it — so the
+      // base colour here is the rear of the locomotive, not its nose.
+      set: { loco: '#1f3f7a', roof: '#e9edf1', trim: '#c8202e' } },
   ];
 
   const STORAGE_KEY = 'cc.train';
