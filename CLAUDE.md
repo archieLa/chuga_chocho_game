@@ -70,11 +70,17 @@ or your edit will not reach the game.
 
 | | State |
 |---|---|
-| Locations | **53 done, across 49 states + DC** — Medora (ND) is the newest: a Northern Pacific depot on the edge of a prairie dog town, with a horse-drawn surrey working the street. Assateague (MD) is the one with a wild animal as the subject — a band of ponies loose on a salt marsh, one drinking from a creek with its reflection under it. **There is no fence in that scene and there must never be one** — it is the whole reason Maryland is that place and not Baltimore. **Virginia is the last state left.** |
+| Locations | **53 done, across 48 states + DC** — counted, not guessed: the line below the table says how. **Two states left: New Jersey and Virginia.** Medora (ND) is the newest: a Northern Pacific depot on the edge of a prairie dog town, with a horse-drawn surrey working the street. Assateague (MD) is the one with a wild animal as the subject — a band of ponies loose on a salt marsh, one drinking from a creek with its reflection under it. **There is no fence in that scene and there must never be one** — it is the whole reason Maryland is that place and not Baltimore. |
 | Rolling stock | **19 vehicles + `manifest.json`** — 8 powered (steam, diesel-electric, high-speed electric, commuter EMU, streetcar, cable car, **cane tank**, **monorail**) and 11 wagons (the **auto-rack** carries eight little cars and is what Detroit shunts; Bailey Yard's crane loads a container or a boxcar the same way). All in `play/assets/trains/`. The cane tank has no side rods on purpose and the monorail has almost no visible wheels — both are correct, see `SCENE_GUIDE.md`. |
 | US map | **Done** — `play/assets/us-map.svg` + inlined `play/js/map-data.js`, picker wired in `play/js/map.js`. |
 | Galleries | `tools/scene-gallery.html` and `tools/train-gallery.html` — open either straight from disk to see every asset as it stands. |
 | The game engine | **Built.** See the module map below. |
+
+**Count the states, never estimate them.** This table has been wrong twice. One line:
+
+```bash
+python3 -c "import re;w=open('play/js/world.js').read();h=set(re.findall(r\"state:'([^']+)'\",w));print(len(re.findall(r'\bid:',w)),'locations ·',len(h-{'District of Columbia'}),'states')"
+```
 
 ### The module map
 
