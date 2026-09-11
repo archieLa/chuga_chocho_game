@@ -5175,7 +5175,7 @@
   // the turn, which is what a slip road is for.
   const RACE_JOIN = { top: 220, accel: 90, brakeOver: 340 };
 
-  function driveSideRoad(car, secs) {
+  function driveSideRoad(car, secs, shut) {
     const ex = currentScene && currentScene.roadExit;
     if (!ex) return false;
     const onCircuit = currentScene.carStyle === 'race';
@@ -5208,16 +5208,27 @@
       }
       const want = car.x + v * secs;
       if (want < ROAD_CX) { car.x = want; return true; }
-      const blocked = cars.some(c => c.phase === 'road' &&
-                                     Math.abs(c.y - ex.y1) < carGap(ex.y1));
-      if (blocked) { car.x = ROAD_CX; return true; }        // wait for a gap
+      const noRoom = cars.some(c => c.phase === 'road' &&
+                                    Math.abs(c.y - ex.y1) < carGap(ex.y1));
+      if (noRoom || shut) { car.x = ROAD_CX; return true; } // wait for a gap, or for the gate
       car.phase = 'road'; car.x = null; car.y = ex.y1;
       return true;
     }
     if (car.phase === 'enter') {
       car.x -= car.speed * depthScale(car.y) * secs;
-      // Reached the junction: swing onto our carriageway and head down.
-      if (car.x <= ex.jx + 16) { car.phase = 'road'; car.x = null; car.y = ex.y1; }
+      // Reached the junction: swing onto our carriageway and head down — but not
+      // into a shut crossing.
+      //
+      // The backstop in updateCars will stop it either way, but it would stop it
+      // SIX PIXELS below this junction, because that is all the road there is
+      // between Rim Drive and the rails. So it holds up here instead, where a
+      // driver would: the street has room for the queue and the carriageway has
+      // none, and a line of cars waiting to turn reads far better than one
+      // parked across the junction mouth.
+      if (car.x <= ex.jx + 16) {
+        if (shut) { car.x = ex.jx + 16; return true; }
+        car.phase = 'road'; car.x = null; car.y = ex.y1;
+      }
       return true;
     }
     // Going away from the viewer and has reached the junction: turn right —
@@ -5287,7 +5298,7 @@
     // Where everything was before this frame moved it. The queue uses it to
     // hold a car rather than shove it backwards — see below.
     cars.forEach(car => { car.x0 = car.x; car.y0 = car.y; });
-    cars.forEach(car => { car.offRoad = driveSideRoad(car, secs); });
+    cars.forEach(car => { car.offRoad = driveSideRoad(car, secs, blocked); });
     // Rim Drive is a queue too. Without this, two cars released together at the
     // gate turn together and then sit 7px apart the whole way across.
     // 'exit' and 'approach' share one eastbound lane where the street is
@@ -5342,6 +5353,28 @@
         // for, in a scene that is already about waiting for things.
         if (dir < 0 && berthShut()) lim = closer(lim, BERTH_STOP);
         if (car.holdY != null) lim = closer(lim, car.holdY);
+        // NOTHING ENTERS THE CROSSING WHILE IT IS SHUT. The backstop, and the
+        // only rule in here that is about the RAILS rather than about the gate.
+        //
+        // `beforeLine` above is a POSITION test standing in for "has not passed
+        // the gate yet", and it is wrong for any car that joined the carriageway
+        // BELOW the gate's line. Crater Lake's Rim Drive meets the road at
+        // y=432 — eleven pixels under the far arm and thirty-six under STOP_FAR
+        // — so every car that turned down off it tested as already-past and
+        // drove through a closed crossing. Four of them in twenty-five seconds,
+        // always from the same side, which is the tell.
+        //
+        // Detroit had the same bug from the other end (a road that STARTS below
+        // the line) and was patched by clamping the line to the road. That fixed
+        // Detroit and nothing else; this catches both, and anything else that
+        // ever manages to get past a stop line, in any scene, for any reason.
+        //
+        // Only for a car that has not reached the band yet. One already ON it
+        // has to CLEAR the crossing — clamping that one stops it dead on the
+        // rails, which is the one thing worse than driving through the gate.
+        if (blocked && (dir > 0 ? car.y < CROSS_KEEP[0] : car.y > CROSS_KEEP[1])) {
+          lim = closer(lim, dir > 0 ? CROSS_KEEP[0] : CROSS_KEEP[1]);
+        }
         // NOBODY WAITS ON THE CROSSING. A driver does not stop on a level
         // crossing and this game least of all should draw one parked on the
         // rails. A limit that lands in the track band becomes the near side of
