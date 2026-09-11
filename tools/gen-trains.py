@@ -14,7 +14,7 @@ All vehicles share one convention so the engine can place and animate them unifo
 
 Run:  python3 tools/gen-trains.py
 """
-import json, pathlib
+import json, math, pathlib
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / 'play/assets/trains'
 OUT.mkdir(parents=True, exist_ok=True)
@@ -111,6 +111,98 @@ def emit(name, vb, body, note, length, origin_from_rear, kind, label):
     (OUT / f'{name}.svg').write_text(svg(name, vb, body, note))
     VEHICLES[name] = dict(file=f'{name}.svg', kind=kind, label=label,
                           length=length, originFromRear=origin_from_rear)
+
+# ------------------------------------------------------------- liveries ----
+#
+# THE STARS-AND-STRIPES SCHEME, shared by every vehicle that wears it.
+#
+# It started on the diesel-electric alone, hand-fitted to that one silhouette,
+# and the first thing asked for after it shipped was the same paint on the steam
+# engine and on the wagons. Hand-fitting eleven more bodies would have been
+# eleven more chances to get the rake angle slightly different on each, so the
+# geometry moved in here and the diesel keeps its own only because its shell is
+# genuinely irregular (a hood, a taller cab and a sloped nose).
+#
+# RAKED, NOT BANDED, and that is the whole point of it. The colours are divided
+# by steeply ANGLED lines leaning FORWARD, with a row of stars along the blue
+# behind them. Horizontal stripes are just a painted train; this is the one
+# scheme in the set anybody would recognise.
+#
+# The base body IS THE BLUE — the palette sets it — so only the white and the red
+# are drawn on top, each one covering everything forward of its own rake.
+#
+# The regions FOLLOW THE BODY'S OUTLINE rather than being clipped to it, which is
+# why `rx` is a parameter: a tank barrel and a boiler are half-round at the front,
+# and a rectangle painted over one hangs out past the end. Following the outline
+# needs no clipPath and so leaves nothing for the id-namespacing in
+# inline-assets.py to rewrite, and nothing to collide when the same wagon is in
+# the consist twice.
+
+FLAG_WHITE, FLAG_RED = '#f2f4f7', '#c8202e'
+FLAG_LEAN = 0.5          # how far forward a rake's top leans, per unit of height
+
+
+def flag_star(cx, cy, r, fill=FLAG_WHITE):
+    pts = []
+    for k in range(10):
+        rr = r if k % 2 == 0 else r * 0.4
+        a = math.radians(-90 + k * 36)
+        pts.append(f'{cx + rr * math.cos(a):.1f},{cy + rr * math.sin(a):.1f}')
+    return '<polygon points="' + ' '.join(pts) + '" fill="' + fill + '"/>'
+
+
+def flag_front(xb, x1, yt, yb, rx, fill, nose=None):
+    """Everything FORWARD of a rake whose foot is at xb, following the outline.
+
+    yt is the top of the body and yb its bottom, so yt < yb in SVG's coordinates;
+    the rake leans forward going up. Clamped at x1 so a short body gets a triangle
+    rather than a region that runs off the front.
+
+    `nose` is for the streamlined shells, whose fronts are a bezier rather than a
+    corner: pass the body path's OWN fragment from (x1, yt) round to the bottom,
+    and the region is closed with it. Copying the silhouette is the whole trick —
+    it means the scheme needs no clipPath on any vehicle, and so leaves nothing
+    for the id-namespacing in inline-assets.py to rewrite."""
+    xt = min(xb + (yb - yt) * FLAG_LEAN, x1)
+    d = [f'M{xb:.1f},{yb:.1f} L{xt:.1f},{yt:.1f}']
+    if nose:
+        d.append(f'L{x1:.1f},{yt:.1f} {nose} Z')
+        return f'<path d="{" ".join(d)}" fill="{fill}"/>'
+    r = min(rx, (yb - yt) / 2, (x1 - xb) / 2) if rx else 0
+    if r:
+        d.append(f'L{x1 - r:.1f},{yt:.1f} A{r:.1f},{r:.1f} 0 0 1 {x1:.1f},{yt + r:.1f}')
+        d.append(f'L{x1:.1f},{yb - r:.1f} A{r:.1f},{r:.1f} 0 0 1 {x1 - r:.1f},{yb:.1f} Z')
+    else:
+        d.append(f'L{x1:.1f},{yt:.1f} L{x1:.1f},{yb:.1f} Z')
+    return f'<path d="{" ".join(d)}" fill="{fill}"/>'
+
+
+def flag(x0, x1, yt, yb, rx=0, white=0.38, red=0.68, stars=True, extra='', nose=None):
+    """One body section in the flag scheme, ready to append after its shell.
+
+    `white` and `red` are where each rake's FOOT sits along the body, 0 at the
+    back and 1 at the front. `extra` is anything else that has to take the red —
+    a tank car's front end cap, say, which is a separate shape from its barrel.
+    """
+    L, H = x1 - x0, yb - yt
+    o = ['<g class="cc-livery" data-livery="flag" display="none">']
+    o.append(flag_front(x0 + L * white, x1, yt, yb, rx, FLAG_WHITE, nose))
+    o.append(flag_front(x0 + L * red, x1, yt, yb, rx, FLAG_RED, nose))
+    if stars:
+        # Along the blue only, and never crowding the rake: the row stops where
+        # the white begins. A body too short or too shallow for two of them gets
+        # none, because one lonely star reads as a mistake rather than a flag.
+        r = max(4.0, min(H * 0.17, 9.0))
+        lo, hi = x0 + r * 1.6, x0 + L * white - r * 1.9
+        n = int((hi - lo) / (r * 3.4)) + 1
+        if n >= 2:
+            step = (hi - lo) / (n - 1)
+            cy = yt + H * 0.42
+            o.append(''.join(flag_star(lo + k * step, cy, r) for k in range(n)))
+    o.append(extra)
+    o.append('</g>')
+    return ''.join(o)
+
 
 # ============================================================ LOCOMOTIVES ====
 
@@ -220,6 +312,15 @@ def electric_hs():
     # dark window / glazing band sweeping into the nose
     b.append('<path d="M-206,-110 L118,-110 C 156,-106 186,-90 202,-66 L-206,-66 Z" fill="#2b3340"/>')
     b.append('<path d="M-206,-110 L118,-110 C 150,-107 176,-96 190,-80 L-206,-80 Z" fill="#3b475a"/>')
+    # Over the glazing band rather than under it: that band sweeps the whole length
+    # of this shell and a livery behind it is a livery nobody can see. The glass is
+    # drawn after, so the windows punch back through. The nose fragment is the body
+    # path's OWN, reused, so the scheme needs no clip; the front bogie skirt is
+    # forward of the second rake and has to come with it or a pale block lands
+    # under the red.
+    b.append(flag(-216, 120, -118, -44, white=0.34, red=0.66,
+                  nose='C 168,-114 206,-92 226,-58 L228,-44',
+                  extra=f'<rect x="10" y="-46" width="140" height="18" rx="6" fill="{FLAG_RED}"/>'))
     # side windows
     b.append(windows(-196, 60, -104, -78, 5, gap=14, rx=4))
     # raked windscreen
@@ -254,6 +355,8 @@ def commuter():
     # body with rounded cab end
     b.append('<path class="cc-loco" d="M-196,-124 L150,-124 C 178,-124 196,-110 198,-88 '
              'L198,-46 L-196,-46 Z" fill="#ccd3da"/>')
+    b.append(flag(-196, 150, -124, -46, white=0.36, red=0.68,
+                  nose='C 178,-124 196,-110 198,-88 L198,-46'))
     # corrugated stainless ribbing
     b.append('<g fill="#9aa3ad" opacity="0.55">' + ''.join(
         f'<rect x="-192" y="{y}" width="380" height="2.5"/>' for y in range(-70, -48, 6)) + '</g>')
@@ -299,6 +402,9 @@ def streetcar():
     # body
     b.append(f'<rect class="cc-loco" x="{-h+8}" y="-124" width="{L-16}" height="82" rx="7" fill="#3d5233"/>')
     b.append(f'<rect x="{-h+8}" y="-124" width="{L-16}" height="14" rx="7" fill="#48603c"/>')
+    # after the top shading strip, which is part of the body — leave it in front and
+    # a green band runs the length of the car above the scheme
+    b.append(flag(-h + 8, h - 8, -124, -42, rx=7))
     # arched windows
     for i in range(7):
         x = -h + 22 + i * 36
@@ -342,6 +448,10 @@ def cable_car():
     b = [shadow(-h - 8, h + 8)]
     # closed rear saloon
     b.append(f'<rect class="cc-loco" x="{-h+6}" y="-116" width="128" height="74" rx="5" fill="#8f3b32"/>')
+    # Only the closed saloon takes paint — the front half of a cable car is open air,
+    # so the rakes live in the one panel there is and it gets no stars: at 128px with
+    # three windows through it there is nowhere for them to go.
+    b.append(flag(-h + 6, -h + 134, -116, -42, rx=5, white=0.30, red=0.64, stars=False))
     b.append(f'<rect x="{-h+6}" y="-116" width="128" height="12" rx="5" fill="#a34a3f"/>')
     for i in range(3):
         x = -h + 18 + i * 38
@@ -380,6 +490,7 @@ def coach_old():
     L = 280; h = L / 2
     b = [shadow(-h, h)]
     b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-114" width="{L-16}" height="70" rx="5" fill="#1f4d3a"/>')
+    b.append(flag(-h + 8, h - 8, -114, -44, rx=5))
     # gold lining
     b.append(f'<g class="cc-brass" fill="#d4a943"><rect x="{-h+14}" y="-58" width="{L-28}" height="3"/>'
              f'<rect x="{-h+14}" y="-110" width="{L-28}" height="2.5"/></g>')
@@ -410,9 +521,12 @@ def caboose():
     L = 210; h = L / 2
     b = [shadow(-h, h)]
     b.append(f'<rect class="cc-wagon" x="{-h+10}" y="-106" width="{L-20}" height="62" rx="5" fill="#b8342b"/>')
+    b.append(flag(-h + 10, h - 10, -106, -44, rx=5))
     b.append(f'<rect class="cc-roof" x="{-h+4}" y="-116" width="{L-8}" height="12" rx="6" fill="#5b636d"/>')
     # cupola
     b.append('<rect class="cc-wagon" x="-34" y="-146" width="68" height="32" rx="4" fill="#b8342b"/>')
+    # the cupola takes the same rake, so the two halves of the car agree
+    b.append(flag(-34, 34, -146, -114, rx=4, white=0.30, red=0.62, stars=False))
     b.append('<rect class="cc-roof" x="-40" y="-154" width="80" height="10" rx="5" fill="#5b636d"/>')
     b.append('<rect x="-26" y="-140" width="22" height="18" rx="3" fill="#bfe3f5"/>')
     b.append('<rect x="6" y="-140" width="22" height="18" rx="3" fill="#bfe3f5"/>')
@@ -439,6 +553,7 @@ def coach_modern():
     L = 290; h = L / 2
     b = [shadow(-h, h)]
     b.append(f'<rect class="cc-wagon" x="{-h+8}" y="-140" width="{L-16}" height="96" rx="7" fill="#c8ced5"/>')
+    b.append(flag(-h + 8, h - 8, -140, -44, rx=7))
     b.append('<g fill="#9aa3ad" opacity="0.5">' + ''.join(
         f'<rect x="{-h+12}" y="{y}" width="{L-24}" height="2.5"/>' for y in range(-64, -46, 6)) + '</g>')
     # upper + lower window rows
@@ -465,6 +580,10 @@ def hs_coach():
     b.append(f'<rect class="cc-wagon" x="{-h+6}" y="-118" width="{L-12}" height="74" rx="8" fill="#eef2f6"/>')
     b.append(f'<rect x="{-h+12}" y="-110" width="{L-24}" height="34" rx="6" fill="#2b3340"/>')
     b.append(f'<rect x="{-h+12}" y="-110" width="{L-24}" height="14" rx="6" fill="#3b475a"/>')
+    # Over the dark window surround rather than under it: that band covers most of
+    # this body, and a livery hidden behind it is a livery nobody can see. The glass
+    # is still drawn after, so the windows punch back through.
+    b.append(flag(-h + 6, h - 6, -118, -44, rx=8))
     b.append(windows(-h + 18, h - 18, -104, -82, 5, gap=16, rx=5))
     b.append(f'<rect class="cc-trim" x="{-h+6}" y="-58" width="{L-12}" height="9" fill="#c0392b"/>')
     b.append(f'<rect class="cc-roof" x="{-h+10}" y="-126" width="{L-20}" height="10" rx="5" fill="#c3cbd4"/>')
@@ -488,6 +607,9 @@ def boxcar():
     b.append(f'<rect class="cc-roof" x="{-h+2}" y="-128" width="{L-4}" height="12" rx="5" fill="#6b737d"/>')
     # sliding door
     b.append('<rect x="-38" y="-114" width="76" height="66" rx="2" fill="#a35a38"/>')
+    # After the door PANEL and before its furniture — a boxcar door is painted with
+    # the car, so a livery that stops at the doorway looks like a repair.
+    b.append(flag(-h + 8, h - 8, -118, -44, rx=4))
     b.append('<rect x="-38" y="-114" width="76" height="6" fill="#5f3520"/>')
     b.append('<rect x="-4" y="-110" width="5" height="58" fill="#5f3520"/>')
     b.append('<rect x="-42" y="-52" width="84" height="5" fill="#4a2a19"/>')
@@ -570,6 +692,10 @@ def tanker():
     b.append('<rect class="cc-wagon" x="-104" y="-116" width="208" height="62" rx="31" fill="#b9c0c8"/>')
     b.append('<ellipse class="cc-wagon" cx="-104" cy="-85" rx="14" ry="31" fill="#a7aeb7"/>')
     b.append('<ellipse class="cc-wagon" cx="104" cy="-85" rx="14" ry="31" fill="#a7aeb7"/>')
+    # rx=31 is a full half-round end, and the cap in front of it is a separate
+    # shape — it has to take the red too or the tank ends in a blue nose
+    b.append(flag(-104, 104, -116, -54, rx=31,
+                  extra=f'<ellipse cx="104" cy="-85" rx="14" ry="31" fill="{FLAG_RED}"/>'))
     b.append('<rect x="-104" y="-116" width="208" height="18" rx="9" fill="#ffffff" opacity="0.22"/>')
     # bands
     b.append('<g fill="#8f98a3">' + ''.join(
@@ -595,6 +721,18 @@ def hopper():
     # sloped open-top gondola
     b.append(f'<path class="cc-wagon" d="M{-h+6},-112 L{h-6},-112 L{h-26},-48 L{-h+26},-48 Z" fill="#4a4f57"/>')
     b.append(f'<rect class="cc-wagon" x="{-h+2}" y="-118" width="{L-4}" height="10" rx="3" fill="#5b616a"/>')
+    # The body is a TRAPEZOID — the sides slope in toward the floor — so the regions
+    # are cut by hand rather than by flag(), which knows only about rectangles. Same
+    # rake, same colours; the front edge is the wagon's own.
+    b.append('<g class="cc-livery" data-livery="flag" display="none">')
+    for xf, col in ((0.38, FLAG_WHITE), (0.64, FLAG_RED)):
+        xb = -h + 6 + (L - 12) * xf
+        b.append(f'<path d="M{xb + 10:.1f},-48 L{xb + 42:.1f},-112 L{h-6},-112 L{h-26},-48 Z" '
+                 f'fill="{col}"/>')
+        b.append(f'<path d="M{xb + 42:.1f},-118 L{h-2},-118 L{h-2},-108 L{xb + 42:.1f},-108 Z" '
+                 f'fill="{col}"/>')
+    b.append(''.join(flag_star(-h + 24 + k * 26, -82, 8) for k in range(3)))
+    b.append('</g>')
     # ribs
     b.append('<g stroke="#2f343c" stroke-width="4">' + ''.join(
         f'<line x1="{-h+22+i*32}" y1="-108" x2="{-h+34+i*32}" y2="-52"/>' for i in range(6)) + '</g>')
@@ -620,12 +758,15 @@ def container():
     b.append(f'<rect x="{-h+30}" y="-92" width="{L-60}" height="38" rx="3" fill="#2f343c"/>')
     # lower container (in the well)
     b.append(f'<rect class="cc-wagon" x="{-h+18}" y="-116" width="{L-36}" height="52" rx="3" fill="#2a6fd6"/>')
+    b.append(flag(-h + 18, h - 18, -116, -64, rx=3))
     b.append(ribs(-h + 24, h - 24, -114, -66, 16, '#000', 0.16))
     b.append(f'<rect x="{h-64}" y="-114" width="44" height="48" rx="2" fill="#000" opacity="0.14"/>')
     b.append(f'<text x="{-h+70}" y="-84" font-family="Trebuchet MS,sans-serif" font-size="17" '
              f'fill="#ffffff" opacity="0.85">CHUGA</text>')
     # upper container
     b.append(f'<rect class="cc-wagon2" x="{-h+14}" y="-172" width="{L-28}" height="54" rx="3" fill="#d9822b"/>')
+    # both boxes, because a double stack with one flag container looks half-finished
+    b.append(flag(-h + 14, h - 14, -172, -118, rx=3))
     b.append(ribs(-h + 20, h - 20, -170, -122, 16, '#000', 0.16))
     b.append(f'<rect x="{-h+18}" y="-170" width="44" height="50" rx="2" fill="#000" opacity="0.14"/>')
     b.append(f'<text x="{h-96}" y="-140" font-family="Trebuchet MS,sans-serif" font-size="17" '
@@ -664,6 +805,10 @@ def cane_tank():
     b.append(f'<rect class="cc-loco" x="{-h+46}" y="-126" width="{L-92}" height="46" rx="12" '
              f'fill="#2f6b45"/>')
     b.append(f'<rect x="{-h+46}" y="-126" width="{L-92}" height="12" rx="6" fill="#3a7f53"/>')
+    # The saddle tank IS this engine's body — it is what a colour choice paints —
+    # so the rakes go on it. No stars: it is 158px long with two brass bands across
+    # it, and one lonely star reads as a mistake rather than a flag.
+    b.append(flag(-h + 46, h - 46, -126, -80, rx=12, white=0.32, red=0.64, stars=False))
     b.append(f'<g class="cc-brass" fill="#d4a943">'
              f'<rect x="{-h+50}" y="-92" width="{L-100}" height="3"/>'
              f'<rect x="{-h+50}" y="-120" width="{L-100}" height="2.5"/></g>')
@@ -736,6 +881,9 @@ def cane_car():
     # the load: cut cane, stacked lengthways and spilling over the top
     b.append(f'<rect class="cc-wagon" x="{-h+10}" y="-98" width="{L-20}" height="42" rx="4" '
              f'fill="#9caf4e"/>')
+    # The cane LOAD is this wagon's .cc-wagon — it is what a colour choice already
+    # paints — so it is what the scheme goes on. The stalk strokes still lie over it.
+    b.append(flag(-h + 10, h - 10, -98, -56, rx=4, stars=False))
     b.append('<g stroke="#b8c96a" stroke-width="2.6" stroke-linecap="round">' + ''.join(
         f'<line x1="{-h+16}" y1="{-94+i*7}" x2="{h-16}" y2="{-92+i*7}"/>' for i in range(6)) + '</g>')
     b.append('<g stroke="#7d8f3c" stroke-width="1.8" stroke-linecap="round">' + ''.join(
@@ -773,6 +921,8 @@ def monorail():
              f'C {h-14},-140 {h+4},-124 {h+4},-100 L{h+4},-52 L{-h+8},-52 Z" fill="#f2f4f6"/>')
     b.append(f'<path d="M{-h+8},-140 L{h-52},-140 C {h-14},-140 {h+4},-124 {h+4},-100 '
              f'L{h+4},-128 C {h-10},-146 {h-40},-148 {h-56},-148 L{-h+8},-148 Z" fill="#ffffff"/>')
+    b.append(flag(-h + 8, h - 52, -140, -52, white=0.36, red=0.68,
+                  nose=f'C {h-14},-140 {h+4},-124 {h+4},-100 L{h+4},-52'))
     # the livery band — this is where the recolour lands
     b.append(f'<rect class="cc-trim" x="{-h+8}" y="-76" width="{L-4}" height="17" fill="#c0392b"/>')
     b.append(f'<rect x="{-h+8}" y="-59" width="{L-4}" height="3.5" fill="#8f2a20"/>')
@@ -836,6 +986,8 @@ def monorail_car():
         f'<rect x="{-h+48+i*100}" y="-76" width="2.5" height="17"/>'
         f'<rect x="{-h+82+i*100}" y="-76" width="2.5" height="17"/>' for i in range(4)) + '</g>')
     b.append(f'<rect x="{-h+22}" y="-130" width="{L-44}" height="44" rx="5" fill="#2b3a46"/>')
+    # over the window surround, under the glass — see the high-speed coach
+    b.append(flag(-h + 8, h - 8, -140, -52, rx=8))
     b.append(windows(-h + 26, h - 26, -126, -90, 7, gap=9, rx=4,
                      fill='#8fc4dd', top='#c2e2f0'))
     b.append(f'<rect class="cc-roof" x="{-h+14}" y="-152" width="{L-28}" height="12" rx="5" '

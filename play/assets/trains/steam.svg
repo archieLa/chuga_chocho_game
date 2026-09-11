@@ -36,10 +36,33 @@
   <!-- ground shadow -->
   <ellipse cx="10" cy="2" rx="190" ry="7" fill="#000" opacity="0.18"/>
 
+  <!-- ===================================================================
+       THE STARS-AND-STRIPES LIVERY (.cc-livery data-livery="flag").
+
+       Off unless a child picks it. rolling.js shows or hides EVERY .cc-livery
+       in the vehicle together, so this is spread across several small groups
+       slotted in at the right depth rather than being one block at the end:
+       a livery appended last covers the cab glass, the brass and the headlight
+       and the engine goes blind, which is exactly what happened to the diesel.
+
+       The base body IS THE BLUE — the palette sets .cc-loco to it — so only the
+       white, the red and the stars are drawn on top.
+
+       BLUE AT THE BACK, then a rake, white, a second rake, RED TO THE FRONT.
+       The rakes lean forward half a pixel per pixel of height, the same lean
+       the diesel and every wagon use. The red carries on over the SMOKEBOX
+       rather than stopping at it: graphite is right on a working steam engine
+       but on a painted one it reads as a job left half done, and the nose is
+       the end a child looks at.
+       =================================================================== -->
+
   <!-- ============ TENDER (coal) ============ -->
   <g id="tender">
     <rect class="cc-loco" x="-190" y="-96" width="114" height="54" rx="4" fill="#1c1f26"/>
     <rect x="-190" y="-96" width="114" height="54" rx="4" fill="url(#boilerShade)"/>
+    <g class="cc-livery" data-livery="flag" display="none">
+      <polygon points="-170.0,-80.0 -168.1,-74.6 -162.4,-74.5 -167.0,-71.0 -165.3,-65.5 -170.0,-68.8 -174.7,-65.5 -173.0,-71.0 -177.6,-74.5 -171.9,-74.6" fill="#f2f4f7"/><polygon points="-142.0,-80.0 -140.1,-74.6 -134.4,-74.5 -139.0,-71.0 -137.3,-65.5 -142.0,-68.8 -146.7,-65.5 -145.0,-71.0 -149.6,-74.5 -143.9,-74.6" fill="#f2f4f7"/><polygon points="-114.0,-80.0 -112.1,-74.6 -106.4,-74.5 -111.0,-71.0 -109.3,-65.5 -114.0,-68.8 -118.7,-65.5 -117.0,-71.0 -121.6,-74.5 -115.9,-74.6" fill="#f2f4f7"/><polygon points="-86.0,-80.0 -84.1,-74.6 -78.4,-74.5 -83.0,-71.0 -81.3,-65.5 -86.0,-68.8 -90.7,-65.5 -89.0,-71.0 -93.6,-74.5 -87.9,-74.6" fill="#f2f4f7"/>
+    </g>
     <!-- coal load -->
     <g fill="#0d0f13">
       <rect x="-186" y="-104" width="106" height="9" rx="3"/>
@@ -79,6 +102,12 @@
     <rect class="cc-loco" x="-72" y="-122" width="50" height="82" rx="3" fill="#1c1f26"/>
     <rect x="-72" y="-122" width="50" height="82" rx="3" fill="url(#boilerShade)"/>
     <rect class="cc-loco" x="-80" y="-130" width="68" height="9" rx="3" fill="#23272f"/>
+    <!-- The first rake. The cab stays mostly blue so the colour carries through
+         from the tender, and the white runs on into the boiler in front of it.
+         Before the glass, or the driver cannot see out. -->
+    <g class="cc-livery" data-livery="flag" display="none">
+      <path d="M-50,-40 L-22,-96 L-22,-40 Z" fill="#f2f4f7"/>
+    </g>
     <rect x="-66" y="-112" width="28" height="26" rx="2" fill="#bfe3f5"/>
     <rect x="-66" y="-112" width="28" height="10" rx="2" fill="#d9f0fb"/>
     <rect class="cc-trim" x="-72" y="-48" width="50" height="6" fill="#c0392b"/>
@@ -88,6 +117,17 @@
   <g id="boiler">
     <rect class="cc-loco" x="-30" y="-94" width="172" height="50" rx="24" fill="#1c1f26"/>
     <rect x="-30" y="-94" width="172" height="50" rx="24" fill="url(#boilerShade)"/>
+    <!-- The barrel goes white, then the second rake and red to the front. The red
+         follows the boiler's OWN half-round end rather than being a rectangle laid
+         over it — there is no clipPath anywhere in this scheme, so there is nothing
+         for the id-namespacing in inline-assets.py to rewrite and nothing to collide
+         when two of the same vehicle are in one consist. The bands are drawn after
+         and still read across both colours. -->
+    <g class="cc-livery" data-livery="flag" display="none">
+      <rect x="-30" y="-94" width="172" height="50" rx="24" fill="#f2f4f7"/>
+      <path d="M40,-44 L65,-94 L118,-94 A24,24 0 0 1 142,-70 L142,-68
+               A24,24 0 0 1 118,-44 Z" fill="#c8202e"/>
+    </g>
     <!-- boiler bands -->
     <g stroke="#3a4049" stroke-width="2.5" opacity="0.9">
       <line x1="6" y1="-92" x2="6" y2="-46"/><line x1="44" y1="-92" x2="44" y2="-46"/>
@@ -95,19 +135,30 @@
     </g>
     <!-- smokebox (slightly larger, matte) -->
     <rect x="118" y="-96" width="30" height="54" rx="10" fill="#15181d"/>
+    <g class="cc-livery" data-livery="flag" display="none">
+      <rect x="118" y="-96" width="30" height="54" rx="10" fill="#c8202e"/>
+    </g>
     <circle cx="146" cy="-69" r="4" class="cc-brass" fill="#d4a943"/>
     <!-- running board -->
     <rect x="-30" y="-46" width="178" height="7" rx="2" fill="#15181d"/>
     <rect class="cc-trim" x="-30" y="-44" width="178" height="3" fill="#c0392b"/>
-    <!-- sand dome + steam dome (dark, with brass caps — not gold blobs) -->
+    <!-- sand dome + steam dome (dark, with brass caps — not gold blobs). They sit
+         ON the barrel, so they are painted with it; each cover goes in front of its
+         own dome and behind its brass cap, which stays brass. -->
     <g>
       <rect class="cc-loco" x="9" y="-104" width="26" height="12" rx="4" fill="#23272f"/>
       <ellipse class="cc-loco" cx="22" cy="-104" rx="13" ry="8" fill="#2a2f37"/>
+      <g class="cc-livery" data-livery="flag" display="none">
+        <rect x="9" y="-104" width="26" height="12" rx="4" fill="#dfe4ea"/><ellipse cx="22" cy="-104" rx="13" ry="8" fill="#eef1f5"/>
+      </g>
       <ellipse class="cc-brass" cx="22" cy="-107" rx="9" ry="4" fill="#d4a943"/>
     </g>
     <g>
       <rect class="cc-loco" x="51" y="-108" width="30" height="14" rx="5" fill="#23272f"/>
       <ellipse class="cc-loco" cx="66" cy="-108" rx="15" ry="9" fill="#2a2f37"/>
+      <g class="cc-livery" data-livery="flag" display="none">
+        <rect x="51" y="-108" width="30" height="14" rx="5" fill="#dfe4ea"/><ellipse cx="66" cy="-108" rx="15" ry="9" fill="#eef1f5"/>
+      </g>
       <ellipse class="cc-brass" cx="66" cy="-112" rx="10" ry="4.5" fill="#d4a943"/>
     </g>
     <!-- bell -->
@@ -123,6 +174,9 @@
     <path d="M118,-124 L146,-124 L142,-134 L122,-134 Z" fill="#15181d"/>
     <!-- headlight (the engine's "face" — kids look straight at it) -->
     <rect class="cc-loco" x="138" y="-120" width="24" height="24" rx="4" fill="#262b33"/>
+    <g class="cc-livery" data-livery="flag" display="none">
+      <rect x="138" y="-120" width="24" height="24" rx="4" fill="#c8202e"/>
+    </g>
     <circle class="cc-brass" cx="163" cy="-108" r="10.5" fill="#d4a943"/>
     <circle cx="164" cy="-108" r="7.5" fill="#fff3c4"/>
     <circle cx="166" cy="-110" r="3" fill="#ffffff" opacity="0.9"/>
@@ -143,6 +197,11 @@
   <!-- ============ CYLINDER ============ -->
   <g id="cylinder">
     <rect class="cc-loco" x="138" y="-58" width="40" height="34" rx="5" fill="#23272f"/>
+    <!-- The cylinder block sits forward of the second rake, so it is red like the
+         rest of the nose; leave it and a blue box lands in the middle of it. -->
+    <g class="cc-livery" data-livery="flag" display="none">
+      <rect x="138" y="-58" width="40" height="34" rx="5" fill="#c8202e"/>
+    </g>
     <rect x="172" y="-60" width="8" height="38" rx="2" fill="#15181d"/>
     <rect x="134" y="-56" width="6" height="30" rx="2" fill="#15181d"/>
   </g>

@@ -45,13 +45,32 @@
     // the roof, the panel lines and the windows. This still reads as black.
     { key: 'black',  hex: '#26292f' },
     // NOT A COLOUR — a paint scheme. It only appears on a vehicle whose artwork
-    // carries it (today the diesel-electric alone), and the customizer works that
-    // out by asking the drawing rather than by knowing the type.
+    // carries it, and the customizer works that out by asking the drawing rather
+    // than by knowing the type. That is what let it spread from the diesel alone
+    // to the steam engine and every wagon without a line changing here.
     { key: 'flag', livery: 'flag', hex: '#c8202e',
       // The BODY is the blue — the white and the red are drawn over it — so the
-      // base colour here is the rear of the locomotive, not its nose.
-      set: { loco: '#1f3f7a', roof: '#e9edf1', trim: '#c8202e' } },
+      // base colour here is the rear of the vehicle, not its nose.
+      //
+      // `body` is not a recolour hook; it is "whichever hook this slot's body
+      // uses", `.cc-loco` on an engine and `.cc-wagon` on a wagon. Written as
+      // `loco` it painted the engine and left every wagon's blue undrawn, so the
+      // wagons came out in their factory colours with white and red over them.
+      set: { body: '#1f3f7a', roof: '#e9edf1', trim: '#c8202e' } },
   ];
+
+  /** Which recolour hook is a slot's main body: engines wear .cc-loco, wagons
+      .cc-wagon. Anywhere a scheme says `body`, this is what it means. */
+  function bodyPart(slot) { return slot === 'engine' ? 'loco' : 'wagon'; }
+
+  /** Expand a scheme's parts for one slot — `body` becomes that slot's own hook. */
+  function schemeFor(entry, slot) {
+    const out = {};
+    Object.keys(entry.set || {}).forEach(k => {
+      out[k === 'body' ? bodyPart(slot) : k] = entry.set[k];
+    });
+    return out;
+  }
 
   const STORAGE_KEY = 'cc.train';
 
@@ -161,8 +180,9 @@
       // them returns those parts to the fills the artwork was drawn with.
       if (next.livery) {
         const liv = PALETTE.filter(q => q.livery === next.livery)[0];
-        if (liv && liv.set) {
-          Object.keys(liv.set).forEach(k => { if (k !== part) delete next[k]; });
+        if (liv) {
+          const had = schemeFor(liv, slot);
+          Object.keys(had).forEach(k => { if (k !== part) delete next[k]; });
         }
       }
       next.livery = null;
@@ -174,7 +194,7 @@
     setLivery(slot, entry) {
       const target = slot === 'engine' ? consist.engine : consist.wagons[slot];
       if (!target) return;
-      const next = Object.assign({}, target.colours, entry.set || {});
+      const next = Object.assign({}, target.colours, schemeFor(entry, slot));
       next.livery = entry.livery || null;
       target.colours = next;
       changed();
@@ -211,8 +231,15 @@
       // both places use the streetcar and nothing ever repainted it. While the
       // presets are in charge the engine's colour is theirs to decide, so it is
       // set on every arrival either way.
+      //
+      // A LIVERY IS NOT A COLOUR AND THE PLACES DO NOT GET A VOTE ON IT. The
+      // repaint below knows only about `loco`, so on an engine wearing a scheme it
+      // replaced the blue the white and the red are drawn over and left the rakes
+      // and the stars standing on black. Nothing latches userSet when a child picks
+      // a swatch — only changing the ENGINE does — so choosing the flag and then
+      // going anywhere at all was enough to break it.
       const wantLoco = preset.bodyColour || DEFAULT_LOCO;
-      if (consist.engine.colours.loco !== wantLoco) {
+      if (!consist.engine.colours.livery && consist.engine.colours.loco !== wantLoco) {
         consist.engine.colours = Object.assign({}, consist.engine.colours, { loco: wantLoco });
         did = true;
       }
