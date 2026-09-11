@@ -31610,7 +31610,1310 @@ def medora():
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague(); medora()
+def margate():
+    """MARGATE CITY, NEW JERSEY — Lucy the Elephant, and the shore town she lives in.
+
+    New Jersey's one slot, and it goes to a **six-storey building shaped like an
+    elephant**: 1882, sixty-five feet, a million pieces of wood under twelve thousand
+    square feet of tin, twenty-two windows, a spiral stair inside a hind leg and a
+    howdah on her back you can walk out onto.  She is the oldest roadside attraction in
+    America, a National Historic Landmark, and she was re-skinned in 2022, so she is in
+    better condition than she has been in a century.
+
+    **THE RISK was that this became the fifth beach** after Miami, Hatteras, Lewes and
+    Assateague.  The reference settled how to avoid it, and the answer is not the beach
+    at all — it is that **the Jersey Shore is BUILT UP**.  The other four are empty in
+    their different ways: a wild barrier island, a marsh, a ferry terminal, a strip of
+    pastel hotels.  Margate is a dense residential town running straight down to the
+    sand, big shore houses shoulder to shoulder on narrow lots, gables and decks and
+    outside stairs — and standing in the middle of it, on an ordinary corner plot
+    between the houses and the street, is the elephant.
+
+    So the composition is not Lucy → dune → ocean, which is the majestic version and
+    the wrong one.  It is **street, houses, LUCY ridiculously above the rooflines, more
+    houses, the street-end, the dune, the crowded beach, the Atlantic** — with the
+    little towers of Atlantic City two miles up the coast.  She is not a monument beside
+    the sea.  She is a sixty-five foot elephant living on a normal residential block,
+    and that is much funnier and much truer.
+
+    **WHERE THE ROAD GOES.** Down the avenue and it STOPS AT THE BEACH, at the ramp
+    through the dune where the tarmac gives out and the sand begins.  Every cross street
+    in Margate does exactly this.  It is the most honest ending any road in this set has.
+
+    **WHAT MOVES.** People walk to the door in her near hind leg and vanish into it; a
+    beat later a figure appears at the howdah rail sixty feet up and looks out.  That is
+    the prairie dogs' appear-and-vanish verb used in the other direction, it needs no
+    walk cycle, and — the real reason for it — **a child watching it learns without being
+    told that the elephant is hollow and there are people inside her.**  Under that: the
+    surf runs up the sand and draws back, gulls cross the sky, and a kite hangs over the
+    beach.
+
+    **RATIOS.** A locomotive is 96px tall on screen; at Lucy's depth the ruler is 14.2
+    pixels to the metre, so nineteen-point-eight metres of elephant is 281px — just under
+    three locomotives, and half as tall again as the houses beside her.  Every person in
+    the frame is at true scale against her, which is the whole point: she has to be
+    absurd, and she is only absurd if the people are right.
+    """
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    SEA, SEA_D, SEA_L = '#3d7fa6', '#2f6b90', '#5c9cbd'
+    FOAM = '#f2f6f5'
+    SAND, SAND_L, SAND_D = '#e0d1ab', '#efe3c4', '#c9b88f'
+    WETSAND = '#c5b795'
+    DGRASS, DGRASS_L, DGRASS_D = '#9aa868', '#b7c081', '#7d8a52'
+    LAWN, LAWN_L = '#6f9450', '#85a962'
+    ROADC, ROADC_D = '#7a7a7e', '#63636a'
+    WALK, WALK_D = '#cfc9bb', '#b3ada0'
+    SLATE, SLATE_D = '#8d949b', '#6f757c'
+    SHINGLE, SHINGLE_D = '#9d958a', '#82796e'
+    TRIMW = '#f6f3ea'
+    HAZE = '#b9cddc'
+
+    TIN, TIN_L, TIN_D = '#9a9d96', '#b4b7af', '#82857d'
+    TIN_SH, TIN_XD = '#74776f', '#63665e'
+    RED, RED_D = '#b8352f', '#942723'
+    GOLD, GOLD_L = '#e0ae3a', '#f4d478'
+    TAN, TAN_D, TAN_L = '#a9724a', '#8a5836', '#c08e63'
+    ROOFW, ROOFW_D, ROOFC = '#8a5a3a', '#653f26', '#e6d6b4'
+    TUSK, TUSK_D = '#f4efe3', '#dcd3c0'
+    DARKW, DARKW_L = '#2f3640', '#4d5764'
+    IRIS, PUP = '#c8792a', '#241d16'
+
+    # The shore-house palette.  Cream, buttermilk, pale blue, white, shingle grey —
+    # every one of them sun-bleached, because on a barrier island everything is.
+    WALLS = ('#eee3cc', '#ecd79a', '#b9cdda', '#f4f1e8', '#cdd3d2', '#e6c9a8',
+             '#d8dbd6', '#f0e2c8')
+    WALLS_FAR = WALLS
+
+    # WHERE THE ROAD GOES, and this is the load-bearing decision in the scene.
+    #
+    # The first version stopped the carriageway dead at a ramp through the dune, and the
+    # question that killed it is: what does a CAR do when it gets there?  A street that
+    # ends in nothing is a street nobody would drive down.
+    #
+    # The second version T'd it into a beachfront avenue running right, Crater Lake style.
+    # That is wrong here and the geometry says so plainly.  **The far gate's arm is at
+    # y=421 and its posts occupy y=388..445**, so a junction with room for a car to
+    # complete a turn AND then stop at a closed barrier would have to sit at about
+    # y=330..370 — which is the entire sea and beach.  Crater Lake overlaps its junction
+    # with the gate and gets away with it because nothing there is waiting; here it would
+    # put a turning car on the crossing.
+    #
+    # So: a **beach parking lot**, which is what the end of a Margate street actually is,
+    # and which solves the problem by being the room rather than by needing it.  Seventy
+    # pixels deep — about six metres, a car and a half — with nose-in bays along the far
+    # side and a through aisle along the near side that runs right and out of frame.  A
+    # car arriving can park, or drive on out; a car leaving can sit in the aisle with the
+    # whole lot behind it while the barrier is down.  The head of the street itself is
+    # closed with a rail and a timber ramp over the bulkhead: pedestrian beach access, no
+    # through route, which is exactly what is there.
+    ROAD_TOP = 376          # the tarmac opens out into the beach lot here
+    LOT_FAR, LOT_NEAR = 376, 446   # the lot: 70px deep, and that depth IS the point
+    DEFS = []
+    d = sky_defs('#3b82c6', '#8cbde1', '#dcecf5')
+
+    # ===================================================== SKY ===
+    sk = [sky('#3b82c6', '#8cbde1', '#dcecf5'),
+          clouds([(150, 70, 54), (430, 48, 42), (720, 82, 46), (1030, 58, 50),
+                  (1230, 96, 38)])]
+
+    # ===================================================== GROUND / SEA ===
+    gr = []
+    # THE ATLANTIC.  It only shows to the right of the avenue — which is the point: in a
+    # shore town the ocean is a thing you see at the END of a street, not a backdrop.
+    gr.append(f'<path d="M-20,300 L1320,300 L1320,314 '
+              f'C 1000,319 760,323 -20,330 Z" fill="{SEA}"/>')
+    gr.append(f'<path d="M-20,300 L1320,300 L1320,309 L-20,309 Z" '
+              f'fill="{mix(SEA, HAZE, 0.45)}"/>')
+    rs = rnd(9)
+    for k in range(70):
+        wx = -20 + rs() * 1340
+        wy = 309 + rs() * 40
+        if wy > 328 - (wx + 20) / 1340.0 * 15:
+            continue
+        gr.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{10 + rs() * 40:.0f}" '
+                  f'height="1.6" fill="{SEA_L}" opacity="{0.3 + rs() * 0.4:.2f}"/>')
+    # ATLANTIC CITY, two miles up the beach.  Plain slabs at the very edge of visibility,
+    # hazed almost into the sky — a skyline that reads as buildings and as nothing else.
+    for tx, tw, th in ((604, 13, 26), (620, 9, 17), (633, 16, 32), (652, 8, 14),
+                       (663, 11, 22), (677, 14, 29), (694, 8, 15), (705, 10, 19)):
+        gr.append(f'<rect x="{tx}" y="{300 - th}" width="{tw}" height="{th}" '
+                  f'fill="{mix("#6f7f8c", HAZE, 0.62)}"/>')
+        gr.append(f'<rect x="{tx}" y="{300 - th}" width="{tw}" height="3" '
+                  f'fill="{mix("#8f9ea8", HAZE, 0.55)}"/>')
+    # a low sand spit running out at the far end of the beach, so the sea has a shore
+    gr.append(f'<path d="M780,325 C 980,321 1160,317 1320,313 L1320,318 '
+              f'C 1160,322 980,326 790,330 Z" fill="{mix(SAND, HAZE, 0.4)}"/>')
+
+    # THE SURF.  A foam line that runs up the sand and draws back — the one endless,
+    # unhurried motion in the frame, and the game's whole register is unhurried.
+    gr.append(f'<g id="cc-surf" class="cc-surf" transform="translate(0,0)">')
+    gr.append(f'<path d="M480,332 C 760,326 1020,320 1320,314 L1320,321 '
+              f'C 1020,327 760,333 480,339 Z" fill="{FOAM}"/>')
+    gr.append(f'<path d="M480,338 C 760,332 1020,326 1320,320 L1320,325 '
+              f'C 1020,331 760,337 480,343 Z" fill="{FOAM}" opacity="0.55"/>')
+    gr.append('</g>')
+    DEFS.append('    <path id="surf-path" class="cc-path" d="M0,0 L0,14"/>')
+
+    # WET SAND, then dry.  The wet strip is the darker band the tide leaves and it is
+    # what makes a beach read as a beach rather than as a field of sand.
+    gr.append(f'<path d="M480,337 C 760,331 1020,325 1320,319 L1320,332 '
+              f'C 1020,338 760,344 480,350 Z" fill="{WETSAND}"/>')
+    gr.append(f'<path d="M480,346 C 760,340 1020,334 1320,328 L1320,382 L480,382 Z" '
+              f'fill="{SAND}"/>')
+    rb = rnd(17)
+    for k in range(60):
+        bx = 520 + rb() * 800
+        by = 352 + rb() * 24
+        gr.append(f'<ellipse cx="{bx:.0f}" cy="{by:.0f}" rx="{16 + rb() * 44:.0f}" '
+                  f'ry="{3 + rb() * 5:.0f}" fill="{SAND_L}" '
+                  f'opacity="{0.3 + rb() * 0.35:.2f}"/>')
+
+    def far_shore_house(x, base, h, wall, seed, wide=False):
+        r = rnd(seed)
+        roof = (SLATE, SHINGLE, SLATE_D, SHINGLE_D)[int(r() * 4)]
+        w = h * ((1.5 + r() * 0.5) if wide else (0.72 + r() * 0.34))
+        gh = h * (0.16 if wide else 0.38)
+        ey = base - h + gh
+        haze = 0.30 - (base - 324) / 22.0 * 0.16
+        o_ = [f'<rect x="{x:.0f}" y="{ey:.0f}" width="{w:.0f}" height="{base - ey:.0f}" '
+              f'fill="{mix(wall, HAZE, haze)}"/>']
+        o_.append(f'<path d="M{x - 1:.0f},{ey:.0f} L{x + w / 2:.0f},{base - h:.0f} '
+                  f'L{x + w + 1:.0f},{ey:.0f} Z" fill="{mix(wall, HAZE, haze)}"/>')
+        o_.append(f'<path d="M{x - 3:.0f},{ey + 1:.0f} L{x + w / 2:.0f},{base - h - 2:.0f} '
+                  f'L{x + w + 3:.0f},{ey + 1:.0f} L{x + w + 3:.0f},{ey + 4:.0f} '
+                  f'L{x + w / 2:.0f},{base - h:.0f} L{x - 3:.0f},{ey + 4:.0f} Z" '
+                  f'fill="{mix(roof, HAZE, haze + 0.06)}"/>')
+        o_.append(f'<rect x="{x - 2:.0f}" y="{base - (base - ey) * 0.42:.0f}" '
+                  f'width="{w + 4:.0f}" height="1.8" fill="{TRIMW}" opacity="0.85"/>')
+        o_.append(f'<rect x="{x - 2:.0f}" y="{base - 2:.0f}" width="{w + 4:.0f}" '
+                  f'height="2" fill="{mix("#b8a077", HAZE, 0.25)}"/>')
+        nw = max(2, int(w / 9))
+        for k in range(nw):
+            o_.append(f'<rect x="{x + 2 + k * (w - 4) / nw:.1f}" y="{ey + 3:.0f}" '
+                      f'width="{(w - 4) / nw * 0.5:.1f}" height="{(base - ey) * 0.4:.1f}" '
+                      f'fill="{mix("#5d6b78", HAZE, 0.4)}"/>')
+        return ''.join(o_)
+
+    rsh = rnd(67)
+    fx_ = 1336
+    while fx_ > 940:
+        t_ = (fx_ - 940) / 396.0
+        hh = (22 + t_ * t_ * 44) * (0.72 + rsh() * 0.62)
+        wide = rsh() > 0.62
+        fx_ -= hh * (1.5 if wide else 0.85) + 3
+        gr.append(far_shore_house(fx_, 324 + t_ * 22, hh,
+                                  WALLS_FAR[int(rsh() * len(WALLS_FAR))],
+                                  400 + int(fx_), wide=wide))
+    # the bulkhead the beach ends against on this island, and the ramp down off it
+    gr.append(f'<path d="M916,346 C 1060,346 1200,350 1330,356 L1330,362 '
+              f'C 1200,356 1060,352 916,352 Z" fill="{mix("#b8a077", HAZE, 0.18)}"/>')
+
+    # THE CROWD.  Assateague's beach was empty on purpose; this one is full on purpose.
+    # Umbrellas first, because a beach at this distance is a field of coloured discs.
+    UMB = ('#d8544a', '#e0a63c', '#4a8fb8', '#5fa06a', '#d4718f', '#e8d25c',
+           '#6f7fc0', '#e2854a')
+    ru = rnd(23)
+    for k in range(34):
+        ux = 540 + ru() * 790
+        uy = 352 + ru() * 26
+        if uy < 364 - (ux - 480) / 840.0 * 18:
+            continue
+        us = 0.71 + (uy - 352) / 26.0 * 0.20
+        col = UMB[int(ru() * len(UMB))]
+        gr.append(f'<g transform="translate({ux:.0f},{uy:.0f}) scale({us:.2f})">'
+                  f'<ellipse cx="0" cy="1" rx="9" ry="2.4" fill="#000" opacity="0.13"/>'
+                  f'<rect x="-0.8" y="-11" width="1.6" height="11" fill="#8c8579"/>'
+                  f'<path d="M-11,-11 C -9,-20 9,-20 11,-11 Z" fill="{col}"/>'
+                  f'<path d="M-4,-11 C -3.4,-18 3.4,-18 4,-11 Z" fill="#ffffff" '
+                  f'opacity="0.45"/></g>')
+    # towels, then people.  A person on a beach at this depth is 13 to 17 pixels, which
+    # is a head, a body and two legs and not one mark more.
+    for k in range(26):
+        tx = 540 + ru() * 790
+        ty = 356 + ru() * 22
+        gr.append(f'<rect x="{tx:.0f}" y="{ty:.0f}" width="{7 + ru() * 7:.0f}" '
+                  f'height="{2.6 + ru() * 2:.1f}" rx="1" '
+                  f'fill="{UMB[int(ru() * len(UMB))]}" opacity="0.85"/>')
+
+    def beachling(px, py, ps, shirt, trous, skin='#e2b48c'):
+        h = 16.0
+        return (f'<g transform="translate({px:.0f},{py:.0f}) scale({ps:.2f})">'
+                f'<ellipse cx="0" cy="0.6" rx="3" ry="1" fill="#000" opacity="0.14"/>'
+                f'<path d="M-1.6,-6 L-2,0 L-0.3,0 L0,-6 Z" fill="{trous}"/>'
+                f'<path d="M0.3,-6 L0.6,0 L2.3,0 L1.9,-6 Z" fill="{trous}"/>'
+                f'<path d="M-2.6,-5.6 C -3,-10.6 3,-10.6 2.6,-5.6 Z" fill="{shirt}"/>'
+                f'<circle cx="0" cy="-12" r="1.9" fill="{skin}"/></g>')
+
+    SHIRTS = (('#e8e4d8', '#3f5f8c'), ('#d8544a', '#f2efe4'), ('#4a8fb8', '#e8d25c'),
+              ('#e0a63c', '#4a5a6a'), ('#5fa06a', '#f2efe4'), ('#d4718f', '#3f4a58'))
+    for k in range(40):
+        px = 540 + ru() * 790
+        py = 352 + ru() * 28
+        if py < 364 - (px - 480) / 840.0 * 18:
+            continue
+        sh_, tr_ = SHIRTS[int(ru() * len(SHIRTS))]
+        gr.append(beachling(px, py, 0.755 + (py - 352) / 28.0 * 0.225, sh_, tr_))
+    # a few in the water, and one or two right at the foam
+    for k in range(9):
+        px = 620 + ru() * 690
+        py = 335 - (px - 480) / 840.0 * 14 + ru() * 6
+        gr.append(f'<ellipse cx="{px:.0f}" cy="{py:.0f}" rx="2.4" ry="1.8" '
+                  f'fill="#e2b48c"/>')
+        gr.append(f'<ellipse cx="{px:.0f}" cy="{py + 2:.0f}" rx="5" ry="1.4" '
+                  f'fill="{FOAM}" opacity="0.7"/>')
+
+    # THE LIFEGUARD BOAT AND STAND.  Every Jersey beach has both, and the boat — a broad
+    # white-and-cream surf boat nose-up on the sand with its oars crossed — is one of the
+    # few objects that says *this* coast rather than any coast.
+    gr.append(f'<g transform="translate(1010,372) scale(0.86)">'
+              f'<ellipse cx="0" cy="2" rx="34" ry="5" fill="#000" opacity="0.12"/>'
+              f'<path d="M-34,-4 C -30,4 28,4 34,-6 C 22,-10 -22,-10 -34,-4 Z" '
+              f'fill="{TRIMW}"/>'
+              f'<path d="M-34,-4 C -30,1 28,1 34,-6 L34,-9 C 22,-13 -22,-13 -34,-7 Z" '
+              f'fill="#e6dcc2"/>'
+              f'<path d="M-30,-10 L-8,-24 M30,-12 L8,-24" stroke="#b8956a" '
+              f'stroke-width="2.2" stroke-linecap="round"/></g>')
+    gr.append(f'<g transform="translate(880,362) scale(0.66)">'
+              f'<path d="M-11,0 L-7,-20 M11,0 L7,-20" stroke="#c9b07c" '
+              f'stroke-width="2.6"/>'
+              f'<rect x="-9" y="-28" width="18" height="9" fill="{TRIMW}"/>'
+              f'<rect x="-9" y="-31" width="18" height="3.4" fill="#d8544a"/></g>')
+
+    # THE DUNE.  Low, mounded, held together by beach grass and a snow fence — Margate's
+    # is a modest thing, not Hatteras's wall of sand.
+    gr.append(f'<path d="M480,372 C 720,366 940,362 1320,358 L1320,{LOT_FAR} '
+              f'L480,{LOT_FAR} Z" fill="{SAND_D}"/>')
+    gr.append(f'<path d="M480,373 C 720,367 940,363 1320,359 L1320,372 '
+              f'C 940,376 720,378 480,379 Z" fill="{DGRASS_D}" opacity="0.5"/>')
+    rg = rnd(31)
+    for k in range(96):
+        gx = 500 + rg() * 820
+        gy = 366 + rg() * 12
+        s_ = 0.5 + rg() * 0.7
+        gr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-11 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-14 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-10 * s_:.1f}" '
+                  f'stroke="{(DGRASS, DGRASS_L, DGRASS_D)[int(rg() * 3)]}" '
+                  f'stroke-width="{1.2 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    # the snow fence: slats and posts, leaning the way they always lean
+    for px in range(700, 1322, 15):
+        gr.append(f'<rect x="{px}" y="{368 - (px % 4)}" width="2.6" height="10" '
+                  f'fill="#a98a5e" opacity="0.85"/>')
+    for fy in (370, 374):
+        gr.append(f'<rect x="700" y="{fy}" width="622" height="1.6" fill="#8d7049" '
+                  f'opacity="0.6"/>')
+
+    # ===================================================== SCENERY BACK ===
+    back = []
+
+    # ---------------------------------------------------------------------
+    # THE SHORE HOUSES.  Twenty-five to thirty per cent of the frame, packed shoulder to
+    # shoulder on narrow lots, because without them this is Lucy on a generic beach and
+    # the whole argument for New Jersey falls over.  Every one is the same kit — two or
+    # three storeys, a gable end to the street, shingle or clapboard, a porch or a deck
+    # with a white rail and an outside stair — and the density comes from how tightly
+    # they are packed, not from making each one different.
+    def shore_house(x, w, base, h, wall, seed, deck=True, dormer=False):
+        r = rnd(seed)
+        roof = (SLATE, SHINGLE, SLATE_D, SHINGLE_D)[int(r() * 4)]
+        gh = h * (0.34 + r() * 0.12)                 # the gable above the eaves
+        ey = base - h + gh                           # eaves height
+        o = ['<g>']
+        o.append(f'<ellipse cx="{x + w / 2:.0f}" cy="{base + 2}" rx="{w * 0.56:.0f}" '
+                 f'ry="4" fill="#000" opacity="0.12"/>')
+        o.append(f'<rect x="{x}" y="{ey:.0f}" width="{w}" height="{base - ey:.0f}" '
+                 f'fill="{wall}"/>')
+        # the gable, and the roof over it
+        o.append(f'<path d="M{x - 3},{ey:.0f} L{x + w / 2:.0f},{base - h} '
+                 f'L{x + w + 3},{ey:.0f} Z" fill="{wall}"/>')
+        o.append(f'<path d="M{x - 6},{ey + 3:.0f} L{x + w / 2:.0f},{base - h - 3} '
+                 f'L{x + w + 6},{ey + 3:.0f} L{x + w + 6},{ey + 7:.0f} '
+                 f'L{x + w / 2:.0f},{base - h + 1} L{x - 6},{ey + 7:.0f} Z" '
+                 f'fill="{roof}"/>')
+        o.append(f'<path d="M{x + w / 2:.0f},{base - h - 3} L{x + w + 6},{ey + 3:.0f} '
+                 f'L{x + w + 6},{ey + 7:.0f} L{x + w / 2:.0f},{base - h + 1} Z" '
+                 f'fill="{mix(roof, "#000000", 0.22)}"/>')
+        # clapboard or shingle courses
+        nc = int((base - ey) / 7)
+        for k in range(nc):
+            o.append(f'<rect x="{x}" y="{ey + 4 + k * 7:.0f}" width="{w}" height="1.3" '
+                     f'fill="#000" opacity="0.055"/>')
+        # windows, in storeys
+        st = max(2, int((base - ey) / 34))
+        for sy in range(st):
+            wy = ey + 8 + sy * (base - ey - 12) / st
+            n = max(2, int(w / 26))
+            for k in range(n):
+                wx = x + 6 + k * (w - 12) / n
+                ww = (w - 12) / n * 0.58
+                o.append(f'<rect x="{wx - 1.6:.0f}" y="{wy - 1.6:.0f}" '
+                         f'width="{ww + 3.2:.0f}" height="20" fill="{TRIMW}"/>')
+                o.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{ww:.0f}" '
+                         f'height="16.8" fill="#5d6b78"/>')
+                o.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{ww:.0f}" '
+                         f'height="5" fill="#8296a4"/>')
+        # the gable window — a shore house always has one looking at the water
+        o.append(f'<rect x="{x + w / 2 - 5:.0f}" y="{ey - gh * 0.52:.0f}" width="10" '
+                 f'height="13" fill="{TRIMW}"/>')
+        o.append(f'<rect x="{x + w / 2 - 3.4:.0f}" y="{ey - gh * 0.52 + 1.6:.0f}" '
+                 f'width="7" height="10" fill="#5d6b78"/>')
+        if deck:
+            dy = base - (base - ey) * 0.42
+            o.append(f'<rect x="{x - 4}" y="{dy:.0f}" width="{w + 8}" height="3.4" '
+                     f'fill="{mix(wall, "#000000", 0.3)}"/>')
+            o.append(f'<rect x="{x - 4}" y="{dy - 13:.0f}" width="{w + 8}" height="3" '
+                     f'fill="{TRIMW}"/>')
+            for k in range(int((w + 8) / 6)):
+                o.append(f'<rect x="{x - 3 + k * 6}" y="{dy - 12:.0f}" width="1.8" '
+                         f'height="12" fill="{TRIMW}"/>')
+            # the outside stair down to the street, on one side
+            for k in range(6):
+                o.append(f'<rect x="{x + w + 2:.0f}" y="{dy + k * (base - dy) / 6:.0f}" '
+                         f'width="{9 - k:.0f}" height="2.6" fill="{TRIMW}"/>')
+        if dormer:
+            dx0 = x + w / 2 - 9
+            o.append(f'<rect x="{dx0:.0f}" y="{ey - gh * 0.66:.0f}" width="18" '
+                     f'height="14" fill="{wall}"/>')
+            o.append(f'<path d="M{dx0 - 3:.0f},{ey - gh * 0.66:.0f} '
+                     f'L{dx0 + 9:.0f},{ey - gh * 0.66 - 9:.0f} '
+                     f'L{dx0 + 21:.0f},{ey - gh * 0.66:.0f} Z" fill="{roof}"/>')
+        return ''.join(o) + '</g>'
+
+    # The far row: the next block back, packed tight, small.  It shows between and under
+    # Lucy and is most of what makes the town read as a town rather than a stage flat.
+    rh = rnd(41)
+    x_ = -26
+    while x_ < 600:
+        w_ = 46 + int(rh() * 34)
+        back.append(shore_house(x_, w_, 414, 96 + int(rh() * 34),
+                                WALLS[int(rh() * len(WALLS))], 300 + x_,
+                                deck=False, dormer=rh() > 0.6))
+        x_ += w_ + 4 + int(rh() * 6)
+
+    # the last houses on the corner, right beside the ramp, and the street frontage
+    back.append(f'<path d="M-20,380 L590,380 L590,436 L-20,436 Z" fill="{WALK}"/>')
+    back.append(f'<path d="M-20,380 L590,380 L590,384 L-20,384 Z" fill="{WALK_D}"/>')
+
+    # The near row: the houses on Lucy's own block.  Tall, two and three storeys, and
+    # they run right up to the kerb the way shore lots do.
+    rh2 = rnd(43)
+    NEAR = [(-46, 58, 142)]
+    for nx, nw, nh in NEAR:
+        back.append(shore_house(nx, nw, 446, nh, WALLS[int(rh2() * len(WALLS))],
+                                600 + nx, deck=True, dormer=rh2() > 0.5))
+
+    # ---------------------------------------------------------------------
+    # THE STATION.  It goes on the FAR side of the rails, which is not a preference: the
+    # train renders behind `scenery-front`, so a building on the near side would stand in
+    # front of it and hide the very thing the scene is about.  Platform near, depot far —
+    # the same arrangement Medora uses and for the same reason.
+    #
+    # It is a seashore station of the kind the island line was built with: one storey,
+    # shingled, a broad hipped roof with very deep eaves on brackets so passengers could
+    # wait out of the sun, the operator's bay window pushed out toward the track so he
+    # could see both ways, and a brick chimney.  Ten and a half metres long, four and a
+    # half to the eaves — measured, like everything else here.
+    DP_L, DP_R, DP_B = 12, 174, 444
+    DP_W = DP_R - DP_L
+    DP_EAVE = DP_B - 74                     # 5.2 m at 14.2 px/m
+    DP_RIDGE = DP_EAVE - 46
+    dp = ['<g>']
+    dp.append(f'<ellipse cx="{(DP_L + DP_R) // 2}" cy="{DP_B + 2}" rx="{DP_W * 0.56:.0f}" '
+              f'ry="5" fill="#000" opacity="0.13"/>')
+    dp.append(f'<rect x="{DP_L}" y="{DP_EAVE}" width="{DP_W}" height="{DP_B - DP_EAVE}" '
+              f'fill="#e8dcc2"/>')
+    for k in range(int((DP_B - DP_EAVE) / 7)):
+        dp.append(f'<rect x="{DP_L}" y="{DP_EAVE + 4 + k * 7}" width="{DP_W}" '
+                  f'height="1.3" fill="#000" opacity="0.06"/>')
+    # the operator's bay, pushed out toward the rails
+    BY_L, BY_R = DP_L + 58, DP_L + 104
+    dp.append(f'<path d="M{BY_L},{DP_B} L{BY_L - 7},{DP_B - 44} L{BY_R + 7},{DP_B - 44} '
+              f'L{BY_R},{DP_B} Z" fill="#f2ece0"/>')
+    for wx_ in (BY_L - 3, BY_L + 13, BY_L + 29):
+        dp.append(f'<rect x="{wx_}" y="{DP_B - 38}" width="11" height="22" '
+                  f'fill="#5d6b78"/>')
+        dp.append(f'<rect x="{wx_}" y="{DP_B - 38}" width="11" height="6" '
+                  f'fill="#8296a4"/>')
+    # doors and the tall trackside windows
+    dp.append(f'<rect x="{DP_L + 16}" y="{DP_B - 40}" width="20" height="40" '
+              f'fill="#7a5a3a"/>')
+    dp.append(f'<rect x="{DP_L + 19}" y="{DP_B - 36}" width="14" height="16" '
+              f'fill="#5d6b78"/>')
+    for wx_ in (DP_L + 116, DP_L + 134):
+        dp.append(f'<rect x="{wx_ - 2}" y="{DP_B - 44}" width="17" height="35" '
+                  f'fill="#f2ece0"/>')
+        dp.append(f'<rect x="{wx_}" y="{DP_B - 41}" width="13" height="29" '
+                  f'fill="#5d6b78"/>')
+        dp.append(f'<rect x="{wx_}" y="{DP_B - 41}" width="13" height="8" '
+                  f'fill="#8296a4"/>')
+    # the roof: hipped, with eaves that overhang far enough to be a shelter
+    dp.append(f'<path d="M{DP_L - 16},{DP_EAVE + 4} L{DP_L + 34},{DP_RIDGE} '
+              f'L{DP_R - 34},{DP_RIDGE} L{DP_R + 16},{DP_EAVE + 4} Z" fill="{SHINGLE}"/>')
+    dp.append(f'<path d="M{DP_R - 34},{DP_RIDGE} L{DP_R + 16},{DP_EAVE + 4} '
+              f'L{DP_R + 4},{DP_EAVE + 4} L{DP_R - 42},{DP_RIDGE + 4} Z" '
+              f'fill="{SHINGLE_D}"/>')
+    dp.append(f'<rect x="{DP_L - 18}" y="{DP_EAVE + 3}" width="{DP_W + 36}" height="6" '
+              f'fill="{SHINGLE_D}"/>')
+    for bx_ in range(DP_L - 8, DP_R + 10, 26):
+        dp.append(f'<path d="M{bx_},{DP_EAVE + 9} l0,10 l9,-10 Z" fill="#c9bda2"/>')
+    dp.append(f'<rect x="{DP_L + 112}" y="{DP_RIDGE - 22}" width="13" height="26" '
+              f'fill="#a8543a"/>')
+    dp.append(f'<rect x="{DP_L + 110}" y="{DP_RIDGE - 24}" width="17" height="5" '
+              f'fill="#88412c"/>')
+    dp.append(f'<path d="M{DP_L - 22},{DP_B} L{DP_R + 26},{DP_B} L{DP_R + 26},{DP_B + 8} '
+              f'L{DP_L - 22},{DP_B + 8} Z" fill="#c2b79c"/>')
+    dp.append(f'<path d="M{DP_L - 22},{DP_B} L{DP_R + 26},{DP_B} L{DP_R + 26},{DP_B + 2.4} '
+              f'L{DP_L - 22},{DP_B + 2.4} Z" fill="#ddd3b8"/>')
+    for k in range(int((DP_W + 48) / 13)):
+        dp.append(f'<rect x="{DP_L - 20 + k * 13}" y="{DP_B}" width="2" height="8" '
+                  f'fill="#a89d84" opacity="0.7"/>')
+    back.append(''.join(dp) + '</g>')
+    # and the pair on the far side of Lucy's plot, between her and the street end
+    back.append(shore_house(494, 74, 440, 139, WALLS[int(rh2() * len(WALLS))], 711,
+                            deck=True))
+
+    # ---------------------------------------------------------------------
+    # LUCY'S PLOT.  Pale gravel and paving inside a black iron picket fence, with the
+    # little green-and-cream gift cottage tucked beside her — which is exactly how she
+    # sits in the reference, and the cottage is the scale gag: its ridge reaches her knee.
+    PLOT_L, PLOT_R, PLOT_T, PLOT_B = 148, 566, 422, 444
+    back.append(f'<path d="M{PLOT_L},{PLOT_T} L{PLOT_R},{PLOT_T} L{PLOT_R + 8},{PLOT_B} '
+                f'L{PLOT_L - 8},{PLOT_B} Z" fill="#ded7c6"/>')
+    rp = rnd(47)
+    for k in range(60):
+        back.append(f'<ellipse cx="{PLOT_L + rp() * (PLOT_R - PLOT_L):.0f}" '
+                    f'cy="{PLOT_T + 2 + rp() * 24:.0f}" rx="{6 + rp() * 20:.0f}" '
+                    f'ry="{1.6 + rp() * 2.4:.1f}" fill="#efe9db" '
+                    f'opacity="{0.3 + rp() * 0.4:.2f}"/>')
+    # a strip of lawn along the front of the plot
+    back.append(f'<path d="M{PLOT_L - 6},{PLOT_B - 7} L{PLOT_R + 6},{PLOT_B - 7} '
+                f'L{PLOT_R + 8},{PLOT_B} L{PLOT_L - 8},{PLOT_B} Z" fill="{LAWN}"/>')
+
+    # ---------------------------------------------------------------------
+    # THE GIFT COTTAGE.  One storey, a hipped roof, a deep porch on turned posts, mint
+    # green below a cream frame.  It stands between Lucy and the street.
+    CO_X, CO_B, CO_W, CO_H = 402, 444, 104, 56
+    back.append(f'<g><ellipse cx="{CO_X + CO_W / 2:.0f}" cy="{CO_B + 2}" rx="56" ry="4" '
+                f'fill="#000" opacity="0.12"/>'
+                f'<rect x="{CO_X}" y="{CO_B - CO_H}" width="{CO_W}" height="{CO_H}" '
+                f'fill="#8fc7a4"/>'
+                f'<rect x="{CO_X}" y="{CO_B - CO_H}" width="{CO_W}" height="6" '
+                f'fill="#e8dcb4"/>'
+                + ''.join(f'<rect x="{CO_X + 4 + k * 8}" y="{CO_B - CO_H + 8}" '
+                          f'width="3" height="{CO_H - 12}" fill="#e8dcb4"/>'
+                          for k in range(12))
+                + f'<rect x="{CO_X + 34}" y="{CO_B - 30}" width="24" height="30" '
+                f'fill="#5d6b78"/>'
+                f'<path d="M{CO_X - 12},{CO_B - CO_H} L{CO_X + 24},{CO_B - CO_H - 29} '
+                f'L{CO_X + CO_W - 24},{CO_B - CO_H - 29} L{CO_X + CO_W + 12},'
+                f'{CO_B - CO_H} Z" fill="{SHINGLE}"/>'
+                f'<path d="M{CO_X + CO_W - 24},{CO_B - CO_H - 29} '
+                f'L{CO_X + CO_W + 12},{CO_B - CO_H} L{CO_X + CO_W - 2},{CO_B - CO_H} '
+                f'L{CO_X + CO_W - 32},{CO_B - CO_H - 24} Z" fill="{SHINGLE_D}"/>'
+                f'<rect x="{CO_X - 10}" y="{CO_B - 20}" width="{CO_W + 20}" height="3" '
+                f'fill="#e8dcb4"/>'
+                + ''.join(f'<rect x="{CO_X - 8 + k * 16}" y="{CO_B - 20}" width="3" '
+                          f'height="20" fill="#e8dcb4"/>' for k in range(8))
+                + '</g>')
+
+    # ---------------------------------------------------------------------
+    # LUCY.  Author units: origin on the ground between the feet, facing RIGHT, 420 units
+    # from the gravel to the finial.  She is 65 ft high and 60 ft long, so she is nearly
+    # as LONG as she is tall, on SHORT thick legs — the first draft made her a tall
+    # animal on stilts and she read as a circus elephant in fancy dress.
+    #
+    # Her brow tops out ABOVE her back, with the howdah in the dip behind the skull, and
+    # the body, head and near legs are ONE continuous outline: drawn as separate shapes
+    # they meet in visible seams and she comes apart into a kit of grey parts.
+    LUCY_X, LUCY_Y, LUCY_S = 300, 440, 0.669     # 420 units -> 281px -> 19.8 m
+
+    BODY = (
+        'M-182,-206 '
+        'C -180,-230 -152,-242 -96,-245 '
+        'C -36,-247 12,-246 48,-241 '
+        'C 66,-238 74,-240 84,-248 '
+        'C 92,-278 118,-300 152,-301 '
+        'C 190,-302 214,-282 216,-250 '
+        'C 217,-226 212,-200 204,-182 '
+        'C 198,-166 188,-156 172,-151 '
+        'C 150,-145 126,-142 112,-136 '
+        'C 102,-130 98,-116 100,-100 '
+        'C 104,-70 108,-36 112,-20 '
+        'C 114,-12 120,-8 124,-6 L50,-6 '
+        'C 54,-8 58,-12 58,-20 '
+        'C 58,-40 56,-62 56,-76 '
+        'C 22,-70 -24,-68 -62,-72 '
+        'C -62,-56 -64,-30 -66,-20 '
+        'C -67,-12 -62,-8 -58,-6 L-140,-6 '
+        'C -136,-8 -131,-12 -132,-20 '
+        'C -134,-42 -138,-66 -142,-84 '
+        'C -160,-96 -174,-120 -180,-152 '
+        'C -184,-172 -184,-190 -182,-206 Z')
+    EAR = ('M86,-282 C 126,-288 160,-268 162,-236 '
+           'C 164,-208 154,-182 140,-164 '
+           'C 130,-152 118,-148 108,-154 '
+           'C 98,-160 86,-154 78,-166 '
+           'C 66,-186 72,-256 86,-282 Z')
+
+    o = [f'<g transform="translate({LUCY_X},{LUCY_Y}) scale({LUCY_S})">']
+    o.append('<ellipse cx="-20" cy="3" rx="200" ry="18" fill="#000" opacity="0.17"/>')
+
+    def farleg(cx, w):
+        hw, fw = w / 2.0, w / 2.0 + 7
+        return (f'<path d="M{cx - hw:.0f},-150 C {cx - hw - 3:.0f},-60 '
+                f'{cx - fw + 2:.0f},-24 {cx - fw:.0f},-8 L{cx + fw:.0f},-8 '
+                f'C {cx + fw - 2:.0f},-24 {cx + hw + 3:.0f},-60 {cx + hw:.0f},-150 Z" '
+                f'fill="{TIN_XD}"/>'
+                f'<path d="M{cx - fw:.0f},-17 C {cx - fw - 3:.0f},-5 {cx + fw + 3:.0f},-5 '
+                f'{cx + fw:.0f},-17 Z" fill="{TIN_SH}"/>')
+
+    o.append(farleg(-146, 54))
+    o.append(farleg(20, 52))
+    # tusks first, so the trunk hangs in front of them
+    for dx, dy, col in ((-17, 13, TUSK_D), (0, 0, TUSK)):
+        o.append(f'<path d="M{168 + dx},{-186 + dy} '
+                 f'C {208 + dx},{-178 + dy} {244 + dx},{-152 + dy} '
+                 f'{266 + dx},{-114 + dy} '
+                 f'C {273 + dx},{-101 + dy} {258 + dx},{-94 + dy} '
+                 f'{252 + dx},{-106 + dy} '
+                 f'C {232 + dx},{-142 + dy} {200 + dx},{-160 + dy} '
+                 f'{164 + dx},{-160 + dy} Z" fill="{col}"/>')
+    o.append(f'<path d="{BODY}" fill="{TIN}"/>')
+    DEFS.append(f'    <clipPath id="luskin"><path '
+                f'transform="translate({LUCY_X},{LUCY_Y}) scale({LUCY_S})" '
+                f'd="{BODY}"/></clipPath>')
+    o.append('</g>')
+    lucy_open = ''.join(o)
+
+    # everything painted inside her outline, in her own coordinate frame
+    sh = [f'<g clip-path="url(#luskin)">'
+          f'<g transform="translate({LUCY_X},{LUCY_Y}) scale({LUCY_S})">']
+    sh.append(f'<path d="M-160,-232 C -80,-252 30,-252 92,-240 '
+              f'C 20,-232 -90,-226 -160,-214 Z" fill="{TIN_L}" opacity="0.6"/>')
+    sh.append(f'<path d="M-190,-110 C -120,-62 60,-58 120,-104 '
+              f'L124,0 L96,0 C 104,-52 100,-74 84,-70 '
+              f'C 20,-56 -40,-56 -96,-70 C -114,-74 -118,-46 -110,0 L-146,0 Z" '
+              f'fill="{TIN_D}" opacity="0.75"/>')
+    sh.append(f'<path d="M-176,-206 C -150,-214 -120,-186 -120,-146 '
+              f'C -120,-114 -142,-92 -164,-96 Z" fill="{TIN_D}" opacity="0.35"/>')
+    sh.append(f'<path d="M74,-236 C 96,-222 104,-186 98,-146 '
+              f'C 88,-108 68,-94 52,-98 C 72,-140 76,-196 74,-236 Z" '
+              f'fill="{TIN_D}" opacity="0.28"/>')
+    sh.append(f'<path d="M96,-206 C 116,-176 148,-158 186,-156 '
+              f'C 176,-142 108,-140 94,-164 Z" fill="{TIN_D}" opacity="0.45"/>')
+    # the tin: twelve thousand square feet of it in staggered sheets.  Very faint —
+    # they are creases catching the light, and drawn any heavier she turns to brickwork.
+    sm = ['<g opacity="0.15">']
+    for k in range(19):
+        sy = -304 + k * 17
+        sm.append(f'<path d="M-220,{sy} C -70,{sy - 6} 90,{sy - 6} 280,{sy}" '
+                  f'stroke="{TIN_XD}" stroke-width="1.5" fill="none"/>')
+        for m in range(20):
+            sx = -206 + m * 20 + (10 if k % 2 else 0)
+            sm.append(f'<path d="M{sx},{sy - 1} l1.6,17" stroke="{TIN_XD}" '
+                      f'stroke-width="1.3" fill="none"/>')
+    sm.append('</g>')
+    sh.append(''.join(sm))
+    sh.append('</g></g>')
+    lucy_skin = ''.join(sh)
+
+    o = [f'<g transform="translate({LUCY_X},{LUCY_Y}) scale({LUCY_S})">']
+    for cx, fw in ((-99, 42), (87, 41)):
+        for k in range(4):
+            nx = cx - fw + 8 + k * (2 * fw - 16) / 3.0
+            o.append(f'<ellipse cx="{nx:.0f}" cy="-9.5" rx="5.5" ry="4.5" '
+                     f'fill="{TIN_L}" opacity="0.8"/>')
+    # trunk
+    o.append(f'<path d="M186,-196 L214,-202 C 222,-164 222,-120 226,-84 '
+             f'C 229,-60 240,-48 246,-44 C 254,-39 250,-27 241,-30 '
+             f'C 221,-36 206,-54 202,-84 C 197,-124 192,-158 180,-186 Z" '
+             f'fill="{TIN}"/>')
+    o.append(f'<path d="M206,-200 C 216,-162 216,-120 220,-84 '
+             f'C 224,-56 238,-46 246,-42 C 250,-38 248,-32 244,-33 '
+             f'C 226,-40 213,-58 210,-84 C 205,-126 200,-160 192,-194 Z" '
+             f'fill="{TIN_D}" opacity="0.55"/>')
+    for k in range(10):
+        ty = -184 + k * 15
+        o.append(f'<path d="M{188 + k * 2.6:.0f},{ty} l{26 - k * 1.2:.0f},-4" '
+                 f'stroke="{TIN_D}" stroke-width="2.4" opacity="0.4" fill="none"/>')
+    # ear: lighter than the head, with a hard edge, hanging BEHIND the eye
+    o.append(f'<path d="{EAR}" fill="{TIN_L}"/>')
+    o.append(f'<path d="{EAR}" fill="none" stroke="{TIN_SH}" stroke-width="3"/>')
+    o.append(f'<path d="M90,-277 C 126,-282 156,-264 158,-238 '
+             f'C 148,-254 116,-262 94,-258 Z" fill="{TIN}" opacity="0.8"/>')
+    o.append(f'<path d="M96,-232 C 122,-238 140,-226 142,-206 '
+             f'C 143,-188 136,-172 128,-162" stroke="{TIN}" stroke-width="3.4" '
+             f'fill="none" opacity="0.7"/>')
+    # the eye.  Enormous, and it must be: every photograph of her leads with it.
+    o.append('<ellipse cx="188" cy="-248" rx="21" ry="20" fill="#f6f3ea"/>')
+    o.append(f'<ellipse cx="188" cy="-248" rx="21" ry="20" fill="none" '
+             f'stroke="{TIN_SH}" stroke-width="3"/>')
+    o.append(f'<circle cx="190" cy="-248" r="11" fill="{IRIS}"/>')
+    o.append(f'<circle cx="190" cy="-248" r="5.2" fill="{PUP}"/>')
+    o.append('<circle cx="185" cy="-253" r="2.8" fill="#ffffff" opacity="0.9"/>')
+    # tail
+    o.append(f'<path d="M-180,-196 C -194,-180 -198,-148 -194,-122 L-186,-124 '
+             f'C -189,-150 -184,-178 -173,-190 Z" fill="{TIN_D}"/>')
+    o.append(f'<path d="M-196,-130 C -204,-120 -204,-108 -195,-102 '
+             f'C -187,-108 -186,-120 -188,-130 Z" fill="{TIN_XD}"/>')
+    # THE DOOR in the near hind leg — the whole reason this scene exists
+    o.append(f'<rect x="-122" y="-56" width="40" height="56" rx="2" fill="{TIN_D}"/>')
+    o.append(f'<rect x="-117" y="-51" width="30" height="51" fill="{DARKW}"/>')
+    o.append(f'<rect x="-117" y="-51" width="30" height="7" fill="{DARKW_L}"/>')
+    o.append(f'<rect x="-104" y="-44" width="2" height="44" fill="{TIN_D}" '
+             f'opacity="0.7"/>')
+    o.append(f'<path d="M-128,0 L-78,0 L-74,7 L-132,7 Z" fill="{TIN_L}"/>')
+    # the blanket: crimson with a scalloped gold border, painted ON the tin
+    BL = ('M-170,-236 L10,-242 C 20,-206 20,-170 13,-140 '
+          'C -46,-128 -120,-128 -174,-140 C -180,-172 -177,-206 -170,-236 Z')
+    o.append(f'<path d="{BL}" fill="{RED}"/>')
+    o.append(f'<path d="M-170,-236 L10,-242 C 14,-224 17,-208 18,-194 '
+             f'L-175,-188 C -175,-204 -173,-220 -170,-236 Z" fill="{RED_D}" '
+             f'opacity="0.28"/>')
+    o.append(f'<path d="M-174,-158 C -120,-146 -46,-146 14,-158 L13,-140 '
+             f'C -46,-128 -120,-128 -174,-140 Z" fill="{GOLD}"/>')
+    zz = []
+    for k in range(19):
+        zx = -170 + k * 9.4
+        zz.append(f'M{zx:.0f},-152 l4.7,8.6 l4.7,-8.6')
+    o.append(f'<path d="{" ".join(zz)}" stroke="{GOLD_L}" stroke-width="2.8" '
+             f'fill="none" opacity="0.9"/>')
+    o.append(f'<path d="M10,-242 C 20,-206 20,-170 13,-140 L0,-142 '
+             f'C 7,-172 7,-206 -3,-241 Z" fill="{GOLD}"/>')
+    # her windows.  Twenty-two in life; five is enough to say BUILDING, and each gets a
+    # frame and a transom, because a bare dark rectangle is a hole, not a window.
+    for wx, wy in ((-148, -214), (-60, -180), (-4, -182), (-134, -176), (46, -198)):
+        o.append(f'<rect x="{wx - 3}" y="{wy - 3}" width="23" height="29" rx="2" '
+                 f'fill="{TIN_L}"/>')
+        o.append(f'<rect x="{wx}" y="{wy}" width="17" height="23" fill="{DARKW}"/>')
+        o.append(f'<rect x="{wx}" y="{wy}" width="17" height="6" fill="{DARKW_L}"/>')
+        o.append(f'<rect x="{wx + 7}" y="{wy}" width="2" height="23" fill="{TIN_L}" '
+                 f'opacity="0.8"/>')
+    # THE HOWDAH.  A little building strapped to her back: an enclosed block sitting down
+    # INTO the back, a floor overhanging it, a railing with medallions, turned posts and
+    # a crossed double-gable roof with ogee eaves and finials.  Drawn as a plain canopy
+    # it becomes a beach umbrella, which is what the first draft came out as.
+    o.append(f'<path d="M-160,-230 C -120,-218 -40,-218 -4,-232 L-2,-296 L-162,-292 Z" '
+             f'fill="{TAN}"/>')
+    o.append(f'<path d="M-162,-292 L-2,-296 L-1,-276 L-162,-272 Z" fill="{TAN_L}" '
+             f'opacity="0.4"/>')
+    o.append(f'<path d="M-20,-226 L-4,-232 L-2,-296 L-18,-296 Z" fill="{TAN_D}" '
+             f'opacity="0.55"/>')
+    o.append(f'<rect x="-110" y="-284" width="22" height="28" fill="{DARKW}"/>')
+    o.append(f'<rect x="-113" y="-287" width="28" height="6" fill="{TAN_D}"/>')
+    o.append(f'<path d="M-170,-294 L10,-298 L10,-306 L-170,-302 Z" fill="{TAN_D}"/>')
+    o.append(f'<path d="M-170,-302 L10,-306 L10,-311 L-170,-307 Z" fill="{ROOFC}"/>')
+    lucy_lower = ''.join(o) + '</g>'
+
+    # the railing and roof come AFTER the figures at the rail, so a visitor stands
+    # behind the rail and in front of the posts, which is where a person actually is
+    o = [f'<g transform="translate({LUCY_X},{LUCY_Y}) scale({LUCY_S})">']
+    o.append(f'<path d="M-166,-308 L6,-312 L6,-332 L-166,-328 Z" fill="{ROOFW}"/>')
+    o.append(f'<path d="M-166,-328 L6,-332 L6,-338 L-166,-334 Z" fill="{ROOFW_D}"/>')
+    for k in range(8):
+        mx = -150 + k * 21
+        o.append(f'<circle cx="{mx}" cy="-320" r="6.6" fill="{ROOFC}"/>')
+        o.append(f'<circle cx="{mx}" cy="-320" r="3.2" fill="{GOLD}"/>')
+    for px in (-166, -112, -54, 0):
+        o.append(f'<rect x="{px}" y="-378" width="7" height="44" fill="{ROOFW_D}"/>')
+        o.append(f'<rect x="{px + 1}" y="-378" width="2.6" height="44" fill="{ROOFW}"/>')
+    for dx, dy, col, cc in ((-30, 12, ROOFW_D, '#cfbc9a'), (0, 0, ROOFW, ROOFC)):
+        o.append(f'<path d="M{-186 + dx},{-362 + dy} '
+                 f'C {-174 + dx},{-382 + dy} {-150 + dx},{-398 + dy} '
+                 f'{-116 + dx},{-406 + dy} '
+                 f'L{-80 + dx},{-420 + dy} L{-44 + dx},{-406 + dy} '
+                 f'C {-10 + dx},{-398 + dy} {14 + dx},{-382 + dy} '
+                 f'{26 + dx},{-362 + dy} L{12 + dx},{-358 + dy} '
+                 f'C {2 + dx},{-375 + dy} {-18 + dx},{-388 + dy} '
+                 f'{-48 + dx},{-396 + dy} '
+                 f'L{-80 + dx},{-408 + dy} L{-112 + dx},{-396 + dy} '
+                 f'C {-142 + dx},{-388 + dy} {-162 + dx},{-375 + dy} '
+                 f'{-172 + dx},{-358 + dy} Z" fill="{col}"/>')
+        o.append(f'<path d="M{-172 + dx},{-358 + dy} '
+                 f'C {-162 + dx},{-375 + dy} {-142 + dx},{-388 + dy} '
+                 f'{-112 + dx},{-396 + dy} L{-80 + dx},{-408 + dy} '
+                 f'L{-48 + dx},{-396 + dy} '
+                 f'C {-18 + dx},{-388 + dy} {2 + dx},{-375 + dy} '
+                 f'{12 + dx},{-358 + dy} '
+                 f'C {-20 + dx},{-370 + dy} {-138 + dx},{-370 + dy} '
+                 f'{-172 + dx},{-358 + dy} Z" fill="{cc}"/>')
+    val = []
+    for k in range(14):
+        vx = -182 + k * 15
+        val.append(f'M{vx},-356 a7.5,6 0 0 0 15,0')
+    o.append(f'<path d="{" ".join(val)}" fill="none" stroke="{GOLD}" '
+             f'stroke-width="2.6"/>')
+    for fx, fy in ((-80, -420), (-186, -362), (28, -362)):
+        o.append(f'<path d="M{fx},{fy - 17} L{fx + 3.4:.0f},{fy - 5} L{fx},{fy + 2} '
+                 f'L{fx - 3.4:.0f},{fy - 5} Z" fill="{ROOFW_D}"/>')
+    lucy_top = ''.join(o) + '</g>'
+
+    # THE IRON FENCE round her plot, in front of her feet and in front of the visitors
+    # at the door, because that is where it stands.
+    fence = ['<g>']
+    for px_ in range(PLOT_L - 10, PLOT_R + 10, 9):
+        fence.append(f'<rect x="{px_}" y="{PLOT_B - 20}" width="2.4" height="20" '
+                     f'fill="#31353b"/>')
+        fence.append(f'<path d="M{px_ + 1.2:.1f},{PLOT_B - 24} '
+                     f'L{px_ + 3.2:.1f},{PLOT_B - 20} L{px_ - 0.8:.1f},{PLOT_B - 20} Z" '
+                     f'fill="#31353b"/>')
+    fence.append(f'<rect x="{PLOT_L - 12}" y="{PLOT_B - 15}" '
+                 f'width="{PLOT_R - PLOT_L + 24}" height="2.6" fill="#31353b"/>')
+    fence.append(f'<rect x="{PLOT_L - 12}" y="{PLOT_B - 3}" '
+                 f'width="{PLOT_R - PLOT_L + 24}" height="2.6" fill="#31353b"/>')
+    # the gate, opposite the door in her leg
+    for gx_ in (PLOT_L + 118, PLOT_L + 160):
+        fence.append(f'<rect x="{gx_}" y="{PLOT_B - 28}" width="4" height="28" '
+                     f'fill="#31353b"/>')
+    fence.append('</g>')
+    plot_fence = ''.join(fence)
+
+    # ---------------------------------------------------------------------
+    # PEOPLE.  Everything here is at TRUE scale against her — 1.7 m is 24 pixels at the
+    # plot's depth — because she is only absurd if the people are right.
+    def person(px, py, ps, shirt, trous, skin='#e2b48c', hat=None, child=False):
+        h = 22.0 if child else 34.0
+        g = [f'<g transform="translate({px},{py}) scale({ps})">']
+        g.append(f'<ellipse cx="0" cy="1" rx="{h * 0.26:.1f}" ry="{h * 0.07:.1f}" '
+                 f'fill="#000" opacity="0.16"/>')
+        g.append(f'<path d="M{-h * 0.1:.1f},{-h * 0.4:.1f} L{-h * 0.12:.1f},0 '
+                 f'L{-h * 0.02:.1f},0 L{h * 0.02:.1f},{-h * 0.4:.1f} Z" fill="{trous}"/>')
+        g.append(f'<path d="M{h * 0.02:.1f},{-h * 0.4:.1f} L{h * 0.04:.1f},0 '
+                 f'L{h * 0.14:.1f},0 L{h * 0.12:.1f},{-h * 0.4:.1f} Z" fill="{trous}"/>')
+        g.append(f'<path d="M{-h * 0.17:.1f},{-h * 0.38:.1f} '
+                 f'C {-h * 0.19:.1f},{-h * 0.66:.1f} {h * 0.19:.1f},{-h * 0.66:.1f} '
+                 f'{h * 0.17:.1f},{-h * 0.38:.1f} Z" fill="{shirt}"/>')
+        g.append(f'<path d="M{-h * 0.17:.1f},{-h * 0.6:.1f} '
+                 f'L{-h * 0.24:.1f},{-h * 0.4:.1f}" stroke="{shirt}" '
+                 f'stroke-width="{h * 0.08:.1f}" stroke-linecap="round"/>')
+        g.append(f'<path d="M{h * 0.17:.1f},{-h * 0.6:.1f} '
+                 f'L{h * 0.24:.1f},{-h * 0.4:.1f}" stroke="{shirt}" '
+                 f'stroke-width="{h * 0.08:.1f}" stroke-linecap="round"/>')
+        g.append(f'<circle cx="0" cy="{-h * 0.76:.1f}" r="{h * 0.11:.1f}" fill="{skin}"/>')
+        if hat:
+            g.append(f'<ellipse cx="0" cy="{-h * 0.85:.1f}" rx="{h * 0.2:.1f}" '
+                     f'ry="{h * 0.045:.1f}" fill="{hat}"/>')
+            g.append(f'<path d="M{-h * 0.1:.1f},{-h * 0.86:.1f} '
+                     f'C {-h * 0.1:.1f},{-h * 0.98:.1f} {h * 0.1:.1f},{-h * 0.98:.1f} '
+                     f'{h * 0.1:.1f},{-h * 0.86:.1f} Z" fill="{hat}"/>')
+        return ''.join(g) + '</g>'
+
+    # THREE AT THE HOWDAH RAIL, sixty feet up.  These are the figures that APPEAR: the
+    # engine fades them in a beat after someone walks into the leg, and that one beat is
+    # how a three-year-old works out that the elephant is hollow.
+    # HOW HIGH THEY STAND. The deck is at author y=-308, and standing them on it
+    # hid them completely: the parapet's cap tops out at -334, a 21-unit figure
+    # standing at -308 has its head at -329, and five units of it were behind a
+    # solid decorated panel. The whole headline animation played with nobody to
+    # see. It is the parapet that is wrong — at 26 units against a 21-unit person
+    # it is a 1.9 m railing, which is a wall — but lowering it would redraw the
+    # one silhouette in this scene nobody is allowed to touch, so the figures come
+    # up to where a person at a chest-high rail actually reads: a bit over half of
+    # them showing, head and shoulders and no more. Nothing gives it away, because
+    # everything below the cap is behind the panel either way. Their SIZE is
+    # untouched — the scene's no-cheat rule is about scale, and Lucy is only
+    # absurd if the people are right.
+    # EACH ONE STANDS WHERE THE RAIL PUTS THEM, which is not one shared line.
+    # Standing them all on the deck at -308 hid every one of them: the parapet's
+    # cap tops out at about -335, a 21-unit adult standing on the deck has its head
+    # at -329, and the whole headline animation played behind a solid decorated
+    # panel with nobody to see. Moving them all up by the same amount then showed
+    # the two adults and still lost the CHILD, who is two thirds their height.
+    #
+    # So the stance is measured from the cap down: the same fraction of every
+    # figure shows above the rail, which is what actually happens when people of
+    # different heights stand at one railing — you see head and shoulders of each.
+    # Their SIZE is untouched; the scene's no-cheat rule is about scale, and Lucy
+    # is only absurd if the people are right.
+    #
+    # It is the PARAPET that is wrong, strictly — 26 units against a 21-unit person
+    # is a 1.9 m railing, which is a wall — but lowering it would redraw the one
+    # silhouette in this scene nobody is allowed to touch, and nothing gives the
+    # stance away because everything below the cap is behind the panel either way.
+    CAP_L, CAP_R = -334.0, -338.0                # the cap runs -166 -> 6, tilted
+    SHOW = 0.55                                  # of each figure, above the rail
+    howdah_folk = []
+    for i_, (hx, sh_, tr_, ch_) in enumerate(
+            ((-136, '#e8c65a', '#3a3f48', False), (-88, '#4a8fb8', '#f2efe4', False),
+             # clear of the -54 post: at -46 the child stood half behind it, and a
+             # figure you can only half see is the one figure that has to read
+             (-38, '#d8544a', '#3f4a58', True))):
+        cap = CAP_L + (hx + 166) / 172.0 * (CAP_R - CAP_L)
+        h_loc = (22.0 if ch_ else 34.0) * 0.62   # their height in author units
+        feet = cap + h_loc * SHOW
+        howdah_folk.append(
+            f'<g id="cc-howdah-{i_}" class="cc-howdah" opacity="1">'
+            + person(LUCY_X + hx * LUCY_S, LUCY_Y + feet * LUCY_S,
+                     LUCY_S * 0.62, sh_, tr_, child=ch_)
+            + '</g>')
+
+    # TWO AT THE DOOR, at the foot of the near hind leg.  These are the figures that
+    # VANISH.  The door is at author x=-102, so they stand just outside it.
+    door_folk = []
+    for i_, (dx_, sh_, tr_, ht_) in enumerate(
+            ((-62, '#5fa06a', '#3f4a58', None), (-30, '#e2854a', '#4a4a54', '#f2efe4'))):
+        door_folk.append(
+            f'<g id="cc-door-{i_}" class="cc-door" opacity="1">'
+            + person(LUCY_X + dx_ * LUCY_S, LUCY_Y + 2, LUCY_S * 0.7, sh_, tr_, hat=ht_)
+            + '</g>')
+
+    # ---------------------------------------------------------------------
+    # THE AVENUE.  Kerb, verge and the parked cars every shore street has along it.  No
+    # badges, no plates, no model anybody could name — a saloon, a wagon and a pickup as
+    # plain blocks of colour.
+    def car(cx, cy, cs, body, roof=None, kind='saloon'):
+        roof = roof or mix(body, '#ffffff', 0.2)
+        g = [f'<g transform="translate({cx},{cy}) scale({cs})">']
+        g.append('<ellipse cx="0" cy="1" rx="34" ry="4" fill="#000" opacity="0.16"/>')
+        if kind == 'wagon':
+            g.append(f'<path d="M-32,-4 L-30,-16 C -22,-26 20,-26 28,-16 L30,-4 Z" '
+                     f'fill="{body}"/>')
+            g.append(f'<path d="M-22,-17 C -16,-24 18,-24 24,-17 Z" fill="{roof}"/>')
+        elif kind == 'pickup':
+            g.append(f'<path d="M-32,-4 L-32,-14 L2,-14 L4,-22 C 12,-25 24,-24 27,-20 '
+                     f'L30,-14 L30,-4 Z" fill="{body}"/>')
+            g.append(f'<path d="M6,-20 C 12,-23 22,-22 24,-19 Z" fill="{roof}"/>')
+        else:
+            g.append(f'<path d="M-32,-4 L-30,-13 C -20,-22 16,-22 26,-13 L30,-4 Z" '
+                     f'fill="{body}"/>')
+            g.append(f'<path d="M-16,-14 C -10,-20 12,-20 18,-14 Z" fill="{roof}"/>')
+        for wx_ in (-19, 17):
+            g.append(f'<circle cx="{wx_}" cy="-3" r="6" fill="#2c2f34"/>')
+            g.append(f'<circle cx="{wx_}" cy="-3" r="2.6" fill="#9aa0a6"/>')
+        return ''.join(g) + '</g>'
+
+
+
+    # utility poles.  Every shore street has them and they are the one vertical that
+    # keeps a row of houses from reading as a single wall.
+    for px_, pb, ps_ in ((556, 430, 1.44),):
+        hgt = 78 * ps_
+        back.append(f'<g><rect x="{px_}" y="{pb - hgt:.0f}" width="{3.4 * ps_:.1f}" '
+                    f'height="{hgt:.0f}" fill="#7d6a52"/>'
+                    f'<rect x="{px_ - 11 * ps_:.0f}" y="{pb - hgt + 6 * ps_:.0f}" '
+                    f'width="{25 * ps_:.0f}" height="{2.2 * ps_:.1f}" fill="#6f5d47"/>'
+                    f'<rect x="{px_ - 8 * ps_:.0f}" y="{pb - hgt + 16 * ps_:.0f}" '
+                    f'width="{19 * ps_:.0f}" height="{2 * ps_:.1f}" fill="#6f5d47"/></g>')
+    back.append(f'<path d="M557,326 C 700,344 860,342 1010,322" stroke="#6f5d47" '
+                f'stroke-width="1.5" fill="none" opacity="0.45"/>')
+
+    # ---------------------------------------------------------------------
+    # THE BEACH LOT, and what the cars actually do.
+    #
+    # Nose-in bays along the far side, a through aisle along the near side that runs right
+    # and out of frame.  `.cc-road-exit` carries "farEdgeY,nearEdgeY,junctionX" and is how
+    # the engine's own traffic knows where to drive out and which lane to use; nothing is
+    # painted on the aisle, because painted cars sit frozen while live ones drive past
+    # them, and that lesson cost Crater Lake a revision.
+    #
+    # AND IT IS A SINGLE-TRACK SECTION, which is the fourth token.  The aisle is 35px
+    # deep and a car at this depth is 35px tall, so exactly ONE lane exists here — two
+    # opposed lanes drove clean through each other, 414 overlapping frames in forty
+    # seconds.  "east" is the other way the engine shares one lane and it does not fit:
+    # its inbound traffic arrives from the far WEST, and west of this junction at this
+    # height is the railway.  So the aisle takes one car at a time, in either direction,
+    # which is also what a 35px aisle does in life.
+    LOT_SURF = mix(ROADC, ROADC_D, 0.55)
+    back.append(f'<path d="M678,{LOT_FAR} L1330,{LOT_FAR} L1330,{LOT_NEAR} '
+                f'L698,{LOT_NEAR} Z" fill="{LOT_SURF}"/>')
+    back.append(f'<path d="M678,{LOT_FAR} L1330,{LOT_FAR} L1330,{LOT_FAR + 4} '
+                f'L679,{LOT_FAR + 4} Z" fill="{mix(LOT_SURF, "#ffffff", 0.13)}"/>')
+    back.append(f'<path d="M{697},{LOT_NEAR - 5} L1330,{LOT_NEAR - 5} L1330,{LOT_NEAR} '
+                f'L698,{LOT_NEAR} Z" fill="{ROADC_D}"/>')
+    # THE BAYS.  A white tick between each one, and a stop bar at their head: a strip of
+    # tarmac with markings on it is a car park, and without them it is a grey rectangle.
+    BAY_T, BAY_B = LOT_FAR + 3, LOT_FAR + 30
+    for bx_ in range(716, 1332, 30):
+        back.append(f'<rect x="{bx_}" y="{BAY_T}" width="2" height="{BAY_B - BAY_T}" '
+                    f'fill="#e8e2c9" opacity="0.38"/>')
+    back.append(f'<rect x="712" y="{BAY_B}" width="620" height="2.2" fill="#e8e2c9" '
+                f'opacity="0.4"/>')
+    # a kerb along the head of the bays, so the tarmac stops against something
+    back.append(f'<rect x="690" y="{LOT_FAR - 3}" width="642" height="3.4" '
+                f'fill="{WALK_D}"/>')
+
+    def parked_car(cx, cy, s_, col):
+        """Nose-in, so seen end-on: at this depth a car is eighteen pixels wide and it
+        gets a roof, a screen and two wheels and nothing else."""
+        return (f'<g transform="translate({cx},{cy}) scale({s_})">'
+                f'<ellipse cx="0" cy="1" rx="10" ry="2.4" fill="#000" opacity="0.16"/>'
+                f'<path d="M-9,0 L-9,-9 C -9,-12 9,-12 9,-9 L9,0 Z" fill="{col}"/>'
+                f'<path d="M-7,-11 C -6,-17 6,-17 7,-11 Z" '
+                f'fill="{mix(col, "#ffffff", 0.22)}"/>'
+                f'<path d="M-5,-12 C -4,-15.6 4,-15.6 5,-12 Z" fill="#cfe0ea"/>'
+                f'<rect x="-9.6" y="-3" width="3" height="3.4" rx="1" fill="#2c2f34"/>'
+                f'<rect x="6.6" y="-3" width="3" height="3.4" rx="1" fill="#2c2f34"/></g>')
+
+    rc = rnd(83)
+    CARCOL = ('#dfe1e0', '#4a6f8c', '#8c4a44', '#3f4a58', '#c9c4b8', '#5f7a58',
+              '#b8a45c', '#7a6f86')
+    for k, bx_ in enumerate(range(731, 1330, 30)):
+        if rc() < 0.24:                      # a lot is never full and never empty
+            continue
+        back.append(parked_car(bx_, BAY_B - 3, 0.95 + (bx_ - 731) / 600.0 * 0.2,
+                               CARCOL[int(rc() * len(CARCOL))]))
+    back.append(f'<g class="cc-road-exit" '
+                f'data-exit="{LOT_FAR + 34},{LOT_NEAR - 5},{700},single"></g>')
+
+    # THE HEAD OF THE STREET is closed: a rail across the tarmac and a timber ramp over
+    # the bulkhead beyond it.  Pedestrian beach access, no through route for a car — which
+    # is why the lot has to be there and is the only place a car can go.
+    lx_ = 622 - 112 * (ROAD_TOP - 300) / 420.0
+    rx_ = 658 + 112 * (ROAD_TOP - 300) / 420.0
+    back.append(f'<path d="M{lx_ - 6:.0f},{ROAD_TOP - 1} L{rx_ + 6:.0f},{ROAD_TOP - 1} '
+                f'L{rx_ - 7:.0f},364 L{lx_ + 7:.0f},364 Z" fill="#c2a878"/>')
+    for k in range(6):
+        yy = 365 + k * 1.8
+        w_ = 56 + k * 3.2
+        back.append(f'<rect x="{640 - w_ / 2:.0f}" y="{yy:.0f}" width="{w_:.0f}" '
+                    f'height="1.2" fill="#a98a5e" opacity="0.7"/>')
+    for px_ in range(int(lx_) - 16, int(rx_) + 18, 14):
+        back.append(f'<rect x="{px_ - 3}" y="{ROAD_TOP - 15}" width="6" height="15" '
+                    f'fill="#6f5c3e"/>')
+    back.append(f'<rect x="{lx_ - 19:.0f}" y="{ROAD_TOP - 15}" '
+                f'width="{rx_ - lx_ + 38:.0f}" height="4" rx="2" fill="{TRIMW}"/>')
+    back.append(f'<rect x="{lx_ - 19:.0f}" y="{ROAD_TOP - 8}" '
+                f'width="{rx_ - lx_ + 38:.0f}" height="3.6" rx="1.8" fill="{TRIMW}"/>')
+
+    # the verge between the street and the railway, on the town side.  It is drawn
+    # BEFORE the plot, because the plot is nearer than it and has to sit on top.
+    back.append(f'<path d="M-20,442 L604,442 L604,450 L-20,450 Z" fill="{LAWN}"/>')
+    rv = rnd(53)
+    for k in range(50):
+        gx = -18 + rv() * 600
+        gy = 443 + rv() * 7
+        s_ = 0.5 + rv() * 0.6
+        back.append(f'<path d="M{gx:.0f},{gy:.0f} l{-3 * s_:.1f},{-9 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{0.8 * s_:.1f},{-12 * s_:.1f} '
+                    f'M{gx:.0f},{gy:.0f} l{4 * s_:.1f},{-8 * s_:.1f}" '
+                    f'stroke="{(LAWN_L, "#5f8447", LAWN)[int(rv() * 3)]}" '
+                    f'stroke-width="{1.2 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    # THE CARRIAGEWAY IS CUT OUT OF THE NEAR GROUND.  scenery-front is painted after the
+    # road, so a full-width fill here buries it and the crossing ends up with no road in
+    # front of the gate.  Ground goes inside this clip; props stay outside it.
+    DEFS.append('    <clipPath id="mgnf">'
+                '<path d="M-20,514 L562,514 L508,722 L-20,722 Z"/>'
+                '<path d="M711,514 L1320,514 L1320,722 L772,722 Z"/></clipPath>')
+    fr.append('<g clip-path="url(#mgnf)">')
+    # town side: the near verge and sidewalk.  Beach side: soft blown sand with dune
+    # grass, because on this island the sand gets everywhere and the last block before
+    # the beach is half sand already.
+    fr.append(f'<path d="M-20,516 L640,516 L560,722 L-20,722 Z" fill="{LAWN}"/>')
+    fr.append(f'<path d="M-20,566 L600,566 L572,626 L-20,626 Z" fill="{WALK}"/>')
+    fr.append(f'<path d="M-20,566 L600,566 L598,574 L-20,574 Z" fill="{WALK_D}"/>')
+    fr.append(f'<path d="M-20,618 L578,618 L540,722 L-20,722 Z" fill="{LAWN}"/>')
+    fr.append(f'<path d="M-20,618 L578,618 L576,624 L-20,624 Z" fill="#5f8447"/>')
+    fr.append(f'<path d="M640,516 L1320,516 L1320,722 L560,722 Z" fill="{SAND}"/>')
+    rf = rnd(59)
+    for k in range(46):
+        sx = 660 + rf() * 660
+        sy = 528 + rf() * 190
+        fr.append(f'<ellipse cx="{sx:.0f}" cy="{sy:.0f}" rx="{30 + rf() * 90:.0f}" '
+                  f'ry="{6 + rf() * 14:.0f}" fill="{SAND_L}" '
+                  f'opacity="{0.3 + rf() * 0.35:.2f}"/>')
+    for k in range(22):
+        sx = 660 + rf() * 660
+        sy = 540 + rf() * 180
+        fr.append(f'<ellipse cx="{sx:.0f}" cy="{sy:.0f}" rx="{24 + rf() * 60:.0f}" '
+                  f'ry="{5 + rf() * 10:.0f}" fill="{SAND_D}" '
+                  f'opacity="{0.22 + rf() * 0.22:.2f}"/>')
+    fr.append('</g>')
+
+    def on_road(x, y, m=12):
+        """The near layers draw over EVERYTHING, road included.  Anything scattered here
+        has to be asked whether it is standing on the carriageway."""
+        t = (y - 300) / 420.0
+        return (622 - 112 * t) - m < x < (644 + 126 * t) + m
+
+    # dune grass in the near sand, and the snow fence running down beside the railway
+    for k in range(46):
+        gx = 700 + rf() * 630
+        gy = 530 + rf() * 190
+        if on_road(gx, gy, 26):
+            continue
+        s_ = 0.7 + rf() * 0.9
+        fr.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-14 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-19 * s_:.1f} '
+                  f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-13 * s_:.1f}" '
+                  f'stroke="{(DGRASS, DGRASS_L, DGRASS_D)[int(rf() * 3)]}" '
+                  f'stroke-width="{1.5 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+    for k in range(13):
+        fx_ = 822 + k * 38
+        fy_ = 528 + k * 3
+        fr.append(f'<rect x="{fx_}" y="{fy_}" width="4.4" height="30" fill="#b09061" '
+                  f'opacity="0.7"/>')
+    fr.append('<path d="M824,540 L1310,578 M824,550 L1310,588" stroke="#8d7049" '
+              'stroke-width="1.8" fill="none" opacity="0.55"/>')
+    # a family going down to the sand, near and large — the one place in the frame where
+    # a person is big enough to have a face-worth of detail, and they are carrying the
+    # chairs and the bucket that say this is a day at the beach.
+    fr.append('<g transform="translate(1006,644) rotate(16)">'
+              '<rect x="0" y="0" width="8" height="30" rx="2.5" fill="#d8544a"/>'
+              '<rect x="-3" y="-2" width="14" height="5" rx="2.5" fill="#8a8579"/></g>')
+    fr.append(person(994, 676, 1.7, '#4a8fb8', '#e8e4d8'))
+    fr.append(person(1046, 682, 1.66, '#e0a63c', '#3f4a58', hat='#f2efe4'))
+    fr.append(person(1090, 686, 1.57, '#d4718f', '#f2efe4', child=True))
+    fr.append('<g transform="translate(1112,686)">'
+              '<path d="M-4.6,-8 L4.6,-8 L3.4,0 L-3.4,0 Z" fill="#5fa06a"/>'
+              '<rect x="-5.2" y="-9.2" width="10.4" height="2" rx="1" fill="#4a8456"/>'
+              '<path d="M-4,-9 C -4,-13.6 4,-13.6 4,-9" stroke="#4a8456" '
+              'stroke-width="1.4" fill="none"/></g>')
+
+    # a beach bicycle leaning on the fence — the Shore's own vehicle, and the reference
+    # has one outside every house.  No maker, no markings: two wheels, a frame, a basket.
+    fr.append(f'<g transform="translate(846,604) scale(0.66)">'
+              f'<ellipse cx="0" cy="2" rx="30" ry="4" fill="#000" opacity="0.15"/>'
+              f'<circle cx="-20" cy="-16" r="16" fill="none" stroke="#3a3f48" '
+              f'stroke-width="2.6"/>'
+              f'<circle cx="20" cy="-16" r="16" fill="none" stroke="#3a3f48" '
+              f'stroke-width="2.6"/>'
+              f'<path d="M-20,-16 L-4,-16 L6,-34 L20,-16 M-4,-16 L8,-36 '
+              f'M6,-34 L-8,-35" stroke="#5c8fa8" stroke-width="3" fill="none"/>'
+              f'<path d="M-14,-34 L0,-34" stroke="#3a3f48" stroke-width="2.4"/>'
+              f'<rect x="6" y="-44" width="16" height="10" rx="2" fill="none" '
+              f'stroke="#b8956a" stroke-width="2"/></g>')
+
+    # a parked car at the kerb, near and large.  Plain blocks of colour: no badge, no
+    # plate, no model anybody could name.
+    # a paved parking apron beside the kerb, with a car on it.  A car drawn on the grass
+    # is a car somebody abandoned; a car needs a piece of ground that is for cars.
+    fr.append(f'<path d="M300,630 L536,630 L516,706 L254,706 Z" '
+              f'fill="{mix(ROADC, "#ffffff", 0.22)}"/>')
+    fr.append(f'<path d="M300,630 L536,630 L535,636 L299,636 Z" fill="{WALK_D}"/>')
+    fr.append(f'<path d="M304,636 L312,700" stroke="{TRIMW}" stroke-width="2.6" '
+              f'opacity="0.7" fill="none"/>')
+    fr.append(car(400, 684, 2.38, '#4a6f8c'))
+    # a bench facing the street, and a hydrant, because a pavement with nothing on it
+    # is a drawing of a pavement rather than a pavement
+    fr.append('<g transform="translate(196,610) scale(0.97)">'
+              '<ellipse cx="0" cy="2" rx="26" ry="4" fill="#000" opacity="0.14"/>'
+              '<rect x="-24" y="-10" width="48" height="5" rx="2" fill="#8a6a44"/>'
+              '<rect x="-24" y="-24" width="48" height="5" rx="2" fill="#8a6a44"/>'
+              '<rect x="-24" y="-32" width="48" height="5" rx="2" fill="#8a6a44"/>'
+              '<rect x="-22" y="-10" width="4" height="12" fill="#4a4f55"/>'
+              '<rect x="18" y="-10" width="4" height="12" fill="#4a4f55"/>'
+              '<rect x="-22" y="-34" width="4" height="24" fill="#4a4f55"/>'
+              '<rect x="18" y="-34" width="4" height="24" fill="#4a4f55"/></g>')
+    fr.append('<g transform="translate(96,660) scale(0.9)">'
+              '<ellipse cx="0" cy="2" rx="10" ry="3" fill="#000" opacity="0.14"/>'
+              '<rect x="-5" y="-20" width="10" height="20" rx="3" fill="#c94a3c"/>'
+              '<rect x="-9" y="-15" width="18" height="4" rx="2" fill="#c94a3c"/>'
+              '<path d="M-5,-20 C -5,-26 5,-26 5,-20 Z" fill="#a73a2e"/></g>')
+
+    # ---------------------------------------------------------------------
+    # THE PLATFORM.  On the NEAR side of the rails on purpose: the train renders behind
+    # `scenery-front`, so anyone standing here stays visible while it is stopped.  Put
+    # them on the far side and the train hides the very thing the animation is about.
+    #
+    # It stops short of the carriageway at every height — the road's left edge is
+    # 622 − 112t and the deck is cut inside it, because a platform across a level
+    # crossing is not a thing that exists.
+    PF_TOP, PF_NEAR, PF_FOOT = 516, 546, 562
+    fr.append(f'<path d="M-20,{PF_TOP} L550,{PF_TOP} L546,{PF_NEAR} L-20,{PF_NEAR} Z" '
+              f'fill="#b8ac92"/>')
+    for k in range(int(572 / 15)):
+        fr.append(f'<rect x="{-20 + k * 15}" y="{PF_TOP}" width="2.2" '
+                  f'height="{PF_NEAR - PF_TOP}" fill="#9a8e74" opacity="0.6"/>')
+    # the pale edge line along the platform lip.  Not lettering, and not a hazard stripe
+    # either — just the painted edge every platform has.
+    fr.append(f'<path d="M-20,{PF_TOP + 4} L549,{PF_TOP + 4} L548,{PF_TOP + 9} '
+              f'L-20,{PF_TOP + 9} Z" fill="#efe8d6"/>')
+    fr.append(f'<path d="M-20,{PF_NEAR} L546,{PF_NEAR} L540,{PF_FOOT} L-20,{PF_FOOT} Z" '
+              f'fill="#8e836c"/>')
+    fr.append(f'<path d="M-20,{PF_NEAR} L546,{PF_NEAR} L546,{PF_NEAR + 4} '
+              f'L-20,{PF_NEAR + 4} Z" fill="#cdc2a6"/>')
+    for px_ in range(-10, 526, 62):
+        fr.append(f'<rect x="{px_}" y="{PF_FOOT - 3}" width="8" height="13" '
+                  f'fill="#7a7060"/>')
+    # the ramp off the end of it, so the deck finishes instead of being sliced off at the
+    # kerb — this is the end passengers actually walk down to reach the street
+    fr.append(f'<path d="M500,{PF_TOP} L550,{PF_TOP} L546,{PF_NEAR} L494,{PF_NEAR} Z" '
+              f'fill="#a89c82"/>')
+    fr.append(f'<path d="M494,{PF_NEAR} L546,{PF_NEAR} L540,{PF_FOOT} L488,{PF_FOOT} Z" '
+              f'fill="#8e836c"/>')
+    for k in range(6):
+        fr.append(f'<path d="M{500 + k * 9},{PF_TOP} L{494 + k * 9},{PF_NEAR}" '
+                  f'stroke="#9a8e74" stroke-width="2" opacity="0.6" fill="none"/>')
+    # a handrail down it
+    fr.append(f'<path d="M498,{PF_TOP + 2} L490,{PF_NEAR + 2}" stroke="#6f6558" '
+              f'stroke-width="3" fill="none"/>')
+    fr.append(f'<rect x="495" y="{PF_TOP - 16}" width="4" height="18" fill="#6f6558"/>')
+    fr.append(f'<rect x="487" y="{PF_NEAR - 14}" width="4" height="18" '
+              f'fill="#6f6558"/>')
+    fr.append(f'<path d="M497,{PF_TOP - 14} L489,{PF_NEAR - 12}" stroke="#6f6558" '
+              f'stroke-width="3" fill="none"/>')
+
+    # platform furniture: benches and lamps.  NOT a wooden luggage barrow with crates and
+    # barrels on it — that is Medora's vocabulary, and this is a 1920s seashore halt where
+    # what people carry is a suitcase, a beach bag and a folding chair.
+    for bx_ in (86, 396):
+        fr.append(f'<g transform="translate({bx_},{PF_TOP + 20}) scale(0.92)">'
+                  f'<ellipse cx="0" cy="2" rx="30" ry="4" fill="#000" opacity="0.13"/>'
+                  f'<rect x="-28" y="-10" width="56" height="5" rx="2" fill="#8a6a44"/>'
+                  f'<rect x="-28" y="-25" width="56" height="5" rx="2" fill="#8a6a44"/>'
+                  f'<rect x="-28" y="-34" width="56" height="5" rx="2" fill="#8a6a44"/>'
+                  f'<rect x="-26" y="-10" width="4.4" height="12" fill="#4a4f55"/>'
+                  f'<rect x="21" y="-10" width="4.4" height="12" fill="#4a4f55"/>'
+                  f'<rect x="-26" y="-36" width="4.4" height="26" fill="#4a4f55"/>'
+                  f'<rect x="21" y="-36" width="4.4" height="26" fill="#4a4f55"/></g>')
+    for lx2 in (232, 508):
+        fr.append(f'<g transform="translate({lx2},{PF_TOP + 5})">'
+                  f'<rect x="-3" y="-72" width="6" height="72" fill="#3d4248"/>'
+                  f'<rect x="-7" y="-3" width="14" height="4" rx="2" fill="#3d4248"/>'
+                  f'<path d="M-9,-74 L9,-74 L6,-88 L-6,-88 Z" fill="#3d4248"/>'
+                  f'<path d="M-6,-76 L6,-76 L4,-86 L-4,-86 Z" fill="#f6efd2"/></g>')
+
+    # THE PASSENGERS.  Ids so the engine can move them one at a time; a class so it can
+    # address them all.  Summer clothes and beach bags, because this is the line people
+    # came down to the shore on and that is the entire reason the station is here.
+    #
+    # SCALE: 1.7 m at the platform's depth is 37 px, so `person()` — which is 34 units
+    # tall — runs at 1.09, and the child at 1.04 for 1.05 m.  Measured, not eyeballed.
+    # THE ONES WHO ARE TRAVELLING carry a role, and the engine's station-halt
+    # contract (.cc-platform + .cc-passenger, data-stand -> data-door) does the rest —
+    # the same one Boston, New York and Medora use, so this gets a tested arrival
+    # rather than a fourth implementation of one.
+    #
+    # Not all six. Two stay put, because a shore platform in summer is half people
+    # travelling and half people seeing them off, and a halt where every single
+    # person on it boards is a bus stop.
+    #
+    # The wrapper carries the POSITION and the drawing sits at its own origin: that
+    # is what lets the engine move somebody. Drawn the other way round — the position
+    # baked into the artwork, the wrapper at 0,0 — they cannot walk.
+    #
+    # (x, scale, shirt, trousers, hat, child, bag, role, door x)
+    WAITERS = [(58, 1.09, '#4a8fb8', '#e8e4d8', '#f2efe4', False, '#d8544a', None, 0),
+               (142, 1.09, '#d4718f', '#f2efe4', None, False, None, 'board', 212),
+               (176, 1.04, '#e8c65a', '#4a4a54', None, True, None, 'board', 246),
+               (284, 1.09, '#5fa06a', '#3f4a58', '#e8dcc2', False, '#e0a63c', 'board', 354),
+               (360, 1.08, '#e2854a', '#4a4a54', None, False, None, 'alight', 430),
+               (470, 1.09, '#6f7fc0', '#e8e4d8', '#f2efe4', False, None, None, 0)]
+    for k, (px_, ps_, sh_, tr_, ht_, ch_, bag, role_, dx_) in enumerate(WAITERS):
+        g = person(0, 0, ps_, sh_, tr_, hat=ht_, child=ch_)
+        if bag:
+            # the bag was never scaled with the figure and must not start being:
+            # it hangs at a fixed offset from the person's feet, in wrapper units
+            g += (f'<g transform="translate(9,-14)">'
+                  f'<rect x="-6" y="0" width="12" height="10" rx="2" fill="{bag}"/>'
+                  f'<path d="M-4,0 C -4,-6 4,-6 4,0" stroke="{bag}" stroke-width="1.8" '
+                  f'fill="none"/></g>')
+        sy_, dy_ = PF_NEAR - 5, 514
+        at = (px_, sy_) if role_ != 'alight' else (dx_, dy_)
+        cls = 'cc-person' + (' cc-passenger' if role_ else '')
+        fr.append(f'<g id="cc-person-{k}" class="{cls}"'
+                  + (f' data-role="{role_}" data-stand="{px_},{sy_}" '
+                     f'data-door="{dx_},{dy_}" data-scale="1"'
+                     if role_ else '')
+                  + f' transform="translate({at[0]},{at[1]})"'
+                  + (' opacity="0"' if role_ == 'alight' else '') + '>'
+                  + g + '</g>')
+    # data-stop is the HEAD of the train, and the head is the ENGINE, so it is aimed
+    # well past these people: what has to end up beside them is a COACH DOOR.
+    fr.append('<g class="cc-platform" data-stop="700" data-dwell="7"></g>')
+    # up the platform and into the train: the engine runs people along this in either
+    # direction, staggered, never together
+    DEFS.append('    <path id="board-path" class="cc-path" '
+                'd="M300,540 L344,528 L378,516"/>')
+
+    # the clipped privet along the property line.  It stops short of the parking lane,
+    # because a hedge drawn across a car is a hedge nobody asked where the car was.
+    rhd = rnd(71)
+    fr.append(f'<path d="M-20,678 L268,684 L262,722 L-20,722 Z" fill="#3f6a38"/>')
+    fr.append(f'<path d="M-20,678 L268,684 L266,694 L-20,688 Z" fill="#5f9150"/>')
+    for k in range(28):
+        hx = -20 + rhd() * 290
+        hy = 680 + (hx + 20) / 290.0 * 6 - rhd() * 4
+        hr = 10 + rhd() * 16
+        fr.append(f'<ellipse cx="{hx:.0f}" cy="{hy:.0f}" rx="{hr:.0f}" '
+                  f'ry="{hr * 0.36:.0f}" '
+                  f'fill="{("#4e7a42", "#6a9c58", "#417036")[int(rhd() * 3)]}" '
+                  f'opacity="0.9"/>')
+    # and the hydrangeas every shore garden on this island is full of
+    for hx, hy, hr, col in ((62, 716, 20, '#9aa8d4'), (128, 710, 15, '#c9a3cc'),
+                            (206, 720, 17, '#d8a8bc'), (252, 706, 14, '#9aa8d4')):
+        assert not on_road(hx, hy, hr + 10), 'hydrangea in the carriageway'
+        fr.append(f'<ellipse cx="{hx}" cy="{hy}" rx="{hr + 6}" ry="{hr * 0.62:.0f}" '
+                  f'fill="#4e7a42"/>')
+        for m in range(7):
+            fr.append(f'<circle cx="{hx + (rhd() - 0.5) * hr * 1.8:.0f}" '
+                      f'cy="{hy - 6 - rhd() * hr * 0.7:.0f}" '
+                      f'r="{hr * 0.3:.0f}" fill="{col}"/>')
+
+    # ===================================================== FOREGROUND ===
+    fgl = ['    ']
+    rz = rnd(61)
+    for k in range(54):
+        gx = rz() * 1340 - 20
+        gy = 694 + rz() * 34
+        if on_road(gx, gy):
+            continue
+        beach = gx > 620
+        s_ = 0.9 + rz() * 1.0
+        col = ((DGRASS, DGRASS_L, DGRASS_D) if beach
+               else (LAWN_L, '#5f8447', LAWN))[int(rz() * 3)]
+        fgl.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-16 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-21 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-15 * s_:.1f}" '
+                   f'stroke="{col}" stroke-width="{1.8 * s_:.1f}" fill="none" '
+                   f'stroke-linecap="round"/>')
+
+    # GULLS, and a kite over the beach.  Cheap, and they fill a sky that is otherwise
+    # nothing but blue.
+    gulls = []
+    for i_, (gx, gy, gs) in enumerate(((408, 150, 1.0), (470, 176, 0.8),
+                                       (880, 122, 1.1), (940, 160, 0.85),
+                                       (1120, 200, 0.7))):
+        gulls.append(f'<g id="cc-gull-{i_}" class="cc-gull" '
+                     f'transform="translate({gx},{gy}) scale({gs})">'
+                     f'<path d="M-13,0 C -8,-7 -3,-7 0,-2 C 3,-7 8,-7 13,0 '
+                     f'C 7,-3 3,-2 0,2 C -3,-2 -7,-3 -13,0 Z" fill="#f4f6f7"/>'
+                     f'<path d="M-13,0 C -8,-7 -3,-7 0,-2 C -4,-4 -9,-3 -13,0 Z" '
+                     f'fill="#c9d2d8"/></g>')
+    sk.extend(gulls)
+    sk.append('<g id="cc-kite" class="cc-kite" transform="translate(1024,150)">'
+              '<path d="M0,-26 L17,0 L0,26 L-17,0 Z" fill="#e0563f"/>'
+              '<path d="M0,-26 L0,26 M-17,0 L17,0" stroke="#f4d478" '
+              'stroke-width="2.2"/>'
+              '<path d="M0,26 C 6,36 -6,46 0,56 C 6,66 -6,74 0,84" stroke="#f4d478" '
+              'stroke-width="2" fill="none"/></g>')
+    DEFS.append('    <path id="kite-path" class="cc-path" '
+                'd="M1024,150 C 1060,128 1088,162 1052,182 C 1016,200 1000,168 '
+                '1024,150"/>')
+
+    return scene('margate', 'Margate City, New Jersey',
+                 {
+                     'sky': '\n'.join(sk),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(
+                         back + [lucy_open, lucy_skin, lucy_lower]
+                         + door_folk + howdah_folk + [lucy_top, plot_fence]),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface=ROADC, surface2=ROADC_D, shoulder=WALK,
+                                    dash=ROADC_D, top=ROAD_TOP,
+                                    junction=(LOT_FAR + 8, LOT_NEAR - 2)),
+                     'trackkw': dict(ballast='#a89a80', ballast_hi='#b8aa90',
+                                     tie='#5f4a34', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague(); medora(); margate()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

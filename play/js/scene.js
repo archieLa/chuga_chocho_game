@@ -45,6 +45,7 @@
   const BRIDGE_STOP = 386;         // where northbound traffic waits for a lifted span
   const BERTH_STOP = 404;          // and where it waits for a ferry that is not there
   const CROSS_KEEP = [438, 530];   // no car may come to REST between these — the rails
+  const AISLE_WAIT = 546;          // and where one waits its turn for a single-track side road
   const CROSSING_X = [500, 780];   // where the road meets the rails
 
   const CAR_COLOURS = ['#e84a4a', '#3d7bd6', '#f4b400', '#7b3fb0', '#2aa84a', '#ff8c2a', '#e8e8ee'];
@@ -385,6 +386,20 @@
       // so they queue behind each other instead of passing — which is the only
       // way a street this narrow can carry two directions at all.
       const sameDir = raw[3] === 'east';
+      // A THIRD SHAPE: "single" — one lane, and traffic runs BOTH WAYS along it.
+      //
+      // Margate's beach lot is the case neither of the other two fits. Its aisle
+      // is 35px deep and a car at that depth is 35px tall, so exactly one lane
+      // exists; but the aisle runs off the EAST edge, and the head of the street
+      // is railed off, so a car coming toward the viewer can only have come out
+      // of the lot. Two opposed lanes drove straight through each other — 414
+      // overlapping frames in forty seconds — and "east" cannot help, because its
+      // inbound traffic arrives from the far WEST, which here is the railway.
+      //
+      // So the aisle is a single-track section and it is worked like one: one car
+      // at a time, holding the token until it is off the aisle. Whoever is on it
+      // always leaves, so there is nothing to deadlock.
+      const single = raw[3] === 'single';
       const v = raw.slice(0, 3).map(Number);
       if (v.length === 3 && !v.some(isNaN)) {
         roadExit = {
@@ -392,11 +407,12 @@
           // Pushed to the outer thirds so the two streams clear each other: a car
           // is ~24px tall here and the band is 56px, so 0.75/0.25 leaves a full
           // car's height between them.
-          sameDir: sameDir,
-          // One lane down the middle when both streams share it; otherwise the
-          // outer thirds, so the two can pass.
-          laneOut: sameDir ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.75,
-          laneIn: sameDir ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.25,
+          sameDir: sameDir, single: single, busy: null,
+          // One lane down the middle when both streams share it — whether they
+          // share it by running the same way ("east") or by taking turns
+          // ("single"); otherwise the outer thirds, so the two can pass.
+          laneOut: (sameDir || single) ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.75,
+          laneIn: (sameDir || single) ? (v[0] + v[1]) / 2 : v[0] + (v[1] - v[0]) * 0.25,
           toX: 1340, fromX: -90,
         };
         // TWO LANES ONLY IF TWO LANES FIT. A car on the side road is turned a
@@ -440,6 +456,9 @@
     const lock = buildLock(svg);
     const pdogs = buildPdogs(svg);
     const surrey = buildSurrey(svg);
+    const lucy = buildLucy(svg);
+    const surf = buildSurf(svg);
+    const gulls = buildGulls(svg);
     const graze = buildGraze(svg);
     const osprey = buildOsprey(svg);
     const berth = buildBerth(svg);
@@ -475,7 +494,8 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, pdogs: pdogs, surrey: surrey, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, pdogs: pdogs, surrey: surrey,
+      lucy: lucy, surf: surf, gulls: gulls, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
     mounted[loc.id] = s;
@@ -2879,9 +2899,39 @@
   // =======================================================================
   const KITE = { sway: 13, secs: 6.4, bob: 11, bobSecs: 3.7, tip: 0.42, belly: 26 };
 
+  // A kite on a LOOP rather than on a line. Los Angeles's kite is tethered — it
+  // swings on a string from a named hand, and the string is redrawn to follow it.
+  // Margate's has nobody holding it: it is a dot over a crowded beach, and what it
+  // does is WANDER. So the art gives a small closed path and the kite crawls round
+  // it, slowly, tilting into the turn.
+  //
+  // Slowly is the whole of it. A kite that laps its loop quickly is a fly; at forty
+  // seconds it reads as something hanging in the air and drifting, which is what a
+  // kite on a hundred feet of string actually looks like from a street away.
+  const LOOP_KITE = { secs: 40, tilt: 16 };
+
+  function buildLoopKite(svg, node) {
+    const path = svg.querySelector('[id$="kite-path"]');
+    if (!path || !path.getTotalLength) return null;
+    const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(node.getAttribute('transform') || '');
+    const len = path.getTotalLength();
+    if (!len) return null;
+    // The art draws the kite at a point ON the loop, so the drawing's own origin is
+    // the offset to keep: move the wrapper by the DIFFERENCE, never to the raw point.
+    const p0 = path.getPointAtLength(0);
+    return { el: node, path: path, len: len, loop: true,
+             ox: (m ? +m[1] : 0) - p0.x, oy: (m ? +m[2] : 0) - p0.y, t: Math.random() };
+  }
+
   function buildKites(svg) {
     const out = [];
     svg.querySelectorAll('.cc-kite').forEach(node => {
+      if (!node.hasAttribute('data-anchor')) {
+        const k = buildLoopKite(svg, node);
+        if (k) out.push(k);
+        else console.warn('cc-kite needs data-anchor and data-home, or a #kite-path');
+        return;
+      }
       const a = (node.getAttribute('data-anchor') || '').split(',').map(Number);
       const h = (node.getAttribute('data-home') || '').split(',').map(Number);
       if (a.length !== 2 || h.length !== 2 || a.concat(h).some(isNaN)) {
@@ -2905,6 +2955,18 @@
     if (!list || !list.length) return;
     const secs = t / 1000;
     list.forEach(k => {
+      if (k.loop) {
+        const u = (k.t + secs / LOOP_KITE.secs) % 1;
+        const p = k.path.getPointAtLength(u * k.len);
+        // Tilt from the heading, so it leans into the turn instead of sliding
+        // round the loop bolt upright.
+        const q = k.path.getPointAtLength(((u + 0.02) % 1) * k.len);
+        const tilt = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+        k.el.setAttribute('transform',
+          'translate(' + (p.x + k.ox).toFixed(1) + ',' + (p.y + k.oy).toFixed(1)
+          + ') rotate(' + (Math.sin(tilt * Math.PI / 180) * LOOP_KITE.tilt).toFixed(2) + ')');
+        return;
+      }
       const a = KITE.sway * Math.sin(secs / KITE.secs * TAU) * Math.PI / 180;
       const grow = 1 + (KITE.bob * Math.sin(secs / KITE.bobSecs * TAU)) / k.len;
       const c = Math.cos(a), sn = Math.sin(a);
@@ -3689,6 +3751,134 @@
       L.t + 'rotate(' + (a * L.sign).toFixed(2) + ')'));
     w.wheels.forEach(q => q.el.setAttribute('transform',
       q.t + 'rotate(' + (w.run / q.r * 180 / Math.PI % 360).toFixed(1) + ')'));
+  }
+
+  // =======================================================================
+  // INSIDE THE ELEPHANT (.cc-door / .cc-howdah) — the headline at Margate.
+  //
+  // Two visitors stand at the door in Lucy's near hind leg; three stand at the
+  // howdah rail sixty feet up. Fade one group out, WAIT WITH NOBODY VISIBLE,
+  // then fade the other in.
+  //
+  // THE EMPTY BEAT IS THE WHOLE TRICK and it is the one thing here that must not
+  // be tuned away. A child who sees figures at a door, then sees nothing, then
+  // sees figures appear at a railing on the roof works out for themselves that
+  // the elephant is hollow and there are people climbing about inside her. Let
+  // the two groups overlap and nothing is learned — it is just two sets of dots
+  // that happen to be lit at different times.
+  //
+  // It is the prairie dogs' appear-and-vanish verb pointed the other way, which
+  // is why it was worth doing with opacity and nothing else. Do NOT translate
+  // anybody up the inside of the leg: you cannot see inside her, so the motion
+  // would cost a contract and show nothing.
+  const LUCY = {
+    atDoor: 6,      // they stand at the door
+    goingIn: 1.0,   // fading out, staggered
+    hollow: 2.2,    // NOBODY ANYWHERE. This is the beat that teaches it.
+    comingUp: 1.2,  // fading in at the rail, staggered
+    upTop: 7,       // looking out over the beach
+    goingDown: 1.0,
+    below: 2.4,     // inside again, on the stairs
+    stagger: 0.45,
+  };
+
+  function buildLucy(svg) {
+    const door = [].slice.call(svg.querySelectorAll('.cc-door'));
+    const top = [].slice.call(svg.querySelectorAll('.cc-howdah'));
+    if (!door.length || !top.length) return null;
+    return { door: door, top: top, t: 0 };
+  }
+
+  function updateLucy(dt) {
+    const L = currentScene && currentScene.lucy;
+    if (!L) return;
+    const T = LUCY;
+    const cycle = T.atDoor + T.goingIn + T.hollow + T.comingUp + T.upTop
+                + T.goingDown + T.below;
+    L.t = (L.t + dt / 1000) % cycle;
+    let u = L.t;
+    // Each group's opacity as one number, so the two can never be lit together
+    // by a rounding accident: they are computed from the same clock.
+    const fade = (list, inAt, outAt, dur) => {
+      list.forEach((el, i) => {
+        const d = i * T.stagger;
+        let o;
+        if (u < inAt + d) o = 0;
+        else if (u < inAt + d + dur) o = (u - inAt - d) / dur;
+        else if (u < outAt + d) o = 1;
+        else if (u < outAt + d + dur) o = 1 - (u - outAt - d) / dur;
+        else o = 0;
+        el.setAttribute('opacity', clamp(o, 0, 1).toFixed(3));
+      });
+    };
+    // The door group is lit from the top of the cycle, so it is what you see when
+    // you arrive in the scene; it starts already faded in rather than rising from
+    // nothing, which would read as the first thing that happens.
+    const doorOut = T.atDoor;
+    const topIn = T.atDoor + T.goingIn + T.hollow;
+    const topOut = topIn + T.comingUp + T.upTop;
+    fade(L.door, -T.goingIn, doorOut, T.goingIn);
+    fade(L.top, topIn, topOut, T.goingDown);
+  }
+
+  // =======================================================================
+  // THE SURF (.cc-surf) — the one endless motion in the frame.
+  //
+  // Eased at both ends and never stopping dead, because the whole register of
+  // this game is unhurried and a foam line that snaps is a flicker. Three
+  // seconds each way: at much under two and a half it stops reading as water.
+  const SURF = { secs: 3.0, throw: 14 };
+
+  function buildSurf(svg) {
+    const el = svg.querySelector('.cc-surf');
+    return el ? { el: el, t: 0 } : null;
+  }
+
+  function updateSurf(dt) {
+    const s = currentScene && currentScene.surf;
+    if (!s) return;
+    s.t += dt / 1000;
+    // A raised cosine: zero slope at both ends, so it arrives and leaves without
+    // a corner. sin() alone is close but reverses hardest where the wave should
+    // be hanging at the top of the beach.
+    const u = (1 - Math.cos(s.t / SURF.secs * Math.PI)) / 2;
+    s.el.setAttribute('transform', 'translate(0,' + (u * SURF.throw).toFixed(2) + ')');
+  }
+
+  // =======================================================================
+  // GULLS (.cc-gull) — lateral drift, each at its own speed, wrapping at the
+  // frame edge. No wing cycle: at eleven pixels across there is nothing a
+  // flapping wing could say that the movement does not already.
+  const GULL = { slow: 9, fast: 22, margin: 90 };
+
+  function buildGulls(svg) {
+    const out = [];
+    svg.querySelectorAll('.cc-gull').forEach((el, i) => {
+      const m = /translate\(\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      if (!m) return;
+      // Deterministic per slot rather than random, so a scene looks the same
+      // every time a child comes back to it.
+      const k = (i * 0.37) % 1;
+      out.push({ el: el, x: +m[1], y: +m[2],
+                 rest: (el.getAttribute('transform') || '').slice(
+                   (el.getAttribute('transform') || '').indexOf(')') + 1),
+                 v: (GULL.slow + (GULL.fast - GULL.slow) * k) * (i % 2 ? -1 : 1) });
+    });
+    return out;
+  }
+
+  function updateGulls(dt) {
+    const list = currentScene && currentScene.gulls;
+    if (!list || !list.length) return;
+    const secs = dt / 1000;
+    list.forEach(g => {
+      g.x += g.v * secs;
+      if (g.x > W + GULL.margin) g.x = -GULL.margin;
+      if (g.x < -GULL.margin) g.x = W + GULL.margin;
+      g.el.setAttribute('transform',
+        'translate(' + g.x.toFixed(1) + ',' + g.y + ')'
+        + (g.v < 0 ? ' scale(-1,1)' : '') + g.rest);
+    });
   }
 
   function buildFlags(svg) {
@@ -5059,6 +5249,15 @@
     // Where the road turns, traffic coming toward us has driven in along the side
     // road rather than materialising at the end of ours.
     if (down && ex) {
+      // DON'T STACK THEM UP OUT OF SIGHT. The carriageway spawn below has always
+      // refused to drop a car on top of one still at the entrance; the side road
+      // had no such rule, and on a single-track aisle — where an inbound car can
+      // be held off frame for a while — six of them piled up at x=1340 and ate
+      // the whole eight-car budget. The scene went nearly empty while a queue
+      // nobody could see waited its turn.
+      const entry = ex.sameDir ? ex.fromX : ex.toX;
+      if (cars.some(c => (c.phase === 'enter' || c.phase === 'approach')
+                         && Math.abs(c.x - entry) < carGap(ex.laneIn) * 1.2)) return;
       const car = newCar(1, ex.laneIn);
       // 'approach' comes in from the WEST and drives east to the junction;
       // 'enter' comes from the east and drives west to it.
@@ -5175,6 +5374,33 @@
   // the turn, which is what a slip road is for.
   const RACE_JOIN = { top: 220, accel: 90, brakeOver: 340 };
 
+  /** The single-track aisle's token. Held by at most one car; free when the
+      holder has left the aisle, died, or the scene has been swapped under it. */
+  function aisleFree(ex, car) {
+    if (!ex.single) return true;
+    if (ex.busy === car) return true;
+    if (ex.busy && (ex.busy.dead || cars.indexOf(ex.busy) < 0
+                    || (ex.busy.phase !== 'exit' && ex.busy.phase !== 'enter'))) {
+      ex.busy = null;
+    }
+    return !ex.busy;
+  }
+
+  /** May this car take the single-track aisle now? It has to be free, and if
+      somebody is queueing on the other side the two sides TAKE TURNS.
+
+      Strict priority either way starves the other side to nothing, and both
+      versions were tried: hand it to whoever asks first and the inbound queue,
+      refilled the instant it moves, takes every turn and nothing ever drives out
+      (five in, none out in a minute); hand it to the one waiting in plain sight
+      and outbound traffic — which is continuous — never yields (seven out, none
+      in). Alternating is the only thing that lets a car both arrive and leave. */
+  function mayTakeAisle(ex, car, inbound) {
+    if (!aisleFree(ex, car)) return false;
+    if (!(inbound ? ex.wantOut : ex.wantIn)) return true;   // nobody opposite
+    return ex.lastIn !== inbound;                           // our turn
+  }
+
   function driveSideRoad(car, secs, shut) {
     const ex = currentScene && currentScene.roadExit;
     if (!ex) return false;
@@ -5187,7 +5413,7 @@
         v = car.v;
       }
       car.x += v * secs;
-      if (car.x > ex.toX) car.dead = true;
+      if (car.x > ex.toX) { car.dead = true; if (ex.busy === car) ex.busy = null; }
       return true;
     }
     if (car.phase === 'approach') {
@@ -5215,6 +5441,11 @@
       return true;
     }
     if (car.phase === 'enter') {
+      // Wait off the east edge for the aisle, where there is nothing to see. A
+      // car that has started down it never gives up halfway — changing your mind
+      // in the middle of a single-track section is how you meet somebody in it.
+      if (ex.busy !== car && !mayTakeAisle(ex, car, true)) return true;
+      ex.busy = car; ex.lastIn = true;
       car.x -= car.speed * depthScale(car.y) * secs;
       // Reached the junction: swing onto our carriageway and head down — but not
       // into a shut crossing.
@@ -5228,6 +5459,7 @@
       if (car.x <= ex.jx + 16) {
         if (shut) { car.x = ex.jx + 16; return true; }
         car.phase = 'road'; car.x = null; car.y = ex.y1;
+        if (ex.busy === car) ex.busy = null;              // off the aisle
       }
       return true;
     }
@@ -5237,6 +5469,14 @@
     // new one materialised about 19px in front of it while the queue wants 47.
     // The gap was then made by moving the one BEHIND, so both slid west for a
     // moment before the waiting one turned. It gives way instead.
+    // Waiting its turn for a single-track aisle. It holds on the carriageway
+    // BELOW the crossing rather than at the junction mouth: the junction here is
+    // at y=441 and the keep-clear band starts at 438, so a car pausing at the
+    // mouth is a car stopped on the crossing. AISLE_WAIT is south of the band.
+    if (car.dir < 0 && ex.single && car.y <= ex.y1 + 120 && !mayTakeAisle(ex, car, false)) {
+      car.holdY = AISLE_WAIT;
+      return false;                                      // still on the carriageway
+    }
     if (car.dir < 0 && car.y <= ex.y1) {
       // It used to appear on the side road at a fixed spot regardless, and where
       // a car was already sitting at the junction waiting to turn down, the new
@@ -5257,6 +5497,7 @@
       });
       car.holdY = null;
       car.phase = 'exit';
+      if (ex.single) { ex.busy = car; ex.lastIn = false; }
       car.y = ex.laneOut;
       car.x = spot;
       return true;
@@ -5298,6 +5539,21 @@
     // Where everything was before this frame moved it. The queue uses it to
     // hold a car rather than shove it backwards — see below.
     cars.forEach(car => { car.x0 = car.x; car.y0 = car.y; });
+    // WHO GETS THE SINGLE-TRACK AISLE. Inbound traffic waits for it OFF FRAME and
+    // outbound waits for it ON THE ROAD, in plain sight, so the visible waiter
+    // wins: without this the inbound queue — which is refilled the moment it
+    // moves — took the aisle every single time and nothing ever drove out of the
+    // scene at all. Sixty seconds of it produced five cars in and none out.
+    const ex0 = currentScene && currentScene.roadExit;
+    if (ex0 && ex0.single) {
+      // Who is queueing on each side. Outbound counts only once it has CLEARED
+      // THE CROSSING and is actually approaching the junction: measuring from the
+      // junction instead put the window at y<=571, which is past STOP_NEAR, so a
+      // car stopped at the gate waiting for a train read as a car waiting for the
+      // aisle.
+      ex0.wantOut = cars.some(c => c.dir < 0 && c.phase === 'road' && c.y <= AISLE_WAIT + 4);
+      ex0.wantIn = cars.some(c => c.phase === 'enter' && c.x >= ex0.toX - 2);
+    }
     cars.forEach(car => { car.offRoad = driveSideRoad(car, secs, blocked); });
     // Rim Drive is a queue too. Without this, two cars released together at the
     // gate turn together and then sit 7px apart the whole way across.
@@ -5427,6 +5683,9 @@
   function clearCars() {
     cars.forEach(c => { if (c.el.parentNode) c.el.parentNode.removeChild(c.el); });
     cars = [];
+    // Whoever was holding the aisle has just been deleted along with everything
+    // else; leaving the token set would shut the side road for good.
+    if (currentScene && currentScene.roadExit) currentScene.roadExit.busy = null;
   }
 
   // =======================================================================
@@ -5520,6 +5779,9 @@
     updateLock(dt);
     updatePdogs(dt);
     updateSurrey(dt);
+    updateLucy(dt);
+    updateSurf(dt);
+    updateGulls(dt);
     updateGraze(t);
     updateOsprey(dt);
     updateBerth(dt);
@@ -5664,6 +5926,13 @@
     /** Test hook, the same idea as __setHead in tools/train-gallery.html: put
         the train exactly where you want it so a screenshot can catch it on the
         crossing instead of waiting for it to get there. Not used by the game. */
+    /** Test hook, like __setTrain: the live car list and the side road's state.
+        Written to find out why a single-track aisle had deadlocked, which was
+        invisible from the DOM — the cars were all stacked off frame at the same
+        coordinates. Not used by the game. */
+    __dbg() { return { ex: currentScene && currentScene.roadExit,
+        cars: cars.map(c => ({ d: c.dir, p: c.phase, x: Math.round(c.x || 0), y: Math.round(c.y), h: c.holdY })) }; },
+
     __setTrain(x, dir) {
       if (!train.active) launchTrain();
       if (dir) train.dir = dir;

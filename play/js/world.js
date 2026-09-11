@@ -460,6 +460,26 @@
       scenery:{ theme:'salt-marsh', features:['wildhorses','marsh','dune','boardwalk','osprey','causeway'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'margate', state:'New Jersey', city:'Margate City',
+      say:{ en:'Margate City', pl:'Margate City' },
+      scene:'margate',
+      // Viewpoint: an ordinary Margate cross street, looking down it to the beach. Lucy
+      // the Elephant — a six-storey 1882 BUILDING shaped like an elephant — stands on her
+      // plot on the left among the shore houses; the beach, the crowd and the Atlantic
+      // fill the right; Atlantic City stands small on the horizon. The road crosses the
+      // railway and opens out into a BEACH PARKING LOT — the head of the street itself is
+      // railed off, so the lot is the only place a car can go, which is both what is
+      // there in life and the only way a turning car gets room to stop at a shut gate.
+      // HEADLINE ANIMATION: people go IN a leg and come out ON TOP. #cc-door-0..1
+      // (class cc-door) stand at the door in her near hind leg; #cc-howdah-0..2
+      // (class cc-howdah) stand at the howdah rail sixty feet up. Fade one group out,
+      // WAIT A BEAT WITH NOBODY VISIBLE, then fade the other in — the empty beat is what
+      // teaches a child the elephant is hollow. No walk cycle anywhere.
+      // Also: every other train calls at the station; #cc-surf slides along #surf-path;
+      // #cc-gull-0..4 drift; #cc-kite wanders round #kite-path.
+      scenery:{ theme:'jersey-shore', features:['lucy','shorehouses','beach','dune','surf','skyline'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'medora', state:'North Dakota', city:'Medora',
       say:{ en:'Medora', pl:'Medora' },
       scene:'medora',

@@ -68,6 +68,7 @@ const SUPPORTED = {
   'Ohio': ['Cedar Point'],
   'Georgia': ['Savannah'],
   'Maine': ['Stonington'],
+  'New Jersey': ['Margate City'],
   'New Mexico': ['Albuquerque'],
   'North Carolina': ['Cape Hatteras'],
   'Vermont': ['Quechee'],
