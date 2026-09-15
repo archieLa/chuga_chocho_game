@@ -23,9 +23,9 @@ Motion is always **gate-blind**. Nothing here reacts to the crossing, waits
 for it, or is blocked by it. If a thing needs to know about the gate it is not
 ambient motion, it is gameplay, and it belongs somewhere else.
 
-### Four things now read the gate, and here is the whole of it
+### Five things now read the gate, and here is the whole of it
 
-The rule is still the rule and everything that can be gate-blind is. Four are not,
+The rule is still the rule and everything that can be gate-blind is. Five are not,
 all in one direction: they **listen, and the crossing never hears back**. The gate's
 own behaviour, its two buttons and the physical endpoint are byte for byte what they
 were, and no child can tell the difference at the crossing itself.
@@ -39,8 +39,16 @@ were, and no child can tell the difference at the crossing itself.
 * **Lewes's lane signal** is red while the gate is down and green a beat after it lifts. This one is barely a  concession: the gate is physically what is holding those cars, so the signal reports the road's own state  rather than borrowing the crossing's. Two waiting-and-goings in one frame, and nobody has to explain the  connection.
 * **Bailey Yard's shuffle** puts its wagon down and gets out of the way, because the
   same crane is about to load the train.
+* **Norfolk's terminal barrier** lifts when the crossing lifts and drops a beat before it
+  drops, and it is the clearest case any of these has. It is not borrowing the crossing's
+  state to save work — **it is the same rule said twice in one frame, in a second
+  language**. A child who has learned what the red and white arms mean sees a yellow and
+  black one twenty metres up the road doing the same thing at the same moment, and works
+  out that the arms are not a toy that belongs to this one railway. It follows
+  `CC.gate.isDown()`, which covers `closing` as well as `closed` — that is what makes it
+  fall *first*. Yellow and black on purpose: the same colours would read as one object.
 
-If a fifth wants in, it needs a reason of that size.
+If a sixth wants in, it needs a reason of that size.
 
 ---
 
@@ -98,6 +106,8 @@ the generator, `inline-assets.py`, and `check-scenes.py`.
 | **Surf** | `.cc-surf`, translated down its `#surf-path` throw and back on a raised cosine — zero slope at both ends, so it arrives and leaves without a corner. Three seconds each way. `sin()` alone is close but reverses hardest exactly where the wave should be hanging at the top of the beach. Under about 2.5s it stops reading as water and starts reading as a flicker. | Margate |
 | **Drifting birds** | `.cc-gull`, lateral only, each at its own speed, wrapping at the frame edge, alternating direction by slot. Speeds are DETERMINISTIC per slot rather than random, so a scene looks the same every time a child comes back to it. No wing cycle: at eleven pixels across there is nothing a flapping wing says that the movement does not. | Margate |
 | **A vehicle that goes out and comes back** | Nothing new: `translate(x,y) scale(sx,1)` on the art's own root, driven by a small phase machine (park, out, look, turn, away, gone, turn, home). The turn is a scaleX SWEEP THROUGH ZERO, the way Glacier's bus turns in its bay, because the art faces one way and a team of horses walking backwards is the one thing anybody would notice. Legs and wheels are driven by DISTANCE RUN and FREEZE the moment it stops. **Its east limit is not the exported path's end**: `#wagon-path` runs to x=560 and the carriageway starts at 595, so a wagon driven to the end of its own path stands its team in the road — and scenery-back is painted UNDER the road, so it would lose that half of itself as well. Measure the road at the mover's own y and stop short of it. | Medora's surrey |
+| **A causal chain** — one thing causes the next | Nothing new in the engine, and that is the point: the parts are the ones already in the set (a rotation, two fades, a translate, a slew) wired so that each one is *caused* by the one before. What makes it a chain rather than five loops near each other is that the effects are driven by the CAUSE'S OWN STATE and not by a parallel clock — Norfolk's load leaves the wagon at the angle the wagon is actually at (`e > 110/150`), so the swing can be retuned and the coal still falls out when the wagon is upside down. Write it as "at t=3.4s fade the load" and the first person to change the timing breaks the physics without touching the physics. | Norfolk's coal pier |
+| **A conveyor that loops seamlessly** | `.cc-belt` translated by exactly ONE lump-pitch and wrapped. Two things the art has to do for it: the belt RUBBER stays outside the moving group (inside it, the band travels too and drags its own ends out from under the gallery), and there is **one spare lump beyond each end** so the spare at the back takes the first one's place as the front one runs off. Without the spares the loop blinks — a gap opens at one end and a lump pops out at the other, together, once a second, for ever. The engine measures the pitch off the art (first lump to last, divided by the gaps) rather than being told it, so the belt can be redrawn without telling anybody. | Norfolk's gallery |
 | **A group that moves together** | Nothing. Give every animal the SAME range LENGTH and the SAME `data-speed`, with the ranges offset by the spacing you want. They set off together, turn together and come back together for ever, because they each cover the same distance between the same pauses. Any group logic here would be code earning nothing. | the Bluegrass family |
 | **Geyser** — waits, erupts, falls back | `.cc-geyser` wrapping everything ABOVE the vent (never the cone) with `data-origin="x,y"` at the mouth. Scales about that point so the column grows out of the vent rather than inflating around its middle. | Yellowstone |
 | **Aurora** — curtains breathe and drift | `.cc-aurora` on the parent; every direct child gets its own slow drift and fade, so the sky ripples instead of sliding sideways as one sheet. | Denali |
@@ -376,6 +386,7 @@ Two traps, both already paid for once:
 | Assateague | five of the band walk on the bluegrass gait, the dam and her foal keeping station · heads lift one at a time, never together · the drinker stands in the creek and its REFLECTION lifts its head with it · ripples only while the muzzle is down · an osprey circles, thirty-six seconds a lap |
 | Medora | **every other train calls at the depot** — three board and one gets off, and the two cowboys who came to watch the train stay put · nineteen prairie dogs pop up and duck down on their own clocks, and the front row dives when a train is coming · the surrey drives out to the kerb, turns, leaves the frame to the west and comes back · its legs and wheels stop when it does |
 | Margate City | **people go IN a leg and come out ON TOP** — two at the door in Lucy's hind leg fade out, nobody is visible for a beat, then three appear at the howdah rail sixty feet up · every other train calls at the station, three board and one gets off · the kite wanders its loop, forty seconds a lap · the surf slides up the sand and back · five gulls drift · the beach lot's aisle is single-track and the two directions take turns |
+| Norfolk | **the set's one causal chain** — the rotary dumper turns a loaded wagon through 150 degrees over three seconds, the coal leaves it as it passes 110, the stream pours under the ring, the belt carries it out along the gallery and the shiploaders pour it into the ship · the belt runs continuously and the spout never stops, because a real one does not · the two booms slew on different periods so they never nod in step · **the terminal barrier agrees with the crossing** · four gulls · nobody is in the frame on purpose |
 | Lewes | cars released by the gate drive up the ramp and into the ship · the lane signal turns green a beat after the crossing lifts and the queue shuffles forward · the ramp lifts through the long red · **she casts off and sails once every couple of minutes, and backs in astern on the way home** |
 | Detroit | plant-gate barrier lifts for the works traffic · **not ambient** — every other train stops and a gantry crane loads an auto-rack onto it. See below. |
 | Bailey Yard | the portal crane shuffles wagons about the loading track · **not ambient** — every other train stops and the same crane lifts a wagon onto it. See below. |

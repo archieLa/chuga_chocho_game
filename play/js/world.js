@@ -460,6 +460,27 @@
       scenery:{ theme:'salt-marsh', features:['wildhorses','marsh','dune','boardwalk','osprey','causeway'] },
       trainPreset:{ engine:'diesel' } },
 
+    { id:'norfolk', state:'Virginia', city:'Norfolk',
+      say:{ en:'Norfolk', pl:'Norfolk' },
+      scene:'norfolk',
+      // Viewpoint: inside Lambert's Point, looking up the works road between the coal
+      // yard and the quay. The ROTARY DUMPER faces you on the left — a steel barrel nine
+      // metres across with a loaded wagon clamped inside it; the pier, the conveyor
+      // gallery and the two shiploaders fill the right. The road crosses the railway and
+      // ends at the terminal gate, with the truck park opening off it.
+      // HEADLINE ANIMATION — and it is the set's FIRST CAUSAL CHAIN, not one loop:
+      //   #cc-dumper (rotate 0 -> -150 -> 0) turns the wagon over;
+      //   #cc-carload fades out as it goes past ~110 degrees;
+      //   #cc-coalfall fades IN under the ring while it is inverted;
+      //   #cc-belt slides along #belt-path, carrying the coal out to the pier;
+      //   #cc-boom-0/#cc-boom-1 slew, and #cc-spout pours it into the ship.
+      // A child can follow one lump of coal from the train to the ship.
+      // Also: #cc-gate is the terminal barrier — lift it when the CROSSING gates lift,
+      // because that is the truck's cue. #cc-truck waits at it. #cc-gull-0..3.
+      scenery:{ theme:'coal-pier', features:['rotarydumper','shiploader','conveyor',
+                'collier','coaltrain','elizabethriver'] },
+      trainPreset:{ engine:'diesel' } },
+
     { id:'margate', state:'New Jersey', city:'Margate City',
       say:{ en:'Margate City', pl:'Margate City' },
       scene:'margate',

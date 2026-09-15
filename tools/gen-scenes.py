@@ -32913,7 +32913,852 @@ def margate():
                                      tie='#5f4a34', rail='#cfd4d9'),
                  }, defs=d + '\n' + '\n'.join(DEFS))
 
-sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague(); medora(); margate()
+def norfolk():
+    """NORFOLK, VIRGINIA — Lambert's Point, and the machine that turns a train upside down.
+
+    The fifty-fifth scene and the fiftieth state, and it exists for one object.  At Pier 6
+    a loaded coal wagon rolls into a **rotary dumper** — a steel ring nine metres across —
+    the ring turns through a hundred and fifty degrees, and the coal falls out.  Four cars
+    at a time, up to twelve hundred a day, straight onto a belt and out along the pier into
+    a ship without ever touching the ground.
+
+    Norfolk & Western reached this point in **1886** to put Appalachian coal on tidewater,
+    which is the reason Norfolk is a port at all.  Pier 6 opened in 1962 and is still the
+    largest and fastest coal transloader in the Northern Hemisphere: 8,000 tons an hour,
+    two shiploaders of 2,400 tons each rolling on ninety-six rail wheels and standing
+    **182 feet above the water**, on a pier 1,850 feet long.
+
+    **THE ANIMATION IS THE POINT, and it is the set's first CAUSAL CHAIN.** Everything
+    else in this game that moves, moves by itself: a gate drops, a dog pops up, a wave
+    runs in.  Here one thing causes the next.  A wagon rolls into the ring; the ring turns
+    it over; the coal falls; the coal travels the belt out along the pier; the boom swings;
+    the coal pours into the ship.  **A child can follow one lump of coal from the train to
+    the ship**, and nothing in the other fifty-four scenes offers that.
+
+    **THE FIRST RISK was that this became Margate again** — an enormous object looming over
+    an ordinary neighbourhood, two scenes running.  The answer was to throw the
+    neighbourhood out.  This is a terminal, not a town: the yard and the dumper on one side,
+    the pier and the water on the other, the works road up the middle, and only a couple of
+    rooftops at the far edge to say a city is behind you.
+
+    **THE SECOND RISK was that this became Lewes** — a handsome ship in the middle distance
+    with an apron in front of it.  The 182 feet solved that by itself.  The shiploaders
+    tower two hundred pixels into the sky and the ship is a slab of hull *below* them, seen
+    past the pier: the thing the machine is pointed at, not the thing the eye lands on.
+
+    **WHERE THE ROAD GOES** — see the handoff, because it was decided by measurement rather
+    than by taste.  The works road runs up between the yard and the quay and ends at the
+    **terminal gate**, with the truck park opening off it to the right.  The gate is a
+    lifting barrier, so the frame holds two barriers and two waits: a truck waits at one
+    while a train passes the other.  That rhyme is the reason this ending was chosen over
+    running to the horizon.
+    """
+    def rnd(seed):
+        k = [seed]
+        def rr():
+            k[0] = (k[0] * 1103515245 + 12345) % 2147483648
+            return k[0] / 2147483648.0
+        return rr
+
+    def mix(c, other, k):
+        c, o_ = c.lstrip('#'), other.lstrip('#')
+        return '#%02x%02x%02x' % tuple(
+            round(int(c[i:i + 2], 16) * (1 - k) + int(o_[i:i + 2], 16) * k)
+            for i in (0, 2, 4))
+
+    # Colours read off the reference.  The machinery is very nearly black and the coal is
+    # blacker; the one warm thing in the frame is the dumper ring, which is weathered
+    # mill-scale brown, and it is warm ON PURPOSE — it is the hero and everything else
+    # here is grey.
+    STEEL, STEEL_L, STEEL_D = '#363c43', '#4c545c', '#262b31'
+    STEEL_XD = '#1b1f24'
+    RING, RING_L, RING_D = '#736253', '#8d7c6c', '#493e34'
+    COAL, COAL_L = '#1d1f23', '#32363c'
+    CAR, CAR_L, CAR_D = '#3a4149', '#59626b', '#252a30'
+    RIVER, RIVER_D, RIVER_L = '#5b7f86', '#496a71', '#7aa0a6'
+    HAZE = '#b6cbd6'
+    GROUND, GROUND_L, GROUND_D = '#6e6a63', '#837e75', '#585449'
+    CONC, CONC_L, CONC_D = '#b0aca4', '#c6c2ba', '#948f86'
+    ROADC, ROADC_D = '#6d6d72', '#585860'
+    BALLAST = '#8e8a84'
+    WEED, WEED_L, WEED_D = '#7d8a52', '#96a066', '#63703f'
+    TRIMW = '#eae6db'
+    YELLOW, YELLOW_D = '#dfb23c', '#b88f26'
+    RUST = '#8c4a34'
+    HULL, HULL_R, HULL_W = '#23262b', '#8c3a2e', '#e4e0d5'
+
+    ROAD_TOP = 378              # the works road ends at the terminal gate
+    LOT_FAR, LOT_NEAR = 386, 446   # the truck park, opening off it to the right
+    SHORE = 362                # the quay edge: river above it, terminal ground below
+
+    DEFS = []
+    d = sky_defs('#3d84c4', '#8ebfe0', '#dceaf2')
+
+    # ===================================================== SKY ===
+    sk = [sky('#3d84c4', '#8ebfe0', '#dceaf2'),
+          clouds([(170, 64, 52), (470, 40, 44), (760, 78, 40), (1090, 54, 48),
+                  (1260, 100, 34)])]
+
+    # ===================================================== GROUND / WATER ===
+    gr = []
+
+    # THE FAR SHORE.  Without it the river is a blue slab propped against the sky — the
+    # mistake Margate made and had to have fixed.  Portsmouth across the Elizabeth River:
+    # a low hazed line with container gantries on it, tiny.
+    gr.append(f'<path d="M-20,286 L1330,286 L1330,300 L-20,300 Z" '
+              f'fill="{mix("#6e7d86", HAZE, 0.66)}"/>')
+    for gx_ in range(320, 860, 74):
+        gr.append(f'<g fill="{mix("#5f6e78", HAZE, 0.6)}">'
+                  f'<rect x="{gx_}" y="270" width="3" height="18"/>'
+                  f'<rect x="{gx_ + 22}" y="270" width="3" height="18"/>'
+                  f'<rect x="{gx_ - 4}" y="266" width="34" height="4"/>'
+                  f'<rect x="{gx_ + 26}" y="260" width="3.4" height="10"/></g>')
+    rt = rnd(5)
+    for k in range(40):
+        tx = -20 + rt() * 1350
+        gr.append(f'<rect x="{tx:.0f}" y="{282 - rt() * 8:.0f}" '
+                  f'width="{6 + rt() * 26:.0f}" height="{4 + rt() * 8:.0f}" '
+                  f'fill="{mix("#7e8b94", HAZE, 0.7)}"/>')
+
+    # THE ELIZABETH RIVER.  Green-grey, not blue: this is a working estuary, not the sea.
+    gr.append(f'<path d="M-20,300 L1330,300 L1330,{SHORE} L-20,{SHORE} Z" fill="{RIVER}"/>')
+    gr.append(f'<path d="M-20,300 L1330,300 L1330,308 L-20,308 Z" '
+              f'fill="{mix(RIVER, HAZE, 0.4)}"/>')
+    rw = rnd(11)
+    for k in range(80):
+        wx = -20 + rw() * 1350
+        wy = 330 + rw() * 30
+        gr.append(f'<rect x="{wx:.0f}" y="{wy:.0f}" width="{8 + rw() * 44:.0f}" '
+                  f'height="1.6" fill="{RIVER_L}" opacity="{0.2 + rw() * 0.35:.2f}"/>')
+
+    # ---------------------------------------------------------------------
+    # THE SHIP.  A slab of hull seen PAST the pier and BELOW the loaders, with its holds
+    # open and heaped.  It is the thing the machine is pointed at, and it is deliberately
+    # not the thing the eye lands on: the moment it becomes handsome this scene is Lewes.
+    SH_T, SH_B = 304, 325
+    gr.append(f'<path d="M846,{SH_T} L1330,{SH_T - 3} L1330,{SH_B - 3} L846,{SH_B} Z" '
+              f'fill="{HULL}"/>')
+    gr.append(f'<path d="M846,{SH_B - 5} L1330,{SH_B - 8} L1330,{SH_B - 3} '
+              f'L846,{SH_B} Z" fill="{HULL_R}"/>')
+    gr.append(f'<path d="M846,{SH_T} L1330,{SH_T - 3} L1330,{SH_T + 3} L846,{SH_T + 6} Z" '
+              f'fill="{mix(HULL, "#ffffff", 0.22)}"/>')
+    # the open holds, heaped.  Five of them, which is what a bulk carrier has.
+    for hx in range(866, 1300, 84):
+        gr.append(f'<rect x="{hx}" y="{SH_T + 1}" width="62" height="7" fill="{COAL}"/>')
+        gr.append(f'<path d="M{hx},{SH_T + 2} Q {hx + 31},{SH_T - 4} {hx + 62},{SH_T + 2} '
+                  f'L{hx + 62},{SH_T + 5} L{hx},{SH_T + 5} Z" fill="{COAL_L}"/>')
+        gr.append(f'<rect x="{hx - 4}" y="{SH_T + 7}" width="70" height="2.6" '
+                  f'fill="{mix(HULL, "#ffffff", 0.3)}"/>')
+    # the accommodation block, aft and off at the right edge
+    gr.append(f'<g><rect x="1262" y="{SH_T - 30}" width="60" height="30" fill="{HULL_W}"/>'
+              f'<rect x="1262" y="{SH_T - 30}" width="60" height="4" fill="#c9c4b6"/>'
+              + ''.join(f'<rect x="{1268 + k * 11}" y="{SH_T - 24}" width="6" height="5" '
+                        f'fill="#4e5a63"/>' for k in range(5))
+              + ''.join(f'<rect x="{1268 + k * 11}" y="{SH_T - 15}" width="6" height="5" '
+                        f'fill="#4e5a63"/>' for k in range(5))
+              + f'<rect x="1286" y="{SH_T - 46}" width="13" height="16" fill="#3f474e"/>'
+              f'<rect x="1286" y="{SH_T - 46}" width="13" height="5" fill="{YELLOW}"/>'
+              f'</g>')
+
+    # ---------------------------------------------------------------------
+    # THE PIER.  Low, long, on concrete piles, with timber fendering along its face — and
+    # it is what stops the ship being the subject, because the ship is seen OVER it.
+    PIER = 'M760,364 L1330,336 L1330,352 L760,380 Z'
+    gr.append(f'<path d="{PIER}" fill="{CONC_D}"/>')
+    gr.append(f'<path d="M760,364 L1330,336 L1330,341 L760,369 Z" fill="{CONC}"/>')
+    for k in range(30):
+        px_ = 770 + k * 19
+        py_ = 364 - (px_ - 760) / 570.0 * 28
+        gr.append(f'<rect x="{px_}" y="{py_ + 5:.0f}" width="4.4" height="13" '
+                  f'fill="{CONC_D}"/>')
+    for k in range(46):
+        px_ = 764 + k * 12.5
+        py_ = 369 - (px_ - 760) / 570.0 * 28
+        gr.append(f'<rect x="{px_:.0f}" y="{py_:.0f}" width="2.6" height="8" '
+                  f'fill="#7a6a52" opacity="0.8"/>')
+
+    # ---------------------------------------------------------------------
+    # THE CONVEYOR GALLERY.  From the dumper's transfer tower it runs the whole width of
+    # the frame and out along the pier, crossing high over the road's far end.  It is the
+    # line that ties the two halves of the picture together, and it is the middle link of
+    # the chain: the coal that came out of the wagon is ON it.
+    def gally(x0, y0, x1, y1, depth=9):
+        o_ = [f'<path d="M{x0},{y0} L{x1},{y1} L{x1},{y1 + depth} L{x0},{y0 + depth} Z" '
+              f'fill="{mix(STEEL_L, HAZE, 0.3)}" opacity="0.5"/>',
+              f'<path d="M{x0},{y0} L{x1},{y1} L{x1},{y1 + 3} L{x0},{y0 + 3} Z" '
+              f'fill="{STEEL_L}"/>',
+              f'<path d="M{x0},{y0 + depth - 3} L{x1},{y1 + depth - 3} L{x1},{y1 + depth} '
+              f'L{x0},{y0 + depth} Z" fill="{STEEL_XD}"/>']
+        n = int(abs(x1 - x0) / 34)
+        for k in range(n):
+            t_ = k / float(n)
+            gx0 = x0 + (x1 - x0) * t_
+            gy0 = y0 + (y1 - y0) * t_
+            t2 = (k + 1) / float(n)
+            gx1 = x0 + (x1 - x0) * t2
+            gy1 = y0 + (y1 - y0) * t2
+            o_.append(f'<path d="M{gx0:.0f},{gy0 + depth:.0f} L{gx1:.0f},{gy1:.0f}" '
+                      f'stroke="{STEEL_D}" stroke-width="1.6" fill="none" '
+                      f'opacity="0.45"/>')
+        return ''.join(o_)
+
+    GY0X, GY0Y, GY1X, GY1Y = 430, 356, 1330, 326
+    gr.append(gally(GY0X, GY0Y, GY1X, GY1Y))
+    # trestle legs under it, standing in the water and on the pier
+    for k in range(9):
+        t_ = k / 8.0
+        lx_ = GY0X + (GY1X - GY0X) * t_
+        ly_ = GY0Y + (GY1Y - GY0Y) * t_ + 13
+        base = SHORE + 4 if lx_ < 770 else 364 - (lx_ - 760) / 570.0 * 28 + 6
+        gr.append(f'<path d="M{lx_ - 7:.0f},{ly_:.0f} L{lx_ - 4:.0f},{base:.0f} '
+                  f'L{lx_ + 4:.0f},{base:.0f} L{lx_ + 7:.0f},{ly_:.0f} Z" '
+                  f'fill="{STEEL_D}"/>')
+
+    # THE COAL ON THE BELT — the middle link.  Lumps riding the top of the gallery,
+    # translated along it by the engine.  A real gallery is hooded; this one is drawn open
+    # because the whole argument for this location is that a child can SEE the coal travel.
+    DEFS.append(f'    <path id="belt-path" class="cc-path" '
+                f'd="M{GY0X},{GY0Y} L{GY1X},{GY1Y}"/>')
+    rb = rnd(17)
+    # THE BELT RUBBER ITSELF DOES NOT MOVE — only the coal on it does, so the band is
+    # drawn OUTSIDE #cc-belt. Inside the moving group it travelled with the load and
+    # dragged its own ends out from under the gallery.
+    gr.append(f'<path d="M{GY0X},{GY0Y + 1} L{GY1X},{GY1Y + 1} L{GY1X},{GY1Y + 4} '
+              f'L{GY0X},{GY0Y + 4} Z" fill="{COAL}"/>')
+    # And there is ONE SPARE LUMP BEYOND EACH END (hence -1 .. 50 rather than 0 .. 49).
+    # The engine slides this group by exactly one lump-pitch and loops, so the spare at
+    # the back takes the first one's place and the one that runs off the front has
+    # somewhere to go. Without them the loop blinks: a gap opens at the dumper end and a
+    # lump pops out over the ship at the same moment, once a second, for ever.
+    belt = ['<g id="cc-belt" class="cc-belt" transform="translate(0,0)">']
+    for k in range(-1, 51):
+        t_ = k / 49.0
+        bx = GY0X + (GY1X - GY0X) * t_
+        by = GY0Y + (GY1Y - GY0Y) * t_ + 1
+        belt.append(f'<ellipse cx="{bx:.0f}" cy="{by:.0f}" rx="{3 + rb() * 2.4:.0f}" '
+                    f'ry="{1.1 + rb() * 0.7:.1f}" fill="{COAL}"/>')
+    belt.append('</g>')
+    gr.append(''.join(belt))
+
+    # ---------------------------------------------------------------------
+    # THE SHIPLOADERS.  182 feet — fifty-five metres — and that height is the whole reason
+    # this scene is not Lewes.  A boxy plated tower on rails, a long boom sloping out over
+    # the ship, a stub counterweight boom behind, and the A-frame mast the hoist ropes run
+    # over.  Two of them, because there are two.
+    def shiploader(uid, bx, by, h, boom_a, mirrored=False):
+        """Origin at the base on the pier deck.  h is the tower height in px."""
+        w = h * 0.30
+        o_ = [f'<g transform="translate({bx},{by})">']
+        # the sill and its bogies, which is what says this thing ROLLS
+        o_.append(f'<rect x="{-w * 0.72:.0f}" y="-9" width="{w * 1.44:.0f}" height="9" '
+                  f'fill="{STEEL_D}"/>')
+        for k in range(4):
+            o_.append(f'<circle cx="{-w * 0.6 + k * w * 0.4:.0f}" cy="-3" r="3.4" '
+                      f'fill="{STEEL_XD}"/>')
+        # the legs and the tower
+        for lg in (-1, 1):
+            o_.append(f'<path d="M{lg * w * 0.66:.0f},-9 '
+                      f'L{lg * w * 0.46:.0f},{-h * 0.42:.0f} '
+                      f'L{lg * w * 0.26:.0f},{-h * 0.42:.0f} '
+                      f'L{lg * w * 0.42:.0f},-9 Z" fill="{STEEL}"/>')
+            o_.append(f'<path d="M{lg * w * 0.66:.0f},-9 '
+                      f'L{lg * w * 0.46:.0f},{-h * 0.42:.0f} '
+                      f'L{lg * w * 0.40:.0f},{-h * 0.42:.0f} '
+                      f'L{lg * w * 0.60:.0f},-9 Z" fill="{STEEL_L}" opacity="0.4"/>')
+        for k in range(3):
+            yy_ = -h * (0.12 + k * 0.1)
+            o_.append(f'<path d="M{-w * 0.6 + k * 4:.0f},{yy_:.0f} '
+                      f'L{w * 0.6 - k * 4:.0f},{yy_:.0f}" stroke="{STEEL_D}" '
+                      f'stroke-width="2.4" fill="none"/>')
+        o_.append(f'<path d="M{-w * 0.5:.0f},{-h * 0.42:.0f} L{w * 0.5:.0f},{-h * 0.42:.0f} '
+                  f'L{w * 0.5:.0f},{-h * 0.86:.0f} L{-w * 0.5:.0f},{-h * 0.86:.0f} Z" '
+                  f'fill="{STEEL}"/>')
+        o_.append(f'<path d="M{-w * 0.5:.0f},{-h * 0.42:.0f} '
+                  f'L{-w * 0.22:.0f},{-h * 0.42:.0f} L{-w * 0.22:.0f},{-h * 0.86:.0f} '
+                  f'L{-w * 0.5:.0f},{-h * 0.86:.0f} Z" fill="{STEEL_L}" opacity="0.55"/>')
+        # floor lines across the machinery house
+        for k in range(3):
+            o_.append(f'<rect x="{-w * 0.5:.0f}" y="{-h * (0.52 + k * 0.11):.0f}" '
+                      f'width="{w:.0f}" height="2" fill="{STEEL_XD}" opacity="0.7"/>')
+        # the A-frame mast over the top
+        o_.append(f'<path d="M{-w * 0.36:.0f},{-h * 0.86:.0f} L0,{-h:.0f} '
+                  f'L{w * 0.36:.0f},{-h * 0.86:.0f} L{w * 0.22:.0f},{-h * 0.86:.0f} '
+                  f'L0,{-h * 0.96:.0f} L{-w * 0.22:.0f},{-h * 0.86:.0f} Z" '
+                  f'fill="{STEEL_D}"/>')
+        # the counterweight boom, stubby, behind
+        sgn = -1 if mirrored else 1
+        o_.append(f'<path d="M{-sgn * w * 0.4:.0f},{-h * 0.72:.0f} '
+                  f'L{-sgn * w * 1.5:.0f},{-h * 0.62:.0f} '
+                  f'L{-sgn * w * 1.5:.0f},{-h * 0.54:.0f} '
+                  f'L{-sgn * w * 0.4:.0f},{-h * 0.64:.0f} Z" fill="{STEEL_D}"/>')
+        o_.append(f'<rect x="{-sgn * w * 1.66 if sgn > 0 else sgn * w * 1.34:.0f}" '
+                  f'y="{-h * 0.66:.0f}" width="{w * 0.32:.0f}" height="{h * 0.1:.0f}" '
+                  f'fill="{STEEL_XD}"/>')
+        # THE BOOM.  Its own group, pivoting at the tower head, because the engine slews it.
+        o_.append(f'<g id="{uid}" class="cc-boom" '
+                  f'transform="translate({sgn * w * 0.4:.0f},{-h * 0.74:.0f}) '
+                  f'rotate({boom_a})">')
+        o_.append(f'<path d="M0,-6 L{sgn * h * 0.78:.0f},-3 L{sgn * h * 0.78:.0f},4 '
+                  f'L0,7 Z" fill="{STEEL}"/>')
+        o_.append(f'<path d="M0,-6 L{sgn * h * 0.78:.0f},-3 L{sgn * h * 0.78:.0f},-1 '
+                  f'L0,-3 Z" fill="{STEEL_L}"/>')
+        for k in range(9):
+            o_.append(f'<path d="M{sgn * h * 0.08 * k:.0f},6 '
+                      f'L{sgn * h * 0.08 * (k + 1):.0f},-4" stroke="{STEEL_D}" '
+                      f'stroke-width="1.8" fill="none"/>')
+        # the chute at the boom tip, and the coal falling out of it
+        o_.append(f'<path d="M{sgn * h * 0.76:.0f},4 L{sgn * h * 0.82:.0f},4 '
+                  f'L{sgn * h * 0.8:.0f},18 L{sgn * h * 0.78:.0f},18 Z" '
+                  f'fill="{STEEL_D}"/>')
+        o_.append('</g>')
+        # the hoist ropes from the mast head to the boom
+        o_.append(f'<path d="M0,{-h * 0.96:.0f} L{sgn * h * 0.5:.0f},{-h * 0.84:.0f}" '
+                  f'stroke="{STEEL_D}" stroke-width="1.6" fill="none"/>')
+        return ''.join(o_) + '</g>'
+
+    gr.append(shiploader('cc-boom-0', 946, 348, 214, 14))
+    gr.append(shiploader('cc-boom-1', 1216, 336, 192, 10))
+
+    # THE COAL POURING INTO THE HOLD — the last link of the chain.  Drawn under the near
+    # loader's chute; the engine fades it with the boom's slew.
+    gr.append(f'<g id="cc-spout" class="cc-spout" opacity="1">'
+              f'<path d="M1102,245 L1130,245 L1136,310 L1096,310 Z" '
+              f'fill="{mix(COAL_L, HAZE, 0.62)}" opacity="0.55"/>'
+              f'<path d="M1110,243 L1121,243 L1123,308 L1108,308 Z" fill="{COAL}"/>'
+              f'<path d="M1113,243 L1117,243 L1118,308 L1112,308 Z" fill="{COAL_L}" '
+              f'opacity="0.55"/>'
+              f'<ellipse cx="1115" cy="307" rx="17" ry="4.4" fill="{COAL_L}"/>'
+              f'<ellipse cx="1115" cy="303" rx="30" ry="9" '
+              f'fill="{mix(COAL_L, HAZE, 0.62)}" opacity="0.4"/>'
+              f'<ellipse cx="1100" cy="301" rx="14" ry="6" '
+              f'fill="{mix(COAL_L, HAZE, 0.55)}" opacity="0.3"/>'
+              f'<ellipse cx="1132" cy="299" rx="10" ry="5" '
+              f'fill="{mix(COAL_L, HAZE, 0.55)}" opacity="0.22"/></g>')
+
+    # gulls, because a working river always has them and the sky is otherwise empty
+    for i_, (gx, gy, gs) in enumerate(((330, 150, 1.0), (392, 178, 0.78),
+                                       (742, 128, 1.1), (806, 164, 0.82))):
+        sk.append(f'<g id="cc-gull-{i_}" class="cc-gull" '
+                  f'transform="translate({gx},{gy}) scale({gs})">'
+                  f'<path d="M-13,0 C -8,-7 -3,-7 0,-2 C 3,-7 8,-7 13,0 '
+                  f'C 7,-3 3,-2 0,2 C -3,-2 -7,-3 -13,0 Z" fill="#f4f6f7"/>'
+                  f'<path d="M-13,0 C -8,-7 -3,-7 0,-2 C -4,-4 -9,-3 -13,0 Z" '
+                  f'fill="#c9d2d8"/></g>')
+
+    # ===================================================== SCENERY BACK ===
+    back = []
+
+    # the terminal ground: coal-dusted grey, darker where it is worked
+    back.append(f'<path d="M-20,{SHORE} L1330,{SHORE} L1330,452 L-20,452 Z" '
+                f'fill="{GROUND}"/>')
+    back.append(f'<path d="M-20,{SHORE} L1330,{SHORE} L1330,{SHORE + 4} '
+                f'L-20,{SHORE + 4} Z" fill="{CONC_D}"/>')
+    rg = rnd(23)
+    for k in range(70):
+        back.append(f'<ellipse cx="{-20 + rg() * 1350:.0f}" '
+                    f'cy="{SHORE + 6 + rg() * 82:.0f}" rx="{20 + rg() * 76:.0f}" '
+                    f'ry="{3 + rg() * 8:.0f}" '
+                    f'fill="{GROUND_L if k % 3 else GROUND_D}" '
+                    f'opacity="{0.2 + rg() * 0.3:.2f}"/>')
+
+    # a couple of rooftops at the far edge, and the floodlight masts a terminal lives by.
+    # Two rooftops is the whole city: this is NOT a town scene and it must not become one.
+    for rx_, rb_, rw_, rh_ in ((-30, 392, 96, 34), (74, 396, 70, 26)):
+        back.append(f'<g><rect x="{rx_}" y="{rb_ - rh_}" width="{rw_}" height="{rh_}" '
+                    f'fill="{mix("#9c6a52", HAZE, 0.34)}"/>'
+                    f'<path d="M{rx_ - 5},{rb_ - rh_} L{rx_ + rw_ / 2:.0f},{rb_ - rh_ - 15} '
+                    f'L{rx_ + rw_ + 5},{rb_ - rh_} Z" fill="{mix("#5f6670", HAZE, 0.36)}"/>'
+                    + ''.join(f'<rect x="{rx_ + 10 + k * 20}" y="{rb_ - rh_ + 10}" '
+                              f'width="8" height="11" fill="{mix("#49525c", HAZE, 0.34)}"/>'
+                              for k in range(int(rw_ / 20)))
+                    + '</g>')
+
+    def mast(mx, mb, mh):
+        o_ = [f'<g><path d="M{mx - 5},{mb} L{mx - 2},{mb - mh} L{mx + 2},{mb - mh} '
+              f'L{mx + 5},{mb} Z" fill="{STEEL_D}"/>']
+        for k in range(int(mh / 13)):
+            o_.append(f'<path d="M{mx - 4.4 + k * 0.1:.1f},{mb - k * 13} '
+                      f'L{mx + 4.4 - k * 0.1:.1f},{mb - (k + 1) * 13}" '
+                      f'stroke="{STEEL_D}" stroke-width="1.1" fill="none" opacity="0.8"/>')
+        o_.append(f'<rect x="{mx - 13}" y="{mb - mh - 7}" width="26" height="6" '
+                  f'fill="{STEEL_XD}"/>')
+        for k in range(4):
+            o_.append(f'<rect x="{mx - 11 + k * 6}" y="{mb - mh - 5}" width="4" '
+                      f'height="4" fill="#f4eccd"/>')
+        return ''.join(o_) + '</g>'
+
+    back.append(mast(516, 392, 128))
+    back.append(mast(1046, 376, 116))
+
+    # ---------------------------------------------------------------------
+    # THE YARD TRACK, curving in from the left.  It answers where the wagons come from,
+    # which is the same question the road has to answer and deserves the same honesty: the
+    # spur leaves the main line beyond the crossing and swings round into the dumper, so
+    # nothing has to cross the running line.
+    def rail_curve(y_off):
+        return (f'M-20,{446 + y_off} C 90,{446 + y_off} 170,{438 + y_off} '
+                f'226,{424 + y_off} C 258,{416 + y_off} 268,{410 + y_off} '
+                f'270,{404 + y_off}')
+    back.append(f'<path d="M-20,452 C 96,452 180,442 238,426 C 268,418 278,410 280,402 '
+                f'L262,402 C 260,410 250,416 224,424 C 168,438 88,446 -20,446 Z" '
+                f'fill="{BALLAST}"/>')
+    for yo in (-3, 3):
+        back.append(f'<path d="{rail_curve(yo)}" stroke="#c9ced4" stroke-width="2.4" '
+                    f'fill="none"/>')
+    rs = rnd(29)
+    for k in range(26):
+        t_ = k / 25.0
+        sx = -20 + t_ * 292
+        sy = 448 - t_ * t_ * 44 - t_ * 4
+        back.append(f'<rect x="{sx:.0f}" y="{sy:.0f}" width="15" height="4.4" '
+                    f'rx="1" fill="#5a4a38" opacity="0.85" '
+                    f'transform="rotate({-t_ * 26:.0f} {sx:.0f} {sy:.0f})"/>')
+
+    # ---------------------------------------------------------------------
+    # LOADED WAGONS waiting their turn, on that curve.  Open-top rotary gondolas — not
+    # covered hoppers — heaped with coal, which is what the reference shows and what a
+    # rotary dumper requires, since a hopper car would simply be emptied from below.
+    def gondola(x, y, s, face=1):
+        o_ = [f'<g transform="translate({x},{y}) scale({s * face},{s})">']
+        o_.append(shadow(0, 2, 104, 6, 0.2))
+        o_.append(f'<path d="M-104,-2 L104,-2 L104,-46 L-104,-46 Z" fill="{CAR}"/>')
+        o_.append(f'<path d="M-104,-46 L104,-46 L104,-40 L-104,-40 Z" fill="{CAR_L}"/>')
+        o_.append(f'<path d="M-104,-10 L104,-10 L104,-2 L-104,-2 Z" fill="{CAR_D}"/>')
+        for k in range(13):
+            o_.append(f'<rect x="{-100 + k * 16.4:.0f}" y="-44" width="3.4" height="42" '
+                      f'fill="{CAR_L}" opacity="0.55"/>')
+        # the coal, heaped proud of the sides
+        o_.append(f'<path d="M-100,-44 Q -50,-56 0,-53 Q 50,-56 100,-44 Z" fill="{COAL}"/>')
+        o_.append(f'<path d="M-100,-44 Q -50,-54 0,-51 Q 50,-54 100,-44 '
+                  f'Q 50,-48 0,-46 Q -50,-48 -100,-44 Z" fill="{COAL_L}" opacity="0.5"/>')
+        for wx_ in (-74, -50, 50, 74):
+            o_.append(f'<circle cx="{wx_}" cy="2" r="7" fill="{STEEL_XD}"/>')
+            o_.append(f'<circle cx="{wx_}" cy="2" r="2.8" fill="{STEEL_L}"/>')
+        o_.append(f'<rect x="-88" y="-10" width="176" height="5" fill="{CAR_D}"/>')
+        return ''.join(o_) + '</g>'
+
+    back.append(gondola(36, 446, 1.13))
+    back.append(gondola(250, 431, 1.04))
+
+    # ---------------------------------------------------------------------
+    # THE ROTARY DUMPER — the hero, and the reason Virginia's last slot went to Norfolk.
+    #
+    # You look ALONG the dumper's track, which is the only angle at which the rotation
+    # reads: the ring faces you as a nine-metre circle with the wagon clamped inside it.
+    # That is what set the whole composition — a dumper seen side-on is a vertical line.
+    #
+    # THE CONTRACT is two nested groups.  The outer one puts the ring's centre at the
+    # origin; the inner one, `#cc-dumper`, carries nothing but `rotate(a)`.  The engine
+    # changes that one number and the wagon goes over with the ring, because it is drawn
+    # inside it.  No path animation, no morph, no walk cycle — one rotate.
+    DM_X, DM_B = 270, 434
+    DM_R = 60                       # 9 m at 13.4 px/m
+    DM_Y = DM_B - DM_R
+
+    # the pit the coal falls into, and the apron the track runs over.  Drawn FIRST, so the
+    # ring stands in front of it and the coal falls behind the near lip.
+    back.append(f'<path d="M{DM_X - 96},{DM_B + 16} L{DM_X + 96},{DM_B + 16} '
+                f'L{DM_X + 78},{DM_B - 16} L{DM_X - 78},{DM_B - 16} Z" fill="{CONC_D}"/>')
+    back.append(f'<path d="M{DM_X - 30},{DM_B - 14} L{DM_X + 30},{DM_B - 14} '
+                f'L{DM_X + 24},{DM_B + 8} L{DM_X - 24},{DM_B + 8} Z" fill="{STEEL_XD}"/>')
+
+    # the dumper house: a portal frame, open toward us.  Clad boxes on a coal terminal are
+    # everywhere; this one is deliberately OPEN, because a closed shed hides the one thing
+    # the scene exists for.
+    DH_L, DH_R, DH_T = 150, 392, 288
+    back.append(f'<path d="M{DH_L - 14},{DH_T} L{DH_R + 14},{DH_T} L{DH_R + 14},{DH_T + 9} '
+                f'L{DH_L - 14},{DH_T + 9} Z" fill="{STEEL_D}"/>')
+    back.append(f'<path d="M{DH_L - 20},{DH_T - 12} L{DM_X},{DH_T - 26} '
+                f'L{DH_R + 20},{DH_T - 12} L{DH_R + 20},{DH_T} L{DH_L - 20},{DH_T} Z" '
+                f'fill="{STEEL}"/>')
+    back.append(f'<path d="M{DM_X},{DH_T - 26} L{DH_R + 20},{DH_T - 12} '
+                f'L{DH_R + 20},{DH_T - 6} L{DM_X},{DH_T - 20} Z" fill="{STEEL_D}"/>')
+    for cx_ in (DH_L, DH_R):
+        back.append(f'<rect x="{cx_ - 7}" y="{DH_T}" width="14" height="{DM_B + 14 - DH_T}" '
+                    f'fill="{STEEL}"/>')
+        back.append(f'<rect x="{cx_ - 7}" y="{DH_T}" width="4.4" '
+                    f'height="{DM_B + 14 - DH_T}" fill="{STEEL_L}" opacity="0.5"/>')
+        back.append(f'<rect x="{cx_ - 12}" y="{DM_B + 10}" width="24" height="8" '
+                    f'fill="{CONC_D}"/>')
+    # cross bracing between the columns, above the ring
+    back.append(f'<path d="M{DH_L},{DH_T + 16} L{DH_R},{DH_T + 46} M{DH_R},{DH_T + 16} '
+                f'L{DH_L},{DH_T + 46}" stroke="{STEEL_D}" stroke-width="3.4" '
+                f'fill="none"/>')
+    back.append(f'<rect x="{DH_L}" y="{DH_T + 44}" width="{DH_R - DH_L}" height="5" '
+                f'fill="{STEEL_D}"/>')
+    # the transfer tower on the far side, where the belt starts its run out to the pier
+    back.append(f'<g><rect x="{DH_R + 6}" y="330" width="46" height="{DM_B - 330}" '
+                f'fill="{STEEL}"/>'
+                f'<rect x="{DH_R + 6}" y="330" width="14" height="{DM_B - 330}" '
+                f'fill="{STEEL_L}" opacity="0.45"/>'
+                f'<rect x="{DH_R + 2}" y="324" width="54" height="8" fill="{STEEL_D}"/>'
+                f'<rect x="{DH_R + 14}" y="340" width="16" height="20" fill="{STEEL_XD}"/>'
+                f'</g>')
+
+    # THE BACK WALL of the dumper house.  Without it the ring stands against open water,
+    # because the river is behind it — true, and completely unreadable.  Profiled sheet,
+    # the cheapest cladding there is and the right one.
+    back.append(f'<path d="M{DH_L},{DH_T + 8} L{DH_R},{DH_T + 8} L{DH_R},{DM_B + 14} '
+                f'L{DH_L},{DM_B + 14} Z" fill="{mix(STEEL_L, "#8e9aa2", 0.45)}"/>')
+    for k in range(int((DH_R - DH_L) / 11)):
+        back.append(f'<rect x="{DH_L + 3 + k * 11}" y="{DH_T + 8}" width="3.4" '
+                    f'height="{DM_B + 6 - DH_T}" fill="{STEEL_D}" opacity="0.2"/>')
+    back.append(f'<path d="M{DH_L},{DH_T + 8} L{DH_R},{DH_T + 8} L{DH_R},{DH_T + 15} '
+                f'L{DH_L},{DH_T + 15} Z" fill="{STEEL_D}" opacity="0.35"/>')
+
+    # the ring's own track, running away from us into it
+
+
+    def gondola_end(w, h):
+        """The wagon seen END ON, which is the only way it is ever seen inside the ring.
+
+        Everything here exists to make ONE thing legible: that the box is full of coal and
+        then it is not.  So the body is weathered charcoal, the load is near-black with a
+        lit crest, and there is no ladder up the middle — an end ladder at this size read
+        as a crucifix painted on a coffin."""
+        hw = w / 2.0
+        o_ = [f'<path d="M{-hw:.0f},0 L{hw:.0f},0 L{hw:.0f},{-h:.0f} '
+              f'L{-hw:.0f},{-h:.0f} Z" fill="{CAR}"/>']
+        # the top chord, lit, and the side stakes: the two things that say "open wagon"
+        o_.append(f'<path d="M{-hw - 3:.0f},{-h:.0f} L{hw + 3:.0f},{-h:.0f} '
+                  f'L{hw + 3:.0f},{-h + 6:.0f} L{-hw - 3:.0f},{-h + 6:.0f} Z" '
+                  f'fill="{CAR_L}"/>')
+        o_.append(f'<path d="M{-hw - 3:.0f},{-h:.0f} L{hw + 3:.0f},{-h:.0f} '
+                  f'L{hw + 3:.0f},{-h + 2:.0f} L{-hw - 3:.0f},{-h + 2:.0f} Z" '
+                  f'fill="{mix(CAR_L, "#ffffff", 0.3)}"/>')
+        for sx_ in (-hw + 3, hw - 7):
+            o_.append(f'<rect x="{sx_:.0f}" y="{-h + 5:.0f}" width="4" '
+                      f'height="{h - 11:.0f}" fill="{CAR_L}" opacity="0.65"/>')
+        # THE LOAD.  Its own id: it is in the wagon at the start of the cycle and gone at
+        # the end, and that is the only way the chain reads as cause and effect.
+        o_.append(f'<g id="cc-carload" class="cc-carload" opacity="1">'
+                  f'<path d="M{-hw + 1:.0f},{-h + 3:.0f} '
+                  f'Q 0,{-h - 17:.0f} {hw - 1:.0f},{-h + 3:.0f} '
+                  f'L{hw - 1:.0f},{-h + 20:.0f} L{-hw + 1:.0f},{-h + 20:.0f} Z" '
+                  f'fill="{COAL}"/>'
+                  f'<path d="M{-hw + 1:.0f},{-h + 3:.0f} Q 0,{-h - 16:.0f} '
+                  f'{hw - 1:.0f},{-h + 3:.0f} Q 0,{-h - 8:.0f} '
+                  f'{-hw + 1:.0f},{-h + 3:.0f} Z" fill="{COAL_L}"/>'
+                  f'<path d="M{-hw * 0.5:.0f},{-h - 6:.0f} Q 0,{-h - 15:.0f} '
+                  f'{hw * 0.5:.0f},{-h - 6:.0f} Q 0,{-h - 11:.0f} '
+                  f'{-hw * 0.5:.0f},{-h - 6:.0f} Z" fill="{mix(COAL_L, "#ffffff", 0.25)}" '
+                  f'opacity="0.7"/></g>')
+        # the end sill and the coupler stub, low and off to one side
+        o_.append(f'<rect x="{-hw:.0f}" y="-9" width="{w:.0f}" height="6" '
+                  f'fill="{CAR_D}"/>')
+        o_.append(f'<rect x="-5" y="-7" width="10" height="7" rx="2" fill="{CAR_D}"/>')
+        return ''.join(o_)
+
+    # THE RING IS A BARREL YOU LOOK INTO, not a disc with a hole in it.  Drawn as a flat
+    # plate with radial ribs it came out as a cartwheel, which is what the first two
+    # versions were; what the reference actually shows is a thick steel end-ring with the
+    # wagon visible THROUGH it and a second ring behind, so the eye reads a cylinder.
+    def annulus(ro, ri):
+        return (f'M0,{-ro} A {ro},{ro} 0 1 0 0,{ro} A {ro},{ro} 0 1 0 0,{-ro} Z '
+                f'M0,{-ri} A {ri},{ri} 0 1 1 0,{ri} A {ri},{ri} 0 1 1 0,{-ri} Z')
+
+    ring = [f'<g transform="translate({DM_X},{DM_Y})">',
+            f'<g id="cc-dumper" class="cc-dumper" transform="rotate(0)">']
+    # the dark inside of the barrel, and the FAR end ring seen down it
+    ring.append(f'<circle cx="0" cy="0" r="{DM_R - 16}" fill="#15181c"/>')
+    ring.append(f'<path d="{annulus(DM_R - 17, DM_R - 27)}" fill="{RING_D}" '
+                f'fill-rule="evenodd"/>')
+    for a in (90, 270):
+        ring.append(f'<rect x="-2" y="{-DM_R + 17}" width="4" height="10" '
+                    f'fill="{mix(RING_D, "#000000", 0.3)}" transform="rotate({a})"/>')
+    # THE WAGON, inside the barrel and seen through the near ring
+    ring.append(f'<g transform="translate(0,28)">' + gondola_end(44, 55) + '</g>')
+    # the clamps that hold it in: top, bottom, and a stanchion each side
+    ring.append(f'<rect x="-35" y="-32" width="70" height="4.4" fill="{STEEL_XD}"/>')
+    ring.append(f'<rect x="-35" y="27" width="70" height="4.4" fill="{STEEL_XD}"/>')
+
+    # THE NEAR END RING: a thick steel band, lit on its outer edge, with the drive teeth
+    # round the rim.  The teeth are small and they are the whole reason it reads as a
+    # thing that TURNS rather than a thing that is round.
+    ring.append(f'<path d="{annulus(DM_R, DM_R - 16)}" fill="{RING}" '
+                f'fill-rule="evenodd"/>')
+    ring.append(f'<path d="{annulus(DM_R, DM_R - 5)}" fill="{RING_L}" '
+                f'fill-rule="evenodd"/>')
+    ring.append(f'<path d="{annulus(DM_R - 14, DM_R - 16)}" fill="{RING_D}" '
+                f'fill-rule="evenodd"/>')
+    for a in range(0, 360, 20):
+        ring.append(f'<rect x="-1.8" y="{-DM_R + 4}" width="3.6" height="12" '
+                    f'fill="{RING_D}" transform="rotate({a})" opacity="0.75"/>')
+    for a in range(0, 360, 9):
+        ring.append(f'<rect x="-2.4" y="{-DM_R - 5}" width="4.8" height="5.4" '
+                    f'fill="{RING_D}" transform="rotate({a})"/>')
+    ring.append('</g>')
+    # the trunnions the barrel turns IN.  Outside the rotating group, because a bearing
+    # that goes round with the shaft is not a bearing.
+    for sx_ in (-1, 1):
+        ring.append(f'<rect x="{sx_ * (DM_R + 1) - 7:.0f}" y="-9" width="14" height="18" '
+                    f'rx="2" fill="{STEEL_XD}"/>')
+        ring.append(f'<rect x="{sx_ * (DM_R + 1) - 7:.0f}" y="-9" width="14" height="4" '
+                    f'fill="{STEEL_L}" opacity="0.5"/>')
+    ring.append('</g>')
+    back.append(''.join(ring))
+
+    # THE COAL FALLING OUT — the first link, and the one that has to be unmistakable.
+    back.append(f'<g id="cc-coalfall" class="cc-coalfall" opacity="0">'
+                f'<path d="M{DM_X - 21},{DM_Y + 6} L{DM_X + 21},{DM_Y + 6} '
+                f'L{DM_X + 26},{DM_B - 6} L{DM_X - 26},{DM_B - 6} Z" fill="{COAL}"/>'
+                f'<path d="M{DM_X - 9},{DM_Y + 6} L{DM_X + 5},{DM_Y + 6} '
+                f'L{DM_X + 8},{DM_B - 6} L{DM_X - 12},{DM_B - 6} Z" fill="{COAL_L}" '
+                f'opacity="0.55"/>'
+                f'<ellipse cx="{DM_X}" cy="{DM_B - 8}" rx="34" ry="7" fill="{COAL_L}" '
+                f'opacity="0.5"/>'
+                f'<ellipse cx="{DM_X - 30}" cy="{DM_B - 14}" rx="18" ry="8" '
+                f'fill="{mix(COAL_L, HAZE, 0.55)}" opacity="0.3"/>'
+                f'<ellipse cx="{DM_X + 32}" cy="{DM_B - 18}" rx="14" ry="7" '
+                f'fill="{mix(COAL_L, HAZE, 0.55)}" opacity="0.25"/></g>')
+
+    # the near lip of the pit, ON TOP of the falling coal, so the coal goes INTO something
+    back.append(f'<path d="M{DM_X - 46},{DM_B - 2} L{DM_X + 46},{DM_B - 2} '
+                f'L{DM_X + 54},{DM_B + 14} L{DM_X - 54},{DM_B + 14} Z" fill="{CONC_D}"/>')
+    back.append(f'<path d="M{DM_X - 46},{DM_B - 2} L{DM_X + 46},{DM_B - 2} '
+                f'L{DM_X + 47},{DM_B + 2} L{DM_X - 47},{DM_B + 2} Z" fill="{CONC_L}"/>')
+
+    # ---------------------------------------------------------------------
+    # THE TERMINAL GATE, and the truck park off it to the right.
+    #
+    # This ending was measured, not chosen: the far gate's arm sits at y=421 and its posts
+    # occupy 388..445, so a junction with room for a vehicle to turn AND then stop does not
+    # fit between the crossing and the horizon.  A gate with a park behind it does, because
+    # the park is the room rather than needing it.
+    #
+    # And it earns its place twice over: the frame now holds TWO barriers and two waits.
+    # A truck sits at one while a train passes the other, and that is the whole lesson of
+    # this game stated in a second language.
+    lx_ = 622 - 112 * (ROAD_TOP - 300) / 420.0
+    rx_ = 658 + 112 * (ROAD_TOP - 300) / 420.0
+    LOT_SURF = mix(ROADC, ROADC_D, 0.5)
+    back.append(f'<path d="M{rx_ - 4:.0f},{LOT_FAR} L1330,{LOT_FAR} L1330,{LOT_NEAR} '
+                f'L{rx_ + 14:.0f},{LOT_NEAR} Z" fill="{LOT_SURF}"/>')
+    back.append(f'<path d="M{rx_ - 4:.0f},{LOT_FAR} L1330,{LOT_FAR} L1330,{LOT_FAR + 4} '
+                f'L{rx_ - 3:.0f},{LOT_FAR + 4} Z" fill="{mix(LOT_SURF, "#ffffff", 0.14)}"/>')
+    BAY_T, BAY_B = LOT_FAR + 3, LOT_FAR + 26
+    for bx_ in range(706, 1332, 34):
+        back.append(f'<rect x="{bx_}" y="{BAY_T}" width="2" height="{BAY_B - BAY_T}" '
+                    f'fill="#e8e2c9" opacity="0.34"/>')
+    back.append(f'<rect x="702" y="{BAY_B}" width="630" height="2.2" fill="#e8e2c9" '
+                f'opacity="0.36"/>')
+
+    def truck_end(cx, cy, s_, col):
+        """Nose-in, seen end on: a cab, a screen, two wheels.  Tippers, because that is
+        what calls at a coal terminal."""
+        return (f'<g transform="translate({cx},{cy}) scale({s_})">'
+                f'<ellipse cx="0" cy="1" rx="13" ry="3" fill="#000" opacity="0.18"/>'
+                f'<path d="M-11,0 L-11,-17 L11,-17 L11,0 Z" fill="{col}"/>'
+                f'<path d="M-9,-17 L9,-17 L8,-27 L-8,-27 Z" '
+                f'fill="{mix(col, "#ffffff", 0.16)}"/>'
+                f'<path d="M-6.4,-19 L6.4,-19 L5.6,-25 L-5.6,-25 Z" fill="#8ea6b4"/>'
+                f'<rect x="-11" y="-6" width="22" height="3" fill="{STEEL_XD}" '
+                f'opacity="0.55"/>'
+                f'<rect x="-11.6" y="-5" width="3.4" height="5" rx="1" fill="#2c2f34"/>'
+                f'<rect x="8.2" y="-5" width="3.4" height="5" rx="1" fill="#2c2f34"/></g>')
+
+    rc = rnd(41)
+    TRK = ('#b6b1a6', '#52687c', '#7d5049', '#cdc9bf', '#5f6f5c', '#9c9070', '#454e58')
+    for k, bx_ in enumerate(range(721, 1330, 34)):
+        if rc() < 0.3:
+            continue
+        back.append(truck_end(bx_, BAY_B - 3, 1.22 + (bx_ - 721) / 600.0 * 0.28,
+                              TRK[int(rc() * len(TRK))]))
+    back.append(f'<g class="cc-road-exit" data-exit="{LOT_FAR + 30},{LOT_NEAR - 4},'
+                f'{int(rx_) + 8}"></g>')
+
+    # the gatehouse and the barrier.  Yellow and black on a white cabin, so nobody confuses
+    # it with the red-and-white crossing gate twenty metres away — they do the same job and
+    # they must not look like the same object.
+    GH_X, GH_B = rx_ + 30, ROAD_TOP + 20
+    back.append(f'<g><ellipse cx="{GH_X + 24:.0f}" cy="{GH_B + 2}" rx="34" ry="5" '
+                f'fill="#000" opacity="0.18"/>'
+                f'<rect x="{GH_X:.0f}" y="{GH_B - 43}" width="38" height="43" '
+                f'fill="{TRIMW}"/>'
+                f'<rect x="{GH_X + 27:.0f}" y="{GH_B - 43}" width="11" height="43" '
+                f'fill="{CONC_D}" opacity="0.6"/>'
+                f'<rect x="{GH_X:.0f}" y="{GH_B - 10}" width="38" height="10" '
+                f'fill="{STEEL_D}"/>'
+                f'<rect x="{GH_X:.0f}" y="{GH_B - 43}" width="38" height="6" '
+                f'fill="{YELLOW}"/>'
+                f'<rect x="{GH_X - 5:.0f}" y="{GH_B - 50}" width="48" height="8" '
+                f'fill="{STEEL_D}"/>'
+                f'<rect x="{GH_X + 5:.0f}" y="{GH_B - 35}" width="21" height="18" '
+                f'fill="#3f4a53"/>'
+                f'<rect x="{GH_X + 5:.0f}" y="{GH_B - 35}" width="21" height="5" '
+                f'fill="#75858f"/></g>')
+    back.append(f'<rect x="{lx_ - 26:.0f}" y="{ROAD_TOP + 1}" width="17" height="7" '
+                f'fill="{STEEL_D}"/>')
+    back.append(f'<rect x="{lx_ - 22:.0f}" y="{ROAD_TOP - 30}" width="9" height="32" '
+                f'fill="{TRIMW}"/>')
+    back.append(f'<rect x="{lx_ - 24:.0f}" y="{ROAD_TOP - 34}" width="13" height="5" '
+                f'fill="{STEEL_D}"/>')
+    # THE BARRIER.  Its own group pivoting at the post, so the engine lifts it exactly the
+    # way it lifts the crossing gates.
+    back.append(f'<g id="cc-gate" class="cc-gate" '
+                f'transform="translate({lx_ - 17:.0f},{ROAD_TOP - 24}) rotate(0)">'
+                f'<rect x="0" y="-3" width="{rx_ - lx_ + 14:.0f}" height="6" rx="3" '
+                f'fill="{YELLOW}"/>'
+                + ''.join(f'<rect x="{6 + k * 22}" y="-3" width="11" height="6" '
+                          f'fill="{STEEL_XD}"/>'
+                          for k in range(int((rx_ - lx_ + 8) / 22)))
+                + '</g>')
+    # a truck waiting at it, on the road, nose to the barrier
+    back.append(f'<g id="cc-truck" class="cc-truck" transform="translate(0,0)">'
+                + truck_end(640, ROAD_TOP + 30, 1.05, '#c9c4b8') + '</g>')
+    DEFS.append(f'    <path id="truck-path" class="cc-path" '
+                f'd="M640,{ROAD_TOP + 30} L644,{ROAD_TOP + 2}"/>')
+
+    # the quay rail along the water's edge, so the ground stops against something
+    for px_ in range(444, 1332, 26):
+        back.append(f'<rect x="{px_}" y="{SHORE + 2}" width="3.4" height="13" '
+                    f'fill="{STEEL_D}" opacity="0.85"/>')
+    for yo in (3, 9):
+        back.append(f'<rect x="440" y="{SHORE + yo}" width="890" height="2.4" '
+                    f'fill="{STEEL_D}" opacity="{0.7 if yo == 3 else 0.55}"/>')
+
+    # ===================================================== SCENERY FRONT ===
+    fr = ['    ']
+
+    def on_road(x, y, m=12):
+        """The near layers draw over EVERYTHING, road included.  Anything scattered here
+        has to be asked whether it is standing on the carriageway."""
+        t = (y - 300) / 420.0
+        return (622 - 112 * t) - m < x < (644 + 126 * t) + m
+
+    # The carriageway is cut out of the near ground: `scenery-front` is painted after the
+    # road, so a full-width fill here buries it and the crossing ends up with no road in
+    # front of the gate.  Ground goes inside this clip; props stay outside it.
+    DEFS.append('    <clipPath id="nfnf">'
+                '<path d="M-20,514 L562,514 L508,722 L-20,722 Z"/>'
+                '<path d="M711,514 L1320,514 L1320,722 L772,722 Z"/></clipPath>')
+    fr.append('<g clip-path="url(#nfnf)">')
+    fr.append(f'<path d="M-20,516 L1330,516 L1330,722 L-20,722 Z" fill="{GROUND}"/>')
+    rf = rnd(53)
+    for k in range(52):
+        fr.append(f'<ellipse cx="{-20 + rf() * 1350:.0f}" cy="{524 + rf() * 196:.0f}" '
+                  f'rx="{40 + rf() * 110:.0f}" ry="{8 + rf() * 18:.0f}" '
+                  f'fill="{GROUND_L if k % 3 else GROUND_D}" '
+                  f'opacity="{0.2 + rf() * 0.28:.2f}"/>')
+    # the ground here is coal-dusted, which is the one thing that says what is handled
+    for k in range(30):
+        fr.append(f'<ellipse cx="{-20 + rf() * 1350:.0f}" cy="{556 + rf() * 160:.0f}" '
+                  f'rx="{24 + rf() * 70:.0f}" ry="{5 + rf() * 11:.0f}" '
+                  f'fill="{COAL}" opacity="{0.07 + rf() * 0.12:.2f}"/>')
+    # a gravel apron along the railway boundary
+    fr.append(f'<path d="M-20,528 L1330,528 L1330,566 L-20,562 Z" fill="{BALLAST}" '
+              f'opacity="0.5"/>')
+    for k in range(120):
+        fr.append(f'<circle cx="{-20 + rf() * 1350:.0f}" cy="{530 + rf() * 32:.0f}" '
+                  f'r="{1.4 + rf() * 2.6:.1f}" fill="{CONC_L}" '
+                  f'opacity="{0.2 + rf() * 0.4:.2f}"/>')
+    # tyre tracks, worn in pairs, curving off the road toward the yard
+    for k in range(7):
+        ty = 588 + k * 19
+        fr.append(f'<path d="M{520 - k * 22},{ty} C {360 - k * 30},{ty + 8} '
+                  f'{160 - k * 30},{ty + 16} {-30},{ty + 22}" stroke="{GROUND_D}" '
+                  f'stroke-width="{5 + k * 0.8:.1f}" fill="none" opacity="0.35"/>')
+    # puddles: the flattest, cheapest thing that says this ground is real
+    for px_, py_, pr_ in ((174, 662, 54), (760, 620, 38), (1136, 680, 62), (612, 706, 30)):
+        if on_road(px_, py_, pr_):
+            continue
+        fr.append(f'<ellipse cx="{px_}" cy="{py_}" rx="{pr_}" ry="{pr_ * 0.24:.0f}" '
+                  f'fill="{mix(GROUND_D, RIVER, 0.4)}" opacity="0.7"/>')
+        fr.append(f'<ellipse cx="{px_ - pr_ * 0.2:.0f}" cy="{py_ - pr_ * 0.05:.0f}" '
+                  f'rx="{pr_ * 0.5:.0f}" ry="{pr_ * 0.09:.0f}" '
+                  f'fill="{mix(RIVER_L, "#ffffff", 0.3)}" opacity="0.45"/>')
+    fr.append('</g>')
+
+    # THE BOUNDARY FENCE along the railway, both sides of the road.  Chain link on concrete
+    # posts: the thing that actually separates a works road from a running line, and the
+    # near field's only real structure.
+    for side in (0, 1):
+        x0, x1 = (-16, 500) if side == 0 else (790, 1332)
+        for px_ in range(x0, x1, 46):
+            yy = 548 + (px_ - x0) * (0.055 if side == 0 else 0.03)
+            fr.append(f'<rect x="{px_}" y="{yy - 46:.0f}" width="5" height="46" '
+                      f'fill="{CONC_D}"/>')
+            fr.append(f'<rect x="{px_}" y="{yy - 46:.0f}" width="1.8" height="46" '
+                      f'fill="{CONC_L}" opacity="0.7"/>')
+        y0 = 548
+        y1 = 548 + (x1 - x0) * (0.055 if side == 0 else 0.03)
+        fr.append(f'<path d="M{x0},{y0 - 46} L{x1},{y1 - 46} L{x1},{y1} L{x0},{y0} Z" '
+                  f'fill="{CONC_L}" opacity="0.16"/>')
+        for k in range(3):
+            fr.append(f'<path d="M{x0},{y0 - 44 + k * 21} L{x1},{y1 - 44 + k * 21}" '
+                      f'stroke="{CONC_L}" stroke-width="1.4" fill="none" opacity="0.5"/>')
+
+    # a relay cabinet and a lighting column, which is what actually stands beside a
+    # crossing.  Nothing here is a wooden barrow with barrels on it.
+    fr.append(f'<g transform="translate(228,640)">'
+              f'<ellipse cx="0" cy="3" rx="34" ry="6" fill="#000" opacity="0.16"/>'
+              f'<rect x="-30" y="-62" width="60" height="64" rx="3" fill="{CONC}"/>'
+              f'<rect x="-30" y="-62" width="60" height="7" rx="3" fill="{CONC_D}"/>'
+              f'<rect x="-30" y="-62" width="18" height="64" fill="{CONC_L}" '
+              f'opacity="0.5"/>'
+              f'<rect x="-2" y="-58" width="3.4" height="56" fill="{CONC_D}"/>'
+              f'<rect x="-36" y="-70" width="72" height="8" rx="2" fill="{STEEL_D}"/>'
+              f'<rect x="-36" y="-70" width="72" height="3" fill="{STEEL_L}"/>'
+              + ''.join(f'<rect x="-24" y="{-52 + k * 6}" width="18" height="2.6" '
+                        f'fill="{CONC_D}"/>' for k in range(4))
+              + f'<rect x="-24" y="-30" width="10" height="4" rx="2" fill="{STEEL_D}"/>'
+              f'<rect x="-34" y="0" width="68" height="6" fill="{CONC_D}"/>'
+              f'</g>')
+    fr.append(f'<g transform="translate(1214,606)">'
+              f'<ellipse cx="0" cy="3" rx="12" ry="4" fill="#000" opacity="0.16"/>'
+              f'<rect x="-5" y="-200" width="10" height="202" fill="{STEEL_D}"/>'
+              f'<path d="M-5,-200 C -5,-218 34,-218 37,-208" stroke="{STEEL_D}" '
+              f'stroke-width="8" fill="none"/>'
+              f'<path d="M28,-211 L52,-211 L47,-199 L33,-199 Z" fill="{STEEL}"/></g>')
+
+    # THE TIPPER, near and large: the vehicle this road is for, and the thing the terminal
+    # gate is holding back.  No plate, no badge, no maker.
+    fr.append(f'<g transform="translate(372,700) scale(2.4)">'
+              f'<ellipse cx="0" cy="2" rx="62" ry="7" fill="#000" opacity="0.18"/>'
+              f'<path d="M-58,-6 L-58,-40 L4,-44 L4,-6 Z" fill="{RUST}"/>'
+              f'<path d="M-58,-40 L4,-44 L4,-38 L-58,-34 Z" '
+              f'fill="{mix(RUST, "#ffffff", 0.22)}"/>'
+              f'<path d="M-56,-38 L2,-42 L2,-34 L-56,-30 Z" fill="{COAL}"/>'
+              f'<path d="M8,-6 L8,-34 C 8,-38 30,-38 34,-32 L40,-20 L44,-6 Z" '
+              f'fill="{CONC}"/>'
+              f'<path d="M14,-32 C 20,-35 30,-34 33,-29 L36,-22 L14,-22 Z" '
+              f'fill="#cfe0ea"/>'
+              f'<rect x="-58" y="-10" width="102" height="5" fill="{STEEL_D}"/>'
+              + ''.join(f'<g><circle cx="{wx_}" cy="-4" r="9" fill="{STEEL_XD}"/>'
+                        f'<circle cx="{wx_}" cy="-4" r="3.6" fill="{STEEL_L}"/></g>'
+                        for wx_ in (-44, -20, 28))
+              + '</g>')
+
+    # ===================================================== FOREGROUND ===
+    fgl = ['    ']
+    rz = rnd(61)
+    for k in range(66):
+        gx = rz() * 1350 - 20
+        gy = 690 + rz() * 38
+        if on_road(gx, gy):
+            continue
+        s_ = 0.9 + rz() * 1.0
+        fgl.append(f'<path d="M{gx:.0f},{gy:.0f} l{-4 * s_:.1f},{-15 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{1 * s_:.1f},{-20 * s_:.1f} '
+                   f'M{gx:.0f},{gy:.0f} l{5 * s_:.1f},{-14 * s_:.1f}" '
+                   f'stroke="{(WEED, WEED_L, WEED_D)[int(rz() * 3)]}" '
+                   f'stroke-width="{1.7 * s_:.1f}" fill="none" stroke-linecap="round"/>')
+
+    return scene('norfolk', 'Norfolk, Virginia',
+                 {
+                     'sky': '\n'.join(sk),
+                     'ground': '\n'.join(gr),
+                     'scenery-back': '\n'.join(back),
+                     'scenery-front': '\n'.join(fr),
+                     'foreground': '\n'.join(fgl),
+                     'roadkw': dict(surface=ROADC, surface2=ROADC_D, shoulder=CONC_D,
+                                    dash=ROADC_D, top=ROAD_TOP,
+                                    junction=(LOT_FAR + 8, LOT_NEAR - 2)),
+                     'trackkw': dict(ballast=BALLAST, ballast_hi='#9e9a94',
+                                     tie='#4a4038', rail='#cfd4d9'),
+                 }, defs=d + '\n' + '\n'.join(DEFS))
+
+sf(); la(); chicago(); grand_canyon(); nyc(); seattle(); new_orleans(); austin(); houston(); cape_canaveral(); oahu(); denali(); las_vegas(); moab(); nashville(); boston(); yellowstone(); washington_dc(); miami_beach(); duluth(); kansas(); kansas_city(); smokies(); bluegrass(); crater_lake(); horseshoe_curve(); mt_washington(); cedar_point(); savannah(); stonington(); albuquerque(); cape_hatteras(); quechee(); detroit(); sun_valley(); indianapolis(); new_river_gorge(); mount_rushmore(); vicksburg(); newport(); mystic(); bailey_yard(); charleston(); glacier(); bentonville(); birmingham(); oklahoma_city(); wisconsin_dells(); dubuque(); lewes(); assateague(); medora(); margate(); norfolk()
 print(f'wrote {len(SCENES)} scenes into {OUT}')
 for k, v in SCENES.items():
     print(f'  {k:16s} {v}')

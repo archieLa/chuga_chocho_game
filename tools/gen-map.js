@@ -72,6 +72,7 @@ const SUPPORTED = {
   'New Mexico': ['Albuquerque'],
   'North Carolina': ['Cape Hatteras'],
   'Vermont': ['Quechee'],
+  'Virginia': ['Norfolk'],
   'Michigan': ['Detroit'],
   'Idaho': ['Sun Valley'],
   'Indiana': ['Indianapolis'],

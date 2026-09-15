@@ -455,6 +455,7 @@
     const kites = buildKites(svg);
     const lock = buildLock(svg);
     const pdogs = buildPdogs(svg);
+    const pier = buildPier(svg);
     const surrey = buildSurrey(svg);
     const lucy = buildLucy(svg);
     const surf = buildSurf(svg);
@@ -494,7 +495,7 @@
     const s = { id: loc.id, svg: svg, arms: arms, lamps: lamps, sceneryTrains: sceneryTrains,
                 roadTop: roadTop, carStyle: carStyle, roadExit: roadExit, curve: curve, cablecars: cablecars, rocket: rocket,
                 ferris: ferris, shuttles: shuttles, cog: cog, coasters: coasters,
-                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, pdogs: pdogs, surrey: surrey,
+                spinners: spinners, swarms: swarms, chases: chases, routes: routes, balloons: balloons, falls: falls, boom: boom, gantry: gantry, bascule: bascule, channel: channel, idles: idles, drifts: drifts, flags: flags, jets: jets, kites: kites, lock: lock, pdogs: pdogs, surrey: surrey, pier: pier,
       lucy: lucy, surf: surf, gulls: gulls, graze: graze, osprey: osprey, berth: berth, waves: waves, swing: swing, funi: funi, cyclists: cyclists, watchers: watchers, pumpjacks: pumpjacks, devil: devil, busStop: busStop, slide: slide, tube: tube, duck: duck, geysers: geysers, aurora: aurora, canters: canters, crawls: crawls, halt: halt, haltTurn: false, race: race, lifts: lifts, skiers: skiers, ploughs: ploughs, crane: crane, racks: null, shuntTurn: false, vessels: vessels, tour: tour,
                 bikeSig: bikeSig, rides: rides, vultures: vultures,
                 trainG: trainG, smokeG: smokeG, carsFar: carsFar, carsNear: carsNear };
@@ -3849,6 +3850,181 @@
   // GULLS (.cc-gull) — lateral drift, each at its own speed, wrapping at the
   // frame edge. No wing cycle: at eleven pixels across there is nothing a
   // flapping wing could say that the movement does not already.
+  // =======================================================================
+  // THE COAL PIER (.cc-dumper and everything downstream of it) — Norfolk.
+  //
+  // THE SET'S FIRST CAUSAL CHAIN, and the reason it was worth building. Every
+  // other moving thing in this game moves BY ITSELF: a gate drops, a prairie dog
+  // pops up, a wave runs in, a ferry sails. Here one thing CAUSES the next, and a
+  // child can follow a single lump of coal the whole way:
+  //
+  //   a wagon is turned upside down -> the coal falls out -> it rides the belt
+  //       -> out along the gallery -> and pours into the ship
+  //
+  // So the parts are deliberately NOT independent little loops that happen to sit
+  // near each other. The load leaves the wagon at the ANGLE the wagon is actually
+  // at, not at a time that looked about right — retune the swing and the coal
+  // still leaves when the wagon is upside down, because that is what tips it out.
+  //
+  // The belt is the exception and is meant to be: it runs continuously, because a
+  // real one does and because the middle link of the chain has to be visible the
+  // whole time or the two ends read as two unrelated animations.
+  // =======================================================================
+  const DUMP = {
+    // NEGATIVE, and it matters: the wagon's open top has to swing toward the pit.
+    // Reversed, the coal appears to fall out through the floor.
+    turn: -150,
+    rest: 2, roll: 3, dwell: 1, back: 3,   // seconds — 9 a cycle
+    // Where in the SWING the load leaves, not where in the clock. 110 of 150
+    // degrees, then twenty more to empty.
+    spill: 110 / 150, empty: 20 / 150,
+    refill: 0.7,      // a loaded wagon is back in the barrel by the time it is level
+    belt: 18,         // px/s along the gallery
+    slew: 6,          // the booms' half-swing, degrees
+  };
+
+  function buildPier(svg) {
+    const dumper = svg.querySelector('.cc-dumper');
+    if (!dumper) return null;
+    // The PITCH is measured off the art rather than agreed with it: the coal on the
+    // belt is a row of evenly spaced lumps, so the average gap between the first and
+    // the last IS the loop distance, and the scene can be redrawn without telling
+    // anybody. The art carries one spare lump beyond each end so the loop is seamless.
+    const lumps = svg.querySelectorAll('.cc-belt ellipse');
+    let pitch = { x: 0, y: 0 };
+    if (lumps.length > 1) {
+      const a = lumps[0], b = lumps[lumps.length - 1], n = lumps.length - 1;
+      pitch = { x: (+b.getAttribute('cx') - +a.getAttribute('cx')) / n,
+                y: (+b.getAttribute('cy') - +a.getAttribute('cy')) / n };
+    }
+    const booms = [].map.call(svg.querySelectorAll('.cc-boom'), (el, i) => {
+      const m = /translate\(([^)]*)\)\s*rotate\(\s*(-?[\d.]+)/.exec(el.getAttribute('transform') || '');
+      return m ? { el: el, at: m[1], base: +m[2],
+                   // Different periods, so the two never swing in step — a pair of
+                   // machines nodding together is one machine drawn twice.
+                   secs: i ? 10.5 : 8.5, t: i ? 2.1 : 0 } : null;
+    }).filter(Boolean);
+    const gate = svg.querySelector('.cc-gate');
+    const gm = gate && /translate\(([^)]*)\)/.exec(gate.getAttribute('transform') || '');
+    const truck = svg.querySelector('.cc-truck');
+    const tp = svg.querySelector('[id$="truck-path"]');
+    return {
+      dumper: dumper, load: svg.querySelector('.cc-carload'),
+      fall: svg.querySelector('.cc-coalfall'),
+      belt: svg.querySelector('.cc-belt'), pitch: pitch, p: 0,
+      booms: booms,
+      gate: gate, gateAt: gm ? gm[1] : null, gateA: 0,
+      truck: truck, truckPath: tp, td: 0, tGone: 0,
+      phase: 'rest', t: 0,
+    };
+  }
+
+  function updatePier(dt) {
+    const p = currentScene && currentScene.pier;
+    if (!p) return;
+    const secs = dt / 1000;
+    p.t += secs;
+
+    // ---- the barrel, and what the barrel causes -------------------------
+    let e = 0;                                  // 0..1 of the way over
+    if (p.phase === 'rest') {
+      if (p.t >= DUMP.rest) { p.phase = 'roll'; p.t = 0; }
+    } else if (p.phase === 'roll') {
+      e = ease(clamp(p.t / DUMP.roll, 0, 1));   // 100 tonnes does not snap
+      if (p.t >= DUMP.roll) { p.phase = 'dwell'; p.t = 0; e = 1; }
+    } else if (p.phase === 'dwell') {
+      e = 1;
+      if (p.t >= DUMP.dwell) { p.phase = 'back'; p.t = 0; }
+    } else if (p.phase === 'back') {
+      e = 1 - ease(clamp(p.t / DUMP.back, 0, 1));
+      if (p.t >= DUMP.back) { p.phase = 'rest'; p.t = 0; e = 0; }
+    }
+    p.dumper.setAttribute('transform', 'rotate(' + (DUMP.turn * e).toFixed(2) + ')');
+
+    // The load leaves when the wagon is past 110 degrees — driven by the SWING, so
+    // it stays right if the timing is ever retuned. Coming back it is empty, and a
+    // fresh loaded wagon is in the barrel by the time the barrel is level again:
+    // the same appear-and-vanish the prairie dogs use, and the honest way to say
+    // "the next car" without art for a car shuffle. A dumper that empties one wagon
+    // and then turns it over for ever is a stranger sight than this.
+    const going = p.phase === 'roll' || p.phase === 'dwell';
+    if (p.load) {
+      const spilt = clamp((e - DUMP.spill) / DUMP.empty, 0, 1);
+      const full = p.phase === 'rest' ? clamp(p.t / DUMP.refill, 0, 1)
+                 : p.phase === 'back' ? 0 : 1 - spilt;
+      p.load.setAttribute('opacity', full.toFixed(2));
+    }
+    if (p.fall) {
+      // Under the ring while it is inverted, gone before it comes back up.
+      const on = going ? clamp((e - DUMP.spill) / DUMP.empty, 0, 1) : 0;
+      const off = p.phase === 'dwell' ? clamp(1 - (p.t - 0.5) / 0.5, 0, 1) : 1;
+      p.fall.setAttribute('opacity', Math.min(on, off).toFixed(2));
+    }
+
+    // ---- the belt: continuous, and independent of the barrel -------------
+    if (p.belt && (p.pitch.x || p.pitch.y)) {
+      const len = Math.hypot(p.pitch.x, p.pitch.y) || 1;
+      p.p = (p.p + secs * DUMP.belt / len) % 1;
+      p.belt.setAttribute('transform',
+        'translate(' + (p.p * p.pitch.x).toFixed(2) + ',' + (p.p * p.pitch.y).toFixed(2) + ')');
+    }
+
+    // ---- the booms slew, and the spout never stops -----------------------
+    p.booms.forEach(b => {
+      b.t += secs;
+      const a = b.base + DUMP.slew * Math.sin(b.t / b.secs * TAU);
+      b.el.setAttribute('transform', 'translate(' + b.at + ') rotate(' + a.toFixed(2) + ')');
+    });
+
+    // ---- the terminal barrier: THE SAME RULE, SAID TWICE -----------------
+    //
+    // The fifth thing in the game that reads the crossing, and the only one whose
+    // whole point is that it agrees with it. A child who has learned what the red
+    // and white arms mean sees a yellow and black one twenty metres away doing the
+    // same thing for the same reason, and that is worth more than any amount of
+    // scenery. isDown() covers 'closing' as well as 'closed', which is what makes
+    // it fall A BEAT BEFORE the crossing arms rather than with them.
+    if (p.gate && p.gateAt) {
+      const want = CC.gate.isDown() ? 0 : -72;
+      const step = 72 / 1.5 * secs;                     // about a second and a half
+      p.gateA += clamp(want - p.gateA, -step, step);
+      p.gate.setAttribute('transform',
+        'translate(' + p.gateAt + ') rotate(' + p.gateA.toFixed(2) + ')');
+    }
+
+    // ---- and the truck that was waiting for it ---------------------------
+    if (p.truck && p.truckPath) {
+      const total = p.truckPath.getTotalLength();
+      const open = p.gateA < -36;                       // past halfway up
+      if (p.tGone > 0) {
+        // Through the gate and away. It comes back at the foot of the ramp after a
+        // pause, because a truck park with one truck in it that never moves again
+        // is a painted truck, and painted vehicles are what this scene set out to
+        // avoid on the aisle.
+        p.tGone -= secs;
+        p.truck.setAttribute('opacity', '0');
+        // Put it back at the FOOT before showing it again. Resetting the distance
+        // and the opacity but not the transform flashed it, for one frame, at full
+        // strength at the top of the ramp it had just left by.
+        if (p.tGone <= 0) {
+          p.td = 0;
+          p.truck.setAttribute('transform', 'translate(0,0)');
+          p.truck.setAttribute('opacity', '1');
+        }
+      } else if (open && p.td < total) {
+        p.td = Math.min(total, p.td + 26 * secs);
+        const a = p.truckPath.getPointAtLength(0);
+        const b = p.truckPath.getPointAtLength(p.td);
+        p.truck.setAttribute('transform',
+          'translate(' + (b.x - a.x).toFixed(2) + ',' + (b.y - a.y).toFixed(2) + ')');
+        // Fading over the last few pixels rather than at the line: it is driving
+        // away up a road we cannot see, not being switched off.
+        p.truck.setAttribute('opacity', clamp((total - p.td) / 8, 0, 1).toFixed(2));
+        if (p.td >= total) p.tGone = 6;
+      }
+    }
+  }
+
   const GULL = { slow: 9, fast: 22, margin: 90 };
 
   function buildGulls(svg) {
@@ -5779,6 +5955,7 @@
     updateLock(dt);
     updatePdogs(dt);
     updateSurrey(dt);
+    updatePier(dt);
     updateLucy(dt);
     updateSurf(dt);
     updateGulls(dt);
