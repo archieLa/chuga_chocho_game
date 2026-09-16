@@ -92,8 +92,9 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `asset-data.js` | **generated** by `tools/inline-assets.py` — every scene, every vehicle and `manifest.json` as strings. Ids inside each asset are namespaced so several mounted scenes don't collide. |
 | `map-data.js` | **generated** by `tools/gen-map.js` — the US map SVG as a string. |
 | `i18n.js` | EN + PL dictionaries, `t()`, `apply()`. Every string a child sees or hears starts here. |
-| `speech.js` | `SpeechSynthesis`. Picks the voice **at speak time** (the list is empty on first call), falls back rather than going silent, and takes `{ lang }` to speak one line in another language. |
-| `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. |
+| `voice-en.js`, `voice-pl.js` | **generated** by `tools/gen-voice.py` — one recorded MP3 sprite per language, inlined as base64, plus a `{ line: [start, duration] }` index. |
+| `speech.js` | Narration. **A recorded clip if there is one, `SpeechSynthesis` if not, silence never.** Clips are keyed by the line's own text, so no call site knows they exist. Picks the fallback voice **at speak time** (the list is empty on first call) and takes `{ lang }` to speak one line in another language. |
+| `audio.js` | Web Audio bell, whistle, chuff, honk. Created on first gesture; mute lives in settings. Also owns the speaker for recorded narration (`decode`/`playClip`/`stopClip`) — on its **own gain bus**, so ⚙️ Sound silences the crossing but never the narrator. |
 | `gate.js` | The state machine (`open/closing/closed/opening`) **and** the real-device link — probe, poll `/status`, two-way sync, echo suppression. |
 | `world.js` | The locations as data, `select()`, `spoken()`, `drawRandom()` (the surprise bag), persistence. Source of truth for train presets, including an optional `bodyColour` livery. |
 | `map.js` | The map overlay — and the game's front door. Also **Surprise me**, the random-destination draw. |
@@ -197,14 +198,28 @@ are the scaffolding already in place.
 
 ### Voice — see `VOICE.md`
 
-The browser's `SpeechSynthesis` is a **release blocker**, not a finished feature:
-the voice differs on every platform and none of them sound like they are talking
-to a three-year-old. The plan is pre-recorded lines generated offline with Piper,
-keyed by the string itself, shipped as one inlined sprite per language and played
-through `audio.js`'s existing Web Audio context — with `SpeechSynthesis` kept as
-the fallback, because **silence is never an option** (decision #5). It is ~218
-lines and about 2 MB. `VOICE.md` has the architecture, the licence trap in
-Piper's voice models, and the definition of done.
+**Built.** All 281 lines are pre-recorded offline with Piper and shipped as one
+inlined MP3 sprite per language (`play/js/voice-en.js`, `voice-pl.js`, 3.5 MB),
+played through `audio.js`'s Web Audio context. `SpeechSynthesis` remains the
+fallback, because **silence is never an option** (decision #5). Voices:
+`en_GB-cori-high` (LibriVox, public domain) and `pl_PL-mc_speech-medium` (CC0) —
+`VOICE.md` records why the obvious English choice, `lessac`, cannot be shipped.
+The only box left unticked is a test on a real iPhone.
+
+**Three things will trip you up:**
+
+1. **Change a spoken string and the audio is stale.** The clips are keyed by the
+   text itself, so editing one word in `i18n.js` orphans its clip and that line
+   silently drops to the robot voice. `python3 tools/check-voice.py` exits 1 on
+   it — this is the **fifth place that must agree**, alongside the four under
+   "Adding a location". Fix with `python3 tools/gen-voice.py` (~4.5 min), which
+   needs `tools/voice/setup.sh` run once first.
+2. **Never hand `speech.say()` a string you concatenated.** It will be in no
+   dictionary, so it gets no clip, for ever, quietly. Say the atoms in sequence —
+   `customizer.js`'s `saySlot()` and `map.js`'s surprise reveal both do.
+   No tool catches this; only review does.
+3. **`tools/voice-lines.js` is the source of truth** for what the game can say,
+   and both the generator and the checker read it and nothing else.
 
 ### Ambient motion — see `AMBIENT.md`
 

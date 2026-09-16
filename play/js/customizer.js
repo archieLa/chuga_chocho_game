@@ -105,13 +105,30 @@
       CC.audio.blip();
       this.slot = slot;
       this.render();
-      CC.speech.say(this.slotName(slot), { interrupt: true });
+      this.saySlot(slot);
     },
 
+    /** What the slot is CALLED — for the button's aria-label, where one string
+        is what a screen reader wants. */
     slotName(slot) {
       return slot === 'engine'
         ? CC.i18n.t('ui.engine')
         : CC.i18n.t('ui.wagon') + ' ' + CC.i18n.number(slot + 1);
+    },
+
+    /** What the slot SOUNDS like — two separate utterances, not slotName().
+
+        Recorded narration is keyed by the string itself (see VOICE.md), and the
+        generator emits a clip for every string in the dictionaries. "Wagon
+        three" is in no dictionary — it is built here — so speaking it as one
+        line would miss the clips for ever and quietly drop these four lines
+        back to the robot voice in each language. The rule the whole voice
+        pipeline rests on: NEVER hand speech.say() a string you concatenated.
+        Say the atoms. map.js's surprise sequence already works this way. */
+    saySlot(slot) {
+      if (slot === 'engine') { CC.speech.say(CC.i18n.t('ui.engine'), { interrupt: true }); return; }
+      CC.speech.say(CC.i18n.t('ui.wagon'), { interrupt: true });
+      CC.speech.say(CC.i18n.number(slot + 1));
     },
 
     chooseColour(entry) {

@@ -18,16 +18,21 @@ overwritten by every art drop.
 Everything the game says comes from `play/js/i18n.js` or `play/js/world.js`.
 Counted:
 
-| | lines |
-|---|---|
-| place names, English | 37 |
-| place names, Polish | 10 — the other 27 have no Polish form and are *deliberately* spoken in English (decision #6) |
-| state names | 51, English only — they are American proper nouns |
-| UI strings | ~68 English, ~70 Polish |
-| **total** | **~218** |
+| | EN | PL |
+|---|---|---|
+| place names | 55 | 11 — the other 44 have no Polish form and are *deliberately* spoken in English (decision #6) |
+| state names | 51 | — they are American proper nouns |
+| UI, colours, numbers, shapes, vehicles, praise | 82 | 82 |
+| **clips** | **188** | **93** |
 
-At mono MP3 that is roughly **1.5 MB of audio, 2 MB inlined as base64** — under
-half of what `asset-data.js` already ships. Size is not the constraint.
+**281 lines, 3,056 characters.** Counted, never estimated — `node tools/voice-lines.js
+--summary` prints it, and the number has already been wrong once in this file (it said
+218, from back when there were 37 locations rather than 55).
+
+As built that is **321 s of audio, 2.5 MB of MP3, 3.5 MB inlined as base64** —
+against the 8.9 MB `asset-data.js` already ships. Size is not the constraint.
+(About 40% of that duration is the silence between clips; see THE SEAM PROBLEM
+in `tools/gen-voice.py`. It is deliberate and it compresses to almost nothing.)
 
 Phase 2 adds numbers, letters, shapes and praise words. Record them in the same
 session with the same voice, or you will be doing this twice.
@@ -43,13 +48,26 @@ calls `SpeechSynthesis`**. This is a change inside one module, not a sweep.
 
 The obvious design is `speech.line('place.chicago')`, which means threading a key
 through every call site. Don't. Every spoken string already comes from a
-dictionary, so **the text is the key** — slug it and look it up.
+dictionary, so **the text is the key** — normalise it and look it up.
+
+As built, the key IS the text: NFC, whitespace collapsed, lowercased. No slug
+table, so nothing can go stale between the text and its name; "CLOSE" and
+"close" share a clip, which is what you want. `tools/voice-lines.js` `keyOf()`
+and `speech.js` `key()` are the two copies of that one rule — change it in one
+and you must change it in the other.
 
 That buys three things:
 
 - **No call-site changes.** `speech.say(text, { lang })` keeps its signature.
-- **A generator that cannot invent work.** It walks `i18n.js` and `world.js` and
-  emits exactly the lines that exist.
+- **A generator that cannot invent work.** `tools/voice-lines.js` walks `i18n.js`
+  and `world.js` and emits exactly the lines that exist — in **node**, loading the
+  real modules and calling the real `world.spoken()`, so the language rules cannot
+  drift into a second implementation.
+- **One rule for callers, and it is not optional: NEVER hand `say()` a string you
+  concatenated.** A line built at a call site is in no dictionary, so it gets no
+  clip and drops to the robot for ever, silently. `customizer.js` had exactly one
+  ("Wagon" + " " + "three"); it now says the two atoms in sequence, as `map.js`'s
+  surprise reveal already did. No tool can catch this — only review can.
 - **A checker.** `tools/check-voice.py` reports strings with no clip and clips
   with no string. Edit a string and the audio goes stale — that has to be a
   build error, not something a child discovers. Same discipline as
@@ -57,8 +75,8 @@ That buys three things:
 
 ### One sprite per language, played through `audio.js`
 
-Not 218 files. Concatenate each language into a single MP3 plus a
-`{ slug: [startSeconds, durationSeconds] }` index, generated into
+Not 281 files. Concatenate each language into a single MP3 plus a
+`{ key: [startSeconds, durationSeconds] }` index, generated into
 `play/js/voice-en.js` and `play/js/voice-pl.js` the same way `asset-data.js`
 inlines the scenes. `file://` keeps working and there is still no build step
 required to *run* the game.
@@ -67,21 +85,41 @@ Play it through the **Web Audio context that `audio.js` already owns**, not an
 `<audio>` element. That reuses:
 
 - the gesture unlock already wired to **ALL ABOARD**,
-- the existing mute setting,
 - and `start(when, offset, duration)`, which plays a slice cleanly and cancels
   precisely — which `<audio>` seeking does not.
 
-One number to keep an eye on: decoding a ~110-second sprite holds roughly
-**10 MB of PCM per language** at 22 kHz mono. Fine on anything modern. If it
-hurts on an old tablet, fall back to individual clips decoded on demand and
-cached — more decodes, far less resident memory.
+`audio.js` had no buffer path at all when this was written; `decode()`,
+`playClip()` and `stopClip()` at the bottom of it are that plumbing.
+
+**RESOLVED, and it is a change from the sentence that used to be here: the voice
+does NOT go through the mute setting.** ⚙️ Sound has always meant "no bell, still
+talks", because narration came from `SpeechSynthesis` and never touched
+`audio.js`. Putting clips on `master` would have quietly changed that the day the
+recordings landed — and hard rule #5 says everything on screen is spoken, which
+is not a sound effect but how the game is read to a child who cannot read. So
+narration gets its own gain bus straight to the destination. A separate Voice
+switch can hang off that bus if it is ever wanted.
+
+Both sprites are loaded and decoded, not just the active language's: 44 of the 55
+place names are spoken by the English voice even in Polish (decision #6).
+
+One number to keep an eye on: decoded PCM is **~19 MB for English and ~9 MB for
+Polish** at 22 kHz mono float32. Fine on anything modern. If it ever hurts on an
+old tablet, the fix in order of cheapness is (1) drop `PAD` in `gen-voice.py` from
+0.25 s — about 40% of the sprite is inter-clip silence and the measured encoder
+drift is 0 ms, so there is a lot of room; (2) decode the second language lazily;
+(3) fall back to individual clips decoded on demand and cached.
 
 ### The robot stays as the safety net
 
 **Clip if we have one, `SpeechSynthesis` if we do not, silence never.** Decision
 #5 exists because a child who hears nothing thinks the game is broken, and that
-has not changed. It also means the audio can land incrementally: record the 37
-place names first and everything else keeps working while you go.
+has not changed. It also means the audio can land incrementally: record the place
+names first and everything else keeps working while you go.
+
+Verified by instrumenting both paths in a real headless browser and counting: on
+`file://` and served, welcome / place names / customizer / language switch all
+play **clips, with zero falls back to the robot**.
 
 ---
 
@@ -101,7 +139,25 @@ project where the generated audio is redistributed.
 3. **Delivery controls.** `--length_scale` (higher is slower), `--noise_scale`
    and `--noise_w` (how much variation in tone and phoneme length), and
    `--sentence_silence`. Slowing slightly is usually the single biggest
-   improvement for this audience.
+   improvement for this audience. We ship `--length_scale 1.15`.
+
+### NOISE MUST BE ZERO, and that is not a matter of taste
+
+`--noise_scale 0 --noise_w_scale 0`. At the defaults every render is different,
+which is bad for a build tool twice over: the output is not reproducible, and **on
+very short inputs the model rambles.** "red" in `en_GB-cori-high` came out at
+1.4 s, 2.3 s and 4.2 s on three consecutive runs — the word, a mumble, then the
+word again. Exactly the kind of thing that ships because nobody listens to all
+281 clips.
+
+Zero makes it deterministic, which is what lets `gen-voice.py` have a **babble
+guard**: it fits milliseconds-per-character on the long lines (which never
+ramble), and any line more than 2× its expected length is re-rendered with a
+trailing `!`, `,`, `.` or `?` — punctuation gives the model the sentence boundary
+it was missing. If no variant lands, **the build fails and names the line**,
+rather than letting a child be the one who finds it. Across all 281 lines exactly
+two needed it: `red` and `Moab`, both English, both fixed by `!`. Polish needed
+none. `check-voice.py` re-checks the shipped sprites against the same yardstick.
 
 What Piper does **not** give you is a pitch dial. If a voice needs lifting,
 that is a post-process (`ffmpeg`/`rubberband`, formant-preserving) — and go
@@ -122,6 +178,42 @@ voice name, and give attribution if the licence asks for it. This is the same
 call that ruled out the Rocky statue in Philadelphia and keeps badges and team
 liveries out of Indianapolis and Detroit.
 
+**It caught real ones.** Of the obvious candidates:
+
+| voice | dataset licence | |
+|---|---|---|
+| `en_US-lessac` | Blizzard 2013 — **research only**, per-person, manually issued | ✗ cannot ship |
+| `en_US-ryan` | CC BY-**NC**-SA 4.0 | ✗ non-commercial |
+| `en_US-hfc_female` | CC BY-**NC**-SA 4.0 | ✗ non-commercial |
+| `en_US-amy`, `en_GB-jenny_dioco` | "See URL" — undeclared | ✗ not good enough |
+| `en_GB-cori` | LibriVox, **public domain**, trained from scratch | ✓ |
+| `en_US-kristin` | LibriVox, **public domain**, trained from scratch | ✓ |
+| `en_GB-alba` | CC BY 4.0 (attribution) | ✓ |
+| `pl_PL-mc_speech` | the MC Speech dataset, **CC0** | ✓ |
+| `pl_PL-gosia`, `pl_PL-darkman` | CC0 | ✓ |
+| `pl_PL-bass` | Apache 2.0 | ✓ |
+| `pl_PL-mls_6892` | CC BY 4.0, but 16 kHz low quality | — |
+
+`lessac` being the most obvious English voice AND unshippable is the trap working
+exactly as this section predicted.
+
+### THE SHIPPING VOICES
+
+| | voice | licence |
+|---|---|---|
+| English | **`en_GB-cori-high`** | dataset: LibriVox, **public domain**. Trained from scratch. No attribution required. |
+| Polish | **`pl_PL-mc_speech-medium`** | dataset: [the MC Speech dataset](https://www.kaggle.com/datasets/czyzi0/the-mc-speech-dataset), **CC0**. |
+
+**One caveat, recorded honestly rather than buried.** Every Polish voice in the
+Piper roster — all five — is *fine-tuned from* `en_US-lessac` or `en_US-ryan`, the
+two English models ruled out above. `mc_speech`'s own training data is CC0 and
+that is the licence Piper publishes it under, which is what we rely on; but its
+weights descend from a research-licensed base. Whether a fine-tune is a
+derivative work of its base model is genuinely unsettled, and there is no Polish
+Piper voice trained from scratch to sidestep it with. If that risk is ever judged
+too high, the options are a different Polish TTS or letting Polish fall back to
+`SpeechSynthesis` — the fallback path is already there and already works.
+
 ### A warm adult beats a fake child
 
 The instinct is to reach for a child-sounding voice. Resist it. A warm, clear
@@ -136,6 +228,10 @@ the narrator inherently changes when the language does. That is unavoidable
 short of hiring one bilingual human. Pick two voices that at least share a
 register — both warm, both unhurried, similar apparent age — so it reads as a
 different narrator rather than a different game.
+
+Chosen by ear from a seven-way audition of every licence-clean candidate,
+rendered on real game lines. Regenerate that audition any time with the models in
+`tools/voice/models/`; it is the only way to make this call.
 
 ---
 
@@ -164,12 +260,28 @@ becomes decoration rather than load-bearing.
 
 ## Definition of done
 
-- [ ] a voice chosen per language, with its licence recorded above
-- [ ] `tools/gen-voice.py` — walks the dictionaries, drives Piper, normalises,
+- [x] a voice chosen per language, with its licence recorded above
+- [x] `tools/voice-lines.js` — the one source of truth for what the game can say
+- [x] `tools/gen-voice.py` — drives Piper, guards against babble, normalises,
       concatenates, writes `play/js/voice-<lang>.js`
-- [ ] `tools/check-voice.py` — strings with no clip, clips with no string
-- [ ] `speech.js` prefers a clip, falls back to `SpeechSynthesis`, never silent
-- [ ] playback through `audio.js`'s context, honouring the existing mute
-- [ ] verified on `file://` **and** served, and on a real iPhone — audio unlock
-      and autoplay policy are exactly the sort of thing headless Chrome will
-      happily tell you is fine
+- [x] `tools/check-voice.py` — strings with no clip, clips with no string.
+      Exits 1 on either; negative-tested by editing a string and watching it fail
+- [x] `speech.js` prefers a clip, falls back to `SpeechSynthesis`, never silent
+- [x] playback through `audio.js`'s context — on its **own bus**, deliberately not
+      through the mute; see the resolved note above
+- [x] verified on `file://` **and** served: clips play, robot never fires,
+      console clean
+- [ ] **verified on a real iPhone** — audio unlock and autoplay policy are exactly
+      the sort of thing headless Chrome will happily tell you is fine. This is the
+      one box a machine cannot tick; the `100dvh` bug is the precedent.
+
+## Regenerating
+
+```bash
+tools/voice/setup.sh              # once — Piper + the two voice models (~520 MB, gitignored)
+python3 tools/gen-voice.py        # ~4.5 min for all 281 lines
+python3 tools/check-voice.py      # must pass before committing
+```
+
+**Change any spoken string and the audio is stale.** `check-voice.py` is the fifth
+place that must agree, alongside the four in `CLAUDE.md`'s "Adding a location".

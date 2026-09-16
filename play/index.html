@@ -68,6 +68,12 @@
        directly. Load order: data, then services, then systems, then the
        orchestrator. asset-data.js must come before anything that draws. -->
   <script src="js/i18n.js?v=86"></script>
+  <!-- The recorded narration: one MP3 sprite per language, inlined as base64
+       by tools/gen-voice.py so file:// works. Before speech.js, which reads
+       CC.voice. Missing or stale, the game falls back to SpeechSynthesis and
+       still talks — see VOICE.md. -->
+  <script src="js/voice-en.js?v=86"></script>
+  <script src="js/voice-pl.js?v=86"></script>
   <script src="js/speech.js?v=86"></script>
   <script src="js/audio.js?v=86"></script>
   <script src="js/asset-data.js?v=86"></script>

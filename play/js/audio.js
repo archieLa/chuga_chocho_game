@@ -1,8 +1,15 @@
 /* audio.js — the crossing's voice: warning bell, whistle, chuff and car horn.
 
    Ported from reference/crossing_playtime.html, which already had the tuning
-   right. Everything is synthesised with Web Audio — no files to download, so the
-   game stays a single folder you can open from disk.
+   right. The crossing's own sounds are all synthesised with Web Audio — no files
+   to download, so the game stays a single folder you can open from disk.
+
+   This module also OWNS THE SPEAKER for recorded narration: decode(), playClip()
+   and stopClip() at the bottom, driven by speech.js. The clips are inlined into
+   play/js/voice-*.js exactly as the scenes are inlined into asset-data.js, so
+   file:// still works. They play on their own gain bus, not on master — the
+   reason is written out above setEnabled(), and it is the reason ⚙️ Sound does
+   not mute the narrator.
 
    Browsers refuse to make sound until the user has touched the page, so the
    AudioContext is created lazily by unlock(), which main.js calls on the first
@@ -15,8 +22,10 @@
   const STORAGE_KEY = 'cc.sound';
   let enabled = localStorage.getItem(STORAGE_KEY) !== 'off';
   let ctx = null;
-  let master = null;
+  let master = null;         // the crossing: bell, whistle, chuff, honk
+  let voiceBus = null;       // the narrator — see WHY THE VOICE IS NOT ON master
   let bellTimer = null;
+  let voiceNode = null;      // the one clip currently playing, so it can be cut
 
   /** The AudioContext is created ONLY from unlock(), which runs inside a real
       user gesture. Creating one anywhere else earns a console warning from the
@@ -31,6 +40,11 @@
       master = ctx.createGain();
       master.gain.value = enabled ? 1 : 0;
       master.connect(ctx.destination);
+      // Narration gets its OWN bus straight to the destination, bypassing
+      // master. See the note above setEnabled().
+      voiceBus = ctx.createGain();
+      voiceBus.gain.value = 1;
+      voiceBus.connect(ctx.destination);
     } catch (e) { ctx = null; }
     return ctx;
   }
@@ -63,12 +77,79 @@
       if (a && a.state === 'suspended') a.resume().catch(() => {});
     },
 
+    /** WHY THE VOICE IS NOT ON master, and why ⚙️ Sound does not silence it.
+
+        Hard rule #5: everything on screen is also SPOKEN. That is not a sound
+        effect, it is how the game is read to a child who cannot read — turning
+        it off leaves a three-year-old with unlabelled buttons.
+
+        It also would have been a regression nobody asked for. While narration
+        came from SpeechSynthesis it bypassed this module completely, so Sound
+        off has always meant "no bell, still talks". Putting clips on master
+        would have quietly changed that the day the recordings landed. So the
+        toggle keeps meaning exactly what it has always meant, and the narrator
+        keeps talking. A separate Voice switch can be added if it is ever
+        wanted; the bus is already there to hang it on. */
     setEnabled(on) {
       enabled = !!on;
       localStorage.setItem(STORAGE_KEY, enabled ? 'on' : 'off');
       if (master) master.gain.value = enabled ? 1 : 0;
       if (!enabled) this.stopBell();
       CC.emit && CC.emit('sound', enabled);
+    },
+
+    /* ---- recorded narration (speech.js drives this) ---------------------
+       The clips arrive as ONE base64 MP3 per language plus an index of
+       [start, duration] slices; see VOICE.md and tools/gen-voice.py. Playing
+       them here rather than through an <audio> element reuses the gesture
+       unlock the crossing sounds already need, and gives exact slicing:
+       start(when, offset, duration) plays one word out of the sprite and
+       stops dead at its end, which seeking an <audio> element does not. */
+
+    /** True once a gesture has unlocked us and decoding is possible. */
+    get ready() { return !!ctx; },
+
+    /** Decode a sprite. Returns a Promise of an AudioBuffer, or null if we are
+        not unlocked yet — the caller falls back to SpeechSynthesis, which is
+        the right answer for any line spoken before the first tap. */
+    decode(arrayBuffer) {
+      if (!ctx) return null;
+      // Safari's decodeAudioData only took the callback form for years, so ask
+      // for a Promise and build one ourselves when we get undefined back.
+      try {
+        const p = ctx.decodeAudioData(arrayBuffer);
+        if (p && typeof p.then === 'function') return p;
+      } catch (e) { /* fall through to the callback form */ }
+      return new Promise((res, rej) => {
+        try { ctx.decodeAudioData(arrayBuffer, res, rej); } catch (e) { rej(e); }
+      });
+    },
+
+    /** Play one slice of a decoded sprite. `onended` fires when it finishes OR
+        when it is cut short by the next line, so speech.js's queue keeps
+        draining either way. Returns false if it could not play at all. */
+    playClip(buffer, offset, duration, onended) {
+      if (!ctx || !buffer) return false;
+      this.stopClip();
+      try {
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        src.connect(voiceBus);
+        src.onended = () => { if (voiceNode === src) voiceNode = null; onended && onended(); };
+        voiceNode = src;
+        src.start(0, offset, duration);
+        return true;
+      } catch (e) { voiceNode = null; return false; }
+    },
+
+    /** Cut the current line — what speech.say({ interrupt: true }) needs.
+        The onended handler is detached first so cancelling does not look like
+        the line finishing and pull the next one off the queue. */
+    stopClip() {
+      if (!voiceNode) return;
+      const n = voiceNode;
+      voiceNode = null;
+      try { n.onended = null; n.stop(); } catch (e) {}
     },
 
     /** The ding-ding-ding that runs the whole time the gate is not open. */

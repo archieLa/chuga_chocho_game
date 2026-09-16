@@ -8,3 +8,10 @@ node_modules/
 # folder, and twice it was not. A pattern cannot forget.
 chuga-chocho-*/
 *-drop/
+
+# Voice build tooling: the Piper venv, the .onnx voice models and audition
+# renders. All regenerable by tools/voice/setup.sh — ~500 MB, not repo content.
+# The SHIPPED audio is play/js/voice-*.js, which IS committed.
+tools/voice/venv/
+tools/voice/models/
+tools/voice/auditions/

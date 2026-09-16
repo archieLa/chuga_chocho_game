@@ -162,10 +162,14 @@ Counts **road cars that pass before the gate closes**, with a settings toggle to
 
 - **English default; Polish day one**, via a settings toggle.
 - Drives UI labels, button text and all narration (numbers, colours, letters, place names, praise).
-- Browser `SpeechSynthesis` — no audio files.
-- **Voice fallback:** a device may have no Polish voice at all. Silence would read as "the
-  game is broken", so `speech.js` falls back — a local voice for the language, then any voice
-  for it, then the default voice saying the words anyway.
+- **Pre-recorded narration**, generated offline with Piper and shipped inlined — one MP3
+  sprite per language, keyed by the line's own text. `SpeechSynthesis` sounded different on
+  every platform, none of them like they were talking to a three-year-old, and the ones that
+  got `Oʻahu`, `Quechee` or `Albuquerque` wrong got them wrong confidently. See `VOICE.md`.
+- **Voice fallback:** a line with no clip, or a device where decoding fails, drops to
+  `SpeechSynthesis`; a device may have no Polish voice at all, so that in turn falls back — a
+  local voice for the language, then any voice for it, then the default voice saying the words
+  anyway. Silence would read as "the game is broken", and is never an option.
 - **Per-utterance language override.** `speech.say(text, { lang: 'en' })` speaks one line in
   another language. Used for place names that stay English (see the decisions log in §11).
 - **More languages (e.g. Spanish) later** — per-language dictionaries, so adding one is data, not code.
@@ -249,6 +253,28 @@ acceptance criteria. Two things it settles that belong here as decisions:
   hexes that match neither `trains.PALETTE` nor the `colors` names in `i18n.js` (one is white,
   which has no name in either language). Count & Close cannot say "two red cars" until that is
   reworked into keyed colours, so it is the first task of the phase.
+
+#### Decisions taken while recording the voice
+
+- **The clip key is the line's own text**, normalised (NFC, whitespace collapsed,
+  lowercased) — not an id threaded through every call site, and not a slug table that could
+  drift. Consequence, and it is a real constraint on future code: **never pass
+  `speech.say()` a concatenated string.** It would be in no dictionary, get no clip, and
+  drop to the robot voice for ever without erroring. Say the atoms in sequence.
+- **⚙️ Sound does not mute the narrator.** It never did — narration bypassed `audio.js`
+  entirely while it came from `SpeechSynthesis` — and hard rule #5 makes narration how the
+  game is *read* to a child who cannot read, not a sound effect. So the clips get their own
+  gain bus and the toggle keeps meaning exactly what it always meant.
+- **Voices: `en_GB-cori-high` and `pl_PL-mc_speech-medium`**, chosen by ear from every
+  licence-clean candidate. The obvious English pick, `lessac`, is **research-licensed and
+  cannot be shipped**; `ryan` and `hfc_female` are non-commercial. `VOICE.md` has the table
+  and the one honest caveat about Polish fine-tune lineage.
+- **Piper runs with noise at zero.** At the defaults renders are non-reproducible and short
+  words babble — "red" came out at 1.4 s, 2.3 s and 4.2 s on three runs, saying the word
+  twice with a mumble between. Determinism is what makes the generator's babble guard
+  possible, and that guard **fails the build** rather than shipping a bad clip.
+- **Staleness is a build error.** `tools/check-voice.py` is the fifth place that must agree
+  when something spoken changes, alongside the four for adding a location.
 
 ### Phase 3 — Polish & extend
 
