@@ -40,11 +40,18 @@
       numbers: ['zero','one','two','three','four','five','six','seven','eight','nine','ten'],
       shapes: { circle:'circle', triangle:'triangle', square:'square', star:'star' },
       praise: ['Yay!', 'Great!', 'Wow!', 'Well done!'],
-      // Vehicle names as a small child would say them — not the manifest's
-      // catalogue labels, which are written for a grown-up reading a spec.
+      // Vehicle names in a child's words, EXCEPT where the real name is the
+      // point. A three-year-old who loves trains would rather be told this is a
+      // diesel-electric engine than a "big diesel engine", and will say it back —
+      // so the two engines whose names describe how they actually work use the
+      // proper term in both languages. The rest stay plain ("Little red caboose"),
+      // and none of them are the manifest's catalogue labels, which are written
+      // for a grown-up reading a spec.
+      // These are SPOKEN, so editing one makes the recordings stale — run
+      // tools/check-voice.py, which will tell you so, then tools/gen-voice.py.
       vehicles: {
-        'steam': 'Steam engine', 'diesel': 'Big diesel engine',
-        'electric-hs': 'Fast train', 'commuter': 'City train',
+        'steam': 'Steam engine', 'diesel': 'Diesel-electric engine',
+        'electric-hs': 'Electric train', 'commuter': 'City train',
         'streetcar': 'Streetcar', 'cable-car': 'Cable car',
         'wagon-coach-old': 'Old carriage', 'wagon-coach-modern': 'New carriage',
         'wagon-boxcar': 'Box wagon', 'wagon-container': 'Container wagon',
@@ -139,8 +146,8 @@
         'Wyoming':'Łajoming',
       },
       vehicles: {
-        'steam': 'Parowóz', 'diesel': 'Duża lokomotywa',
-        'electric-hs': 'Szybki pociąg', 'commuter': 'Pociąg miejski',
+        'steam': 'Parowóz', 'diesel': 'Lokomotywa spalinowo-elektryczna',
+        'electric-hs': 'Pociąg elektryczny', 'commuter': 'Pociąg miejski',
         'streetcar': 'Tramwaj', 'cable-car': 'Kolejka linowa',
         'wagon-coach-old': 'Stary wagon', 'wagon-coach-modern': 'Nowy wagon',
         'wagon-boxcar': 'Wagon kryty', 'wagon-container': 'Wagon z kontenerem',
