@@ -101,17 +101,30 @@ for (const lang of Object.keys(DICT)) {
 const locs = CC.world.all();
 for (const loc of locs) {
   for (const lang of Object.keys(DICT)) {
-    const s = CC.world.spoken(loc, lang);          // {text, lang} — lang may be 'en'
+    // ONE NARRATOR PER SESSION: every language's voice says every place, even
+    // the 44 with no Polish form. So each place is recorded in BOTH sprites,
+    // which is why the Polish sprite is no longer the small one. See the note
+    // on world.spoken() for why this reverses half of decision #6.
+    const s = CC.world.spoken(loc, lang);
     add(s.lang, s.text, 'world.' + loc.id + '.say.' + lang);
+    // The state's NAME stays English — American proper nouns — but it is spoken
+    // by this language's voice, so it needs recording in this language's sprite.
+    const st = CC.world.spokenState(loc, lang);
+    if (st) add(st.lang, st.text, 'world.' + loc.id + '.state.' + lang);
   }
-  const st = CC.world.spokenState(loc);            // always English
-  if (st) add(st.lang, st.text, 'world.' + loc.id + '.state');
 }
-// map.js also speaks a bare state name when a state is tapped; every one of
-// those is already covered by spokenState above, but assert it rather than
-// assume — a state with a scene whose place name IS the state (stateIsPlace)
-// returns null there, and its name is still spoken on the map.
-for (const loc of locs) if (loc.state) add('en', loc.state, 'map.state.' + loc.state);
+// map.js also speaks a bare state name when a state is tapped. Nearly all are
+// covered above, but not a state whose place name IS the state (stateIsPlace),
+// where spokenState returns null and the map still says it.
+for (const loc of locs) {
+  if (!loc.state) continue;
+  // Through i18n.sayAs, exactly as map.js says it — otherwise the raw English
+  // spelling is recorded ALONGSIDE the respelling and the Polish sprite carries
+  // 40 clips nothing can ever play.
+  for (const lang of Object.keys(DICT)) {
+    add(lang, CC.i18n.sayAs(loc.state, lang), 'map.state.' + loc.state);
+  }
+}
 
 // --- out -------------------------------------------------------------------
 const out = {};

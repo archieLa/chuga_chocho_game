@@ -25,11 +25,15 @@
       SpeechSynthesis; no voice for the language → any voice saying the words
       anyway; a decode that fails → the robot for the rest of the session.
 
-   PER-UTTERANCE LANGUAGE. Some place names stay English even in Polish (decision
-      #6 — "Rocky Mountains" read with Polish phonetics is not recognisable), so
-      callers pass { lang: 'en' } and that one line uses the English sprite and an
-      English voice. This is why both sprites get loaded, not just the active
-      language's.
+   PER-UTTERANCE LANGUAGE. say() takes { lang } to speak one line in a language
+      other than the active one, and it still works. Nothing in the game uses it
+      now: the narrator no longer changes mid-session, because hearing "Następny
+      przystanek" in one woman's voice and "Wisconsin Dells" in another's is far
+      more jarring to a three-year-old than an approximate vowel. Every place and
+      state is recorded in BOTH sprites and the active language says all of it.
+      See world.spoken() for the full reasoning — it reverses half of decision #6.
+      The hook stays because it costs nothing and is the natural way to add a
+      line that genuinely must be said in another language.
 
    TWO SPEECHSYNTHESIS THINGS THAT BITE, both still handled below:
       1. Voices load asynchronously — getVoices() is empty on the first call in

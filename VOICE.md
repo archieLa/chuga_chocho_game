@@ -20,12 +20,16 @@ Counted:
 
 | | EN | PL |
 |---|---|---|
-| place names | 55 | 11 — the other 44 have no Polish form and are *deliberately* spoken in English (decision #6) |
-| state names | 51 | — they are American proper nouns |
+| place names | 55 | 55 |
+| state names | 51 | 51 |
 | UI, colours, numbers, shapes, vehicles, praise | 82 | 82 |
-| **clips** | **188** | **93** |
+| **clips** | **188** | **186** |
 
-**281 lines, 3,056 characters.** Counted, never estimated — `node tools/voice-lines.js
+Every place and state is recorded in **both** languages — see ONE NARRATOR PER
+SESSION below. Polish was 93 lines under the original rule. It is 186 rather than
+188 because two Polish respellings collide with names already in the sprite.
+
+**374 lines, 3,877 characters.** Counted, never estimated — `node tools/voice-lines.js
 --summary` prints it, and the number has already been wrong once in this file (it said
 218, from back when there were 37 locations rather than 55).
 
@@ -100,8 +104,73 @@ is not a sound effect but how the game is read to a child who cannot read. So
 narration gets its own gain bus straight to the destination. A separate Voice
 switch can hang off that bus if it is ever wanted.
 
-Both sprites are loaded and decoded, not just the active language's: 44 of the 55
-place names are spoken by the English voice even in Polish (decision #6).
+### ONE NARRATOR PER SESSION — reversing half of decision #6
+
+The plan inherited a rule: a place with no Polish form is spoken by the *English*
+voice, because "Rocky Mountains" with Polish phonetics is not recognisable. That
+was written for `SpeechSynthesis`, where a Polish engine reading English text
+really did mangle it. **With recordings it is wrong**, and playing it proved it:
+the Polish surprise reveal said "Następny przystanek" in one woman's voice and
+"Wisconsin Dells" in another's, one beat apart. A three-year-old does not hear a
+careful pronunciation policy; they hear the game change narrator mid-sentence.
+
+A Polish parent reading "Wisconsin Dells" to a Polish child says it with Polish
+phonetics. So the active language's voice now says **everything** — all 55 places
+and all 51 states — and every one of them is recorded in both sprites.
+
+What is SHOWN is untouched: a name with a Polish form is still displayed in
+Polish, one without is still displayed in English, state names are still always
+English. Only the voice changed.
+
+### Which needed a phonetic respelling — nearly all of them
+
+Fed the English SPELLING, the Polish voice applies Polish letter rules and gets
+the name wrong: "Massachusetts" came out as *masachutes*. So there is a
+respelling table, `sayAs` in each language's dictionary in `i18n.js`, keyed by the
+text as that language DISPLAYS it and returning what the voice is fed. English
+needs none — the names are already English — and any language that adds no table
+simply gets a no-op.
+
+**82 entries for Polish**, reviewed by ear over three passes with a native
+speaker, not written from a rulebook. Two kinds, deliberately mixed:
+
+- a **phonetic respelling** where Polish has no name of its own —
+  `Seattle → Sijatel`, `Wisconsin → Łiskansyn`, `Massachusetts → Masaciusets`,
+  `Albuquerque → Albekerki`, `Chicago → Szikago`
+- the **real Polish name** where one exists, because a Polish child should hear
+  the word Polish actually uses — `California → Kalifornia`, `Texas → Teksas`,
+  `North Dakota → Dakota Północna`, `New Mexico → Nowy Meksyk`
+
+A name Polish already says correctly is simply absent: Boston, Denali, Montana,
+Nebraska, Alabama, Alaska, Oklahoma, Oregon, Indiana, Moab, Oahu.
+
+**Check a new one BY EAR before adding it.** Reading a respelling off the page is
+not the same as hearing it, and the review caught plenty that looked right and
+were not. `tools/voice/venv/bin/piper` renders a single line in a second.
+
+### Respelling is not translating — know which one you are doing
+
+A **respelling** changes only what the voice is fed; the screen is untouched. It
+lives in `i18n.js`'s `sayAs`.
+
+A **translation** is a different name, and it belongs in `world.js`'s `say.pl`,
+where it changes the label too. `Grand Canyon → Wielki Kanion` was always there;
+`Rocky Mountains → Góry Skaliste`, `Sun Valley → Dolina Słoneczna` and
+`Mount Rushmore → Góra Raszmor` joined it, because a Polish label reading "Rocky
+Mountains" while the voice says "Góry Skaliste" is just a bug with extra steps.
+
+The trap: an entry in `sayAs` is keyed by the DISPLAYED text. Give a place a
+Polish name in `world.js` and its old English-keyed `sayAs` entry becomes
+unreachable — dead data that still looks live. Move the name, delete the
+respelling. `check-voice.py` will not catch this for you; it only knows about
+lines that are actually produced.
+
+**Per-location `sayAs` still wins** over the table, and is the right place for a
+one-off that is about that location rather than the language — `Washington` is
+fed as "Washington D C" in English so the letters are read out.
+
+Both sprites are loaded and decoded, because `{ lang }` on `say()` still works
+even though nothing passes it now.
 
 One number to keep an eye on: decoded PCM is **~19 MB for English and ~9 MB for
 Polish** at 22 kHz mono float32. Fine on anything modern. If it ever hurts on an
@@ -249,9 +318,11 @@ becomes decoration rather than load-bearing.
 
 - **One narrator, or a narrator plus a train character?** A second voice for the
   train ("all aboard!") is charming and doubles the recording work.
-- **Do the state names need Polish?** Today they are always English, on the
-  grounds that they are American proper nouns. Recording changes nothing about
-  that decision — it is here only so nobody re-opens it by accident.
+- ~~**Do the state names need Polish?**~~ **ANSWERED, and not the way this line
+  expected.** The state's NAME is still always English — they are American proper
+  nouns. But it is now *spoken by the Polish voice* in Polish, like everything
+  else; see ONE NARRATOR PER SESSION above. Translating the names themselves is
+  still not on the table.
 - **Sound effects stay where they are.** The bell, whistle, chuff and honk are
   synthesised in `audio.js` and are not part of this. They already sound the
   same everywhere.

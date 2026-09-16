@@ -109,7 +109,10 @@
     nameState(el, name) {
       if (!name) return;
       CC.audio.blip();
-      CC.speech && CC.speech.say(name, { interrupt: true, lang: 'en' });
+      // The NAME stays English — states are American proper nouns — but the
+      // active language's voice says it, from that language's phonetic
+      // respelling. See world.spoken() and i18n.sayAs().
+      CC.speech && CC.speech.say(CC.i18n.sayAs(name), { interrupt: true });
       el.classList.add('state--said');
       setTimeout(() => el.classList.remove('state--said'), 1100);
     },
@@ -250,8 +253,11 @@
       const shape = this.overlay.querySelector('[data-name="' + stateName + '"]');
       if (shape) shape.classList.add('state--picked');
 
-      // State names are American proper nouns — always spoken in English.
-      CC.speech && CC.speech.say(stateName, { interrupt: true, lang: 'en' });
+      // State names are American proper nouns, so the name is always English —
+      // but it is said by whichever voice the child is playing in, from that
+      // language's phonetic respelling, so tapping a state neither swaps
+      // narrators nor mangles the name. See world.spoken() and i18n.sayAs().
+      CC.speech && CC.speech.say(CC.i18n.sayAs(stateName), { interrupt: true });
 
       const box = this.overlay.querySelector('.map-cities');
       box.innerHTML = '';

@@ -17,7 +17,7 @@
   // a scenery descriptor (consumed by scene.js), and a suggested train preset.
   const LOCATIONS = [
     { id:'colorado',   state:'Colorado',   city:'Rocky Mountains',
-      say:{ en:'Rocky Mountains', pl:'Rocky Mountains' },
+      say:{ en:'Rocky Mountains', pl:'Góry Skaliste' },
       scene:'colorado',
       scenery:{ theme:'mountains', features:['peaks','aspens','trestle','creek','redrock'] },
       trainPreset:{ engine:'steam' } },
@@ -278,7 +278,7 @@
       trainPreset:{ engine:'diesel' } },
 
     { id:'sunvalley', state:'Idaho', city:'Sun Valley',
-      say:{ en:'Sun Valley', pl:'Sun Valley' },
+      say:{ en:'Sun Valley', pl:'Dolina Słoneczna' },
       scene:'sun-valley',
       // Viewpoint: the road into Ketchum, which STOPS at the main street. The set's first
       // winter scene and its first aerial lift — Bald Mountain is a whaleback, and the ski
@@ -305,7 +305,7 @@
       trainPreset:{ engine:'diesel' } },
 
     { id:'mountrushmore', state:'South Dakota', city:'Mount Rushmore',
-      say:{ en:'Mount Rushmore', pl:'Mount Rushmore' },
+      say:{ en:'Mount Rushmore', pl:'Góra Raszmor' },
       scene:'mount-rushmore',
       // Viewpoint: Keystone, looking up at the carving — which is deliberately only a
       // quarter of the frame wide. This is the Black Hills WITH Rushmore in them, not a
@@ -550,34 +550,60 @@
     get current() { return LOCATIONS.find(l => l.id === currentId) || LOCATIONS[0]; },
 
     /** The place name in the active language, plus which voice should say it.
-        Names that have no Polish form stay English (Rocky Mountains, Seattle,
-        Austin), and an English name read by a Polish voice is not recognisable
-        — so it is spoken by an English voice. See DESIGN.md §8.
+
+        ONE NARRATOR PER SESSION. Whatever language you are playing in, that
+        language's voice says everything — including the 44 place names that have
+        no Polish form.
+
+        This REVERSES the original half of decision #6, and the reason is worth
+        keeping. That rule ("an English name read by a Polish voice is not
+        recognisable") was written when narration came from SpeechSynthesis,
+        where a Polish engine reading English text really did mangle it. With
+        recorded lines it was simply wrong: a Polish parent reading "Wisconsin
+        Dells" to a Polish child says it with Polish phonetics, and that is what
+        the child should hear. What the old rule actually produced was the
+        narrator CHANGING MID-SENTENCE — "Następny przystanek" in one woman's
+        voice and "Wisconsin Dells" in another's — which is far more jarring to a
+        three-year-old than an approximate vowel.
+
+        The half of decision #6 about what is SHOWN is untouched: a name with a
+        Polish form is still displayed in Polish, one without is still displayed
+        in English. Only the voice changed.
 
         `say` is what is SHOWN; optional `sayAs` is what the voice is given when
         the two differ. Washington needs "Washington D C" to be read out as
         letters rather than slurred, but nobody should have to look at that on a
-        button. Exactly the split i18n.welcome already makes with text/sayAs. */
+        button. Exactly the split i18n.welcome already makes with text/sayAs.
+
+        `sayAs` IS ALSO THE ESCAPE HATCH for this change. If a particular name
+        comes out wrong in the other language, respell it phonetically there —
+        sayAs:{ pl:'Kuiczi' } — and only that one name is affected. That is the
+        same mechanism i18n uses for "czuga czuga czu czu". */
     spoken(loc, code) {
       const lang = code || CC.i18n.code;
       const shown = (loc.say && loc.say[lang]) || loc.city || loc.state;
-      const text = (loc.sayAs && loc.sayAs[lang]) || shown;
-      const untranslated = loc.say && loc.say.en === shown && lang !== 'en';
-      return { text: text, lang: untranslated ? 'en' : lang };
+      // Two levels, most specific first: this location's own sayAs (Washington
+      // → "Washington D C"), then the language's phonetic table in i18n.js
+      // (Wisconsin Dells → "Łiskonsin Dels"). Then the name as shown.
+      const text = (loc.sayAs && loc.sayAs[lang]) || CC.i18n.sayAs(shown, lang);
+      return { text: text, lang: lang };
     },
 
     /** The state to announce alongside a place, or null when saying it would
         only repeat the place itself.
 
-        ALWAYS ENGLISH, and always spoken by an English voice — state names are
-        American proper nouns and decision #6 keeps them that way, the same rule
-        the map labels follow. So this hands back the language too, exactly as
-        `spoken()` does, and the caller does not have to remember. */
-    spokenState(loc) {
+        The state's NAME is always English — they are American proper nouns, and
+        that half of decision #6 stands, exactly as the map labels do. But it is
+        now spoken by the ACTIVE language's voice, for the reason written out
+        above `spoken()`: "Bailey Yard, Nebraska" should be one narrator saying
+        two things, not two narrators saying one each. So this still hands back
+        the language, and the caller still does not have to remember. */
+    spokenState(loc, code) {
       if (!loc || !loc.state || loc.stateIsPlace) return null;
       const shown = (loc.say && loc.say.en) || loc.city || '';
       if (shown === loc.state) return null;
-      return { text: loc.state, lang: 'en' };
+      const lang = code || CC.i18n.code;
+      return { text: CC.i18n.sayAs(loc.state, lang), lang: lang };
     },
 
     /** How far round the bag we are — { drawn, total }. */

@@ -223,10 +223,8 @@ contributor inherits the reasoning rather than re-deriving it.
   command the gate but never read its state, so the physical button appears dead.
   `tools/fake-gate.py` is a stand-in that gets this right.
 - **Place names are spoken by a voice that matches the name, not the UI language**
-  (open decision #6, now settled). Names with no Polish form stay English *and are spoken by
-  an English voice* — "Rocky Mountains" read with Polish phonetics is not recognisable. Names
-  `world.js` does translate (Nowy Jork, Nowy Orlean, Wielki Kanion) are spoken in Polish.
-  State names on the map are always English: they are American proper nouns.
+  (open decision #6, then settled) — **and this was REVERSED once the voice was recorded; see
+  the voice decisions below.** It was right for `SpeechSynthesis` and wrong for recordings.
 - **The two gate buttons stay on every screen**, shrunk into the corner on the map, the
   customizer and settings. The hard rule says the gate is never unavailable, and a child
   mashing the button while the map is open should still get the bell.
@@ -275,6 +273,30 @@ acceptance criteria. Two things it settles that belong here as decisions:
   possible, and that guard **fails the build** rather than shipping a bad clip.
 - **Staleness is a build error.** `tools/check-voice.py` is the fifth place that must agree
   when something spoken changes, alongside the four for adding a location.
+- **ONE NARRATOR PER SESSION — this reverses half of decision #6.** Whatever language you are
+  playing in, that language's voice says everything, including the 44 place names with no
+  Polish form and all 51 state names. The old rule ("an English name read by a Polish voice
+  is not recognisable") was written for `SpeechSynthesis`, where a Polish engine reading
+  English text really did mangle it. With recordings it was simply wrong: a Polish parent
+  reading "Wisconsin Dells" to a Polish child says it with Polish phonetics. What the rule
+  actually produced was the narrator **changing mid-sentence** — "Następny przystanek" in one
+  woman's voice, "Wisconsin Dells" in another's — which is much worse for a three-year-old
+  than an approximate vowel. The cost is that every place and state is recorded in both
+  sprites; Polish went from 93 lines to 188.
+  **What is SHOWN did not change**: a name with a Polish form is still displayed in Polish,
+  one without is still displayed in English, and state names are still always English.
+- **American names are respelled phonetically for the Polish voice** — 82 entries in
+  `i18n.js`'s `pl.sayAs`, reviewed by ear over three passes with a native speaker. Fed the
+  English spelling the voice applies Polish letter rules and mangles them ("Massachusetts"
+  → *masachutes*); fed `Masaciusets` it is right. Where Polish has a real name for a state
+  it is used rather than a phonetic fake (`Texas → Teksas`, `North Dakota → Dakota
+  Północna`), because that is the word a Polish child should learn.
+- **Respelling ≠ translating.** A respelling changes only the voice (`i18n.js`). A different
+  NAME changes the label too and belongs in `world.js`'s `say.pl` — which is where Rocky
+  Mountains (*Góry Skaliste*), Sun Valley (*Dolina Słoneczna*) and Mount Rushmore (*Góra
+  Raszmor*) went, joining Grand Canyon. Because `sayAs` is keyed by the DISPLAYED text,
+  giving a place a Polish name orphans its old English-keyed respelling: move one, delete
+  the other.
 
 ### Phase 3 — Polish & extend
 

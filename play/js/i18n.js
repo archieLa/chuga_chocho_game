@@ -81,6 +81,63 @@
       numbers: ['zero','jeden','dwa','trzy','cztery','pięć','sześć','siedem','osiem','dziewięć','dziesięć'],
       shapes: { circle:'koło', triangle:'trójkąt', square:'kwadrat', star:'gwiazda' },
       praise: ['Brawo!', 'Super!', 'Wow!', 'Świetnie!'],
+      // ---- PHONETIC RESPELLINGS FOR THE VOICE --------------------------------
+      // What the voice is FED, never what the screen SHOWS. Keyed by the text as
+      // this language displays it.
+      //
+      // WHY: the narrator never changes language mid-session (see world.spoken()),
+      // so the Polish voice says the American names too — and fed the English
+      // SPELLING it gets them wrong, because it applies Polish letter rules.
+      // "Massachusetts" came out as "masachutes". Respelled "Masaczusets", it is
+      // right. This is the same trick as welcome.sayAs turning "choo choo" into
+      // "czu czu"; there is just more of it.
+      //
+      // Two kinds of entry, deliberately mixed:
+      //   · a PHONETIC respelling where Polish has no name of its own
+      //     (Seattle → Siatl, Wisconsin → Łiskonsin)
+      //   · the REAL POLISH NAME where one exists, because a Polish child should
+      //     hear the word Polish actually uses (California → Kalifornia,
+      //     Texas → Teksas, North Dakota → Dakota Północna). The map still shows
+      //     the English name; only the voice differs.
+      //
+      // A name already said correctly is simply absent — Alabama, Boston, Denali,
+      // Montana, Nebraska, Oklahoma, Oregon, Indiana, Alaska, Moab, Oahu.
+      // Check a new one by EAR before adding it, with tools/voice/venv/bin/piper.
+      sayAs: {
+        // --- places -------------------------------------------------------
+        'San Francisco':'San Francysko',
+        'Los Angeles':'Los Andżeles', 'Chicago':'Szikago', 'Seattle':'Sijatyl',
+        'Austin':'Ałstin', 'Houston':'Hjuston', 'Cape Canaveral':'Kejp Kanewral',
+        'Las Vegas':'Las Wegas', 'Nashville':'Naszwil', 'Yellowstone':'Jelołston',
+        'Miami Beach':'Majami Bicz', 'Duluth':'Dulut', 'Kansas City':'Kanzas Syti',
+        'Cedar Point':'Sidar Pojnt', 'Savannah':'Sawanna', 'Stonington':'Stoningtyn',
+        'Albuquerque':'Albekerki', 'Cape Hatteras':'Kejp Hateras', 'Quechee':'Kłiczi',
+        'Detroit':'Ditrojit', 'New River Gorge':'Niu Riwer Gordż',
+        'Vicksburg':'Wiksburg', 'Charleston':'Czarlston',
+        'Glacier':'Glejszer', 'Newport':'Niuport', 'Mystic':'Mystik',
+        'Bailey Yard':'Bejli Jard', 'Bentonville':'Bentonwil', 'Birmingham':'Birmingam',
+        'Oklahoma City':'Oklahoma Syti', 'Wisconsin Dells':'Łiskansyn Dels',
+        'Dubuque':'Dubjuk', 'Lewes':'Luis', 'Norfolk':'Norfok',
+        'Margate City':'Margejt Syti', 'Wyspa Assateague':'Wyspa Asatig',
+        // --- states -------------------------------------------------------
+        'Arkansas':'Arkanzas', 'California':'Kalifornia', 'Colorado':'Kolorado',
+        'Connecticut':'Konektykat', 'Delaware':'Delałer',
+        'District of Columbia':'Dystrykt Kolumbii', 'Florida':'Floryda',
+        'Georgia':'Dżordżia', 'Hawaii':'Hawaje', 'Idaho':'Ajdaho',
+        'Illinois':'Ilinoj', 'Iowa':'Ajoła', 'Kansas':'Kanzas', 'Kentucky':'Kentaki',
+        'Louisiana':'Luizjana', 'Maine':'Mejn', 'Maryland':'Merylend',
+        'Massachusetts':'Masaciusets', 'Michigan':'Miszygan', 'Minnesota':'Minesota',
+        'Mississippi':'Misysypi', 'Missouri':'Mizuri', 'Nevada':'Newada',
+        'New Hampshire':'Niu Hampszyr', 'New Jersey':'Niu Dżerzi',
+        'New Mexico':'Nowy Meksyk', 'New York':'Nowy Jork',
+        'North Carolina':'Karolina Północna', 'North Dakota':'Dakota Północna',
+        'Ohio':'Ohajo', 'Pennsylvania':'Pensylwania', 'Rhode Island':'Rod Ajlend',
+        'South Carolina':'Karolina Południowa', 'South Dakota':'Dakota Południowa',
+        'Tennessee':'Tenessi', 'Texas':'Teksas', 'Utah':'Juta', 'Vermont':'Wermont',
+        'Virginia':'Wirdżinia', 'Washington':'Waszyngton',
+        'West Virginia':'Wirdżinia Zachodnia', 'Wisconsin':'Łiskansyn',
+        'Wyoming':'Łajoming',
+      },
       vehicles: {
         'steam': 'Parowóz', 'diesel': 'Duża lokomotywa',
         'electric-hs': 'Szybki pociąg', 'commuter': 'Pociąg miejski',
@@ -142,6 +199,17 @@
 
     /** 'one' … 'ten' — used to say which wagon is being edited. */
     number(n) { const l = this.dict.numbers || []; return l[n] != null ? l[n] : String(n); },
+
+    /** What the VOICE should be fed for a displayed name — the phonetic
+        respelling if this language has one, otherwise the name unchanged.
+
+        Only the voice: callers pass what is on screen and get back what to say.
+        English needs no table (the names are English already), so this is a
+        no-op there and stays a no-op for any language that does not add one. */
+    sayAs(text, code) {
+      const d = DICT[code || current] || DICT.en;
+      return (d.sayAs && d.sayAs[text]) || text;
+    },
 
     /** Fill any element with data-i18n="close" style keys (relative to `ui`). */
     apply(root) {
