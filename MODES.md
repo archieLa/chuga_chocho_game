@@ -60,11 +60,12 @@ not hold *I have now seen five* as a state he can act on.
 
 That is why the progress display is **countable objects, not a numeral** — and
 why that is not decoration. **The pips do the cardinality for him until he can do
-it himself.** Fading them is a rung of its own.
+it himself.** Fading them as he gets steadier is a dial inside a level, not a
+level of its own — see "Why five levels" below.
 
 ---
 
-## Three levels
+## Five levels
 
 Every level is the same verb on the same screen. Nothing ever becomes a flashcard.
 
@@ -73,15 +74,10 @@ Every level is the same verb on the same screen. Nothing ever becomes a flashcar
 | 1 | 2.5–4.5 | close after **N cars** | counting at all |
 | 2 | 4–5.5 | close after **N red cars** | a **filter** — ignoring what doesn't count |
 | 3 | 5–6 | **two red and three blue** | two counters at once |
+| 4 | 5–6 | **`2 + 3 = 5`** → close after 5 | **numerals**; the sum made concrete |
+| 5 | 5.5–6.5 | **`2 + 3 = ?`** → close after the answer | computing it yourself |
 
-**Three, not five.** An earlier draft had five rungs; two of them were parameters
-wearing a level's clothes. "Close after two" vs "close after five" is the same
-game with a different N. "Pips shown" vs "pips hidden" is a display flag. Neither
-earns a button in a settings panel, because a parent cannot tell them apart from
-outside the code.
-
-The three that remain share **one data shape** — a target is a list of
-`{ colour, count }`:
+Levels 1–3 share **one data shape** — a target is a list of `{ colour, count }`:
 
 ```js
 L1 → [{ colour: null,   count: 3 }]
@@ -89,9 +85,55 @@ L2 → [{ colour: 'red',  count: 2 }]
 L3 → [{ colour: 'red',  count: 2 }, { colour: 'blue', count: 3 }]
 ```
 
-Build that and all three fall out of one engine. Level 2 is already paid for:
-`carpassed` carries `{ count, colour, key, dir }` and every car's colour has a
-name in both dictionaries (BUILD_PLAN §11-I, done).
+Levels 4 and 5 reuse it: the equation only decides `count`, and the counting
+phase is level 1 underneath. Level 2 is already paid for — `carpassed` carries
+`{ count, colour, key, dir }` and every colour has a name in both dictionaries
+(BUILD_PLAN §11-I, done).
+
+### Why five levels, when an earlier draft argued for three
+
+Both are the same test, honestly applied, with opposite answers. The draft's
+five rungs collapsed to three because two of them were **parameters wearing a
+level's clothes**: "close after two" vs "close after five" is one game with a
+different N, and "pips hidden" is a display flag. Neither is visible from outside
+the code, so neither earns a button in a parent-facing list.
+
+Levels 4 and 5 are not that. **"Sum shown" vs "solve it yourself" is a real
+cognitive difference a parent can see and act on**, so it earns its own row. The
+rule is not *keep the list short* — it is *never ask a parent to distinguish two
+things that are the same game*.
+
+### Why arithmetic sits ABOVE the colour levels
+
+Not because the addition is harder than tracking two colours — it may not be.
+Because `2 + 3` is the **first symbolic thing in the entire game.** Everything
+before it is concrete: cars, pips, colours, spoken words. Reading a numeral is
+its own threshold (4–5) and independent of the arithmetic.
+
+It must therefore also be **spoken** — "two plus three" — per hard rule #5. The
+equation is never only a symbol on the screen.
+
+### Level 4 is the best idea in the ladder, and the reason is the cars
+
+`2 + 3 = 5`, then count five cars past the crossing, is **not level 1 with
+decoration**. The cars are the **manipulative**. Children learn addition with
+objects, and this scene emits countable objects on a 1.5-second timer. He does
+not get told that 2 + 3 is 5; he *experiences* five. Do not optimise this into a
+numeral on a banner.
+
+### Level 5 needs a rescue, or it breaks rule #4
+
+Levels 1–4 all fail gently: a child who does not understand still sees cars and
+can still press the gate, and the world answers him either way. **Level 5 does
+not.** If he cannot solve `2 + 3 = ?` he does not know what to *attempt* — stuck
+before he starts, which is a worse kind of stuck than missing a count.
+
+So: **after about fifteen seconds, or a few cars, the answer quietly appears** and
+level 5 degrades into level 4. He is never blocked; he is helped. No sound, no
+comment, nothing that marks it as a failure — the number simply completes itself.
+
+**Keep sums within 10.** Wait time is not the constraint here (ten cars is ~16s),
+developmental order is: within 5 first, then within 10.
 
 ---
 
@@ -156,16 +198,17 @@ scenes. It stands on wait time alone.)*
 
 `speech.say()` queues, so prompts are spoken as **atoms in sequence**, never
 concatenated (CLAUDE.md is emphatic; `customizer.js`'s `saySlot()` is the
-pattern). So all three levels share the same pieces:
+pattern). So all five levels share the same pieces:
 
 - `"Let"` and `"cars go by, then close the gate"` — 2 new lines per language
 - numbers 0–10 — **already recorded**
 - colour names — **already recorded**, white included
 - `"and"` — 1 new line
+- `"plus"` and `"equals"`, for levels 4–5 — 2 new lines
 
-Three levels costs about **3–4 new lines per language**, not three scripts.
-Levels 2 and 3 are nearly free once level 1 exists. That is the strongest
-practical reason not to cap at two.
+All five levels cost about **5–6 new lines per language**, not five scripts.
+Levels 2–5 are nearly free once level 1 exists. That is the strongest practical
+reason not to cap the ladder short.
 
 ---
 
