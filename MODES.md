@@ -182,6 +182,11 @@ outnumber targets two to one, so the filtering skill is genuinely exercised. A
 few lines in `newCar()`. The alternative — permanently smaller N in the colour
 levels — makes the harder levels carry the easier numbers, which is backwards.
 
+**The bias stops dead in Free Play.** The spawn is skewed only while a task is
+actually live. Otherwise the road quietly changes character depending on a
+setting the child can neither see nor have chosen — and Free Play is not
+supposed to know Game Mode exists.
+
 *(An earlier draft also justified biasing as insurance against sparse scenes.
 That reason is void: the four measurements above show there are no sparse
 scenes. It stands on wait time alone.)*
@@ -340,6 +345,3 @@ A timing challenge has an inherent fail state. The rule survives because:
   one" and fall back to free play in that scene? Nothing is decided, and it is
   the first thing that will come up in real use, because a child returns to
   favourites.
-- **Does biasing the spawn colour need to stop when no task is live?** It should
-  — Free Play traffic must stay uniform, or the road quietly changes character
-  depending on a setting the child cannot see.
