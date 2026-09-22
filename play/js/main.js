@@ -76,7 +76,9 @@
     });
 
     // --- the car counter ---
-    CC.on('carpassed', n => refreshCounter(n));
+    // `carpassed` carries { count, colour, key, dir } — the counter wants only
+    // the count; the colour is there for the Phase 2 missions.
+    CC.on('carpassed', e => refreshCounter(e && e.count));
     CC.on('settings', () => refreshCounter());
     refreshCounter();
 

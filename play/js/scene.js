@@ -48,7 +48,26 @@
   const AISLE_WAIT = 546;          // and where one waits its turn for a single-track side road
   const CROSSING_X = [500, 780];   // where the road meets the rails
 
-  const CAR_COLOURS = ['#e84a4a', '#3d7bd6', '#f4b400', '#7b3fb0', '#2aa84a', '#ff8c2a', '#e8e8ee'];
+  // Road cars are NAMEABLE, not just coloured. Count & Close (BUILD_PLAN §11-K)
+  // wants to say "let two red cars go by", so every entry's `key` must exist in
+  // i18n's `colors` in BOTH languages — that is the whole reason this is a list
+  // of pairs and not a list of hexes. Add a colour here and you must add the
+  // word there, or a mission will ask for a car it cannot name.
+  //
+  // The hexes are the road's own, tuned against tarmac, and deliberately NOT
+  // CC.trains.PALETTE: a car is not a wagon and the two sets are lit
+  // differently. Only the KEY has to agree between them.
+  const CAR_COLOURS = [
+    { key: 'red',    hex: '#e84a4a' },
+    { key: 'blue',   hex: '#3d7bd6' },
+    { key: 'yellow', hex: '#f4b400' },
+    { key: 'purple', hex: '#7b3fb0' },
+    { key: 'green',  hex: '#2aa84a' },
+    { key: 'orange', hex: '#ff8c2a' },
+    // White is the commonest car on a real road, so it stays — which is why
+    // `white` had to be added to both dictionaries rather than the car dropped.
+    { key: 'white',  hex: '#e8e8ee' },
+  ];
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const roadHalf = (y) => HALF_FAR + (HALF_NEAR - HALF_FAR) * (clamp(y, HORIZON, H) - HORIZON) / (H - HORIZON);
@@ -5456,13 +5475,13 @@
       y: y,
       phase: 'road',
       x: null,
-      colour: CAR_COLOURS[(Math.random() * CAR_COLOURS.length) | 0],
+      paint: CAR_COLOURS[(Math.random() * CAR_COLOURS.length) | 0],
       speed: 150 + Math.random() * 40,                 // world speed; screen speed scales with depth
       stopped: false,
       counted: false,
       near: null,
     };
-    car.el = buildCar(car.colour, car.dir);
+    car.el = buildCar(car.paint.hex, car.dir);
     return car;
   }
 
@@ -5827,7 +5846,12 @@
       if (!car.counted && (car.dir > 0 ? car.y > CROSS_MID : car.y < CROSS_MID)) {
         car.counted = true;
         passed++;
-        CC.emit && CC.emit('carpassed', passed);
+        // `count` is the running total the counter has always shown; the rest is
+        // for the missions — `key` names the colour in either language via
+        // i18n's `colors`, `dir` is +1 away from us / -1 toward us.
+        CC.emit && CC.emit('carpassed', {
+          count: passed, colour: car.paint.hex, key: car.paint.key, dir: car.dir,
+        });
       }
       placeCar(car);
       // Gone once it reaches the end of the tarmac (it has already faded to
@@ -6010,7 +6034,12 @@
     W: W, H: H, RAIL_Y: RAIL_Y, TRAIN_S: TRAIN_S,
 
     get carsPassed() { return passed; },
-    resetCounter() { passed = 0; CC.emit && CC.emit('carpassed', 0); },
+    // A reset is not a car going by: it carries no colour, and a mission must
+    // treat `key == null` as "the counter was cleared", never as a car.
+    resetCounter() {
+      passed = 0;
+      CC.emit && CC.emit('carpassed', { count: 0, colour: null, key: null, dir: 0 });
+    },
 
     init() {
       stage = document.getElementById('stage');
