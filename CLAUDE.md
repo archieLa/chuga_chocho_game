@@ -102,6 +102,7 @@ Load order is the order in `play/index.html`; each file is an IIFE hanging one n
 | `rolling.js` | Builds a vehicle or a whole consist as live SVG — wheels, steam valve gear, chuff smoke. Shared by the scene and the customizer. |
 | `scene.js` | Mounts a location, animates both gates, the road cars, the train, the counter. Owns the single `requestAnimationFrame` loop. |
 | `customizer.js` | The cycling train builder (one vehicle at a time, ◀ ▶, four slot taps, six swatches). |
+| `welcome.js` | **The front door.** A poster — sky, grass, a blue steam mascot — with exactly ONE button. That press is a real gesture, so it is the honest place to unlock audio and say hello before handing over to the map. Shows once per launch; tapping 🗺️ later goes straight to the map. When a second mode lands, the button row grows from one to two and nothing else moves. |
 | `settings.js` | The ⚙️ panel: language, counter, sound, gate address + Test, reset train. |
 | `modes.js` | Mode registry. **Only `freeplay` is registered — this is the Phase 2 hook.** |
 | `main.js` | Event bus (`CC.on` / `CC.emit`) and boot. Loaded last. |
@@ -156,25 +157,41 @@ classes — `#us-map .state.state--picked` — and it sticks.
 
 ### Not every scene's road reaches the horizon
 
-Most do, and cars enter and leave there. Eleven do not: **Crater Lake** turns onto Rim Drive
-at `y=368`, **Horseshoe Curve** ends at the visitor car park at `y=376`, **Mount Washington**
-stops at the Marshfield car park at `y=376`, **Cedar Point**'s midway stops at the entrance
-arch at `y=372`, **Savannah** ends at the far pavement at `y=352`, **Stonington** stops at the
-town-landing car park at `y=410`, **Cape Hatteras** stops at the car park by the dune
-crossing at `y=424`, **Quechee** runs into the covered bridge at `y=386`, **Detroit**
-stops at the plant gate at `y=436`, **Charleston** T's into East Battery at the sea wall at
-`y=374`, and **Glacier** ends at the inn's gravel yard at `y=372`. Cars must not drive off
-the tarmac into a harbour, onto a beach, or across a shipping lot.
+Most do, and cars enter and leave there. **25 of the 55 do not** — **Detroit** stops at the
+plant gate at `y=436`, **Cape Hatteras** at the car park by the dune crossing at `y=424`,
+**Charleston** T's into East Battery at the sea wall at `y=374`, **Quechee** runs into the
+covered bridge at `y=386`, and so on. Cars must not drive off the tarmac into a harbour, onto
+a beach, or across a shipping lot.
 
-The engine works this out from the art rather than from a table: `scene.js` reads the far edge
-of the `#road` polygon at mount time, so a scene that truncates says so simply by being drawn
-that way and **new ones need no code**. Cars spawn, fade and despawn at that line instead of
-the horizon.
+**Don't maintain that list by hand — it said "eleven" when it was 25.** It is derivable from
+the art, so derive it:
 
-Two ids therefore have to survive inlining, and are listed in `KEEP_IDS` in
-`tools/inline-assets.py`: **`road`** for the above, and **`curve-path`** for an ambient train
-(below). Miss that and the lookup silently finds nothing and falls back to the horizon — which
-is exactly what happened the first time.
+```bash
+python3 -c "
+import re,glob,os
+r=[]
+for p in glob.glob('play/assets/scenes/*.svg'):
+    m=re.search(r'class=\"[^\"]*cc-road[^\"]*\"[^>]*points=\"([^\"]+)\"',open(p).read())
+    y=min(float(q.split(',')[1]) for q in m.group(1).split() if ',' in q)
+    if y>300: r.append((y,os.path.basename(p)[:-4]))
+print(len(r),'of',len(glob.glob('play/assets/scenes/*.svg')),'truncate')
+[print(f'  {n:18} y={y:g}') for y,n in sorted(r)]"
+```
+
+The engine works it out the same way rather than from a table: `scene.js` reads the far edge
+of the **`.cc-road`** polygon at mount time, so a scene that truncates says so simply by being
+drawn that way and **new ones need no code**. Cars spawn, fade and despawn at that line
+instead of the horizon.
+
+**The road lookup is by CLASS, and that is deliberate** — `inline-assets.py` namespaces ids
+but never touches classes, so `.cc-road` needs no protection and cannot collide between two
+mounted scenes. It was `#road` once, which is why `KEEP_IDS` still carries a `road-surface`
+entry that matches nothing in any scene: a fossil, harmless, delete it if you are in there.
+
+What genuinely has to survive inlining is everything `scene.js` looks up by id — `gate-near`,
+`gate-far`, `scenery-front`, `track`, and **`curve-path`** for an ambient train (below). All
+are in `KEEP_IDS` in `tools/inline-assets.py`. Miss one and the lookup silently finds nothing
+and the feature just doesn't happen — which is exactly what did happen the first time.
 
 ### Ambient trains on a drawn curve
 
@@ -198,7 +215,7 @@ are the scaffolding already in place.
 
 ### Voice — see `VOICE.md`
 
-**Built.** All 281 lines are pre-recorded offline with Piper and shipped as one
+**Built.** All 374 lines (188 EN + 186 PL) are pre-recorded offline with Piper and shipped as one
 inlined MP3 sprite per language (`play/js/voice-en.js`, `voice-pl.js`, 3.5 MB),
 played through `audio.js`'s Web Audio context. `SpeechSynthesis` remains the
 fallback, because **silence is never an option** (decision #5). Voices:
@@ -223,13 +240,22 @@ The only box left unticked is a test on a real iPhone.
 
 ### Ambient motion — see `AMBIENT.md`
 
-Seventeen scenes have things that move on their own (a train round the Horseshoe,
+Most scenes now have things that move on their own (a train round the Horseshoe,
 a rocket off Pad 39, a cog train up Mount Washington, the bats leaving the
-Congress Avenue Bridge, the mass ascension over Albuquerque). **There is no cap**
-— that call is the maintainer's, scene by scene. All of it is **gate-blind**:
-the crossing is the game and this is only the world behind it. Every one uses the
+Congress Avenue Bridge, the mass ascension over Albuquerque). **`AMBIENT.md`'s
+"What moves today" table is the count** — don't restate a number here, this one
+rotted once already. **There is no cap**
+— that call is the maintainer's, scene by scene. Every one uses the
 same shape of contract — the art tags itself with a class, the engine finds it,
 and a scene without the tag gets nothing.
+
+Motion is **gate-blind by default**: the crossing is the game and this is only the
+world behind it. **Five deliberate exceptions exist** — Bentonville's bike signal,
+Glacier's tour bus, Lewes's lane signal, Bailey Yard's shuffle and Norfolk's
+terminal barrier — and they all run one way: they **listen, and the crossing never
+hears back**. The gate's own behaviour, its two buttons and the physical endpoint
+are byte for byte unchanged. `AMBIENT.md` argues each one; a sixth needs a reason
+of that size, so **read that section before wiring a new thing to the gate.**
 
 `AMBIENT.md` has the contracts, what moves today, and the queue. It lives outside
 `SCENE_GUIDE.md`/`SCENE_ROADMAP.md` on purpose: those come from the scene

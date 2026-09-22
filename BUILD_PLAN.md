@@ -357,6 +357,7 @@ as it is. A mission never becomes the only way to play.
 | `mode` | the mode id | `modes.js` |
 | `languagechange` | the language code | `i18n.js` |
 | `settings` | the settings object | `settings.js` |
+| `sound` | `true`/`false` — the crossing-audio mute, **not** the narrator | `audio.js` |
 
 `CC.modes` is a registry with `register(id, mode)`, `activate(id)`, `list()` and `active`; a
 mode is `{ id, start(), stop() }`. Only `freeplay` is registered today. `CC.scene.resetCounter()`
