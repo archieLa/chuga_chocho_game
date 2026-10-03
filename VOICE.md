@@ -165,6 +165,21 @@ unreachable — dead data that still looks live. Move the name, delete the
 respelling. `check-voice.py` will not catch this for you; it only knows about
 lines that are actually produced.
 
+### A respelling must never reach the screen
+
+`world.spoken()` and `world.spokenState()` return `{ say, shown, lang }`. **`say`
+is for `speech.say()` and nothing else.** For a label use `world.label()` /
+`world.labelState()`.
+
+This is written down because it already shipped: the field was called `text`,
+map.js printed it on the surprise reveal, and in Polish the card read "Następny
+przystanek / Chicago / **Ilinoj**". The respelling is a perfectly ordinary
+string, so nothing errored and no checker could have known. Renaming it to `say`
+is the guard — code reaching for `.text` now gets `undefined` and fails where you
+can see it. That rename immediately exposed the same bug in
+`tools/voice-lines.js`, where it would have recorded nothing for every place and
+state and silently emptied both sprites of them.
+
 **Per-location `sayAs` still wins** over the table, and is the right place for a
 one-off that is about that location rather than the language — `Washington` is
 fed as "Washington D C" in English so the letters are read out.
