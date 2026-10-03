@@ -549,7 +549,16 @@
     },
     get current() { return LOCATIONS.find(l => l.id === currentId) || LOCATIONS[0]; },
 
-    /** The place name in the active language, plus which voice should say it.
+    /** WHAT THE VOICE SAYS for a place — `{ say, shown, lang }` — never a label.
+
+        `say` is the PHONETIC respelling and belongs nowhere but speech.say().
+        Put it on screen and a Polish child reads "Ilinoj" where the state is
+        called Illinois. That is exactly the bug this field is named `say` to
+        prevent: it used to be called `text`, map.js printed it on the surprise
+        card, and nothing complained. Use `label()` / `labelState()` for
+        anything visible, and `shown` is here for a caller that needs both.
+
+        The place name in the active language, plus which voice should say it.
 
         ONE NARRATOR PER SESSION. Whatever language you are playing in, that
         language's voice says everything — including the 44 place names that have
@@ -584,13 +593,29 @@
       const shown = (loc.say && loc.say[lang]) || loc.city || loc.state;
       // Two levels, most specific first: this location's own sayAs (Washington
       // → "Washington D C"), then the language's phonetic table in i18n.js
-      // (Wisconsin Dells → "Łiskonsin Dels"). Then the name as shown.
-      const text = (loc.sayAs && loc.sayAs[lang]) || CC.i18n.sayAs(shown, lang);
-      return { text: text, lang: lang };
+      // (Wisconsin Dells → "Łiskansyn Dels"). Then the name as shown.
+      const say = (loc.sayAs && loc.sayAs[lang]) || CC.i18n.sayAs(shown, lang);
+      return { say: say, shown: shown, lang: lang };
     },
 
-    /** The state to announce alongside a place, or null when saying it would
-        only repeat the place itself.
+    /** The place name to PUT ON SCREEN, in the active language. Use this for any
+        label; `spoken()` is for the voice and only the voice. */
+    label(loc, code) {
+      const lang = code || CC.i18n.code;
+      return (loc.say && loc.say[lang]) || loc.city || loc.state;
+    },
+
+    /** The state name to PUT ON SCREEN — always English, American proper nouns.
+        The companion to spokenState(), which returns the respelling. */
+    labelState(loc) {
+      return (loc && loc.state) || '';
+    },
+
+    /** WHAT THE VOICE SAYS for the state alongside a place — `{ say, shown,
+        lang }` — or null when saying it would only repeat the place itself.
+
+        `say` is the respelling ("Teksas", "Ilinoj"); the LABEL is `shown`, which
+        is always the English name. See the warning on `spoken()`.
 
         The state's NAME is always English — they are American proper nouns, and
         that half of decision #6 stands, exactly as the map labels do. But it is
@@ -603,7 +628,7 @@
       const shown = (loc.say && loc.say.en) || loc.city || '';
       if (shown === loc.state) return null;
       const lang = code || CC.i18n.code;
-      return { text: CC.i18n.sayAs(loc.state, lang), lang: lang };
+      return { say: CC.i18n.sayAs(loc.state, lang), shown: loc.state, lang: lang };
     },
 
     /** How far round the bag we are — { drawn, total }. */
@@ -634,7 +659,7 @@
       localStorage.setItem(STORAGE_KEY, id);
       const s = this.spoken(loc);
       if (!opts || opts.speak !== false) {
-        CC.speech && CC.speech.say(s.text, { interrupt: true, lang: s.lang });
+        CC.speech && CC.speech.say(s.say, { interrupt: true, lang: s.lang });
       }
       CC.emit && CC.emit('location', loc);
     },

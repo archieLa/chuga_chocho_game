@@ -162,14 +162,16 @@
       const st = CC.world.spokenState(res.loc);
       if (res.wrapped) line('surprise-allseen', CC.i18n.t('ui.allSeen'));
       line('surprise-kicker', CC.i18n.t('ui.nextStop'));
-      line('surprise-name', (res.loc.say && res.loc.say[CC.i18n.code]) || res.loc.city || res.loc.state);
-      if (st) line('surprise-state', st.text);
+      // LABELS, not the spoken forms. st.say is the phonetic respelling — print
+      // it and a Polish child reads "Ilinoj" for Illinois, which is what this
+      // card used to do. See the warning on world.spoken().
+      line('surprise-name', CC.world.label(res.loc));
+      if (st) line('surprise-state', CC.world.labelState(res.loc));
       box.appendChild(card);
 
-      // Every word on that card is spoken, in the order it is written. The
-      // kicker is UI language; the place name takes whichever voice its own name
-      // wants, which is not always the same one; the state is always English.
-      // See world.spoken() and world.spokenState().
+      // Every word on that card is spoken, in the order it is written — but from
+      // the SPOKEN forms, which are not the same strings as the labels above.
+      // One narrator says all of it; see world.spoken().
       if (CC.speech) {
         const said = CC.world.spoken(res.loc);
         let first = true;
@@ -179,8 +181,8 @@
         };
         if (res.wrapped) say(CC.i18n.t('ui.allSeen'));
         say(CC.i18n.t('ui.nextStop'));
-        say(said.text, said.lang);
-        if (st) say(st.text, st.lang);
+        say(said.say, said.lang);
+        if (st) say(st.say, st.lang);
       }
       this.refreshDice();
       dice.disabled = true;             // refreshDice re-enables; hold it shut for the reveal
@@ -268,7 +270,7 @@
       locs.forEach(l => {
         const b = document.createElement('button');
         b.className = 'city-btn';
-        b.textContent = (l.say && l.say[CC.i18n.code]) || l.city || l.state;
+        b.textContent = CC.world.label(l);
         b.addEventListener('click', () => this.selectLocation(l));
         box.appendChild(b);
       });

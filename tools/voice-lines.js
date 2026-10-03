@@ -106,11 +106,11 @@ for (const loc of locs) {
     // which is why the Polish sprite is no longer the small one. See the note
     // on world.spoken() for why this reverses half of decision #6.
     const s = CC.world.spoken(loc, lang);
-    add(s.lang, s.text, 'world.' + loc.id + '.say.' + lang);
+    add(s.lang, s.say, 'world.' + loc.id + '.say.' + lang);
     // The state's NAME stays English — American proper nouns — but it is spoken
     // by this language's voice, so it needs recording in this language's sprite.
     const st = CC.world.spokenState(loc, lang);
-    if (st) add(st.lang, st.text, 'world.' + loc.id + '.state.' + lang);
+    if (st) add(st.lang, st.say, 'world.' + loc.id + '.state.' + lang);
   }
 }
 // map.js also speaks a bare state name when a state is tapped. Nearly all are
