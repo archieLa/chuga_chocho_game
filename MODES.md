@@ -400,8 +400,8 @@ that takes ten seconds to rebuild and wrong for forty flags.
 problem, works on touch, and a toddler will not sustain it. One mechanism covers
 both controls.
 
-**Museum mode is not protected this way at all** — it is a URL, which a child in
-a kiosk browser cannot reach. See `DESIGN.md` §14.
+(A kiosk would not need this at all — it is enabled by a URL a child cannot reach.
+That is **optional future work, not Phase 2**: `DESIGN.md` §14.)
 
 ---
 
@@ -460,8 +460,8 @@ itself; N inside a level widens by itself and never narrows. What remains:
 
 - **The exact widening trigger.** How many clean runs before level 1's pool goes
   from `{2,3}` to `{2,3,4,5}` — three, five? Consecutive or cumulative? And does
-  the widening survive a session? At home it probably should; in a museum it
-  deliberately does not, so every child gets the gentle opening.
+  the widening survive a session? **Answer it for a child at home** — that is the
+  only case Phase 2 serves.
 - **How often does a task run in Game Mode?** Reading today: Free Play has no
   tasks ever, Game Mode means every visit carries one. If a task on *every* train
   makes the crossing feel like a test, the answer is a task per *place* rather

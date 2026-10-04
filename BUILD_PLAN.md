@@ -324,7 +324,7 @@ make it bigger, louder, friendlier and more forgiving than you think it needs to
 
 **`MODES.md` is the spec; this is the ordered work list built from it.** Where the two
 differ, `MODES.md` wins — it carries the reasoning. `DESIGN.md` §11 has the original vision
-and §14 has the kiosk deployment.
+and §14 has the kiosk deployment, which is OPTIONAL FUTURE work and explicitly out of Phase 2 scope.
 
 **What you are adding:** one optional **Game Mode**, a five-level maths ladder layered on
 Free Play. Every level is the same verb — close the gate at the right moment. Free Play
@@ -402,8 +402,8 @@ Count & Close needs to know *which car* passed, and needs the car's colour to be
   scrolls, so two new rows need no layout work.
 - A **prompt banner** in the scene, top-centre, clear of the topbar and the gate
   buttons. Always spoken as well as shown. **Size it to be readable by a parent
-  standing behind the child** — that is the conversion moment in a museum, and it
-  costs nothing at home.
+  standing behind the child** — a parent watching over a shoulder is the common
+  case at home too, and sizing for them costs nothing.
 - Mission lifecycle in `modes.js`: `start()` subscribes, `stop()` unsubscribes
   **and clears the banner**. Switching modes must not leak listeners — the
   one-entry registry never had to care, so check it deliberately.

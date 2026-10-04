@@ -231,21 +231,17 @@ Four things that will catch you out, all argued in full there:
 `modes.js` and `i18n.js`'s `numbers`/`shapes`/`praise` are the scaffolding
 already in place. `shapes` is still unused and the ladder does not need it.
 
-### Museum / kiosk deployment — see `DESIGN.md` §14
+### Museum / kiosk deployment — OPTIONAL FUTURE, see `DESIGN.md` §14
 
-**Designed, not built.** A railway museum is a plausible home for this: one device, dozens
-of children a day, no accounts ever. Three things to know before touching anything near it:
+**Not Phase 2. Not scheduled. Do not build it, and do not let it widen Phase 2's scope.**
+The design is written down only so it is not lost. If a Phase 2 decision would come out
+differently for a kiosk, **make the decision that is right for a child at home.**
 
-- **It is enabled by a URL** (`play/index.html?kiosk=1`), not a setting — a child in a
-  kiosk browser cannot reach it.
-- **A line has to be drawn that does not exist in the code today**: the museum's state
-  (language default, sound, level, gate address) persists; the child's (train, location,
-  flags, bag, counter) resets on idle and lives in memory, **never `localStorage`**.
-  `welcome.js` becomes the attract screen.
-- **Long-run stability is UNTESTED and is a hard prerequisite.** `scene.js` runs one
-  `requestAnimationFrame` loop that a museum would leave going twelve hours a day across
-  hundreds of scene swaps. No evidence of a leak, no evidence against one; the longest test
-  ever run is sixty seconds.
+One thing from it is worth knowing now, because it is true regardless: **nobody has ever
+run this game for more than about a minute.** `scene.js` owns one `requestAnimationFrame`
+loop, and a long session across many scene swaps is simply untested — no evidence of a
+leak, no evidence against one. Not blocking anything today; it would be a hard prerequisite
+before any unattended deployment.
 
 ### Voice — see `VOICE.md`
 

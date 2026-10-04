@@ -265,7 +265,7 @@ acceptance criteria. Further decisions that belong here:
   everybody.
 - **A revisit always sets a fresh task**, flag or no flag — the same reasoning that keeps
   `select()` out of the surprise bag.
-- **Museum / kiosk deployment is designed** — see §14.
+- **Museum / kiosk deployment is designed but DEFERRED** — optional future work, not Phase 2. See §14.
 
 - **Missions are optional layers, never a replacement.** Free Play stays the default mode and
   stays exactly as it is; a mission *interprets* a gate press but never withholds one. `modes.js`
@@ -335,11 +335,22 @@ MIT · README with play/hosting/hardware instructions · CONTRIBUTING · GitHub 
 
 ---
 
-## 14. Museum / kiosk deployment
+## 14. Museum / kiosk deployment — OPTIONAL, FUTURE
 
-**Status: designed, not built.** A railway museum is a plausible home for this game, and
-it is a genuinely different deployment context: one device, dozens of children a day, each
-for a few minutes, no accounts and no sign-in — ever.
+> **Status: OPTIONAL FUTURE ENHANCEMENT. Not Phase 2, not scheduled, nobody should be
+> building it.** It is written down because the design work is done and would otherwise be
+> lost, not because it is queued. **Phase 2 (Game Mode) must not grow scope to accommodate
+> it** — if a Phase 2 decision would be different for a kiosk, make the decision that is
+> right for a child at home and revisit this section if a museum ever becomes real.
+
+A railway museum is a plausible home for this game, and it is a genuinely different
+deployment context: one device, dozens of children a day, each for a few minutes, no
+accounts and no sign-in — ever.
+
+**Why it is cheap to defer:** nothing here asks Phase 2 to be built differently. The one
+piece of groundwork it would need — splitting "the museum's state" from "the child's state"
+— is additive and can be done whenever, and `welcome.js` already happens to be the right
+shape for an attract screen without having been designed for one.
 
 ### It is a shop window, not just an exhibit
 
