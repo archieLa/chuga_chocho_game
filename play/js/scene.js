@@ -6061,12 +6061,31 @@
       start();
     },
 
-    /** Swap the backdrop. The gate is deliberately untouched: if it was down it
-        stays down, right through the cross-fade, so a real device can never
-        desync because a child hopped to another state mid-crossing. */
+    /** Swap the backdrop — and ARRIVE WITH THE GATE OPEN.
+
+        This used to leave the gate exactly as it was, so a gate left down in
+        Colorado was still down on arriving in Denali. That is wrong, and Game
+        Mode makes it obvious: cars stop at a closed gate, so with the gate
+        already down almost nothing comes past (measured: 1 car in 45 seconds
+        against ~27), and "close the gate after three cars" can never start. The
+        child would have to work out that he must OPEN the gate before the game
+        will ask him to close it — backwards, and no three-year-old deduces it.
+        It is a dead-looking scene in Free Play too, which is why this is not a
+        Game Mode behaviour.
+
+        The old rule was really protecting against DESYNC with a physical gate,
+        and that still holds: `CC.gate.open()` with no argument is the same path
+        the OPEN button takes, so it sends `/open` to the device as well as
+        moving the arms. Never set the state directly here, and never pass
+        `fromDevice` — either one produces exactly the desync the old rule
+        forbade. A real barrier WILL move when a child picks a new place; that
+        is correct, not a fault. */
     show(loc, opts) {
       const next = mount(loc);
       if (!next || next === currentScene) return;
+      // Before the fade, not after: the arriving scene should never be seen
+      // with the arms down. open() is a no-op when it is already open.
+      CC.gate.open();
       const prev = currentScene;
       // GIVE THE SCENE WE ARE LEAVING ITS TRAIN BACK. A halt and a shunt both
       // hold on to elements of the scene they started in — the passengers on

@@ -378,8 +378,9 @@ The picker (`play/js/map.js`) already renders the map and calls `CC.world.select
 which persists to `localStorage` and emits a `location` event. Nothing listens yet.
 
 - Subscribe to the `location` event in `scene.js` and swap the backdrop to the new
-  location's scene, preserving gate state (if the gate is down, it stays down through the
-  swap — the physical device must never desync because the child changed states).
+  location's scene. **ARRIVING SOMEWHERE NEW OPENS THE GATE** (reversed; see below) —
+  via `CC.gate.open()` with no argument, so the real device is commanded too and cannot
+  desync, which was the whole point of the original rule.
 - Apply the location's `trainPreset` (e.g. Colorado → `steam`, New Orleans → `streetcar`,
   San Francisco → `cable-car`) **only if the player has not overridden the engine** in the
   customizer. A user choice outranks a preset until they reset it.

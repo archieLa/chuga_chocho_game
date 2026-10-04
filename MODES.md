@@ -199,21 +199,22 @@ scenes. It stands on wait time alone.)*
   seven to pick out. Fine as traffic, questionable as the thing you are *asked*
   to count. Decide by watching, once it is playable.
 
-### The voice cost stays flat
+### The voice cost stays low — but NOT as low as first claimed
 
 `speech.say()` queues, so prompts are spoken as **atoms in sequence**, never
 concatenated (CLAUDE.md is emphatic; `customizer.js`'s `saySlot()` is the
-pattern). So all five levels share the same pieces:
+pattern).
 
-- `"Let"` and `"cars go by, then close the gate"` — 2 new lines per language
-- numbers 0–10 — **already recorded**
-- colour names — **already recorded**, white included
-- `"and"` — 1 new line
-- `"plus"` and `"equals"`, for levels 4–5 — 2 new lines
+An earlier draft of this section said the atoms were `"Let"` + a number +
+`"cars go by"`, making all five levels cost about 5–6 new lines. **That was
+wrong — it produces broken Polish**, because Polish numerals govern the noun's
+case. The corrected design makes the whole **noun phrase** the atom.
 
-All five levels cost about **5–6 new lines per language**, not five scripts.
-Levels 2–5 are nearly free once level 1 exists. That is the strongest practical
-reason not to cap the ladder short.
+See **"The prompt strings, and why Polish needs more than atoms"** below for the
+mechanism and the forms. The real figure is **~37 new lines per language** —
+still cheap, still shared across all five levels, and levels 2–5 are still nearly
+free once level 1 exists. The argument against capping the ladder short survives;
+only the number moved.
 
 ---
 
@@ -450,6 +451,127 @@ A timing challenge has an inherent fail state. The rule survives because:
 - **⚙️ "reset train" must not touch `cc.claimed`.** That button is about rolling
   stock. Claims are cleared only by a parent, deliberately, behind a hold — see
   "Claims belong to the LEVEL".
+
+---
+
+## Arriving somewhere new OPENS the gate — ✅ BUILT
+
+**This reverses a Phase 1 decision, deliberately.** It is the one piece of Game Mode
+groundwork already in the code (`scene.js` `show()`), because it fixes a Free Play wart too.
+
+**Verified against `tools/fake-gate.py`:** device forced down → the screen picks up `closed`
+through two-way sync → the child travels → the screen reads `open` **and the device reports
+`up`**. The barrier moves, and nothing desyncs. Phase 1 preserved gate state across a
+location change — if it was down, it stayed down. It now **opens on arrival**, every time,
+in both modes.
+
+### Why it had to change: a closed gate starves the task
+
+Measured, with the gate held closed: **1 car passed in 45 seconds**, against ~27 with it
+open. Cars stop at a closed gate, which is the entire point of the game — but it means
+"close the gate after three cars" can never progress while the gate is already down.
+
+And gate state persisted across travel, so a child who left Colorado with the gate down
+arrived in Denali with a task that could not start. He would have to deduce that he must
+**open** the gate before the game will ask him to close it. That is backwards, and no
+three-year-old will work it out.
+
+### It does not break what the old rule protected
+
+The original rule's stated reason was *"the physical device must never desync because the
+child changed states."* **Desync was the concern, not preservation.** So:
+
+> **Open it with `CC.gate.open()` and NO argument.**
+
+That is the same path the OPEN button uses: it sets the state *and* sends `/open` to the
+device (`gate.js` — `if (!fromDevice) command('/open')`). Screen and barrier stay in
+agreement. Passing `fromDevice` truthy, or setting the state directly, would produce
+exactly the desync the old rule forbade.
+
+**Expect the real barrier to move on its own** when a child picks a new place. That is
+correct, not a bug — but anyone with hardware on the bench should know it is coming.
+
+**It applies in Free Play too.** Arriving somewhere with the gate down means no traffic,
+which is a dead-looking scene wherever you are. This is not a Game Mode behaviour.
+
+---
+
+## The prompt strings, and why Polish needs more than atoms
+
+**This corrects an earlier claim in this document.** The voice-cost section said prompts
+assemble from atoms — `"Let"` + number + `"cars go by"` — so more levels cost almost
+nothing. **That works in English and produces broken Polish.**
+
+### Polish numerals govern the noun's case
+
+| n | form | example |
+|---|---|---|
+| 2, 3, 4 | nominative plural | *trzy **auta*** |
+| 5 and up | genitive plural | *pięć **aut*** |
+
+Adjectives agree too, so a colour compounds it: *dwa **czerwone auta*** but *pięć
+**czerwonych aut***. An atom sequence of `[Przepuść][pięć][auta]` yields *"przepuść pięć
+auta"* — wrong. `i18n.js` has no plural machinery; `i18n.number(n)` returns the bare word.
+
+*(The simple two-band rule is only safe because sums are capped at 10. Above 20, numbers
+ending 2–4 revert to the nominative. Do not raise the cap without revisiting this.)*
+
+### The fix: the NOUN PHRASE is the atom
+
+Three utterances, none concatenated — the agreement lives inside the middle one, which is
+pre-composed and recorded as a whole:
+
+```
+say(ui.letPass)            EN "Let"       PL "Przepuść"
+say(i18n.phrase(n, key))   EN "two red cars"   PL "dwa czerwone auta"
+say(ui.thenClose)          EN "go by, then close the gate"
+                           PL "potem zamknij szlaban"
+```
+
+`i18n.phrase(n, colourKey)` composes from per-language data. **`tools/voice-lines.js` must
+enumerate it over every (n, colour) in range and record each result**, exactly as it
+already records `ui`/`colors`/`numbers` wholesale rather than curating which are spoken —
+that philosophy is in its header and it is the reason this works at all. The composed
+string is then a dictionary line like any other, and `speech.say()` finds its clip.
+
+**Ranges:** plain counts **2–10** (levels 1, 4, 5); colour counts **2–5** (levels 2, 3).
+That is 9 + 7×4 = **37 phrases per language**, 74 in total — on top of 374, so expect
+`gen-voice.py` to run nearer six minutes than four and a half.
+
+### The Polish forms the composer needs
+
+Noun: *auto* → **auta** (nom. pl.) / **aut** (gen. pl.). Keep *auto*; `settings.js`
+already says *"Pokaż licznik aut"*, so it is the established word.
+
+| colour | nom. pl. | gen. pl. |
+|---|---|---|
+| red | czerwone | czerwonych |
+| blue | niebieskie | niebieskich |
+| yellow | żółte | żółtych |
+| green | zielone | zielonych |
+| purple | fioletowe | fioletowych |
+| orange | pomarańczowe | pomarańczowych |
+| white | białe | białych |
+
+English needs none of this — `"two red cars"` is `number + colour + "cars"` throughout.
+
+### The new UI strings
+
+| key | EN | PL |
+|---|---|---|
+| `ui.gameMode` | Game Mode | Tryb gry |
+| `ui.freePlay` | Free Play | Swobodna gra |
+| `ui.level` | Level | Poziom |
+| `ui.levelNote` | Level 2 starts a fresh map. Level 1's flags are kept. | Poziom 2 zaczyna nową mapę. Flagi z poziomu 1 zostają. |
+| `ui.startLevelAgain` | Start this level again | Zacznij ten poziom od nowa |
+| `ui.letPass` | Let | Przepuść |
+| `ui.thenClose` | go by, then close the gate | potem zamknij szlaban |
+| `ui.plus` | plus | plus |
+| `ui.equals` | equals | równa się |
+
+> **CHECK EVERY POLISH LINE BY EAR BEFORE REGENERATING THE SPRITE.** Reading it off the
+> page proves nothing — `tools/voice/venv/bin/piper`. The forms above are a draft by a
+> non-native speaker and the agreement table is the part most likely to be wrong.
 
 ---
 
