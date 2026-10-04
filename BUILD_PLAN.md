@@ -428,6 +428,19 @@ equation and then run level 1 underneath. Build this once:
 | 5 | `2 + 3 = ?` → count the answer | computing it |
 
 - Subscribe to `carpassed` (`{ count, colour, key, dir }` — task I, done).
+- **LIFECYCLE — one task per arrival.** Arriving sets a task; completing it flags the
+  state and **the place becomes Free Play** until the child travels and returns. Do not
+  set another task after each train: one ask per place is the difference between a game
+  and homework, and finishing is rewarded with unlimited train play.
+- **A new task never BEGINS while the gate is down** — cars stop at a closed gate, so it
+  could not progress. Wait for `CC.gate` to be open, then speak the prompt. This governs
+  starting only: closing the gate mid-task is the *answer* and must never abort it.
+- **Do NOT auto-open the gate when a train has passed.** Rejected — see `MODES.md`. It
+  takes the gate off a child who is holding it down, and breaks `idleTrainTimer`, whose
+  comment calls that "the whole game".
+- **FIX FIRST: pause the TASK while any panel is open** (customizer, settings, map).
+  Measured: 18 cars counted in 30s behind the customizer, so the pips would be wrong
+  through no fault of the child. Pause the task only — the scene should keep running.
 - **Progress shows as countable objects, not a numeral.** The pips do the
   cardinality for a child who cannot yet hold "I have seen five" as a state.
   This is the mechanism, not decoration.

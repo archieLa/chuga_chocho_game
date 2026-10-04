@@ -496,6 +496,70 @@ which is a dead-looking scene wherever you are. This is not a Game Mode behaviou
 
 ---
 
+## When a task starts, and when it stops — ONE PER ARRIVAL
+
+```
+arrive somewhere          → gate opens (built), a task is set
+                          → but NOT while the gate is down: it waits
+he does it                → flag + praise, and THE PLACE BECOMES FREE PLAY
+he does not do it         → the task just stays live. No timer, no expiry.
+travel away and back      → new task
+```
+
+**One ask per arrival, then the toy is his.** Completing the task is rewarded with
+**unlimited train play** — hold the gate down and trains keep coming every 2.6 seconds,
+which is the thing a small child actually wants. That is the right shape: a short thing to
+earn, then the place is yours.
+
+Three reasons this beats asking again after every train:
+
+1. **It cannot become a test.** One ask per place is the whole difference between a game
+   and homework — the worry this document opened with.
+2. **Travel sets the rhythm**, which keeps the 55 places central. That is the part of this
+   game with the longest runway; the mechanic caps out years earlier.
+3. **Flag and task line up 1:1.** *Do the thing here, get the flag here.* A three-year-old
+   can hold that; "sometimes there is a task" is not holdable.
+
+The cost is that wanting another task means a trip to the map. That is a few taps and it is
+the nicest thing in the game, so it is a cost worth paying.
+
+### A new task never begins while the gate is down
+
+Cars stop at a closed gate, so a task set against a closed gate cannot progress — the same
+starvation that made arrivals open the gate. **The fix is patience, not force: the prompt is
+simply not given until the road is moving.**
+
+**This governs STARTING a task, never continuing one.** Closing the gate mid-task is the
+*answer*. A task must never abort because he did the thing it asked.
+
+### REJECTED: auto-opening the gate when the train has passed
+
+Proposed, and it is realistic — a real crossing raises itself once the train clears. It is
+rejected because **it takes the gate out of the child's hands.** He has just finished a task
+and is holding the gate down because trains keep arriving; the game prising it open to
+administer the next question is exactly the interruption this document exists to prevent.
+
+It would also break `scene.js`'s `idleTrainTimer`, whose own comment calls holding the gate
+down *"the whole game"* — auto-opening caps it at one train per press, for ever.
+
+**And it must not be tied to whether a physical gate is connected.** Hardware changes where
+input comes from; it must never change what the game does. Nothing in the game behaves
+differently with a device attached today, and this would be the first break — two children
+getting different rules depending on what is plugged in.
+
+### BUG TO FIX FIRST: the scene runs behind panels
+
+**Measured: 18 cars counted in 30 seconds with the customizer open.** A child who opens the
+train builder mid-task returns to a count that advanced where he could not see it, so the
+pips are wrong through no fault of his — silent unfairness, which is what rule #4 exists to
+prevent.
+
+**Pause the TASK whenever a panel is open** (customizer, settings, map). Do not pause the
+scene — it looks good behind the panel, and `requestAnimationFrame` already stops when the
+tab is hidden, which is a different case. Only the counting stops.
+
+---
+
 ## The prompt strings, and why Polish needs more than atoms
 
 **This corrects an earlier claim in this document.** The voice-cost section said prompts
@@ -584,10 +648,6 @@ itself; N inside a level widens by itself and never narrows. What remains:
   from `{2,3}` to `{2,3,4,5}` — three, five? Consecutive or cumulative? And does
   the widening survive a session? **Answer it for a child at home** — that is the
   only case Phase 2 serves.
-- **How often does a task run in Game Mode?** Reading today: Free Play has no
-  tasks ever, Game Mode means every visit carries one. If a task on *every* train
-  makes the crossing feel like a test, the answer is a task per *place* rather
-  than per train — decide after watching.
 - **Does the whole-map celebration need a trigger guard?** With per-level claims
   it fires once per level, which is probably right, but nobody has watched it
   happen yet.
