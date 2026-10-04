@@ -233,16 +233,39 @@ contributor inherits the reasoning rather than re-deriving it.
 - **Closing the gate calls a train**, and holding it closed keeps them coming. Opening the
   gate never cancels one — nothing the child does can go wrong.
 
-### Phase 2 — Learning Modes ← next
+### Phase 2 — Game Mode ← next
 
-Missions framework, difficulty levels, no-fail encouraging feedback. The gate buttons / physical button are how the child answers.
+One optional **Game Mode**: a five-level **maths** ladder with no-fail feedback. The gate
+buttons / physical button are how the child answers, at every level.
 
-- **Count & Close** — close after *N* cars of a colour ("5 blue"); combos for harder levels.
-- **Letter Hunt** — show a word (**TRAIN**); cycle the alphabet; close the gate on each next letter in order.
-- **Picture Word** — show a picture; cycle words; close when the naming word appears.
+| level | the ask |
+|---|---|
+| 1 | close after **N cars** |
+| 2 | close after **N red cars** |
+| 3 | **two red and three blue** |
+| 4 | **`2 + 3 = 5`** → close after 5 |
+| 5 | **`2 + 3 = ?`** → close after the answer |
+
+**DECISION — the two word games are CUT.** *Letter Hunt* (spell a word letter by letter) and
+*Picture Word* (close on the word naming a picture) were in this roadmap and are no longer.
+Not primarily on cost: **they fail the gate test.** "Close when you see the word TRAIN" is a
+flashcard app whose button happens to look like a gate, whereas counting cars and closing is
+genuinely gate-shaped — the thing counted is the thing going past, and the gate is what acts
+on it. Maths also sits where this audience actually is (cardinality at 4–5 is exactly what
+"close after five cars" exercises). **`MODES.md` is the spec and argues all of it.**
 
 **The ordered work list for this phase is `BUILD_PLAN.md` §11** — tasks I–N with contracts and
-acceptance criteria. Two things it settles that belong here as decisions:
+acceptance criteria. Further decisions that belong here:
+
+- **A completed state flies a US flag on the map**, and `cc.claimed` is keyed by LEVEL, so
+  changing level gives a fresh board without any destructive control existing.
+- **Nothing is ever unlocked.** This game has zero locked content and keeps it — a cosmetic
+  unlock for finishing the map was considered and rejected, because a prize at the end turns
+  the souvenir back into a progress bar. If a new livery is worth drawing, ship it to
+  everybody.
+- **A revisit always sets a fresh task**, flag or no flag — the same reasoning that keeps
+  `select()` out of the surprise bag.
+- **Museum / kiosk deployment is designed** — see §14.
 
 - **Missions are optional layers, never a replacement.** Free Play stays the default mode and
   stays exactly as it is; a mission *interprets* a gate press but never withholds one. `modes.js`
@@ -309,6 +332,99 @@ Geography · train technology & history · counting · colours · letters & spel
 ## 13. Open-source setup
 
 MIT · README with play/hosting/hardware instructions · CONTRIBUTING · GitHub Pages · single-file bundle for offline sharing.
+
+---
+
+## 14. Museum / kiosk deployment
+
+**Status: designed, not built.** A railway museum is a plausible home for this game, and
+it is a genuinely different deployment context: one device, dozens of children a day, each
+for a few minutes, no accounts and no sign-in — ever.
+
+### It is a shop window, not just an exhibit
+
+The museum is **discovery**. If a child and a parent enjoy it there, nothing stops them
+setting it up at home — it is a static page. That reframes two things:
+
+- **Game Mode stays in.** An earlier draft proposed defaulting museums to Free Play because
+  the 55-state arc is meaningless in three minutes. That conflated two separable things:
+  the **task loop** (10–60s — perfect for a museum, and the clearest demonstration of what
+  this game is *for*) and the **collection arc** (weeks). The arc simply does not complete
+  in one visit, which is not a failure state — there is no "you must finish". A child does
+  three states in five minutes, sees three flags, and that is a satisfying mini-arc.
+- **The prompt banner must be readable by a bystander.** The conversion moment is a parent
+  two metres back watching their child count three cars and close a gate correctly. Size
+  the banner for them as well as for the child.
+
+### Every child starts fresh
+
+**Reset per visitor, do not accumulate.** Three reasons:
+
+1. **Every child deserves the arc.** Inheriting a stranger's purple train and a half-filled
+   map means the first thing he does is live in someone else's choices.
+2. **Privacy.** A public machine used by children must not retain any visitor's choices for
+   the next one. That is the correct default regardless of UX.
+3. Accumulation is the one thing that actively ruins Game Mode — a finished map has nothing
+   left to offer.
+
+`welcome.js` is already the right piece: a poster with exactly one button. In kiosk mode it
+becomes the **attract screen**. Idle for ~90 seconds with no input → back to the poster,
+session cleared, next child presses "All aboard!" and starts genuinely fresh.
+
+### The line between the museum's state and the child's
+
+This split does not exist in the code today and is the main work:
+
+| persists — the MUSEUM's | resets — the CHILD's |
+|---|---|
+| default language, sound, level | train, location |
+| gate device address | flags, the surprise bag, car counter |
+| kiosk mode itself | current language (reverts to the museum default) |
+
+In kiosk mode the child's half lives in memory or `sessionStorage`, **never
+`localStorage`**, so nothing about a visitor survives on a public machine at all.
+
+### Enabling it is a URL, not a setting
+
+`play/index.html?kiosk=1`. Museums run browsers in kiosk mode at a fixed URL with no address
+bar, so **a child cannot reach the setting** — which sidesteps the protection problem rather
+than solving it, and costs almost nothing. (The in-game controls that clear a board use
+hold-to-confirm instead; see `MODES.md`.)
+
+### Unknown visitor age solves itself
+
+A museum cannot know whether the next child is three or eight. It does not need to: **N
+widens by itself within a level.** A session opens at `{2,3}` and a capable six-year-old
+ramps to `{2,3,4,5}` within a minute because he completes tasks quickly. The mechanism
+designed for a child growing over months also handles a stranger arriving cold — and each
+session restarts at `{2,3}`, which is right, because the next child deserves the gentle
+opening too.
+
+### Give the museum the collective thing
+
+A lifetime counter on the attract screen — *"18,204 trains have crossed here"* — accumulates
+for ever, belongs to the building rather than to any child, and costs the visitor nothing.
+It is the one number a museum will actually want on a wall.
+
+### Two prerequisites before any museum runs this
+
+- **The physical gate is the strongest pitch.** A real crossing barrier children operate,
+  wired to the screen, in a railway museum, is an *exhibit* rather than a kiosk. The
+  `/open` `/close` `/status` endpoint already works with two-way sync (§9). Lead with it.
+- **Long-run stability is UNTESTED.** `scene.js` owns one `requestAnimationFrame` loop that
+  a museum would leave running twelve hours a day across hundreds of scene swaps. There is
+  no evidence of a leak and no evidence against one — the longest test ever run is sixty
+  seconds. **An hours-long soak test watching memory across repeated location changes is a
+  hard prerequisite.** It is the class of bug that is invisible in development and fatal in
+  deployment.
+
+### What this does not change
+
+Hard rule #4 applies unchanged: no ads, no tracking, no analytics, no data collection. The
+lifetime counter is a local tally, not telemetry. **One open question:** whether the attract
+screen may carry a QR or URL pointing at the game's own page. It would be the first
+outward-facing pointer the game has ever had. The argument for is that it is how a parent
+obtains a free thing, not an advertisement; the call is the maintainer's.
 
 ---
 

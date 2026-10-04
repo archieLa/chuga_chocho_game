@@ -320,13 +320,21 @@ make it bigger, louder, friendlier and more forgiving than you think it needs to
 
 ---
 
-## 11. Phase 2 — the mission modes (start here)
+## 11. Phase 2 — Game Mode (start here)
 
-The vision for these is `DESIGN.md` §11. This is the ordered work list, same shape as A–H.
+**`MODES.md` is the spec; this is the ordered work list built from it.** Where the two
+differ, `MODES.md` wins — it carries the reasoning. `DESIGN.md` §11 has the original vision
+and §14 has the kiosk deployment.
 
-**What you are adding:** three optional, gentle mini-games layered on top of Free Play —
-*Count & Close*, *Letter Hunt*, *Picture Word*. Free Play stays the default and stays exactly
-as it is. A mission never becomes the only way to play.
+**What you are adding:** one optional **Game Mode**, a five-level maths ladder layered on
+Free Play. Every level is the same verb — close the gate at the right moment. Free Play
+stays the default and stays exactly as it is; Game Mode never becomes the only way to play.
+
+**Two earlier plans are CUT: *Letter Hunt* and *Picture Word*.** Not primarily on cost —
+they fail the gate test. "Close when you see the word TRAIN" is a flashcard app whose button
+happens to look like a gate, whereas counting cars and closing is genuinely gate-shaped: the
+thing counted is the thing going past, and the gate is what acts on it. `MODES.md` argues it
+in full. Do not reinstate them without reading that section.
 
 ### The rules that do not change
 
@@ -380,81 +388,119 @@ Count & Close needs to know *which car* passed, and needs the car's colour to be
   whose whole job is naming colours.
 - **Done when:** a mission can subscribe to `carpassed` and speak the colour of the car that
   just went by, in English and Polish, and the existing car counter still counts correctly.
+### J. The Game Mode framework
 
-### J. The missions framework
+`MODES.md` is the spec for all of J–N. Where this list and that document differ,
+**that document wins** — it carries the reasoning.
 
-- A **mode picker**: a new button in the topbar next to 🗺️ 🚆 ⚙️, opening a panel of big
-  cards — Free Play + the three missions — each with a spoken label. Same panel conventions
-  as `customizer.js` and `settings.js` (one big Done, no dead ends).
-- Give a mission somewhere to show its prompt: a **big, friendly banner** area in the scene
-  (top-centre, well clear of the topbar and the gate buttons). Prompt text is always spoken
-  as well as shown.
-- Mission lifecycle in `modes.js`: `start()` subscribes, `stop()` unsubscribes **and clears
-  the banner**. Switching modes must not leak listeners — the current registry never had to
-  care, so check this deliberately.
-- **No-fail feedback**, one shared helper both missions and Free Play can use: right answer →
-  `CC.speech.praise()` + a happy sound; not-yet → a gentle spoken nudge and the mission
-  continues unchanged.
-- **Done when:** the child can pick any of the four modes, see and hear its prompt, switch
-  freely between them and back to Free Play, and the gate keeps working the entire time —
-  and switching modes ten times leaves no duplicate listeners.
+- **The mode toggle goes in ⚙️ Settings, NOT the topbar.** The topbar is already
+  🗺️ 🚆 ⚙️ and a fourth button is tight on a phone held sideways; and it makes the
+  mode a grown-up's choice so a child cannot fumble himself into a test. Turning
+  Game Mode on **reveals a level row beneath it** (progressive disclosure — Free
+  Play users never see a difficulty setting).
+- `settings.js` already has a `row(label, fill)` helper and `.set-scroll` already
+  scrolls, so two new rows need no layout work.
+- A **prompt banner** in the scene, top-centre, clear of the topbar and the gate
+  buttons. Always spoken as well as shown. **Size it to be readable by a parent
+  standing behind the child** — that is the conversion moment in a museum, and it
+  costs nothing at home.
+- Mission lifecycle in `modes.js`: `start()` subscribes, `stop()` unsubscribes
+  **and clears the banner**. Switching modes must not leak listeners — the
+  one-entry registry never had to care, so check it deliberately.
+- **No-fail feedback**, one shared helper: right answer → `CC.speech.praise()` +
+  a happy sound; not-yet → a gentle spoken nudge, and the task continues
+  unchanged.
+- **Done when:** Game Mode can be switched on and off in ⚙️, its prompt is shown
+  and spoken in both languages, the gate works throughout, and switching modes
+  ten times leaves no duplicate listeners and no stale banner.
 
-### K. Count & Close
+### K. The task engine — one shape for all five levels
 
-*Close the gate after N cars have gone by.*
+A target is a list of `{ colour, count }`. Levels 4–5 only decide `count` by an
+equation and then run level 1 underneath. Build this once:
 
-- Pick a target (`2`–`5` at the easiest level), speak it using `i18n` `numbers` — "let three
-  cars go by, then close the gate."
-- Count `carpassed` events; when the child closes the gate at the right count, praise and set
-  a new target. Closing early is a "not yet", not a failure — the count simply keeps running.
-- Show progress as **big countable objects, not a numeral alone** (three car icons, filling
-  in) — the child is pre-literate.
-- Harder levels add a colour: "let two **red** cars go by" — which is what task I exists for.
-- **Done when:** the target is spoken and shown in both languages, the count is visible as
-  objects, closing at the right moment praises and re-targets, closing early is gentle, and
-  nothing about it can be lost.
+| level | target | new thing |
+|---|---|---|
+| 1 | `[{colour:null, count:N}]` | counting |
+| 2 | `[{colour:'red', count:N}]` | a filter |
+| 3 | `[{colour:'red',count:2},{colour:'blue',count:3}]` | two counters |
+| 4 | `2 + 3 = 5` → count 5 | numerals, sum made concrete |
+| 5 | `2 + 3 = ?` → count the answer | computing it |
 
-### L. Letter Hunt
+- Subscribe to `carpassed` (`{ count, colour, key, dir }` — task I, done).
+- **Progress shows as countable objects, not a numeral.** The pips do the
+  cardinality for a child who cannot yet hold "I have seen five" as a state.
+  This is the mechanism, not decoration.
+- **Targets are drawn from a BAG, not `Math.random()`** — same reasoning as
+  `world.drawRandom()`. The pool widens with success (`{2,3}` → `{2,3,4,5}`) and
+  **never narrows**.
+- **Level 2+ must bias the car spawn toward the target colour** (~1 in 3, not 1
+  in 7). Measured: cars arrive on a global 1.5s timer (~36/min in every scene),
+  so one colour comes every ~11s and "five red cars" is **57 seconds** of
+  watching cars that do not count. That is tedium, which a small child reads as
+  the game being broken. **The bias stops dead in Free Play.**
+- **Level 5 needs the rescue:** after ~15s the answer quietly completes itself
+  and level 5 becomes level 4. Nothing marks it as a failure.
+- **Done when:** every level sets varying targets, speaks and shows them in both
+  languages, praises on success, nudges gently on a miss, and nothing can be lost.
 
-*Spell a word by closing the gate on each next letter.*
+### L. Claiming — the flag on the map
 
-- Show a short word (`TRAIN`, `POCIĄG`) with the letters found so far filled in. Wagons cycle
-  past carrying letters; the child closes the gate when the next needed letter is at the
-  crossing.
-- Speak the letter name and the word each time one lands. Wrong letter → gentle nudge, the
-  letter simply passes by.
-- **Polish needs its own word list and its own letters** (`Ą Ć Ę Ł Ń Ó Ś Ź Ż`) — put both
-  lists in `i18n.js` as data, and check the letters actually render in the chosen font.
-- **Done when:** a word can be spelled end to end in both languages, each letter is spoken,
-  and a wrong close never punishes.
+- A completed state flies a **US flag**. `cc.claimed` is **keyed by level**:
+  `{ "1": [ids], "2": [ids] }`. The map shows the current level's flags.
+- **BLOCKER, do this first:** map labels carry no `data-name`. Add it to the
+  `<text class="lbl">` in `tools/gen-map.js` and re-run — the flag anchors to the
+  **label**, not the state shape, because DC is 3×4px and nine states live in the
+  margin `COLUMN`. The column needs its own placement; a naive offset collides
+  with the Massachusetts label.
+- **Do not borrow `.cc-livery` or `data-livery`** — reserved for rolling stock.
+  Use `.state-flag`. (The Medora-surrey rule.)
+- Gold is taken: `#ffd166` is `.state--picked`. Draw the flag as an **overlay**
+  so it composes with a picked state — which is the common case, since you are
+  standing in a state when you earn it.
+- Specificity: write `#us-map .state.state--claimed`, per `styles.css:253`.
+- **Second visits ALWAYS set a task**, flag or no flag. Never "you have this one
+  already".
+- **Nothing is ever unlocked and no claimed-count is shown** beyond the mode chip.
+- **Done when:** completing a task plants a flag, it survives a reload, changing
+  level shows a different board, and a revisit still sets a task.
 
-### M. Picture Word
+### M. Celebrations
 
-*Close the gate when the word naming the picture appears.*
+- **Per state: the train comes.** Immediately, with the whistle, plus
+  `CC.speech.praise()`. The celebration is the game working, not a cutscene —
+  a train arriving because you operated the crossing correctly is the whole
+  thesis in one beat. `audio.js` already has every sound needed.
+- The flag plants itself **in the scene**, on a pole by the crossing, so the
+  reward happens where he is; the map is where he finds it later.
+- **Whole map: warm, not fireworks.** Flags ripple across the country, the train
+  runs over the map, praise in his language. Then nothing is opened and nothing
+  is taken.
+- **Done when:** both celebrations play in both languages and neither blocks the
+  gate.
 
-- Show a picture (start with what you already have — a vehicle from `CC.assets.vehicles`, so
-  you are not authoring art; `CLAUDE.md` still says stop if you find yourself drawing).
-  Candidate words ride past; the child closes on the matching one.
-- Speak the picture's name at the start and on request (tapping the picture re-speaks it).
-- **Done when:** matching works in both languages using existing art, and the picture's name
-  can always be re-heard on demand.
+### N. Protection and polish
 
-### N. Difficulty and polish
-
-- A difficulty setting in ⚙️ (easy / medium) that adjusts targets, word length and how much
-  is spoken. Default to the easiest.
-- Re-check the whole child journey with `tools/shot.py` over both `file://` and `http://`,
-  screenshot every mode, and confirm zero console errors or warnings.
+- **Hold-to-confirm (3s)** on the two controls that can empty a board: the level
+  switch, and "Start this level again" (current level only). `⚙️ reset train` is
+  NOT the precedent — it fires with no confirmation (`settings.js:149`), fine for
+  a train, wrong for forty flags.
+- The level row's text must say plainly: *"Level 2 starts a fresh map. Level 1's
+  flags are kept."*
+- Re-check the whole journey with `tools/shot.py` over `file://` **and**
+  `http://`, screenshot every level, confirm zero console errors or warnings.
 
 ### Phase 2 definition of done
 
-- [ ] All four modes are reachable from one picker, and Free Play is still the default.
-- [ ] Every prompt is shown **and** spoken, in English and Polish.
-- [ ] The gate works from buttons, spacebar and the physical device in **every** mode.
+- [ ] Free Play is untouched and remains the default.
+- [ ] Game Mode toggles in ⚙️, and the level row appears with it.
+- [ ] All five levels set varying targets and are shown **and** spoken, EN and PL.
+- [ ] The gate works from buttons, spacebar and the physical device in every mode.
 - [ ] A wrong answer is never punished — no fail state, no timer, no scary feedback.
 - [ ] Switching modes repeatedly leaks no listeners and leaves no stale banner.
-- [ ] `carpassed` reports a nameable colour and the car counter still counts.
-- [ ] Zero console errors or warnings, `file://` and `http://`, every mode.
+- [ ] Flags persist per level; changing level never destroys another level's board.
+- [ ] Nothing in the game is locked behind an achievement.
+- [ ] Zero console errors or warnings, `file://` and `http://`, every level.
 - [ ] A three-year-old can still get from launch to a moving train without help.
 
 ---

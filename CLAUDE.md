@@ -206,12 +206,46 @@ close a gate against. Scenes without the path simply get no background train.
 
 ### Modes — see `MODES.md`
 
-A sketch, **not a plan**: the challenge-mode idea (close the gate when five cars
-have passed; when the word appears), why the gate being the answer is the good
-part of it, the ladder of rungs that is meant to answer *outgrowing*, and how it
-squares with hard rule #4's "no losing". Nothing is committed and no code should
-be written against it yet. `modes.js` and `i18n.js`'s `numbers`/`shapes`/`praise`
-are the scaffolding already in place.
+**No longer a sketch — the shape is DECIDED and `MODES.md` is the spec.** Read it
+before writing any Phase 2 code; `BUILD_PLAN.md` §11 is the ordered work list
+built from it.
+
+Game Mode is a **maths** ladder of five levels, all of them the same verb: close
+the gate at the right moment. Counting → counting one colour → two colours →
+`2 + 3 = 5` → `2 + 3 = ?`. **The two word games (Letter Hunt, Picture Word) are
+CUT** — `MODES.md` says why, and the reason is not cost.
+
+Four things that will catch you out, all argued in full there:
+
+- **The mode toggle is in ⚙️ Settings, NOT a fourth topbar button**, and turning
+  it on reveals the level row beneath it.
+- **The map's `/55` chip changes meaning with the mode** — the surprise bag in
+  Free Play, states claimed in Game Mode. It must also *look* different in each,
+  or the number jumping from 12 to 3 reads as "I lost my things".
+- **Claims are keyed by LEVEL** (`cc.claimed = { "1": [...], ... }`), which is
+  what gives a parent a fresh map on changing level without any destructive
+  button existing at all.
+- **Nothing is ever unlocked.** This game has zero locked content and keeps it;
+  the flags are a record, not a key.
+
+`modes.js` and `i18n.js`'s `numbers`/`shapes`/`praise` are the scaffolding
+already in place. `shapes` is still unused and the ladder does not need it.
+
+### Museum / kiosk deployment — see `DESIGN.md` §14
+
+**Designed, not built.** A railway museum is a plausible home for this: one device, dozens
+of children a day, no accounts ever. Three things to know before touching anything near it:
+
+- **It is enabled by a URL** (`play/index.html?kiosk=1`), not a setting — a child in a
+  kiosk browser cannot reach it.
+- **A line has to be drawn that does not exist in the code today**: the museum's state
+  (language default, sound, level, gate address) persists; the child's (train, location,
+  flags, bag, counter) resets on idle and lives in memory, **never `localStorage`**.
+  `welcome.js` becomes the attract screen.
+- **Long-run stability is UNTESTED and is a hard prerequisite.** `scene.js` runs one
+  `requestAnimationFrame` loop that a museum would leave going twelve hours a day across
+  hundreds of scene swaps. No evidence of a leak, no evidence against one; the longest test
+  ever run is sixty seconds.
 
 ### Voice — see `VOICE.md`
 

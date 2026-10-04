@@ -308,6 +308,132 @@ the incomplete ones.** The moment a child can see what is missing, 47 un-flagged
 states become homework — the exact failure this document exists to avoid. He will
 notice the map filling up on its own, which is the good version of the feeling.
 
+### A flag NEVER unlocks anything
+
+Finishing the map gets a celebration and a full map. **It does not open any
+content, and nothing in this game is ever withheld pending an achievement.**
+
+This game has **zero locked content** today, literally — there is no lock,
+unlock, earn or achievement concept anywhere in the code. All 55 places are
+reachable from the first minute, as are all 19 vehicles, all 7 colours and the
+one livery. The flags are the first record of achievement the game has ever had,
+and they are a **record, not a key**.
+
+A cosmetic unlock (a special livery for completing the map) was considered and
+**rejected**, for three reasons that compound:
+
+1. **It turns the souvenir back into a progress bar.** The section above exists
+   because a visible "what's missing" becomes homework. A prize at the end
+   reintroduces exactly that pressure from the other direction — it makes
+   *finishing* matter, and the flags stop being a record of where he has been.
+2. **Per-level flags make "completing the map" ambiguous.** Level 1's 55? Then a
+   three-year-old takes the prize and levels 2–5 have nothing. All five levels?
+   That is 275 completions. One livery per level? That is a five-tier grind.
+3. **It introduces the first "no" into a game built on "yes."** A child who has
+   not finished would now know there is a thing he cannot have.
+
+**If a new livery is ever worth drawing, ship it to everybody.** A good livery is
+a nice thing to have at three years old on day one; it is better used than
+withheld.
+
+### Second visits: ALWAYS set a task
+
+A state that already flies a flag still gets a fresh task, every single time.
+Never "you have this one already, here is Free Play instead."
+
+The reasoning is already in `CLAUDE.md`, about the surprise bag: *a favourite can
+be visited every day without the dice using it up.* This is the same question in
+a different costume and it gets the same answer — **a revisit must feel exactly
+as good as the first time.**
+
+The alternative — no task where the flag already flies — would make his favourite
+place the **least** game-like place in the game. He goes to Colorado, which he
+loves, and Colorado is the one spot with nothing to do. That quietly pushes him
+toward unvisited states to find the game, which is the completionist sweep this
+document is written against, and it punishes affection.
+
+**The revisit is already fresh for free**, because targets come from the bag — a
+different number and a different colour than last time. Novelty is a consequence
+of a decision already made, not something to invent.
+
+**And nothing about a miss is ever persisted.** A state he tried and did not
+finish looks identical to one he has never seen: no half-flag, no "attempted"
+marker, no record of the attempt. Same rule, same reason.
+
+---
+
+## Claims belong to the LEVEL, not to the child
+
+`cc.claimed` is keyed by level: `{ "1": [ids…], "2": [ids…] }`. The map shows the
+**current level's** flags and the chip reads that level's `N/55`.
+
+**This is what replaces a "reset the flags" button.** Switching to level 2 in ⚙️
+gives a fresh map automatically — which is the thing a parent actually wants when
+they move the dial — with no destructive control, no confirmation dialog, and no
+way to lose anything by mis-tapping. Drop back to level 1 and his old flags are
+all still there, exactly as he left them.
+
+It also keeps "the game never revokes a flag" **literally** true. The only thing
+that ever clears anything is a parent, deliberately.
+
+**This is not the tiered flag that was rejected above.** That was about the map
+*displaying* bronze/silver/gold, turning one board into a grind ladder. Here each
+level has its own clean binary board and only one is ever visible.
+
+**The hazard, and it is real:** from the child's side, switching level makes his
+flags vanish — the same "I lost my things" problem as the mode chip. The
+difference is that it is recoverable and it is a knowing parental act. The ⚙️ row
+must say so plainly; it is parent-facing text, so it can be a whole sentence:
+*"Level 2 starts a fresh map. Level 1's flags are kept."*
+
+The mental model to hold: **each level is its own journey across the map.**
+
+### Protect the controls that clear the board
+
+Two controls can empty a map in one press — the level switch, and **"Start this
+level again"** (which clears only the current level, never all five). Both need a
+**parent gate**, and `⚙️ reset train` is NOT the precedent to copy: it fires
+immediately with no confirmation (`settings.js:149`), which is fine for a train
+that takes ten seconds to rebuild and wrong for forty flags.
+
+**Hold to confirm — press and hold for three seconds.** No reading, no locale
+problem, works on touch, and a toddler will not sustain it. One mechanism covers
+both controls.
+
+**Museum mode is not protected this way at all** — it is a URL, which a child in
+a kiosk browser cannot reach. See `DESIGN.md` §14.
+
+---
+
+## Celebrations
+
+### Completing a state: the train comes
+
+He closed the gate at the right moment, so the crossing does the thing a crossing
+is **for** — a train, immediately, with the whistle. Plus `CC.speech.praise()`,
+which already exists in both languages.
+
+**The principle: the celebration is the game working, not a cutscene bolted onto
+it.** Confetti is generic and says nothing. A train arriving *because you
+operated the crossing correctly* is the entire thesis of this game in one beat.
+
+`whistle()`, `chuff()`, `honk()`, `blip()` and `ding()` all exist in `audio.js`,
+so this needs no new sound.
+
+Then the flag plants itself **in the scene** — on a pole by the crossing — so the
+reward happens where he is. He finds it on the map afterwards, which is the right
+separation: **the souvenir lives in the trophy cabinet, the game lives in the
+scene.**
+
+### Completing the map: warm, not fireworks
+
+The map itself celebrates — flags rippling in sequence across the country, the
+train running over the map, praise in his language. It should feel like the end
+of a good day, not a boss defeat.
+
+**And then nothing is taken and nothing is opened** (see "A flag NEVER unlocks
+anything"). The permanent full map is the keepsake.
+
 ---
 
 ## Hard rule #4 still wins
@@ -322,26 +448,24 @@ A timing challenge has an inherent fail state. The rule survives because:
   expires.** "Not yet earned" is fine at any age; "you had it and lost it" is
   precisely what this rule exists to prevent.
 - **⚙️ "reset train" must not touch `cc.claimed`.** That button is about rolling
-  stock. Whether claims are ever resettable is a later question; they are not
-  in v1.
+  stock. Claims are cleared only by a parent, deliberately, behind a hold — see
+  "Claims belong to the LEVEL".
 
 ---
 
 ## Still open
 
-- **DECIDED: the LEVEL is a parent's choice in ⚙️ and never moves by itself; N
-  inside a level widens by itself.** What is still open is the exact trigger for
-  widening — how many clean runs, and whether the pool ever narrows again (it
-  should not; that is "taking something away").
+Settled, for reference: the LEVEL is a parent's choice in ⚙️ and never moves by
+itself; N inside a level widens by itself and never narrows. What remains:
+
+- **The exact widening trigger.** How many clean runs before level 1's pool goes
+  from `{2,3}` to `{2,3,4,5}` — three, five? Consecutive or cumulative? And does
+  the widening survive a session? At home it probably should; in a museum it
+  deliberately does not, so every child gets the gentle opening.
 - **How often does a task run in Game Mode?** Reading today: Free Play has no
   tasks ever, Game Mode means every visit carries one. If a task on *every* train
   makes the crossing feel like a test, the answer is a task per *place* rather
   than per train — decide after watching.
-- **What does a claim feel like in the moment?** Praise and a sound exist
-  (`CC.speech.praise()`). Whether the flag plants itself with a small animation
-  on the map, or is simply found there next time, is unchosen.
-- **What happens on a SECOND visit to a state already flagged?** Does it set a
-  fresh task (nothing more to earn — is that flat?), or say "you've got this
-  one" and fall back to free play in that scene? Nothing is decided, and it is
-  the first thing that will come up in real use, because a child returns to
-  favourites.
+- **Does the whole-map celebration need a trigger guard?** With per-level claims
+  it fires once per level, which is probably right, but nobody has watched it
+  happen yet.
