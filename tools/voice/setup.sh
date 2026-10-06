@@ -5,7 +5,10 @@
 #   tools/voice/venv/    Piper (piper-tts) in a throwaway virtualenv
 #   tools/voice/models/  the .onnx voice models named in VOICE.md
 #
-# You also need ffmpeg on PATH for the MP3 encode:  brew install ffmpeg
+# You also need ffmpeg on PATH for the MP3 encode:
+#   Debian/Ubuntu  sudo apt install ffmpeg
+#   Fedora         sudo dnf install ffmpeg
+#   macOS          brew install ffmpeg
 #
 # The game itself needs NONE of this. It reads play/js/voice-en.js and
 # play/js/voice-pl.js, which ARE committed. This is only needed to regenerate
@@ -13,7 +16,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-command -v ffmpeg >/dev/null || { echo "ffmpeg missing — run: brew install ffmpeg"; exit 1; }
+command -v ffmpeg >/dev/null || {
+  echo "ffmpeg missing. Install it:"
+  echo "  Debian/Ubuntu  sudo apt install ffmpeg"
+  echo "  Fedora         sudo dnf install ffmpeg"
+  echo "  macOS          brew install ffmpeg"
+  exit 1
+}
 
 python3 -m venv tools/voice/venv
 tools/voice/venv/bin/pip install -q --upgrade pip

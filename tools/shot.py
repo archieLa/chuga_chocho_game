@@ -29,18 +29,41 @@ import urllib.request
 
 CHROME_CANDIDATES = [
     os.environ.get('CHROMIUM_PATH', ''),
+    # macOS
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    # Linux. `chromium-browser` is Debian/Ubuntu's name and
+    # `google-chrome-stable` is what Google's .deb installs — without both,
+    # a perfectly good browser is "not found" on the commonest distro.
     shutil.which('google-chrome') or '',
+    shutil.which('google-chrome-stable') or '',
     shutil.which('chromium') or '',
+    shutil.which('chromium-browser') or '',
+    '/snap/bin/chromium',
 ]
+
+
+def sandbox_flags():
+    """Chrome refuses to start as root on Linux unless sandboxing is off.
+
+    That is every Docker image and most CI runners, and the failure is opaque —
+    Chrome exits silently and the DevTools port never opens, so you get a
+    connection timeout rather than a reason. Only ever added where it is needed:
+    on macOS, and as a normal user on Linux, the sandbox stays on.
+    """
+    if sys.platform.startswith('linux') and hasattr(os, 'geteuid') and os.geteuid() == 0:
+        return ['--no-sandbox', '--disable-dev-shm-usage']
+    return []
 
 
 def find_chrome():
     for c in CHROME_CANDIDATES:
         if c and pathlib.Path(c).exists():
             return c
-    sys.exit('No Chrome/Chromium found. Set CHROMIUM_PATH.')
+    sys.exit('No Chrome/Chromium found. Install one, or set CHROMIUM_PATH.\n'
+             '  Debian/Ubuntu:  sudo apt install chromium-browser\n'
+             '  Fedora:         sudo dnf install chromium\n'
+             '  macOS:          brew install --cask google-chrome')
 
 
 class WS:
@@ -190,8 +213,9 @@ def main():
         find_chrome(), '--headless=new', '--disable-gpu', '--hide-scrollbars',
         '--remote-debugging-port=%d' % port, '--user-data-dir=' + profile,
         '--window-size=%d,%d' % (width, height), '--no-first-run', '--no-default-browser-check',
-        '--allow-file-access-from-files', 'about:blank',
-    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        '--allow-file-access-from-files',
+    ] + sandbox_flags() + ['about:blank'],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     ws_url = None
     for _ in range(80):

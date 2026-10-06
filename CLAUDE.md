@@ -291,6 +291,14 @@ of that size, so **read that section before wiring a new thing to the gate.**
 `SCENE_GUIDE.md`/`SCENE_ROADMAP.md` on purpose: those come from the scene
 collaborator and are overwritten by every art drop.
 
+### What you need installed
+
+**To play: nothing.** Open `play/index.html`. To regenerate assets or run the verify loop:
+**Python 3** (stdlib only) and **Chrome/Chromium** cover the day-to-day; **Node 18+** is for
+`gen-map.js` alone; **ffmpeg** is for `gen-voice.py` alone. Per-platform commands are in
+`tools/README.md`. `shot.py` finds a browser by itself on macOS and Linux (set
+`CHROMIUM_PATH` if it is somewhere odd) and adds `--no-sandbox` when running as root.
+
 ### How to verify a change (do this, don't skip it)
 
 `tools/shot.py` drives a real headless Chrome over the DevTools Protocol with **real** input

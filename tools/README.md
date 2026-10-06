@@ -4,12 +4,36 @@ Asset generators and review helpers. **None of this runs in the game** — these
 
 ## Setup
 
+**To PLAY the game you need nothing at all** — open `play/index.html`. Everything below is
+only for regenerating assets and running the review loop.
+
+### Prerequisites
+
+| | needed for | Debian/Ubuntu | macOS |
+|---|---|---|---|
+| **Python 3** (≥3.8) | every `.py` tool — stdlib only, no pip packages | preinstalled | preinstalled |
+| **Chrome or Chromium** | `shot.py`, the whole verify loop | `sudo apt install chromium-browser` | `brew install --cask google-chrome` |
+| **Node 18+** | `gen-map.js`, `shot.js` | `sudo apt install nodejs npm` | `brew install node` |
+| **ffmpeg** | `gen-voice.py` only | `sudo apt install ffmpeg` | `brew install ffmpeg` |
+
+`shot.py` finds Chrome by itself on both platforms; set `CHROMIUM_PATH` if it is somewhere
+unusual. Running as root on Linux (Docker, most CI) it adds `--no-sandbox` automatically,
+because Chrome otherwise exits silently and you get a connection timeout with no reason
+given.
+
 ```bash
 cd tools
 npm install          # d3-geo, topojson-client, us-atlas, playwright
 ```
 
-Python scripts need only Python 3 (standard library).
+Node is needed for `gen-map.js` only — and that regenerates a committed file you will
+probably never touch. **Python 3 plus a browser is enough for the day-to-day loop.**
+
+### The voice pipeline is separate and optional
+
+`tools/voice/setup.sh` installs Piper and ~520 MB of voice models, all gitignored. **You
+only need it to regenerate the spoken audio**, i.e. when a spoken string changes. The
+shipped audio (`play/js/voice-en.js`, `voice-pl.js`) is committed.
 
 ## The tools
 
