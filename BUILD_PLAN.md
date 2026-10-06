@@ -445,8 +445,21 @@ equation and then run level 1 underneath. Build this once:
   cardinality for a child who cannot yet hold "I have seen five" as a state.
   This is the mechanism, not decoration.
 - **Targets are drawn from a BAG, not `Math.random()`** — same reasoning as
-  `world.drawRandom()`. The pool widens with success (`{2,3}` → `{2,3,4,5}`) and
-  **never narrows**.
+  `world.drawRandom()`. Level 1 opens at `{1,2,3}` and widens to `{1,2,3,4,5}` after
+  **5 successes — cumulative, not consecutive, and persisted across sessions.** A miss
+  must never set the counter back; that is "taking something away". Never narrows.
+- **Counts and equation answers run 1–10.** Zero is out — "close after no cars" is not a
+  count. One is IN, and is the gentlest opening rung: it teaches the mechanic (watch, then
+  act) with no counting load.
+- **NOTHING COUNTS WHILE THE PROMPT IS SPEAKING, and no new cars spawn during it.** The
+  prompt is ~3s and cars arrive every 1.6s, so two would pass before the child knows what
+  he is doing. Cars already on the road finish uncounted; do not freeze them, a stopped
+  scene looks broken. **The pips appearing are the "go" signal.**
+- **Levels 4 and 5 do subtraction as well as addition, both in the pool from the first
+  task** — they are learned as a pair, not a sequence. **The pips carry the operation
+  (part-part-whole), the cars confirm the answer**, which is what makes subtraction
+  concrete at all: cars only ever arrive, so they can embody a sum but never a
+  taking-away. Answers 1–10, never negative.
 - **Level 2+ must bias the car spawn toward the target colour** (~1 in 3, not 1
   in 7). Measured: cars arrive on a global 1.5s timer (~36/min in every scene),
   so one colour comes every ~11s and "five red cars" is **57 seconds** of

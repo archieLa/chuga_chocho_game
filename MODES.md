@@ -74,8 +74,8 @@ Every level is the same verb on the same screen. Nothing ever becomes a flashcar
 | 1 | 2.5–4.5 | close after **N cars** | counting at all |
 | 2 | 4–5.5 | close after **N red cars** | a **filter** — ignoring what doesn't count |
 | 3 | 5–6 | **two red and three blue** | two counters at once |
-| 4 | 5–6 | **`2 + 3 = 5`** → close after 5 | **numerals**; the sum made concrete |
-| 5 | 5.5–6.5 | **`2 + 3 = ?`** → close after the answer | computing it yourself |
+| 4 | 5–6 | **`2 + 3 = 5`** / **`5 − 2 = 3`** → close after the shown answer | **numerals**; the operation made concrete |
+| 5 | 5.5–6.5 | **`2 + 3 = ?`** / **`5 − 2 = ?`** → close after the answer | computing it yourself |
 
 Levels 1–3 share **one data shape** — a target is a list of `{ colour, count }`:
 
@@ -121,6 +121,34 @@ objects, and this scene emits countable objects on a 1.5-second timer. He does
 not get told that 2 + 3 is 5; he *experiences* five. Do not optimise this into a
 numeral on a banner.
 
+### Levels 4 and 5 do SUBTRACTION too, from the first task
+
+Addition and subtraction are learned as a **pair, not a sequence** — part-part-whole. If 2
+and 3 make 5, then 5 take away 3 leaves 2; they are two views of one relationship, and
+separating them makes each harder. So **both operations are in the equation pool from the
+start** at levels 4 and 5. No widening gate, no extra level, no new settings row: "sum shown
+vs solve it yourself" is a difference a parent can act on, "sometimes it is a minus" is not.
+
+**The asymmetry this has to solve.** Cars only ever *arrive*, so they can embody an addition
+(`2 + 3 = 5`, then five cars) but never a subtraction — nothing on screen performs a
+taking-away. Left there, subtraction would be "do the sum in your head, then count", with
+the maths half abstract.
+
+**The pips fix it. Let the pips carry the OPERATION and the cars confirm the ANSWER:**
+
+```
+2 + 3 = 5     ● ●  +  ● ● ●     →  ● ● ● ● ●      then five cars go past
+5 − 2 = 3     ● ● ● ● ●  ✕ ✕    →  ● ● ●          then three cars go past
+```
+
+The pips already exist to do cardinality; making them do part-part-whole costs nothing and
+is exactly how this is taught with physical counters. It makes **both** operations concrete
+— and it improves level 4 rather than merely rescuing subtraction, because today the
+equation is a numeral and the cars are the only concrete part of it.
+
+**Constraints:** the answer is **1–10 and never negative**; operands within 10. One new
+spoken word per language: *minus*.
+
 ### Level 5 needs a rescue, or it breaks rule #4
 
 Levels 1–4 all fail gently: a child who does not understand still sees cars and
@@ -152,10 +180,21 @@ gets "two cars" three runs in a row and the varying is invisible.
 
 ### The pool widens; it does not jump
 
-Early level 1 draws from `{2, 3}`. After a few clean runs it becomes
-`{2, 3, 4, 5}`. This is the **"N advances by itself, the level never does"**
-principle doing real work: a two-and-a-half-year-old is never handed five on his
-first go, and nobody has to open Settings for him to grow.
+Level 1 opens at `{1, 2, 3}`. **After 5 successes it becomes `{1, 2, 3, 4, 5}`.** This is
+the **"N advances by itself, the level never does"** principle doing real work: a
+two-and-a-half-year-old is never handed five on his first go, and nobody has to open
+Settings for him to grow.
+
+**Cumulative, not consecutive**, and **persisted across sessions**. Consecutive would mean a
+single miss wipes his progress toward widening — a soft punishment, and *nothing is ever
+taken away*. Cumulative means a miss simply does not count toward it; he is never set back,
+only not yet advanced. And without persistence a short sitting would never reach five, so
+the pool would never widen at all.
+
+Five is about five *visits*, since a place gives one task — roughly three to five minutes of
+real play including travel.
+
+*(Undecided: whether level 1 widens a second time, to `{1…10}`. Watch first.)*
 
 ### MEASURED: why level 2 cannot reuse level 1's numbers
 
@@ -172,7 +211,7 @@ about every 11 seconds**:
 | L2 — five red | **~57s** ❌ |
 | L3 — two red *and* three blue | ~35–45s ❌ |
 
-Level 1 can range freely over 2–5. **Level 2 and 3 cannot**, and the failure is
+Level 1 can range freely over 1–5. **Level 2 and 3 cannot**, and the failure is
 not "too hard" — it is *tedium*, which a three-year-old reads as **the game is
 broken**.
 
@@ -523,6 +562,38 @@ Three reasons this beats asking again after every train:
 The cost is that wanting another task means a trip to the map. That is a few taps and it is
 the nicest thing in the game, so it is a cost worth paying.
 
+### Counting starts when the PROMPT ENDS — nothing counts during it
+
+*"Let three cars go by, then close the gate"* is roughly three seconds of audio. At one car
+every 1.6 seconds, **about two cars pass before the child has finished hearing what to
+do.** If those counted he would start every task already behind, and at N=3 he would have
+one car's worth of warning. That is frustrating in a way he could never diagnose.
+
+So, while a prompt is being spoken:
+
+- **nothing counts**, and
+- **no new cars spawn** — cars already on the road finish their run, uncounted.
+
+Do **not** freeze cars mid-road; a stopped scene looks broken rather than paused.
+
+**The pips appearing ARE the "go" signal.** Empty pips showing up is a clean visual start
+that does not depend on where the traffic happens to be — which matters, because cars still
+in flight when the prompt ends are not countable and a child cannot be expected to know it.
+
+### Counts run 1–10, and the pool opens {1, 2, 3}
+
+**1 is in, for counting and for equation answers alike.** An earlier draft floored it at 2
+on reaction-time grounds — at N=1 the only car arrives ~1.6s in, before a small child has
+oriented. That objection dissolves once counting starts after the prompt: N=1 then gets the
+same clean start and the same window as any other N.
+
+And 1 earns its place. *"Let one car go by, then close the gate"* teaches the **mechanic** —
+watch, then act — with no counting load at all. Flooring at 2 would make a
+two-and-a-half-year-old's very first task a count of two.
+
+**Zero stays out**, for a different reason: "close after no cars" is not a count and has
+nothing to watch.
+
 ### A new task never begins while the gate is down
 
 Cars stop at a closed gate, so a task set against a closed gate cannot progress — the same
@@ -598,16 +669,27 @@ already records `ui`/`colors`/`numbers` wholesale rather than curating which are
 that philosophy is in its header and it is the reason this works at all. The composed
 string is then a dictionary line like any other, and `speech.say()` finds its clip.
 
-**Ranges:** plain counts **2–10** (levels 1, 4, 5); colour counts **2–5** (levels 2, 3).
-That is 9 + 7×4 = **37 phrases per language**, 74 in total — on top of 374, so expect
+**Ranges:** plain counts **1–10** (levels 1, 4, 5); colour counts **1–5** (levels 2, 3).
+That is 10 + 7×5 = **45 phrases per language**, 90 in total — on top of 374, so expect
 `gen-voice.py` to run nearer six minutes than four and a half.
 
 ### The Polish forms the composer needs
 
-Noun: *auto* → **auta** (nom. pl.) / **aut** (gen. pl.). Keep *auto*; `settings.js`
-already says *"Pokaż licznik aut"*, so it is the established word.
+**THREE bands, not two** — because counts start at 1 (see "Counts run 1–10"):
 
-| colour | nom. pl. | gen. pl. |
+| n | numeral | noun | example |
+|---|---|---|---|
+| 1 | **jedno** (neuter!) | *auto* (nom. sg.) | jedno czerwone **auto** |
+| 2–4 | dwa / trzy / cztery | *auta* (nom. pl.) | trzy czerwone **auta** |
+| 5+ | pięć … | *aut* (gen. pl.) | pięć czerwonych **aut** |
+
+Keep *auto*; `settings.js` already says *"Pokaż licznik aut"*, so it is the established word.
+
+**The numeral for 1 is not the one in the dictionary.** `i18n.numbers[1]` is *jeden*, which
+is masculine. *auto* is neuter, so the phrase needs **jedno**. The composer must special-case
+it — reading it straight out of `numbers` yields *"jeden auto"*, which is wrong.
+
+| colour | 1 and 2–4 | 5+ |
 |---|---|---|
 | red | czerwone | czerwonych |
 | blue | niebieskie | niebieskich |
@@ -617,7 +699,12 @@ already says *"Pokaż licznik aut"*, so it is the established word.
 | orange | pomarańczowe | pomarańczowych |
 | white | białe | białych |
 
-English needs none of this — `"two red cars"` is `number + colour + "cars"` throughout.
+The **adjective** happily has only two forms: neuter singular and neuter nominative plural
+are identical (*czerwone auto*, *czerwone auta*), so only the noun moves between bands 1
+and 2–4.
+
+**English needs one band break too** — `"one red car"`, not `"one red cars"`. Everything
+from 2 up is `number + colour + "cars"`.
 
 ### The new UI strings
 
@@ -631,6 +718,7 @@ English needs none of this — `"two red cars"` is `number + colour + "cars"` th
 | `ui.letPass` | Let | Przepuść |
 | `ui.thenClose` | go by, then close the gate | potem zamknij szlaban |
 | `ui.plus` | plus | plus |
+| `ui.minus` | minus | minus |
 | `ui.equals` | equals | równa się |
 
 > **CHECK EVERY POLISH LINE BY EAR BEFORE REGENERATING THE SPRITE.** Reading it off the
@@ -644,10 +732,9 @@ English needs none of this — `"two red cars"` is `number + colour + "cars"` th
 Settled, for reference: the LEVEL is a parent's choice in ⚙️ and never moves by
 itself; N inside a level widens by itself and never narrows. What remains:
 
-- **The exact widening trigger.** How many clean runs before level 1's pool goes
-  from `{2,3}` to `{2,3,4,5}` — three, five? Consecutive or cumulative? And does
-  the widening survive a session? **Answer it for a child at home** — that is the
-  only case Phase 2 serves.
+- **Does level 1 widen a SECOND time**, from `{1,2,3,4,5}` to `{1…10}`? The first
+  widening is settled (5 cumulative successes, persisted); whether there is another
+  rung above it wants watching rather than deciding.
 - **Does the whole-map celebration need a trigger guard?** With per-level claims
   it fires once per level, which is probably right, but nobody has watched it
   happen yet.
