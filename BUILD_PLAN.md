@@ -445,9 +445,12 @@ equation and then run level 1 underneath. Build this once:
   cardinality for a child who cannot yet hold "I have seen five" as a state.
   This is the mechanism, not decoration.
 - **Targets are drawn from a BAG, not `Math.random()`** — same reasoning as
-  `world.drawRandom()`. Level 1 opens at `{1,2,3}` and widens to `{1,2,3,4,5}` after
-  **5 successes — cumulative, not consecutive, and persisted across sessions.** A miss
-  must never set the counter back; that is "taking something away". Never narrows.
+  `world.drawRandom()`. Level 1 opens at `{1,2,3}`, grows to `{1…7}` after 5 successes and
+  `{1…10}` after 10 — **cumulative, not consecutive, and persisted across sessions.** A
+  miss must never set the counter back; that is "taking something away".
+  **THE POOL GROWS, IT DOES NOT SLIDE** — `{1…7}`, never `{3…7}`, or a child who has done
+  ten tasks never sees an easy one again. Never narrows.
+  **Levels 2 and 3 stay capped at 5** — ten red cars is ~48s even with the spawn biased.
 - **Counts and equation answers run 1–10.** Zero is out — "close after no cars" is not a
   count. One is IN, and is the gentlest opening rung: it teaches the mechanic (watch, then
   act) with no counting load.

@@ -180,21 +180,38 @@ gets "two cars" three runs in a row and the varying is invisible.
 
 ### The pool widens; it does not jump
 
-Level 1 opens at `{1, 2, 3}`. **After 5 successes it becomes `{1, 2, 3, 4, 5}`.** This is
-the **"N advances by itself, the level never does"** principle doing real work: a
-two-and-a-half-year-old is never handed five on his first go, and nobody has to open
+**Two bumps, five successes each:**
+
+| after | level 1's pool |
+|---|---|
+| start | `{1, 2, 3}` |
+| 5 successes | `{1 … 7}` |
+| 10 successes | `{1 … 10}` |
+
+This is the **"N advances by itself, the level never does"** principle doing real work: a
+two-and-a-half-year-old is never handed seven on his first go, and nobody has to open
 Settings for him to grow.
 
+**THE POOL GROWS, IT DOES NOT SLIDE.** `{1…7}`, never `{3…7}`. A replacement window would
+mean a child who has done ten tasks never sees a 2 again — every task eleven to sixteen
+seconds of holding a count, with no quick wins left anywhere. An always-harder ratchet is a
+treadmill; a growing pool is variety with the occasional easy one. Because the bag draws
+**without replacement**, he meets every number in the pool before any of them repeats, so
+the variety needs no further machinery.
+
 **Cumulative, not consecutive**, and **persisted across sessions**. Consecutive would mean a
-single miss wipes his progress toward widening — a soft punishment, and *nothing is ever
-taken away*. Cumulative means a miss simply does not count toward it; he is never set back,
-only not yet advanced. And without persistence a short sitting would never reach five, so
-the pool would never widen at all.
+single miss wipes his progress toward the next bump — a soft punishment, and *nothing is
+ever taken away*. Cumulative means a miss simply does not count toward it; he is never set
+back, only not yet advanced. And without persistence a short sitting would never reach five,
+so the pool would never grow at all.
 
 Five is about five *visits*, since a place gives one task — roughly three to five minutes of
 real play including travel.
 
-*(Undecided: whether level 1 widens a second time, to `{1…10}`. Watch first.)*
+**Levels 2 and 3 do not get the bumps: they stay capped at 5.** Measured — even with the
+spawn biased to one car in three, ten red cars is ~48 seconds of watching. The bumps apply
+to level 1 and to levels 4–5's equation answers. That is already why the colour phrases are
+specified at 1–5 and the plain ones at 1–10.
 
 ### MEASURED: why level 2 cannot reuse level 1's numbers
 
@@ -206,14 +223,15 @@ about every 11 seconds**:
 | ask | expected wait |
 |---|---|
 | L1 — five cars, any colour | **~8s** ✅ |
+| L1 — ten cars, any colour | **~16s** ✅ |
 | L2 — two red | ~23s |
 | L2 — three red | ~34s |
 | L2 — five red | **~57s** ❌ |
 | L3 — two red *and* three blue | ~35–45s ❌ |
 
-Level 1 can range freely over 1–5. **Level 2 and 3 cannot**, and the failure is
-not "too hard" — it is *tedium*, which a three-year-old reads as **the game is
-broken**.
+**Level 1 can range freely all the way to 10** — colour is what costs, not count. **Levels 2
+and 3 cannot**, which is why they stay capped at 5, and the failure is not "too hard" — it
+is *tedium*, which a three-year-old reads as **the game is broken**.
 
 **The fix: bias the spawn toward the live target's colour** — roughly one car in
 three instead of one in seven. Three red then takes ~15s, and distractors still
@@ -732,9 +750,6 @@ from 2 up is `number + colour + "cars"`.
 Settled, for reference: the LEVEL is a parent's choice in ⚙️ and never moves by
 itself; N inside a level widens by itself and never narrows. What remains:
 
-- **Does level 1 widen a SECOND time**, from `{1,2,3,4,5}` to `{1…10}`? The first
-  widening is settled (5 cumulative successes, persisted); whether there is another
-  rung above it wants watching rather than deciding.
 - **Does the whole-map celebration need a trigger guard?** With per-level claims
   it fires once per level, which is probably right, but nobody has watched it
   happen yet.
