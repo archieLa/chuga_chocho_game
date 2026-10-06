@@ -88,6 +88,34 @@ for (const lang of Object.keys(DICT)) {
     };
     if (d[sec]) walk(d[sec], 'i18n.' + lang + '.' + sec);
   }
+  // GAME MODE NOUN PHRASES — "three red cars" / "trzy czerwone auta".
+  //
+  // These are COMPOSED, not stored, because Polish numerals govern the noun's
+  // case and a fixed noun atom would make the voice say "przepuść pięć auta".
+  // i18n.phrase() builds the whole phrase per language; we enumerate every one
+  // the game can ask for and record each as a line of its own, exactly as the
+  // dictionaries above are recorded wholesale. Nothing judges which are
+  // "really" spoken — that list is the kind that rots.
+  //
+  // RANGES — keep in step with MODES.md:
+  //   plain counts  1-10   levels 1, 4, 5 (level 1 grows to {1..10}; equation
+  //                        answers are 1-10)
+  //   colour counts 1-5    levels 2 and 3 only, which stay capped at 5 because
+  //                        ten RED cars is ~48s of waiting even with the spawn
+  //                        biased. There is no point recording what cannot
+  //                        be asked.
+  const PLAIN_MAX = 10, COLOUR_MAX = 5;
+  const COLOURS = ['red', 'blue', 'yellow', 'green', 'purple', 'orange', 'white'];
+  for (let n = 1; n <= PLAIN_MAX; n++) {
+    add(lang, CC.i18n.phrase(n, null, lang), 'i18n.' + lang + '.phrase(' + n + ')');
+  }
+  for (const col of COLOURS) {
+    for (let n = 1; n <= COLOUR_MAX; n++) {
+      add(lang, CC.i18n.phrase(n, col, lang),
+          'i18n.' + lang + '.phrase(' + n + ',' + col + ')');
+    }
+  }
+
   // `sayAs` and not `text`: sayAs is the RESPELLING the voice is given, so it is
   // what reaches speech.say() and therefore what has to be recorded. The brand
   // sound is spelled for this language's phonetics ("czuga czuga czu czu"), and

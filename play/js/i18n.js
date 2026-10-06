@@ -30,7 +30,15 @@
             allAboard: 'ALL ABOARD!', readyToRide: 'Ready for an adventure?',
             // Shown when the device is held upright. The picture does the work —
             // this is spoken, not read.
-            rotate: 'Turn me sideways!' },
+            rotate: 'Turn me sideways!',
+            // ---- Game Mode (MODES.md). Settings rows first, then the spoken
+            // prompt frame: the game says letPass + a phrase + thenClose as
+            // three separate clips, never a concatenated sentence.
+            gameMode: 'Game Mode', freePlay: 'Free Play', level: 'Level',
+            levelNote: "Level 2 starts a fresh map. Level 1's flags are kept.",
+            startLevelAgain: 'Start this level again',
+            letPass: 'Let', thenClose: 'go by, then close the gate',
+            plus: 'plus', minus: 'minus', equals: 'equals' },
       // Spoken once when the game opens, over the map. `sayAs` is what the voice is
       // given (the brand sound respelled so this language's TTS pronounces it);
       // `text` is what a reader sees. Keep the brand sound itself untranslated.
@@ -38,6 +46,14 @@
                  sayAs: "Let's explore the United States. Time to ride... chuga chuga choo choo!" },
       colors: { red:'red', blue:'blue', yellow:'yellow', green:'green', purple:'purple', orange:'orange', black:'black', white:'white', flag:'stars and stripes' },
       numbers: ['zero','one','two','three','four','five','six','seven','eight','nine','ten'],
+      // How this language builds "three red cars". English needs one break only
+      // — singular at 1 — so `noun` is keyed by band and the adjective never
+      // moves. See i18n.phrase().
+      count: { bands: n => (n === 1 ? 'one' : 'many'),
+               numeral: null,                       // use numbers[n]
+               noun:    { one: 'car', many: 'cars' },
+               adj:     null,                       // colours are invariable
+               order:   'num adj noun' },
       shapes: { circle:'circle', triangle:'triangle', square:'square', star:'star' },
       praise: ['Yay!', 'Great!', 'Wow!', 'Well done!'],
       // Vehicle names in a child's words, EXCEPT where the real name is the
@@ -81,11 +97,41 @@
             // "Wsiadamy" is what you actually say to a child boarding a train —
             // not a literal translation of "all aboard".
             allAboard: 'WSIADAMY!', readyToRide: 'Gotowi na przygodę?',
-            rotate: 'Obróć mnie na bok!' },
+            rotate: 'Obróć mnie na bok!',
+            // ---- Game Mode. Approved by ear 2026-10-06 — see MODES.md.
+            // Reword any of these and the clip is orphaned: re-audition first.
+            gameMode: 'Tryb gry', freePlay: 'Swobodna gra', level: 'Poziom',
+            levelNote: 'Poziom 2 zaczyna nową mapę. Flagi z poziomu 1 zostają.',
+            startLevelAgain: 'Zacznij ten poziom od nowa',
+            letPass: 'Przepuść', thenClose: 'potem zamknij szlaban',
+            plus: 'plus', minus: 'minus', equals: 'równa się' },
       welcome: { text: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę… chuga chuga choo choo!',
                  sayAs: 'Zwiedzajmy Stany Zjednoczone. Czas na przejażdżkę... czuga czuga czu czu!' },
       colors: { red:'czerwony', blue:'niebieski', yellow:'żółty', green:'zielony', purple:'fioletowy', orange:'pomarańczowy', black:'czarny', white:'biały', flag:'gwiazdy i paski' },
       numbers: ['zero','jeden','dwa','trzy','cztery','pięć','sześć','siedem','osiem','dziewięć','dziesięć'],
+      // POLISH NUMERALS GOVERN THE NOUN'S CASE — three bands, not one. Get this
+      // wrong and the voice says "przepuść pięć auta", which is nonsense.
+      //   1      jedno auto        neuter singular
+      //   2-4    trzy auta         nominative plural
+      //   5+     pięć aut          genitive plural
+      // The ADJECTIVE has only two forms: neuter singular and neuter nominative
+      // plural are identical (czerwone auto / czerwone auta), so bands one and
+      // few share it.
+      // The numeral for 1 is overridden: numbers[1] is the MASCULINE 'jeden',
+      // and `auto` is neuter, so the phrase needs 'jedno'.
+      count: { bands: n => (n === 1 ? 'one' : n >= 2 && n <= 4 ? 'few' : 'many'),
+               numeral: { one: 'jedno' },
+               noun:    { one: 'auto', few: 'auta', many: 'aut' },
+               adj: {
+                 red:    { one: 'czerwone',     few: 'czerwone',     many: 'czerwonych' },
+                 blue:   { one: 'niebieskie',   few: 'niebieskie',   many: 'niebieskich' },
+                 yellow: { one: 'żółte',        few: 'żółte',        many: 'żółtych' },
+                 green:  { one: 'zielone',      few: 'zielone',      many: 'zielonych' },
+                 purple: { one: 'fioletowe',    few: 'fioletowe',    many: 'fioletowych' },
+                 orange: { one: 'pomarańczowe', few: 'pomarańczowe', many: 'pomarańczowych' },
+                 white:  { one: 'białe',        few: 'białe',        many: 'białych' },
+               },
+               order: 'num adj noun' },
       shapes: { circle:'koło', triangle:'trójkąt', square:'kwadrat', star:'gwiazda' },
       praise: ['Brawo!', 'Super!', 'Wow!', 'Świetnie!'],
       // ---- PHONETIC RESPELLINGS FOR THE VOICE --------------------------------
@@ -206,6 +252,38 @@
 
     /** 'one' … 'ten' — used to say which wagon is being edited. */
     number(n) { const l = this.dict.numbers || []; return l[n] != null ? l[n] : String(n); },
+
+    /** "three red cars" / "trzy czerwone auta" — ONE string, built from this
+        language's own agreement rules.
+
+        WHY THIS EXISTS. Game Mode wants to say "let three red cars go by", and
+        the obvious way — say("Let"), say(number), say("cars") — is wrong in
+        Polish, where the numeral governs the noun's case: *trzy auta* but
+        *pięć aut*, with the adjective agreeing too. A fixed noun atom produces
+        "przepuść pięć auta", which is nonsense. So the whole NOUN PHRASE is the
+        atom, composed here and recorded as one clip.
+
+        THIS IS STILL NOT CONCATENATION in the sense CLAUDE.md forbids. The rule
+        is that a spoken string must exist in a dictionary so the generator can
+        record it; `tools/voice-lines.js` calls this function over every (n,
+        colour) in range and records each result, exactly as it records `ui` and
+        `colors` wholesale. Change the ranges there and here together.
+
+        @param n       1..10
+        @param colour  a key in `colors` (red, blue, …), or null for plain cars
+        @param code    language, defaults to the active one */
+    phrase(n, colour, code) {
+      const d = DICT[code || current] || DICT.en;
+      const c = d.count;
+      if (!c) return String(n);
+      const band = c.bands(n);
+      const num = (c.numeral && c.numeral[band]) || (d.numbers || [])[n] || String(n);
+      const noun = c.noun[band];
+      const adj = colour && c.adj ? (c.adj[colour] || {})[band]
+                : colour ? (d.colors || {})[colour]
+                : null;
+      return (adj ? [num, adj, noun] : [num, noun]).join(' ');
+    },
 
     /** What the VOICE should be fed for a displayed name — the phonetic
         respelling if this language has one, otherwise the name unchanged.
