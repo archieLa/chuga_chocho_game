@@ -492,6 +492,24 @@ of a good day, not a boss defeat.
 **And then nothing is taken and nothing is opened** (see "A flag NEVER unlocks
 anything"). The permanent full map is the keepsake.
 
+**IT NEEDS A GUARD, or it fires for ever.** Once all 55 are flagged the condition *"the map
+is full"* stays true permanently — and revisits always set a task, so a naive check of
+"task completed → is the map full?" would throw the party again on **every task he ever
+does afterwards**, and on every launch if it is checked at load.
+
+So: record that it has been shown — `cc.celebrated: ["1"]` beside `cc.claimed` — and never
+show it again. **Per level**, because each level has its own board and so earns its own
+moment.
+
+**Sequencing on the 55th state: the scene first, the map later.** Two celebrations both want
+that moment — the per-state one (the train comes, in the scene, where he is) and the map one
+(on the map, where he is not). Let the per-state celebration play out undisturbed, and
+**hold the map celebration until he next opens the map**, where it runs as a surprise.
+
+Do not cut to the map when the train has passed. It would yank him out of the scene at the
+very moment he has earned the right to enjoy it, and finding the full map himself a minute
+later is the better discovery.
+
 ---
 
 ## Hard rule #4 still wins
@@ -745,11 +763,14 @@ from 2 up is `number + colour + "cars"`.
 
 ---
 
-## Still open
+## Still open — nothing blocking
 
-Settled, for reference: the LEVEL is a parent's choice in ⚙️ and never moves by
-itself; N inside a level widens by itself and never narrows. What remains:
+Settled, for reference: the LEVEL is a parent's choice in ⚙️ and never moves by itself; N
+inside a level grows by itself and never narrows or slides.
 
-- **Does the whole-map celebration need a trigger guard?** With per-level claims
-  it fires once per level, which is probably right, but nobody has watched it
-  happen yet.
+**Nothing here blocks building.** Two things to watch rather than decide:
+
+- **Whether level 1's two bumps land at the right pace** — five successes each is a
+  starting guess, not a measurement. Watching one child is worth more than re-reasoning it.
+- **Whether a task per arrival is the right frequency.** It is the deliberately gentle
+  choice; if he wants more practice than travelling allows, that will be obvious quickly.

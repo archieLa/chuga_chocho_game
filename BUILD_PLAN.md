@@ -505,6 +505,12 @@ equation and then run level 1 underneath. Build this once:
 - **Whole map: warm, not fireworks.** Flags ripple across the country, the train
   runs over the map, praise in his language. Then nothing is opened and nothing
   is taken.
+- **GUARD IT.** "The map is full" stays true for ever, and revisits always set a task, so
+  an unguarded check throws the party on every task afterwards and on every launch. Store
+  `cc.celebrated: ["1"]` beside `cc.claimed` — once per level, never again.
+- **On the 55th: scene first, map later.** Let the per-state celebration play out, then
+  hold the map celebration until he next opens the map. Do not cut to the map when the
+  train has passed — it yanks him out of the scene he just earned.
 - **Done when:** both celebrations play in both languages and neither blocks the
   gate.
 
@@ -518,6 +524,10 @@ equation and then run level 1 underneath. Build this once:
   flags are kept."*
 - Re-check the whole journey with `tools/shot.py` over `file://` **and**
   `http://`, screenshot every level, confirm zero console errors or warnings.
+- **Done when:** neither board-clearing control fires on a single tap, a three-second hold
+  does fire it, the level row explains in both languages what changing level does, and the
+  whole journey — launch, travel, five levels, a claim, both celebrations — is clean on
+  `file://` and `http://` alike.
 
 ### Phase 2 definition of done
 
