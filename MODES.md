@@ -757,9 +757,13 @@ from 2 up is `number + colour + "cars"`.
 | `ui.minus` | minus | minus |
 | `ui.equals` | equals | równa się |
 
-> **CHECK EVERY POLISH LINE BY EAR BEFORE REGENERATING THE SPRITE.** Reading it off the
-> page proves nothing — `tools/voice/venv/bin/piper`. The forms above are a draft by a
-> non-native speaker and the agreement table is the part most likely to be wrong.
+> **✅ APPROVED BY EAR** (2026-10-06) — all three agreement bands, the colour adjectives,
+> the sentence frame and the settings strings, rendered with `pl_PL-mc_speech-medium` and
+> checked by a native speaker. The audition is `tools/voice/auditions/POLISH-GAMEMODE.*`.
+>
+> **This approval is keyed to the exact wording above.** Clips are keyed by their own text,
+> so changing one word silently orphans its clip and drops that line to the robot voice —
+> re-audition anything you reword, and never guess a new Polish form from the pattern.
 
 ---
 
